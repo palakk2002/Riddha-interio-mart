@@ -64,22 +64,22 @@ const CategoryQuickAccess = () => {
           ))}
         </div>
 
-        {/* Categories Grid/Scroll Area */}
-        <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+        {/* Categories Grid/Scroll Area - Definitive 3.3 item hint for 360px screens */}
+        <div className="overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0">
           <motion.div 
             key={activeTab}
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="flex md:grid md:grid-cols-5 lg:grid-cols-6 gap-x-6 md:gap-10 pb-4 md:pb-0 min-h-[140px] md:min-h-[200px]"
+            className="flex md:grid md:grid-cols-5 lg:grid-cols-6 gap-x-4 md:gap-10 pb-4 md:pb-0 min-h-[140px] md:min-h-[200px]"
           >
-            {/* 2-row grid for mobile scrolling, standard grid for desktop */}
-            <div className="grid grid-rows-2 grid-flow-col gap-x-6 md:gap-x-10 gap-y-6 md:gap-y-10 md:contents">
+            {/* 2-row grid for mobile scrolling */}
+            <div className="grid grid-rows-2 grid-flow-col gap-x-4 md:gap-x-10 gap-y-6 md:gap-y-10 md:contents">
               {filteredCategories.map((category) => (
-                <motion.div key={category.id} variants={itemVariants} layout>
+                <motion.div key={category.id} variants={itemVariants} layout className="snap-start">
                   <Link
                     to={`/category/${category.slug}`}
-                    className="group flex flex-col items-center gap-2 md:gap-4 w-20 md:w-auto shrink-0"
+                    className="group flex flex-col items-center gap-2 md:gap-4 w-[94px] min-[400px]:w-[100px] md:w-auto shrink-0"
                   >
                     <div className="relative aspect-square w-full rounded-xl md:rounded-[2rem] overflow-hidden bg-soft-oatmeal/5 shadow-sm group-hover:shadow-2xl transition-all duration-500">
                       <img
@@ -89,7 +89,7 @@ const CategoryQuickAccess = () => {
                       />
                       <div className="absolute inset-0 bg-deep-espresso/0 group-hover:bg-deep-espresso/10 transition-colors duration-300" />
                     </div>
-                    <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.15em] text-deep-espresso/60 group-hover:text-warm-sand text-center transition-colors leading-tight">
+                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.15em] text-deep-espresso/60 group-hover:text-warm-sand text-center transition-colors leading-tight min-h-[2.5em] flex items-center justify-center">
                       {category.name}
                     </span>
                   </Link>
