@@ -40,18 +40,18 @@ const Banner = () => {
       
       {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-deep-espresso/80 via-deep-espresso/40 to-deep-espresso/80 md:bg-gradient-to-r md:from-deep-espresso/80 md:via-deep-espresso/30 md:to-transparent flex items-center justify-center md:justify-start">
-        <div className="max-w-7xl mx-auto px-2 md:px-8 w-full flex flex-col items-center md:items-start text-center md:text-left">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-col items-center md:items-start text-center md:text-left">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="w-full max-w-xl space-y-3 md:space-y-8 flex flex-col items-center md:items-start"
+            className="w-full max-w-xl space-y-4 md:space-y-8 flex flex-col items-center md:items-start"
           >
             <motion.span 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="inline-block px-4 py-1.5 bg-warm-sand/20 backdrop-blur-md border border-warm-sand/30 text-warm-sand rounded-full text-[10px] md:text-xs font-bold tracking-widest uppercase"
+              className="inline-block px-3 py-1 bg-warm-sand/20 backdrop-blur-md border border-warm-sand/30 text-warm-sand rounded-full text-[8px] md:text-xs font-bold tracking-[0.2em] uppercase"
             >
               Exclusive Collection 2026
             </motion.span>
@@ -60,7 +60,7 @@ const Banner = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-3xl sm:text-5xl md:text-7xl font-bold text-white leading-[1.2] md:leading-[1.1]"
+              className="text-2xl min-[360px]:text-3xl sm:text-5xl md:text-7xl font-bold text-white leading-tight md:leading-[1.1]"
             >
               Elegance in Every <span className="text-warm-sand italic font-serif">Detail.</span>
             </motion.h1>
@@ -69,7 +69,7 @@ const Banner = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="text-sm md:text-xl text-soft-oatmeal/90 leading-relaxed font-light max-w-[95%] md:max-w-none"
+              className="text-xs md:text-xl text-soft-oatmeal/90 leading-relaxed font-light max-w-[90%] md:max-w-none"
             >
               Discover our curated selection of premium tiles, designer paints, and contemporary furniture designed for modern luxury living.
             </motion.p>
@@ -78,10 +78,10 @@ const Banner = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-3 md:gap-5 pt-2 md:pt-4 w-full sm:w-auto"
+              className="flex flex-col sm:flex-row gap-3 md:gap-5 pt-4 w-full sm:w-auto"
             >
-              <Button size={isMobile ? 'sm' : 'lg'} className="shadow-2xl rounded-full px-10 w-full sm:w-auto">Shop Collection</Button>
-              <Button variant="outline" size={isMobile ? 'sm' : 'lg'} className="border-white text-white hover:bg-white hover:text-deep-espresso rounded-full px-10 w-full sm:w-auto">
+              <Button size={isMobile ? 'sm' : 'lg'} className="shadow-2xl rounded-full px-8 md:px-10 w-full sm:w-auto text-[10px] md:text-sm">Shop Collection</Button>
+              <Button variant="outline" size={isMobile ? 'sm' : 'lg'} className="border-white text-white hover:bg-white hover:text-deep-espresso rounded-full px-8 md:px-10 w-full sm:w-auto text-[10px] md:text-sm">
                 View Gallery
               </Button>
             </motion.div>

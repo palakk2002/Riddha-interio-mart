@@ -41,7 +41,7 @@ const HomePage = () => {
       {/* Featured Products Section */}
       <section className="bg-soft-oatmeal/10 py-10 md:py-32 border-y border-soft-oatmeal/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -58,7 +58,7 @@ const HomePage = () => {
             </Link>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"

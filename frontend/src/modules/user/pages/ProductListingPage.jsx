@@ -21,7 +21,7 @@ const ProductListingPage = () => {
     
     if (sortBy === 'price-low') result.sort((a, b) => a.price - b.price);
     if (sortBy === 'price-high') result.sort((a, b) => b.price - a.price);
-    if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating);
+
     
     return result;
   }, [activeCategory, sortBy]);
@@ -77,7 +77,7 @@ const ProductListingPage = () => {
               <option value="featured">Featured Recommendations</option>
               <option value="price-low">Price: Low to High</option>
               <option value="price-high">Price: High to Low</option>
-              <option value="rating">Highest Rated Pieces</option>
+
             </select>
             <FiChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
           </div>

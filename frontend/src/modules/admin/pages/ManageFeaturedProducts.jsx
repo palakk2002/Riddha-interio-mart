@@ -109,22 +109,7 @@ const ManageFeaturedProducts = () => {
                     />
                   </div>
 
-                  {/* Rating */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Rating
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="5"
-                      step="0.1"
-                      value={newProduct.rating}
-                      onChange={(e) => setNewProduct({ ...newProduct, rating: e.target.value })}
-                      className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                      placeholder="4.5"
-                    />
-                  </div>
+
 
                   {/* Tag */}
                   <div className="space-y-2">
@@ -232,15 +217,10 @@ const ManageFeaturedProducts = () => {
                 {/* Content */}
                 <div className="flex-1 p-4 md:p-6 flex flex-col justify-between space-y-3 md:space-y-5">
                   <div className="space-y-2">
-                    {/* Category + Rating */}
                     <div className="flex justify-between items-start">
                       <h4 className="text-[8px] md:text-[10px] uppercase tracking-[0.2em] text-warm-sand font-black">
                         {product.category}
                       </h4>
-                      <div className="flex items-center text-[9px] md:text-[11px] text-amber-500 font-bold bg-amber-50/50 px-2 py-0.5 md:py-1 rounded-full ring-1 ring-amber-100">
-                        <FiStar className="h-3 w-3 fill-amber-500 mr-1" />
-                        {product.rating}
-                      </div>
                     </div>
 
                     {/* Product Name */}

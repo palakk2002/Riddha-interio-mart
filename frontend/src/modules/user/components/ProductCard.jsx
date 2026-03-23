@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiShoppingCart, FiStar, FiHeart } from 'react-icons/fi';
+import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { useCart } from '../data/CartContext';
 import Button from '../../../shared/components/Button';
@@ -24,7 +24,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
       <Link 
         to={`/products/${product.id}`} 
         className={`relative block overflow-hidden shrink-0 ${
-          isList ? 'w-[42%] md:w-full h-full md:h-80 border-r md:border-r-0' : 'h-36 md:h-80 w-full'
+          isList ? 'w-[42%] md:w-full h-full md:h-80 border-r md:border-r-0' : 'h-40 md:h-80 w-full'
         } border-soft-oatmeal/10`}
       >
         <motion.img
@@ -44,8 +44,8 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
 
         {/* Badges - Show Top Choice on grid view */}
         {!isList && (
-           <div className="absolute top-3 left-3 flex gap-2">
-             <span className="bg-golden-glow/90 backdrop-blur-md text-deep-espresso text-[8px] md:text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter shadow-sm">
+           <div className="absolute top-2 left-2 md:top-3 md:left-3 flex gap-2">
+             <span className="bg-golden-glow/90 backdrop-blur-md text-deep-espresso text-[9px] md:text-[10px] font-bold px-2 md:px-3 py-1 rounded-full uppercase tracking-tighter shadow-sm">
                Top Choice
              </span>
            </div>
@@ -54,18 +54,12 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
 
       <div className={`flex-1 p-3 md:p-7 flex flex-col justify-between overflow-hidden ${!isList ? 'space-y-1.5 md:space-y-5' : ''}`}>
         <div className="space-y-1.5 md:space-y-3">
-          <div className="flex justify-between items-start">
-            <h4 className="text-[7px] md:text-[10px] uppercase tracking-[0.2em] text-warm-sand font-black">
-              {product.category}
-            </h4>
-            <div className={`${isList ? 'hidden md:flex' : 'flex'} items-center text-[9px] md:text-[11px] text-amber-500 font-bold bg-amber-50/50 px-2 py-0.5 md:py-1 rounded-full ring-1 ring-amber-100`}>
-              <FiStar className="h-3 w-3 fill-amber-500 mr-1" />
-              {product.rating}
-            </div>
-          </div>
+          <h4 className="text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-warm-sand font-black">
+            {product.category}
+          </h4>
           
           <Link to={`/products/${product.id}`}>
-            <h3 className={`${isList ? 'text-xs md:text-xl' : 'text-sm md:text-xl'} font-display font-bold text-deep-espresso line-clamp-2 leading-tight group-hover:text-warm-sand transition-colors duration-300`}>
+            <h3 className={`${isList ? 'text-[11px] md:text-xl' : 'text-xs md:text-xl'} font-display font-bold text-deep-espresso line-clamp-2 leading-tight group-hover:text-warm-sand transition-colors duration-300`}>
               {product.name}
             </h3>
           </Link>
@@ -73,17 +67,17 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
           {/* Delivery Badge (Only for list view or as needed) */}
           {isList && (
             <div className="flex items-center gap-2 pt-0.5 md:hidden">
-              <div className="bg-purple-100 text-purple-700 text-[8px] font-bold px-2 py-0.5 rounded flex items-center">
-                <span className="mr-1">⚡</span> Delivery in 4 hours
+              <div className="bg-purple-100 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded flex items-center">
+                <span className="mr-1">⚡</span> 4h Delivery
               </div>
             </div>
           )}
         </div>
 
-        <div className={`flex ${isList ? 'flex-col md:flex-row md:items-end' : 'items-center'} justify-between gap-2 md:pt-4`}>
+        <div className={`flex ${isList ? 'flex-col md:flex-row md:items-end' : 'items-center'} justify-between gap-1 md:gap-2 md:pt-4`}>
           <div className="flex flex-col">
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg md:text-2xl font-black text-deep-espresso tracking-tight">
+            <div className="flex items-baseline gap-1.5 md:gap-2">
+              <span className="text-sm md:text-2xl font-black text-deep-espresso tracking-tight">
                 ${product.price}
               </span>
               {!isList && product.originalPrice > product.price && (
@@ -93,7 +87,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
               )}
             </div>
             <div className="flex items-center gap-2 md:mt-1">
-              <span className="text-[9px] md:text-[10px] text-deep-espresso/30 font-bold uppercase tracking-widest leading-none">
+              <span className="text-[8px] md:text-[10px] text-deep-espresso/30 font-bold uppercase tracking-widest leading-none">
                 Incl. GST
               </span>
               {isList && product.originalPrice > product.price && (
@@ -105,27 +99,20 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
           </div>
 
           <div className={`flex items-center ${isList ? 'justify-between md:justify-end' : 'justify-end'} gap-3 mt-1 md:mt-0`}>
-             {isList && (
-               <div className="md:hidden flex items-center text-[10px] text-amber-500 font-bold">
-                 <FiStar className="h-2.5 w-2.5 fill-amber-500 mr-1" />
-                 {product.rating}
-               </div>
-             )}
-             
              {quantity > 0 ? (
                <div className="flex items-center bg-soft-oatmeal/10 border border-soft-oatmeal/20 rounded-lg md:rounded-2xl overflow-hidden h-8 md:h-12 shadow-inner">
                  <button 
                    onClick={(e) => { e.preventDefault(); updateQuantity(product.id, quantity - 1); }}
-                   className="px-2 md:px-4 h-full hover:bg-soft-oatmeal/20 text-deep-espresso transition-colors text-sm md:text-xl font-bold"
+                   className="px-1.5 min-[360px]:px-2 md:px-4 h-full hover:bg-soft-oatmeal/20 text-deep-espresso transition-colors text-xs md:text-xl font-bold"
                  >
                    −
                  </button>
-                 <span className="px-2 md:px-4 text-[10px] md:text-sm font-black text-deep-espresso w-6 md:w-10 text-center">
+                 <span className="px-1.5 min-[360px]:px-2 text-[9px] md:text-sm font-black text-deep-espresso w-5 min-[360px]:w-6 md:w-10 text-center">
                    {quantity}
                  </span>
                  <button 
                    onClick={(e) => { e.preventDefault(); updateQuantity(product.id, quantity + 1); }}
-                   className="px-2 md:px-4 h-full hover:bg-soft-oatmeal/20 text-deep-espresso transition-colors text-sm md:text-xl font-bold"
+                   className="px-1.5 min-[360px]:px-2 md:px-4 h-full hover:bg-soft-oatmeal/20 text-deep-espresso transition-colors text-xs md:text-xl font-bold"
                  >
                    +
                  </button>
@@ -135,7 +122,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
                  whileHover={{ scale: 1.05 }}
                  whileTap={{ scale: 0.95 }}
                  onClick={(e) => { e.preventDefault(); addToCart(product); }}
-                 className="h-8 md:h-12 px-6 md:px-8 bg-deep-espresso text-white rounded-lg md:rounded-2xl font-bold text-[10px] md:text-sm hover:bg-warm-sand transition-colors shadow-lg"
+                 className="h-8 md:h-12 px-4 min-[360px]:px-6 md:px-8 bg-deep-espresso text-white rounded-lg md:rounded-2xl font-bold text-[9px] md:text-sm hover:bg-warm-sand transition-colors shadow-lg"
                >
                  Add
                </motion.button>

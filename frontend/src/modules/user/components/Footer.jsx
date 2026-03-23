@@ -20,14 +20,14 @@ const Footer = () => {
   };
 
   return (
-    <footer className="hidden md:block bg-deep-espresso text-soft-oatmeal pt-24 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+    <footer className="hidden md:block bg-deep-espresso text-soft-oatmeal pt-12 md:pt-24 pb-12">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
         <motion.div 
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 md:gap-16 mb-16 md:mb-20"
         >
           {/* Brand */}
           <motion.div variants={itemVariants} className="space-y-8">
