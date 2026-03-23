@@ -47,32 +47,38 @@ const AddressPage = () => {
         <h1 className="text-xl font-bold text-deep-espresso">Add Delivery Address</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 space-y-4">
+      <form onSubmit={handleSubmit} className="p-4 space-y-6">
         {/* Contact Info Section */}
         <div className="space-y-4">
           <h3 className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand flex items-center gap-2">
             <span className="w-4 h-px bg-warm-sand/30" /> Contact Info
           </h3>
-          <div className="space-y-3">
-            <input 
-              required
-              type="text" 
-              placeholder="Full Name" 
-              className="w-full px-6 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/50 focus:border-warm-sand focus:bg-white focus:outline-none font-medium transition-all"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-            />
-            <div className="relative">
-              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">+91</span>
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 px-2">Full Name</label>
               <input 
                 required
-                type="tel" 
-                pattern="[0-9]{10}"
-                placeholder="Mobile Number" 
-                className="w-full pl-14 pr-6 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/50 focus:border-warm-sand focus:bg-white focus:outline-none font-medium transition-all"
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})}
+                type="text" 
+                placeholder="Enter your full name" 
+                className="w-full px-6 py-4 rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all shadow-sm"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
               />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 px-2">Mobile Number</label>
+              <div className="relative">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm tracking-widest">+91</span>
+                <input 
+                  required
+                  type="tel" 
+                  pattern="[0-9]{10}"
+                  placeholder="10-digit number" 
+                  className="w-full pl-16 pr-6 py-4 rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all shadow-sm"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -82,40 +88,52 @@ const AddressPage = () => {
           <h3 className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand flex items-center gap-2">
             <span className="w-4 h-px bg-warm-sand/30" /> Address Details
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
-              <input 
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 px-2">Pincode</label>
+                <input 
+                  required
+                  type="text" 
+                  maxLength="6"
+                  placeholder="6-digit" 
+                  className="w-full px-6 py-4 rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all shadow-sm"
+                  value={formData.pincode}
+                  onChange={(e) => setFormData({...formData, pincode: e.target.value.replace(/\D/g, '').slice(0, 6)})}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 px-2">City</label>
+                <input 
+                  required
+                  type="text" 
+                  placeholder="Bengaluru" 
+                  className="w-full px-6 py-4 rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all shadow-sm"
+                  value={formData.city}
+                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 px-2">Full Address</label>
+              <textarea 
                 required
-                type="text" 
-                maxLength="6"
-                placeholder="Pincode" 
-                className="w-full px-6 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/50 focus:border-warm-sand focus:bg-white focus:outline-none font-medium transition-all"
-                value={formData.pincode}
-                onChange={(e) => setFormData({...formData, pincode: e.target.value.replace(/\D/g, '').slice(0, 6)})}
-              />
-              <input 
-                required
-                type="text" 
-                placeholder="City" 
-                className="w-full px-6 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/50 focus:border-warm-sand focus:bg-white focus:outline-none font-medium transition-all"
-                value={formData.city}
-                onChange={(e) => setFormData({...formData, city: e.target.value})}
+                placeholder="Flat, House no., Building, Apartment" 
+                className="w-full px-6 py-4 rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all min-h-[120px] shadow-sm shadow-inner"
+                value={formData.address}
+                onChange={(e) => setFormData({...formData, address: e.target.value})}
               />
             </div>
-            <textarea 
-              required
-              placeholder="Flat, House no., Building, Apartment" 
-              className="w-full px-6 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/50 focus:border-warm-sand focus:bg-white focus:outline-none font-medium transition-all min-h-[100px]"
-              value={formData.address}
-              onChange={(e) => setFormData({...formData, address: e.target.value})}
-            />
-            <input 
-              type="text" 
-              placeholder="Landmark (Optional)" 
-              className="w-full px-6 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/50 focus:border-warm-sand focus:bg-white focus:outline-none font-medium transition-all"
-              value={formData.landmark}
-              onChange={(e) => setFormData({...formData, landmark: e.target.value})}
-            />
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 px-2">Landmark (Optional)</label>
+              <input 
+                type="text" 
+                placeholder="Nearby famous place" 
+                className="w-full px-6 py-4 rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all shadow-sm"
+                value={formData.landmark}
+                onChange={(e) => setFormData({...formData, landmark: e.target.value})}
+              />
+            </div>
           </div>
         </div>
 

@@ -13,9 +13,9 @@ const CategoryDetailPage = () => {
   const title = slug.charAt(0).toUpperCase() + slug.slice(1).replace('-', ' ');
 
   return (
-    <div className="min-h-screen bg-white pb-20 pt-4 md:pt-10">
+    <div className="min-h-screen bg-white pb-20 pt-1 md:pt-10">
       {/* Header */}
-      <div className="bg-soft-oatmeal/5 border-b border-soft-oatmeal/10 py-8 md:py-20 mb-6 md:mb-12">
+      <div className="bg-soft-oatmeal/5 border-b border-soft-oatmeal/10 py-6 md:py-20 mb-4 md:mb-12">
         <div className="max-w-7xl mx-auto px-4 md:px-12 text-center">
           <motion.h1 
             initial={{ opacity: 0, y: -20 }}

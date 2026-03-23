@@ -256,15 +256,15 @@ const ProductDetailsPage = () => {
       <AnimatePresence>
         {relatedProducts.length > 0 && (
           <motion.section variants={fadeInUp}>
-            <div className="flex items-center justify-between mb-8 md:mb-16">
-              <h2 className="text-4xl font-bold tracking-tight text-deep-espresso">You May Also Like</h2>
-              <Link to="/products" className="text-warm-sand font-black uppercase tracking-widest text-xs hover:text-deep-espresso transition-all group">
+            <div className="flex items-center justify-between mb-4 md:mb-16">
+              <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-deep-espresso">You May Also Like</h2>
+              <Link to="/products" className="text-warm-sand font-black uppercase tracking-widest text-[10px] md:text-xs hover:text-deep-espresso transition-all group">
                 See all products <span className="ml-2 group-hover:translate-x-1 inline-block transition-transform">→</span>
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-6 md:gap-10">
               {relatedProducts.map((p, index) => (
-                <ProductCard key={p.id} product={p} index={index} />
+                <ProductCard key={p.id} product={p} index={index} variant="minimal" />
               ))}
             </div>
           </motion.section>
@@ -272,18 +272,18 @@ const ProductDetailsPage = () => {
       </AnimatePresence>
 
       {/* Mobile Action Bar (Fixed above Bottom Navbar) */}
-      <div className="md:hidden fixed bottom-[72px] left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-soft-oatmeal/10 px-4 py-4 pb-6 shadow-[0_-12px_30px_rgba(0,0,0,0.08)]">
+      <div className="md:hidden fixed bottom-[72px] left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-soft-oatmeal/10 px-4 py-2.5 pb-4 shadow-[0_-12px_30px_rgba(0,0,0,0.08)]">
         <div className="flex gap-4 px-1">
           {currentQuantity === 0 ? (
             <motion.button
               whileTap={{ scale: 0.96 }}
               onClick={() => addToCart(product, 1)}
-              className="flex-1 py-4 bg-white border-2 border-warm-sand text-warm-sand rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all shadow-sm"
+              className="flex-1 py-3 bg-white border-2 border-warm-sand text-warm-sand rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all shadow-sm"
             >
               Add To Cart
             </motion.button>
           ) : (
-            <div className="flex-1 flex items-center justify-between bg-white border-2 border-warm-sand text-warm-sand rounded-2xl px-4 h-[52px] shadow-sm">
+            <div className="flex-1 flex items-center justify-between bg-white border-2 border-warm-sand text-warm-sand rounded-2xl px-4 h-[46px] shadow-sm">
               <motion.button
                 whileTap={{ scale: 0.8 }}
                 onClick={() => updateQuantity(product.id, currentQuantity - 1)}
@@ -316,7 +316,7 @@ const ProductDetailsPage = () => {
           >
             <motion.button
               whileTap={{ scale: 0.96 }}
-              className="w-full py-4 bg-warm-sand text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-warm-sand/20 transition-all border-2 border-warm-sand"
+              className="w-full py-3 bg-warm-sand text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-warm-sand/20 transition-all border-2 border-warm-sand"
             >
               Buy Now
             </motion.button>

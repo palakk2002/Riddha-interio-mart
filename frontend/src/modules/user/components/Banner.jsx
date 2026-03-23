@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Button from '../../../shared/components/Button';
 import heroBanner from '../../../assets/hero.png';
-import mobileBanner from '../../../assets/banner_mobile.png';
+import mobileBanner from '../../../assets/banner_mobile_premium.png';
 
 const Banner = () => {
   const [isMobile, setIsMobile] = React.useState(false);
@@ -15,7 +15,7 @@ const Banner = () => {
   }, []);
 
   return (
-    <div className="relative h-[320px] md:h-[600px] w-full overflow-hidden md:rounded-[2rem] rounded-none group shadow-2xl">
+    <div className="relative h-[280px] md:h-[600px] w-full overflow-hidden md:rounded-[2rem] rounded-none group shadow-2xl">
       {/* Background Image - Responsive */}
       <div className="absolute inset-0">
         {/* Desktop Image */}

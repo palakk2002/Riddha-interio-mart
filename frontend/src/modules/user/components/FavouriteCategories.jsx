@@ -3,6 +3,12 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import furnitureImg from '../../../assets/furniture.jpg';
 import furniture2Img from '../../../assets/furniture2.jpg';
+import mattressImg from '../../../assets/mattress_premium.png';
+import wallDecorImg from '../../../assets/wall_decor_premium.png';
+import vasesImg from '../../../assets/vases_premium.png';
+import mirrorsImg from '../../../assets/mirrors_premium.png';
+import lightingImg from '../../../assets/lighting.jpg';
+import tapImg from '../../../assets/tap.jpg';
 
 const FavouriteCategories = () => {
   const [activeTab, setActiveTab] = useState('Furniture');
@@ -10,19 +16,35 @@ const FavouriteCategories = () => {
   const tabs = ['Furniture', 'Mattresses', 'Home Goods'];
 
   const categories = [
+    // Furniture
     { id: 1, name: 'Hydraulic Beds', category: 'Furniture', slug: 'beds', image: furnitureImg },
     { id: 2, name: 'Bean Bags', category: 'Furniture', slug: 'bean-bags', image: furniture2Img },
     { id: 3, name: 'Swings', category: 'Furniture', slug: 'swings', image: furnitureImg },
     { id: 4, name: 'Chairs', category: 'Furniture', slug: 'chairs', image: furniture2Img },
     { id: 5, name: 'Coffee Tables', category: 'Furniture', slug: 'tables', image: furnitureImg },
     { id: 6, name: 'Sofas', category: 'Furniture', slug: 'sofas', image: furniture2Img },
+    
+    // Mattresses
+    { id: 7, name: 'Orthopedic', category: 'Mattresses', slug: 'ortho-mattress', image: mattressImg },
+    { id: 8, name: 'Memory Foam', category: 'Mattresses', slug: 'memory-foam', image: mattressImg },
+    { id: 9, name: 'Pocket Spring', category: 'Mattresses', slug: 'spring-mattress', image: mattressImg },
+    { id: 10, name: 'Dual Comfort', category: 'Mattresses', slug: 'dual-comfort', image: mattressImg },
+    { id: 11, name: 'Latex Premium', category: 'Mattresses', slug: 'latex-mattress', image: mattressImg },
+    { id: 12, name: 'Hybrid Series', category: 'Mattresses', slug: 'hybrid-mattress', image: mattressImg },
+
+    // Home Goods
+    { id: 13, name: 'Wall Decor', category: 'Home Goods', slug: 'wall-decor', image: wallDecorImg },
+    { id: 14, name: 'Designer Vases', category: 'Home Goods', slug: 'vases', image: vasesImg },
+    { id: 15, name: 'Premium Carpets', category: 'Home Goods', slug: 'carpets', image: furnitureImg },
+    { id: 16, name: 'Luxury Cushions', category: 'Home Goods', slug: 'cushions', image: furniture2Img },
+    { id: 17, name: 'Modern Clocks', category: 'Home Goods', slug: 'clocks', image: lightingImg },
+    { id: 18, name: 'Designer Mirrors', category: 'Home Goods', slug: 'mirrors', image: mirrorsImg },
   ];
 
-  // For now we only have data for Furniture, mock others as empty or same to show layout
-  const filteredCategories = activeTab === 'Furniture' ? categories : [];
+  const filteredCategories = categories.filter(cat => cat.category === activeTab);
 
   return (
-    <section className="max-w-7xl mx-auto px-4 md:px-12 pt-0 pb-12 md:py-24 bg-white">
+    <section className="max-w-7xl mx-auto px-4 md:px-12 pt-0 md:pt-24 pb-2 md:pb-24 bg-white">
       {/* Title Section */}
       <div className="text-center mb-10 md:mb-16">
         <motion.h2
@@ -35,7 +57,7 @@ const FavouriteCategories = () => {
         </motion.h2>
 
         {/* Filter Tabs */}
-        <div className="flex justify-center gap-3 md:gap-6 overflow-x-auto no-scrollbar pb-2">
+        <div className="flex justify-start md:justify-center gap-4 md:gap-6 overflow-x-auto no-scrollbar pb-2 px-4 md:px-0">
           {tabs.map((tab) => (
             <button
               key={tab}

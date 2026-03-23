@@ -187,7 +187,7 @@ const Navbar = () => {
           </div>
 
           {/* Persistent Mobile Search Bar Row */}
-          <div className="md:hidden pb-3">
+          <div className="md:hidden pb-1">
             <SearchBar className="scale-95 origin-left" />
           </div>
         </div>

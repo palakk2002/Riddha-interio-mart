@@ -41,10 +41,10 @@ const CategoryQuickAccess = () => {
   };
 
   return (
-    <section className="pt-6 pb-0 md:py-12 bg-white overflow-hidden">
+    <section className="pt-1 pb-0 md:py-12 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Horizontal Category Tabs */}
-        <div className="flex overflow-x-auto pb-4 mb-2 md:mb-10 gap-6 md:gap-8 no-scrollbar items-center border-b border-soft-oatmeal/20 whitespace-nowrap">
+        <div className="flex overflow-x-auto pb-4 mb-1 md:mb-10 gap-6 md:gap-8 no-scrollbar items-center border-b border-soft-oatmeal/20 whitespace-nowrap">
           {tabs.map((tab) => (
             <button
               key={tab}
@@ -83,7 +83,7 @@ const CategoryQuickAccess = () => {
                 >
                   <Link
                     to={`/category/${category.slug}`}
-                    className="group flex flex-col items-center gap-2 md:gap-4 w-16 min-[360px]:w-20 md:w-auto"
+                    className="group flex flex-col items-center gap-2 md:gap-4 w-14 min-[360px]:w-16 md:w-auto"
                   >
                     <div className="relative aspect-square w-full rounded-xl md:rounded-[2rem] overflow-hidden bg-soft-oatmeal/5 shadow-sm group-hover:shadow-lg transition-all duration-500">
                       <img

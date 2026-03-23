@@ -23,7 +23,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="space-y-8 md:space-y-32 py-5 md:py-10">
+    <div className="space-y-2 md:space-y-32 py-2 md:py-10">
       {/* Quick Access Categories */}
       <CategoryQuickAccess />
 
@@ -39,7 +39,7 @@ const HomePage = () => {
       <FavouriteCategories />
 
       {/* Featured Products Section */}
-      <section className="bg-soft-oatmeal/10 py-10 md:py-32 border-y border-soft-oatmeal/20">
+      <section className="bg-soft-oatmeal/10 pt-4 pb-10 md:py-32 border-y border-soft-oatmeal/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -63,7 +63,7 @@ const HomePage = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-10"
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-10"
           >
             {featuredProducts.map((product, index) => (
               <ProductCard key={product.id} product={product} index={index} />

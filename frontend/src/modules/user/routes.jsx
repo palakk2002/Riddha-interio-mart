@@ -17,10 +17,12 @@ import Refund from './pages/Refund';
 import Terms from './pages/Terms';
 import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
 import AddressPage from './pages/AddressPage';
 import PaymentPage from './pages/PaymentPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import OrderTrackingPage from './pages/OrderTrackingPage';
+import EditProfile from './pages/EditProfile';
 
 const UserRoutes = () => {
   return (
@@ -42,10 +44,12 @@ const UserRoutes = () => {
       <Route path="/terms" element={<Terms />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
       <Route path="/address" element={<AddressPage />} />
       <Route path="/payment" element={<PaymentPage />} />
       <Route path="/order-success" element={<OrderSuccessPage />} />
       <Route path="/order-tracking" element={<OrderTrackingPage />} />
+      <Route path="/profile/edit" element={<EditProfile />} />
     </Routes>
   );
 };

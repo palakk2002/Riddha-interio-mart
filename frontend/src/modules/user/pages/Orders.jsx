@@ -9,7 +9,7 @@ const Orders = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="py-16 md:py-24"
+      className="py-6 md:py-24"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         {/* Header */}
@@ -17,16 +17,16 @@ const Orders = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-16 space-y-4"
+          className="mb-8 md:mb-16 space-y-2 md:space-y-4"
         >
-          <div className="flex items-center gap-3 text-warm-sand mb-2">
-            <FiPackage className="h-5 w-5" />
-            <span className="text-xs uppercase tracking-[0.2em] font-bold">My Orders</span>
+          <div className="flex items-center gap-3 text-warm-sand mb-1 md:mb-2">
+            <FiPackage className="h-4 w-4 md:h-5 md:w-5" />
+            <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold">My Orders</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight text-deep-espresso">
+          <h1 className="text-2xl md:text-5xl font-display font-bold tracking-tight text-deep-espresso">
             Your Orders
           </h1>
-          <p className="text-deep-espresso/50 text-lg font-light leading-relaxed max-w-2xl">
+          <p className="text-deep-espresso/50 text-sm md:text-lg font-light leading-relaxed max-w-2xl">
             Track and manage all your past and current orders in one place.
           </p>
         </motion.div>

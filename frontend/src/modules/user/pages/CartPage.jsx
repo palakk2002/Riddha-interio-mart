@@ -35,7 +35,7 @@ const CartPage = () => {
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-40 text-center"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10 md:py-40 text-center"
       >
         <motion.div 
           initial={{ scale: 0.8, opacity: 0 }}
@@ -63,7 +63,7 @@ const CartPage = () => {
   return (
     <div className="bg-soft-oatmeal/5 min-h-screen">
       {/* Mobile Top Header (Fixed) */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-warm-sand text-white px-4 h-16 flex items-center gap-4 shadow-lg">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-warm-sand text-white px-4 h-14 flex items-center gap-4 shadow-lg">
         <Link to="/products">
           <FiTrash2 className="h-6 w-6 rotate-90" onClick={() => window.history.back()} />
         </Link>
@@ -74,12 +74,12 @@ const CartPage = () => {
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-6 md:py-20 pb-32 md:pb-20"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-2 md:pt-20 pb-32 md:pb-20"
       >
         {/* Mobile-Only Progress Steps */}
-        <div className="md:hidden mt-16 mb-6 flex items-center justify-between px-2 bg-white py-4 rounded-xl shadow-sm overflow-x-auto no-scrollbar">
+        <div className="md:hidden mt-14 mb-6 flex items-center justify-between px-2 bg-white py-4 rounded-xl shadow-sm overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="h-6 w-6 rounded-full bg-green-600 text-white text-xs flex items-center justify-center font-bold">1</span>
+            <span className="h-6 w-6 rounded-full bg-warm-sand text-white text-xs flex items-center justify-center font-bold">1</span>
             <span className="text-xs font-bold text-gray-400">Cart</span>
             <FiArrowRight className="text-gray-300 text-xs" />
           </div>
@@ -235,11 +235,11 @@ const CartPage = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Discount on MRP</span>
-                    <span className="text-green-600 font-medium">-₹500</span>
+                    <span className="text-warm-sand font-medium">-₹500</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Delivery Charges</span>
-                    <span className="text-green-600 font-bold uppercase text-[10px]">Free</span>
+                    <span className="text-warm-sand font-bold uppercase text-[10px]">Free</span>
                   </div>
                   <div className="border-t border-dashed border-gray-200 pt-4 flex justify-between items-baseline">
                     <div>
@@ -249,8 +249,8 @@ const CartPage = () => {
                     <span className="text-xl font-black text-deep-espresso tracking-tighter">₹{cartTotal}</span>
                   </div>
                </div>
-               <div className="bg-green-100/50 px-4 py-2 border-t border-green-200">
-                  <p className="text-[10px] text-green-700 font-bold text-center">You saved ₹500 on this purchase.</p>
+                <div className="bg-warm-sand/10 px-4 py-2 border-t border-warm-sand/20">
+                   <p className="text-[10px] text-warm-sand font-bold text-center">You saved ₹500 on this purchase.</p>
                </div>
             </div>
 
@@ -272,7 +272,7 @@ const CartPage = () => {
                 </div>
                 <div className="flex justify-between text-deep-espresso/40">
                   <span className="text-xs uppercase tracking-widest">Shipping</span>
-                  <span className="text-xs font-black text-green-600 uppercase tracking-widest">Complimentary</span>
+                  <span className="text-xs font-black text-warm-sand uppercase tracking-widest">Complimentary</span>
                 </div>
               </div>
 

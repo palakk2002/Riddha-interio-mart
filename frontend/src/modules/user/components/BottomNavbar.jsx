@@ -52,8 +52,8 @@ const BottomNavbar = () => {
                   </AnimatePresence>
                 </div>
                 
-                <span className={`text-[8px] font-black uppercase tracking-[0.15em] transition-all duration-300 leading-none ${
-                  isActive ? 'opacity-100 transform translate-y-0.5' : 'opacity-0 transform translate-y-2'
+                <span className={`text-[8px] font-black uppercase tracking-[0.15em] transition-all duration-300 leading-none mt-1 ${
+                  isActive ? 'text-warm-sand translate-y-0.5' : 'text-deep-espresso/40 translate-y-0.5'
                 }`}>
                   {item.name}
                 </span>

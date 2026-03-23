@@ -1,111 +1,232 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../data/UserContext';
-import { FiArrowLeft, FiSmartphone } from 'react-icons/fi';
+import { FiArrowLeft, FiUser, FiLock, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
+import { FaGoogle, FaFacebookF, FaXTwitter } from 'react-icons/fa6';
 import Button from '../../../shared/components/Button';
+import LOGIN_BG from '../../../assets/login_bg_fretshop.png';
 
 const LoginPage = () => {
   const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+  const [error, setError] = useState('');
   const { login } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const getSignupPath = () => {
+    if (location.pathname.startsWith('/admin')) return '/admin/signup';
+    if (location.pathname.startsWith('/seller')) return '/seller/signup';
+    return '/signup';
+  };
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (identifier.trim()) {
-      login({ name: 'Guest User', id: identifier });
+    setError('');
+    
+    if (identifier === 'user@riddhainterio.com' && password === '1234') {
+      login({ name: 'Riddha User', id: identifier });
       navigate('/cart');
+    } else if (!identifier || !password) {
+      setError('Please enter both email and password');
+    } else {
+      setError('Invalid email or password. Use user@riddhainterio.com / 1234');
     }
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen bg-white"
-    >
-      {/* Header */}
-      <div className="px-6 py-6 flex items-center gap-6 border-b border-soft-oatmeal/10">
-        <button onClick={() => navigate(-1)}>
-          <FiArrowLeft className="h-6 w-6 text-deep-espresso" />
-        </button>
-        <h1 className="text-xl font-bold text-deep-espresso">Sign Up Or Log In</h1>
+    <div className="min-h-screen bg-white relative overflow-hidden font-sans">
+      {/* Desktop Background Layer */}
+      <div className="hidden md:block absolute inset-0 z-0">
+        <img 
+          src={LOGIN_BG}
+          alt="Luxury Showroom"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/45 backdrop-blur-[1px]" />
       </div>
 
-      {/* Promotional Banner */}
-      <div className="relative bg-[#FFF5F2] mx-4 mt-6 rounded-3xl overflow-hidden p-6 flex items-center justify-between border border-red-50">
-        <div className="relative z-10 max-w-[60%]">
-          <h2 className="text-2xl font-black text-[#F44336] leading-tight">
-            Sign Up Now & Get Upto Rs. 1,500 Off
-          </h2>
-          <p className="text-sm font-bold text-[#F44336] mt-1 flex items-center gap-1">
-            On Your First Purchase <span className="text-lg">›</span>
-          </p>
-          <div className="mt-4 inline-block bg-white border-2 border-dashed border-[#F44336]/20 px-3 py-1.5 rounded-lg">
-            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Use Coupon : <span className="text-deep-espresso text-xs font-black">HELLO1500</span></p>
+      {/* Main Content Container */}
+      <div className="relative z-10 flex flex-col md:flex-row min-h-screen">
+        {/* Left Section (Desktop Branding) */}
+        <motion.div 
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="hidden md:flex flex-1 items-center justify-center p-20"
+        >
+          <div className="max-w-2xl space-y-6">
+            <h1 className="text-[140px] font-display font-black text-white italic leading-none drop-shadow-2xl">
+              Riddha
+            </h1>
+            <p className="text-2xl font-medium text-white/70 italic tracking-wider ml-4">
+              Interio Mart
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Right Section / Form Section */}
+        <div className="flex-1 flex flex-col min-h-screen">
+          {/* Mobile Header Image (Only on Mobile) */}
+          <div className="md:hidden relative h-[32vh] min-h-[220px] w-full overflow-hidden">
+            <img 
+              src={LOGIN_BG}
+              alt="Luxury Interior"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/10" />
+            
+            <button 
+              onClick={() => navigate(-1)}
+              className="absolute top-6 left-6 h-10 w-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 shadow-lg active:scale-90 transition-all z-20"
+            >
+              <FiArrowLeft className="h-5 w-5" />
+            </button>
+
+            {/* Curve Effect */}
+            <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none">
+              <svg viewBox="0 0 1440 320" className="absolute bottom-[-1px] left-0 w-full h-[120%] rotate-180" preserveAspectRatio="none">
+                <path fill="#ffffff" fillOpacity="1" d="M0,160L48,176C96,192,192,224,288,229.3C384,235,480,213,576,192C672,171,768,149,864,154.7C960,160,1056,192,1152,192C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+              </svg>
+            </div>
+          </div>
+
+          {/* Form Area Wrapper */}
+          <div className="flex-1 flex items-center justify-center p-6 md:p-12 lg:p-24 relative">
+            {/* Desktop Back Button */}
+            <button 
+              onClick={() => navigate(-1)}
+              className="hidden md:flex absolute top-10 right-10 flex items-center gap-2 group text-white/50 hover:text-white transition-all font-bold text-xs tracking-widest uppercase z-50"
+            >
+              <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
+              Back
+            </button>
+
+            {/* Form Card */}
+            <motion.div 
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="w-full max-w-md bg-white md:bg-white/10 md:backdrop-blur-3xl md:border md:border-white/20 p-8 md:p-12 rounded-[40px] shadow-2xl relative"
+            >
+              {/* Login/Signup Toggle UI */}
+              <div className="hidden md:flex justify-between items-center mb-10">
+                <h2 className="text-3xl font-display font-bold text-white">Log In</h2>
+                <div className="flex gap-2 text-[10px] font-black uppercase tracking-wider">
+                  <span className="text-white border-b border-white pb-0.5 pointer-events-none">Log In</span>
+                  <span className="text-white/40 hover:text-white cursor-pointer transition-colors" onClick={() => navigate(getSignupPath())}>Sign Up</span>
+                </div>
+              </div>
+
+              {/* Mobile Header (Visible only on mobile) */}
+              <div className="md:hidden text-center space-y-1 mb-10 w-full">
+                <h1 className="text-3xl font-black text-deep-espresso tracking-tight">Welcome Back</h1>
+                <p className="text-gray-400 font-bold text-xs tracking-[0.15em] uppercase italic">
+                  Login to your account
+                </p>
+              </div>
+
+              <AnimatePresence>
+                {error && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-[10px] font-bold uppercase tracking-wider text-center"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <form onSubmit={handleLogin} className="space-y-6">
+                <div className="space-y-5">
+                  <div className="space-y-1">
+                    <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-2 ml-1">Email</label>
+                    <div className="relative group">
+                      <FiUser className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-warm-sand group-focus-within:text-deep-espresso transition-colors h-5 w-5" />
+                      <input 
+                        type="text" 
+                        placeholder={window.innerWidth < 768 ? "Full Name / Email" : "Enter your email"} 
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
+                        className="w-full md:pl-6 pl-16 pr-6 py-4 md:py-4 rounded-full md:rounded-2xl bg-soft-oatmeal/10 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-warm-sand/50 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-semibold transition-all md:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-2 ml-1">Password</label>
+                    <div className="relative group">
+                      <FiLock className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-warm-sand group-focus-within:text-deep-espresso transition-colors h-5 w-5" />
+                      <input 
+                        type={showPassword ? "text" : "password"}
+                        placeholder={window.innerWidth < 768 ? "Password" : "••••••••"} 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full md:pl-6 pl-16 pr-14 py-4 md:py-4 rounded-full md:rounded-2xl bg-soft-oatmeal/10 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-warm-sand/50 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-semibold transition-all md:text-white"
+                      />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 md:text-white/50 hover:text-white">
+                        {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between px-2">
+                  <button type="button" onClick={() => setRememberMe(!rememberMe)} className="hidden md:flex items-center gap-2 group">
+                    <div className={`h-4 w-4 rounded-md border-2 flex items-center justify-center transition-all ${rememberMe ? 'bg-white border-white' : 'border-white/30 group-hover:border-white/50'}`}>
+                      {rememberMe && <FiCheck className="text-deep-espresso text-[10px] stroke-[4]" />}
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 group-hover:text-white">Remember Me</span>
+                  </button>
+                  <button type="button" className="text-[10px] font-bold text-gray-400 md:text-white/40 uppercase tracking-wider hover:text-warm-sand md:hover:text-white">
+                    Forgot Password?
+                  </button>
+                </div>
+
+                <div className="flex flex-col md:flex-row items-center gap-6 pt-2">
+                  <Button 
+                    type="submit"
+                    className="w-full md:w-auto md:ml-auto h-14 md:h-12 px-10 rounded-full md:rounded-xl bg-warm-sand md:bg-white hover:bg-deep-espresso md:hover:bg-warm-sand text-white md:text-deep-espresso md:hover:text-white font-black text-xs uppercase tracking-widest shadow-xl transition-all active:scale-[0.98]"
+                  >
+                    Log In
+                  </Button>
+                </div>
+
+                {/* Social Logins - Desktop Only */}
+                <div className="hidden md:block pt-10 border-t border-white/10">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="flex-1 h-[1px] bg-white/10"></div>
+                    <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">OR</span>
+                    <div className="flex-1 h-[1px] bg-white/10"></div>
+                  </div>
+                  <div className="flex justify-center items-center gap-8">
+                    {[FaGoogle, FaFacebookF, FaXTwitter].map((Icon, idx) => (
+                      <button key={idx} type="button" className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-deep-espresso transition-all hover:scale-110 active:scale-90">
+                        <Icon size={20} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="hidden md:block text-center text-[10px] font-black text-white/50 uppercase tracking-widest mt-8">
+                  Don't have an account? <span onClick={() => navigate(getSignupPath())} className="text-white cursor-pointer border-b border-white/30 pb-0.5 hover:text-white/100 transition-colors">Sign up</span>
+                </p>
+
+                {/* Mobile Sign Up Link */}
+                <p className="md:hidden text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  Don't have account? <span onClick={() => navigate(getSignupPath())} className="text-warm-sand cursor-pointer font-black border-b border-warm-sand/30 pb-0.5">Sign up</span>
+                </p>
+              </form>
+            </motion.div>
           </div>
         </div>
-        <div className="absolute right-0 bottom-0 w-44 h-44 opacity-90">
-             {/* Mock image placeholder using background color or an icon if img not available */}
-             <img 
-               src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500&q=80" 
-               alt="promo" 
-               className="w-full h-full object-cover object-top mask-linear-gradient"
-             />
-        </div>
       </div>
-
-      {/* Form */}
-      <div className="px-6 mt-12 space-y-8">
-        <div className="space-y-6">
-           <p className="text-center text-lg font-bold text-deep-espresso">Sign Up Or Log In</p>
-           
-           <div className="space-y-2">
-             <div className="relative">
-                <input 
-                  type="text" 
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="Enter Mobile Number or Email Id" 
-                  className="w-full px-6 py-4 rounded-xl border-2 border-gray-100 bg-gray-50/50 focus:border-warm-sand focus:outline-none text-base font-medium transition-all"
-                />
-             </div>
-           </div>
-
-           <Button 
-             onClick={handleLogin}
-             size="lg" 
-             className="w-full h-16 rounded-xl bg-[#F44336] hover:bg-[#D32F2F] text-white font-black text-sm uppercase tracking-widest shadow-xl shadow-red-200"
-           >
-             CONTINUE
-           </Button>
-
-           <p className="text-[10px] text-center text-gray-400 font-medium leading-relaxed">
-             By continuing, you agree to our <span className="text-[#F44336] font-bold">Terms & Conditions</span>
-           </p>
-        </div>
-
-        {/* Divider */}
-        <div className="flex items-center gap-4">
-           <div className="h-px flex-1 bg-gray-100" />
-           <span className="text-xs font-bold text-gray-400">Or</span>
-           <div className="h-px flex-1 bg-gray-100" />
-        </div>
-        <p className="text-center text-[10px] text-gray-400 font-black tracking-widest uppercase">Continue with</p>
-
-        {/* Social Buttons */}
-        <div className="grid grid-cols-1 gap-4 pb-20">
-           <button className="flex items-center justify-center gap-4 py-4 border-2 border-gray-100 rounded-xl font-bold text-deep-espresso hover:bg-gray-50 transition-all">
-             <img src="https://www.google.com/favicon.ico" className="h-5 w-5" alt="google" />
-             Google
-           </button>
-           <button className="flex items-center justify-center gap-4 py-4 border-2 border-gray-100 rounded-xl font-bold text-deep-espresso hover:bg-gray-50 transition-all">
-             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" className="h-5 w-5" alt="facebook" />
-             Facebook
-           </button>
-        </div>
-      </div>
-    </motion.div>
+    </div>
   );
 };
 

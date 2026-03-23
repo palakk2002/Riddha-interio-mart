@@ -14,6 +14,7 @@ import {
  LuBadgePercent,
  LuLayoutGrid 
 } from 'react-icons/lu';
+import sidebarBg from '../../../assets/seller_sidebar_bg.png';
 
 const menuItems = [
   { path: '/admin', icon: LuLayoutDashboard, label: 'Dashboard' },
@@ -57,7 +58,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* Full Sidebar Background Image */}
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&h=1200&fit=crop&q=80" 
+            src={sidebarBg} 
             alt="Interior Decorative Lighting" 
             className="w-full h-full object-cover"
           />

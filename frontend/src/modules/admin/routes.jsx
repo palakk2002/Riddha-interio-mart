@@ -10,10 +10,14 @@ import ManageFeaturedProducts from './pages/ManageFeaturedProducts';
 import ManageHeroBanner from './pages/ManageHeroBanner';
 import ManagePromoBanner from './pages/ManagePromoBanner';
 import ManageCategoryGrid from './pages/ManageCategoryGrid';
+import LoginPage from '../user/pages/LoginPage';
+import SignupPage from '../user/pages/SignupPage';
 
 const AdminRoutes = () => {
   return (
     <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
       <Route element={<AdminLayout />}>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/catalog" element={<CatalogPage />} />
