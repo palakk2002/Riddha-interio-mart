@@ -66,15 +66,20 @@ const ManageCategoryGrid = () => {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="bg-white p-6 md:p-8 rounded-2xl border-2 border-dashed border-warm-sand/30 shadow-sm">
-                <h3 className="text-lg font-display font-bold text-deep-espresso mb-6">
-                  Add Grid Item
-                </h3>
-                <form onSubmit={handleAddCategory} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white p-4 md:p-6 rounded-xl border border-soft-oatmeal shadow-sm mb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-display font-bold text-deep-espresso">
+                    Add Grid Item
+                  </h3>
+                  <button onClick={() => setShowAddForm(false)} className="text-warm-sand hover:text-deep-espresso">
+                    <LuX size={16} />
+                  </button>
+                </div>
+                <form onSubmit={handleAddCategory} className="flex flex-wrap md:flex-nowrap items-end gap-4">
                   {/* Category Name */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Category Name
+                  <div className="flex-1 min-w-[150px] space-y-1.5">
+                    <label className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">
+                      Name
                     </label>
                     <input
                       required
@@ -82,48 +87,47 @@ const ManageCategoryGrid = () => {
                       type="text"
                       value={newCategory.name}
                       onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                      className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
+                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-warm-sand transition-all text-xs"
                       placeholder="e.g. Curtains"
                     />
                   </div>
 
                   {/* Image URL */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Image / Icon URL
+                  <div className="flex-[2] min-w-[200px] space-y-1.5">
+                    <label className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">
+                      Image URL
                     </label>
                     <input
                       type="text"
                       value={newCategory.image}
                       onChange={(e) => setNewCategory({ ...newCategory, image: e.target.value })}
-                      className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
+                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-warm-sand transition-all text-xs"
                       placeholder="https://..."
                     />
                   </div>
 
                   {/* Display Order */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Display Order
+                  <div className="w-24 space-y-1.5">
+                    <label className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">
+                      Order
                     </label>
-                    <div className="flex gap-3">
-                      <input
-                        type="number"
-                        min="1"
-                        value={newCategory.displayOrder}
-                        onChange={(e) => setNewCategory({ ...newCategory, displayOrder: e.target.value })}
-                        className="flex-grow bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                        placeholder="e.g. 1"
-                      />
-                      <button
-                        type="submit"
-                        className="bg-deep-espresso text-white px-6 py-3 rounded-xl font-bold hover:bg-dusty-cocoa transition-all flex items-center gap-2 shadow-md whitespace-nowrap"
-                      >
-                        <LuCheck size={18} />
-                        <span className="hidden md:inline">Add</span>
-                      </button>
-                    </div>
+                    <input
+                      type="number"
+                      min="1"
+                      value={newCategory.displayOrder}
+                      onChange={(e) => setNewCategory({ ...newCategory, displayOrder: e.target.value })}
+                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-warm-sand transition-all text-xs"
+                      placeholder="1"
+                    />
                   </div>
+
+                  <button
+                    type="submit"
+                    className="bg-deep-espresso text-white px-5 py-2 rounded-lg font-bold hover:bg-dusty-cocoa transition-all flex items-center gap-2 shadow-sm whitespace-nowrap text-xs"
+                  >
+                    <LuCheck size={14} />
+                    Add
+                  </button>
                 </form>
               </div>
             </motion.div>
@@ -132,11 +136,11 @@ const ManageCategoryGrid = () => {
 
         {/* Section Label */}
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-soft-oatmeal/40" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-warm-sand">
-            Homepage Preview
+          <div className="h-px flex-1 bg-soft-oatmeal/20" />
+          <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-warm-sand/60">
+            Grid View
           </span>
-          <div className="h-px flex-1 bg-soft-oatmeal/40" />
+          <div className="h-px flex-1 bg-soft-oatmeal/20" />
         </div>
 
         {/* Category Grid — mirrors user CategoryQuickAccess.jsx */}
@@ -144,7 +148,7 @@ const ManageCategoryGrid = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-8"
+          className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-4"
         >
           <AnimatePresence>
             {categories.map((cat, index) => (
@@ -155,45 +159,45 @@ const ManageCategoryGrid = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.85 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="group relative flex flex-col items-center gap-3 md:gap-4"
+                className="group relative flex flex-col items-center gap-2"
               >
                 {/* Image Container */}
-                <div className="relative aspect-square w-full rounded-xl md:rounded-[2rem] overflow-hidden bg-soft-oatmeal/5 shadow-sm group-hover:shadow-2xl transition-all duration-500">
+                <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-soft-oatmeal/5 shadow-sm group-hover:shadow-lg transition-all duration-500">
                   <img
                     src={cat.image}
                     alt={cat.name}
                     className="h-full w-full object-cover transition-all duration-700 group-hover:scale-110"
                   />
                   {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-deep-espresso/0 group-hover:bg-deep-espresso/10 transition-colors duration-300" />
+                  <div className="absolute inset-0 bg-deep-espresso/0 group-hover:bg-deep-espresso/5 transition-colors duration-300" />
 
                   {/* Order Badge */}
-                  <div className="absolute top-2 left-2 md:top-3 md:left-3">
-                    <span className="bg-white/90 backdrop-blur-md text-deep-espresso text-[9px] md:text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm">
-                      #{cat.displayOrder}
+                  <div className="absolute top-1.5 left-1.5">
+                    <span className="bg-white/95 backdrop-blur-md text-deep-espresso text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                      {cat.displayOrder}
                     </span>
                   </div>
 
                   {/* Admin Actions */}
-                  <div className="absolute top-2 right-2 md:top-3 md:right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
+                  <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <button
-                      className="h-8 w-8 bg-white/90 backdrop-blur-md shadow-lg rounded-full flex items-center justify-center text-deep-espresso hover:text-dusty-cocoa transition-all"
+                      className="h-6 w-6 bg-white/95 shadow-md rounded-full flex items-center justify-center text-deep-espresso hover:text-dusty-cocoa transition-all"
                       title="Edit"
                     >
-                      <LuPen size={13} />
+                      <LuPen size={10} />
                     </button>
                     <button
                       onClick={() => handleDelete(cat.id)}
-                      className="h-8 w-8 bg-white/90 backdrop-blur-md shadow-lg rounded-full flex items-center justify-center text-red-400 hover:text-red-600 transition-all"
+                      className="h-6 w-6 bg-white/95 shadow-md rounded-full flex items-center justify-center text-red-400 hover:text-red-600 transition-all"
                       title="Delete"
                     >
-                      <LuTrash2 size={13} />
+                      <LuTrash2 size={10} />
                     </button>
                   </div>
                 </div>
 
                 {/* Label */}
-                <span className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.15em] text-deep-espresso/60 group-hover:text-warm-sand text-center transition-colors leading-tight">
+                <span className="text-[8px] md:text-[9px] font-black uppercase tracking-wider text-deep-espresso/50 group-hover:text-warm-sand text-center transition-colors leading-tight truncate w-full px-1">
                   {cat.name}
                 </span>
               </motion.div>
@@ -205,12 +209,12 @@ const ManageCategoryGrid = () => {
             <motion.button
               layout
               onClick={() => setShowAddForm(true)}
-              className="flex flex-col items-center gap-3 md:gap-4 group"
+              className="flex flex-col items-center gap-2 group"
             >
-              <div className="aspect-square w-full rounded-xl md:rounded-[2rem] border-2 border-dashed border-soft-oatmeal flex items-center justify-center hover:border-dusty-cocoa hover:bg-white/50 transition-all">
-                <div className="flex flex-col items-center gap-2 text-warm-sand group-hover:text-dusty-cocoa transition-colors">
-                  <LuLayoutGrid size={28} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider">Add Item</span>
+              <div className="aspect-square w-full rounded-xl border border-dashed border-soft-oatmeal flex items-center justify-center hover:border-dusty-cocoa hover:bg-white/50 transition-all">
+                <div className="flex flex-col items-center gap-1 text-warm-sand/60 group-hover:text-dusty-cocoa transition-colors">
+                  <LuPlus size={20} className="group-hover:scale-110 transition-transform" />
+                  <span className="text-[8px] font-bold uppercase tracking-tighter">Add</span>
                 </div>
               </div>
             </motion.button>

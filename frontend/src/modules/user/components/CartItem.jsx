@@ -35,7 +35,7 @@ const CartItem = ({ item }) => {
           {item.name}
         </h3>
         <p className="text-warm-sand font-bold text-xl">
-          ${item.price}
+          ₹{item.price}
         </p>
       </div>
 

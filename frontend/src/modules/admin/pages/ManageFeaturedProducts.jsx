@@ -1,40 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuPlus, LuX, LuCheck, LuPen, LuTrash2, LuStar, LuPackagePlus } from 'react-icons/lu';
-import { FiStar } from 'react-icons/fi';
+import { LuPlus, LuPen, LuTrash2, LuPackagePlus } from 'react-icons/lu';
 import { manageFeaturedData } from '../data/manageFeaturedData';
 
 const ManageFeaturedProducts = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState(manageFeaturedData);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    price: '',
-    rating: '',
-    tag: 'Top Choice',
-    image: '',
-  });
-
-  const handleAddProduct = (e) => {
-    e.preventDefault();
-    if (!newProduct.name || !newProduct.price) return;
-
-    const productToAdd = {
-      id: Date.now(),
-      name: newProduct.name,
-      category: 'Featured',
-      price: parseFloat(newProduct.price) || 0,
-      originalPrice: Math.round((parseFloat(newProduct.price) || 0) * 1.2),
-      image: newProduct.image || 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=80',
-      rating: parseFloat(newProduct.rating) || 4.5,
-      tag: newProduct.tag || 'Top Choice',
-    };
-
-    setProducts([...products, productToAdd]);
-    setShowAddForm(false);
-    setNewProduct({ name: '', price: '', rating: '', tag: 'Top Choice', image: '' });
-  };
 
   const handleDelete = (id) => {
     setProducts(products.filter((p) => p.id !== id));
@@ -54,108 +27,13 @@ const ManageFeaturedProducts = () => {
             </p>
           </div>
           <button
-            onClick={() => setShowAddForm(!showAddForm)}
+            onClick={() => navigate('/admin/manage-featured/add')}
             className="flex items-center justify-center gap-2 bg-dusty-cocoa text-white px-6 py-3 rounded-xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-dusty-cocoa/20 active:scale-95"
           >
-            {showAddForm ? <LuX size={18} /> : <LuPlus size={18} />}
-            {showAddForm ? 'Cancel' : 'Add Product'}
+            <LuPlus size={18} />
+            Add Featured Product
           </button>
         </div>
-
-        {/* Add Product Form */}
-        <AnimatePresence>
-          {showAddForm && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="bg-white p-6 md:p-8 rounded-2xl border border-soft-oatmeal shadow-lg">
-                <h3 className="text-xl font-display font-bold text-deep-espresso mb-6">
-                  New Featured Product
-                </h3>
-                <form onSubmit={handleAddProduct} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
-                  {/* Product Name */}
-                  <div className="space-y-2 lg:col-span-2">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Product Name
-                    </label>
-                    <input
-                      required
-                      autoFocus
-                      type="text"
-                      value={newProduct.name}
-                      onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                      className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                      placeholder="e.g. Italian Marble Tile"
-                    />
-                  </div>
-
-                  {/* Price */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Price ($)
-                    </label>
-                    <input
-                      required
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={newProduct.price}
-                      onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                      className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                      placeholder="0.00"
-                    />
-                  </div>
-
-
-
-                  {/* Tag */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Tag
-                    </label>
-                    <select
-                      value={newProduct.tag}
-                      onChange={(e) => setNewProduct({ ...newProduct, tag: e.target.value })}
-                      className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                    >
-                      <option value="Top Choice">Top Choice</option>
-                      <option value="Best Seller">Best Seller</option>
-                      <option value="Premium">Premium</option>
-                      <option value="New Arrival">New Arrival</option>
-                      <option value="Trending">Trending</option>
-                    </select>
-                  </div>
-
-                  {/* Image URL + Submit */}
-                  <div className="space-y-2 lg:col-span-5">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Image URL
-                    </label>
-                    <div className="flex gap-3">
-                      <input
-                        type="text"
-                        value={newProduct.image}
-                        onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
-                        className="flex-grow bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                        placeholder="https://images.unsplash.com/..."
-                      />
-                      <button
-                        type="submit"
-                        className="bg-deep-espresso text-white px-8 py-3 rounded-xl font-bold hover:bg-dusty-cocoa transition-all flex items-center gap-2 shadow-md whitespace-nowrap"
-                      >
-                        <LuCheck size={18} />
-                        Add Product
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Section Label */}
         <div className="flex items-center gap-3">
@@ -166,7 +44,7 @@ const ManageFeaturedProducts = () => {
           <div className="h-px flex-1 bg-soft-oatmeal/40" />
         </div>
 
-        {/* Product Cards Grid — mirrors user module ProductCard style */}
+        {/* Product Cards Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
           <AnimatePresence>
             {products.map((product, index) => (
@@ -234,11 +112,11 @@ const ManageFeaturedProducts = () => {
                     <div className="flex flex-col">
                       <div className="flex items-baseline gap-1.5">
                         <span className="text-sm md:text-base font-black text-deep-espresso tracking-tight">
-                          ${product.price}
+                          ₹{product.price}
                         </span>
                         {product.originalPrice > product.price && (
                           <span className="text-[10px] md:text-xs text-gray-400 line-through font-medium">
-                            ${product.originalPrice}
+                            ₹{product.originalPrice}
                           </span>
                         )}
                       </div>
@@ -258,18 +136,16 @@ const ManageFeaturedProducts = () => {
           </AnimatePresence>
 
           {/* Add Placeholder */}
-          {!showAddForm && (
-            <motion.button
-              layout
-              onClick={() => setShowAddForm(true)}
-              className="border-2 border-dashed border-soft-oatmeal rounded-2xl md:rounded-3xl min-h-[320px] md:min-h-[420px] flex flex-col items-center justify-center gap-3 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group"
-            >
-              <div className="w-16 h-16 rounded-full bg-soft-oatmeal/20 flex items-center justify-center group-hover:bg-dusty-cocoa/10 transition-colors">
-                <LuPackagePlus size={28} className="group-hover:scale-110 transition-transform" />
-              </div>
-              <span className="font-bold text-sm uppercase tracking-wider">Add Product</span>
-            </motion.button>
-          )}
+          <motion.button
+            layout
+            onClick={() => navigate('/admin/manage-featured/add')}
+            className="border-2 border-dashed border-soft-oatmeal rounded-2xl md:rounded-3xl min-h-[320px] md:min-h-[420px] flex flex-col items-center justify-center gap-3 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group"
+          >
+            <div className="w-16 h-16 rounded-full bg-soft-oatmeal/20 flex items-center justify-center group-hover:bg-dusty-cocoa/10 transition-colors">
+              <LuPackagePlus size={28} className="group-hover:scale-110 transition-transform" />
+            </div>
+            <span className="font-bold text-sm uppercase tracking-wider">Add Product</span>
+          </motion.button>
         </div>
 
         {/* Summary Footer */}

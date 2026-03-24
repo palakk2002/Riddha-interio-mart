@@ -7,6 +7,9 @@ import CategoriesPage from './pages/CategoriesPage';
 import SettingsPage from './pages/SettingsPage';
 import ManageCategories from './pages/ManageCategories';
 import ManageFeaturedProducts from './pages/ManageFeaturedProducts';
+import AddFeaturedProductPage from './pages/AddFeaturedProductPage';
+import ManageFavouriteCategories from './pages/ManageFavouriteCategories';
+import AddFavouriteCategoryItemPage from './pages/AddFavouriteCategoryItemPage';
 import ManageHeroBanner from './pages/ManageHeroBanner';
 import ManagePromoBanner from './pages/ManagePromoBanner';
 import ManageCategoryGrid from './pages/ManageCategoryGrid';
@@ -36,6 +39,9 @@ const AdminRoutes = () => {
         <Route path="/manage-categories/add" element={<AddCategoryPage />} />
         <Route path="/manage-categories/edit/:id" element={<EditCategoryPage />} />
         <Route path="/manage-featured" element={<ManageFeaturedProducts />} />
+        <Route path="/manage-favourites" element={<ManageFavouriteCategories />} />
+        <Route path="/manage-favourites/add" element={<AddFavouriteCategoryItemPage />} />
+        <Route path="/manage-featured/add" element={<AddFeaturedProductPage />} />
         <Route path="/manage-hero" element={<ManageHeroBanner />} />
         <Route path="/manage-promo" element={<ManagePromoBanner />} />
         <Route path="/manage-grid" element={<ManageCategoryGrid />} />

@@ -129,8 +129,8 @@ const ProductListingPage = () => {
             <div className="px-2 space-y-4">
               <input type="range" className="w-full h-1.5 bg-soft-oatmeal rounded-full appearance-none cursor-pointer accent-warm-sand" />
               <div className="flex justify-between text-[11px] text-gray-400 uppercase tracking-widest font-black">
-                <span>$0</span>
-                <span>$10,000</span>
+                <span>₹0</span>
+                <span>₹10,000</span>
               </div>
             </div>
           </motion.div>
