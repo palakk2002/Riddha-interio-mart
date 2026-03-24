@@ -50,7 +50,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Sidebar Content */}
       <aside
         className={`
-          relative fixed lg:static top-0 left-0 h-screen w-72 shrink-0 bg-deep-espresso text-white z-50 flex flex-col shadow-2xl lg:shadow-none overflow-hidden
+          fixed lg:static top-0 left-0 h-screen w-72 lg:shrink-0 bg-deep-espresso text-white z-50 flex flex-col shadow-2xl lg:shadow-none overflow-hidden
           transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}

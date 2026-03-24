@@ -167,7 +167,7 @@ const ManageFeaturedProducts = () => {
         </div>
 
         {/* Product Cards Grid — mirrors user module ProductCard style */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
           <AnimatePresence>
             {products.map((product, index) => (
               <motion.div
@@ -177,10 +177,10 @@ const ManageFeaturedProducts = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.5, delay: index * 0.08 }}
-                className="group bg-white rounded-2xl md:rounded-3xl border border-soft-oatmeal/20 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden flex flex-col"
+                className="group bg-white rounded-xl md:rounded-2xl border border-soft-oatmeal/20 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col"
               >
                 {/* Image */}
-                <div className="relative h-48 md:h-72 overflow-hidden">
+                <div className="relative h-32 md:h-44 overflow-hidden">
                   <img
                     src={product.image}
                     alt={product.name}
@@ -189,24 +189,24 @@ const ManageFeaturedProducts = () => {
 
                   {/* Tag Badge */}
                   {product.tag && (
-                    <div className="absolute top-3 left-3">
-                      <span className="bg-golden-glow/90 backdrop-blur-md text-deep-espresso text-[9px] md:text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter shadow-sm">
+                    <div className="absolute top-2 left-2">
+                      <span className="bg-golden-glow/90 backdrop-blur-md text-deep-espresso text-[7px] md:text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter shadow-sm">
                         {product.tag}
                       </span>
                     </div>
                   )}
 
                   {/* Admin Actions on Hover */}
-                  <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                  <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
                     <button
-                      className="h-9 w-9 bg-white/90 backdrop-blur-md shadow-xl rounded-full flex items-center justify-center text-deep-espresso hover:text-dusty-cocoa transition-all"
+                      className="h-7 w-7 bg-white/90 backdrop-blur-md shadow-xl rounded-full flex items-center justify-center text-deep-espresso hover:text-dusty-cocoa transition-all"
                       title="Edit"
                     >
                       <LuPen size={14} />
                     </button>
                     <button
                       onClick={() => handleDelete(product.id)}
-                      className="h-9 w-9 bg-white/90 backdrop-blur-md shadow-xl rounded-full flex items-center justify-center text-red-400 hover:text-red-600 transition-all"
+                      className="h-7 w-7 bg-white/90 backdrop-blur-md shadow-xl rounded-full flex items-center justify-center text-red-400 hover:text-red-600 transition-all"
                       title="Delete"
                     >
                       <LuTrash2 size={14} />
@@ -215,7 +215,7 @@ const ManageFeaturedProducts = () => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 p-4 md:p-6 flex flex-col justify-between space-y-3 md:space-y-5">
+                <div className="flex-1 p-2 md:p-3 flex flex-col justify-between space-y-1.5 md:space-y-2">
                   <div className="space-y-2">
                     <div className="flex justify-between items-start">
                       <h4 className="text-[8px] md:text-[10px] uppercase tracking-[0.2em] text-warm-sand font-black">
@@ -224,7 +224,7 @@ const ManageFeaturedProducts = () => {
                     </div>
 
                     {/* Product Name */}
-                    <h3 className="text-sm md:text-lg font-display font-bold text-deep-espresso line-clamp-2 leading-tight group-hover:text-warm-sand transition-colors duration-300">
+                    <h3 className="text-[10px] md:text-[12px] font-display font-bold text-deep-espresso line-clamp-1 leading-tight group-hover:text-warm-sand transition-colors duration-300">
                       {product.name}
                     </h3>
                   </div>
@@ -232,8 +232,8 @@ const ManageFeaturedProducts = () => {
                   {/* Price */}
                   <div className="flex items-center justify-between pt-2 md:pt-4 border-t border-soft-oatmeal/10">
                     <div className="flex flex-col">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-xl md:text-2xl font-black text-deep-espresso tracking-tight">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-sm md:text-base font-black text-deep-espresso tracking-tight">
                           ${product.price}
                         </span>
                         {product.originalPrice > product.price && (

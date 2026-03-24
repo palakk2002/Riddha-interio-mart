@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate, Link } from 'react-router-dom';
 import SellerSidebar from './SellerSidebar';
-import { LuMenu, LuBell, LuUser } from 'react-icons/lu';
+import SellerBottomNavbar from './SellerBottomNavbar';
+import { useUser } from '../../user/data/UserContext';
+import { LuMenu, LuBell, LuUser, LuLogOut, LuChevronDown } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const notifications = [
@@ -13,9 +15,23 @@ const notifications = [
 const SellerLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { logout, user } = useUser();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/seller/login');
+  };
 
   return (
-    <div className="flex h-screen w-full bg-[#FDFBF9] text-deep-espresso overflow-hidden" onClick={() => setShowNotifications(false)}>
+    <div 
+      className="flex h-screen w-full bg-[#FDFBF9] text-deep-espresso overflow-hidden" 
+      onClick={() => {
+        setShowNotifications(false);
+        setShowUserMenu(false);
+      }}
+    >
       <SellerSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
@@ -76,22 +92,58 @@ const SellerLayout = () => {
               </AnimatePresence>
             </div>
             <div className="h-8 w-[1px] bg-soft-oatmeal mx-2"></div>
-            <div className="flex items-center gap-3 cursor-pointer group">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold leading-tight">Elite Interiors</p>
-                <p className="text-xs text-warm-sand font-medium uppercase tracking-tighter">Premium Seller</p>
+            <div className="relative">
+              <div 
+                onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
+                className="flex items-center gap-3 cursor-pointer group"
+              >
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-bold leading-tight">{user?.name || 'Elite Interiors'}</p>
+                  <p className="text-xs text-warm-sand font-medium uppercase tracking-tighter">Premium Seller</p>
+                </div>
+                <div className={`w-10 h-10 rounded-full bg-warm-sand/20 flex items-center justify-center text-warm-sand ring-2 shadow-sm transition-all ${showUserMenu ? 'ring-warm-sand' : 'ring-white group-hover:ring-soft-oatmeal'}`}>
+                  <LuUser size={20} />
+                </div>
+                <LuChevronDown size={14} className={`text-dusty-cocoa transition-transform duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
               </div>
-              <div className="w-10 h-10 rounded-full bg-warm-sand/20 flex items-center justify-center text-warm-sand ring-2 ring-white shadow-sm group-hover:ring-warm-sand transition-all">
-                <LuUser size={20} />
-              </div>
+
+              <AnimatePresence>
+                {showUserMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-2xl border border-soft-oatmeal overflow-hidden z-50 p-2"
+                  >
+                    <Link 
+                      to="/seller/profile"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-deep-espresso hover:bg-soft-oatmeal/30 transition-colors group"
+                    >
+                      <LuUser size={18} className="text-warm-sand group-hover:scale-110 transition-transform" />
+                      View Profile
+                    </Link>
+                    <div className="h-[1px] bg-soft-oatmeal my-1"></div>
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-colors group"
+                    >
+                      <LuLogOut size={18} className="group-hover:translate-x-1 transition-transform" />
+                      Sign Out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar bg-[#FDFBF9]">
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 pb-32 lg:pb-8 custom-scrollbar bg-[#FDFBF9]">
           <Outlet />
         </main>
+        
+        {/* Mobile Bottom Navigation */}
+        <SellerBottomNavbar />
       </div>
     </div>
   );

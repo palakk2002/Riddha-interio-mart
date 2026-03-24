@@ -1,20 +1,16 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
-import { LuSearch, LuPlus, LuTrash2, LuPen, LuFilter, LuCheck, LuX } from 'react-icons/lu';
+import { LuSearch, LuPlus, LuTrash2, LuPen, LuFilter, LuBox } from 'react-icons/lu';
+import { FiTrash2, FiEdit3 } from 'react-icons/fi';
 import { adminProducts } from '../data/adminProducts';
 import { adminCategories } from '../data/adminCategories';
 
 const CatalogPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState(adminProducts);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    code: '',
-    category: 'Tiles',
-    price: '',
-    image: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=80'
-  });
+  const [deleteId, setDeleteId] = useState(null);
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => 
@@ -23,22 +19,9 @@ const CatalogPage = () => {
     );
   }, [searchTerm, products]);
 
-  const handleAddProduct = (e) => {
-    e.preventDefault();
-    const productToAdd = {
-      ...newProduct,
-      id: products.length + 1,
-      price: parseFloat(newProduct.price) || 0
-    };
-    setProducts([productToAdd, ...products]);
-    setShowAddForm(false);
-    setNewProduct({
-      name: '',
-      code: '',
-      category: 'Tiles',
-      price: '',
-      image: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=80'
-    });
+  const handleDelete = (id) => {
+    setProducts(products.filter(p => p.id !== id));
+    setDeleteId(null);
   };
 
   return (
@@ -51,70 +34,14 @@ const CatalogPage = () => {
             <p className="text-warm-sand mt-1">Manage your inventory and product codes.</p>
           </div>
           <button 
-            onClick={() => setShowAddForm(!showAddForm)}
+            onClick={() => navigate('/admin/catalog/add')}
             className="flex items-center justify-center gap-2 bg-dusty-cocoa text-white px-6 py-3 rounded-xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-dusty-cocoa/20 active:scale-95"
           >
-            {showAddForm ? <LuX size={18} /> : <LuPlus size={18} />}
-            {showAddForm ? 'Cancel' : 'Add New Product'}
+            <LuPlus size={18} />
+            Add New Product
           </button>
         </div>
 
-        {/* Add Product Form (Conditional) */}
-        {showAddForm && (
-          <div className="bg-white p-6 rounded-xl border border-soft-oatmeal shadow-lg animate-in fade-in slide-in-from-top-4 duration-300">
-            <h3 className="text-xl font-display font-bold text-deep-espresso mb-6">New Product Details</h3>
-            <form onSubmit={handleAddProduct} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-warm-sand uppercase">Product Name</label>
-                <input 
-                  required
-                  type="text" 
-                  value={newProduct.name}
-                  onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
-                  className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                  placeholder="e.g. Italian Marble"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-warm-sand uppercase">Product Code (SKU)</label>
-                <input 
-                  required
-                  type="text" 
-                  value={newProduct.code}
-                  onChange={(e) => setNewProduct({...newProduct, code: e.target.value})}
-                  className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                  placeholder="e.g. TLE-101"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-warm-sand uppercase">Category</label>
-                <select 
-                  value={newProduct.category}
-                  onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
-                  className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                >
-                  {adminCategories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-warm-sand uppercase">Price ($)</label>
-                <div className="flex gap-3">
-                  <input 
-                    required
-                    type="number" 
-                    value={newProduct.price}
-                    onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
-                    className="flex-grow bg-soft-oatmeal/20 border border-soft-oatmeal rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                    placeholder="0.00"
-                  />
-                  <button type="submit" className="bg-warm-sand text-deep-espresso p-2 rounded-lg hover:bg-dusty-cocoa hover:text-white transition-all shadow-sm">
-                    <LuCheck size={20} />
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        )}
 
         {/* Toolbar */}
         <div className="bg-white p-4 rounded-xl border border-soft-oatmeal shadow-sm flex flex-col md:flex-row gap-4">
@@ -178,11 +105,19 @@ const CatalogPage = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button className="p-2 text-warm-sand hover:text-dusty-cocoa hover:bg-soft-oatmeal rounded-lg transition-all" title="Edit">
-                            <LuPen size={18} />
+                          <button 
+                            onClick={() => navigate(`/admin/catalog/edit/${product.id}`)}
+                            className="p-2 text-warm-sand hover:text-dusty-cocoa hover:bg-soft-oatmeal rounded-lg transition-all" 
+                            title="Edit"
+                          >
+                            <FiEdit3 size={18} />
                           </button>
-                          <button className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Delete">
-                            <LuTrash2 size={18} />
+                          <button 
+                            onClick={() => setDeleteId(product.id)}
+                            className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" 
+                            title="Delete"
+                          >
+                            <FiTrash2 size={18} />
                           </button>
                         </div>
                       </td>
@@ -213,6 +148,33 @@ const CatalogPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-deep-espresso/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl border border-soft-oatmeal animate-in zoom-in-95 duration-200">
+             <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 mb-6 mx-auto">
+                <FiTrash2 size={32} />
+             </div>
+             <h3 className="text-xl font-display font-bold text-center text-deep-espresso mb-2">Remove Item?</h3>
+             <p className="text-center text-warm-sand text-sm mb-8">This will permanently delete the product from the catalog. This action cannot be undone.</p>
+             <div className="grid grid-cols-2 gap-4">
+                <button 
+                  onClick={() => setDeleteId(null)}
+                  className="py-4 bg-soft-oatmeal/20 rounded-2xl font-bold text-xs uppercase tracking-widest text-dusty-cocoa hover:bg-soft-oatmeal/40 transition-all"
+                >
+                   Cancel
+                </button>
+                <button 
+                  onClick={() => handleDelete(deleteId)}
+                  className="py-4 bg-red-500 rounded-2xl font-bold text-xs uppercase tracking-widest text-white hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
+                >
+                   Delete
+                </button>
+             </div>
+          </div>
+        </div>
+      )}
     </PageWrapper>
   );
 };

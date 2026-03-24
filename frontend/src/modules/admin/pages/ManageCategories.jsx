@@ -1,40 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuPlus, LuX, LuCheck, LuPen, LuTrash2, LuImage } from 'react-icons/lu';
+import { FiPlus, FiX, FiCheck, FiEdit3, FiTrash2, FiImage } from 'react-icons/fi';
 import { manageCategoriesData } from '../data/manageCategoriesData';
 
 const ManageCategories = () => {
-  const [categories, setCategories] = useState(manageCategoriesData);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newCategory, setNewCategory] = useState({
-    name: '',
-    subcategoryName: '',
-    image: '',
-  });
+  const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
 
-  const handleAddCategory = (e) => {
-    e.preventDefault();
-    if (!newCategory.name) return;
-
-    const catToAdd = {
-      id: Date.now(),
-      name: newCategory.name,
-      slug: newCategory.name.toLowerCase().replace(/\s+/g, '-'),
-      image: newCategory.image || 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=80',
-      productCount: 0,
-      subcategories: newCategory.subcategoryName
-        ? [{ name: newCategory.subcategoryName, image: newCategory.image || 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&q=80' }]
-        : [],
-    };
-
-    setCategories([...categories, catToAdd]);
-    setShowAddForm(false);
-    setNewCategory({ name: '', subcategoryName: '', image: '' });
-  };
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('admin_categories');
+      if (saved) {
+        setCategories(JSON.parse(saved));
+      } else {
+        localStorage.setItem('admin_categories', JSON.stringify(manageCategoriesData));
+        setCategories(manageCategoriesData);
+      }
+    } catch (err) {
+      console.error('Failed to load categories from storage:', err);
+      // Fallback to default if corrupted
+      setCategories(manageCategoriesData);
+    }
+  }, []);
 
   const handleDelete = (id) => {
-    setCategories(categories.filter((c) => c.id !== id));
+    const updated = categories.filter((c) => c.id !== id);
+    setCategories(updated);
+    localStorage.setItem('admin_categories', JSON.stringify(updated));
   };
 
   return (
@@ -46,102 +40,30 @@ const ManageCategories = () => {
             <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">
               Manage Categories
             </h1>
-            <p className="text-warm-sand mt-1 text-sm md:text-base">
-              Control the homepage categories section. Changes preview below.
+            <p className="text-warm-sand mt-1 text-sm md:text-base font-medium">
+              Control the homepage categories and their sub-collections.
             </p>
           </div>
           <button
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="w-12 h-12 bg-dusty-cocoa text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-dusty-cocoa/40 transition-all active:scale-90"
+            onClick={() => navigate('/admin/manage-categories/add')}
+            className="w-14 h-14 bg-deep-espresso text-white rounded-2xl flex items-center justify-center shadow-xl hover:shadow-deep-espresso/30 hover:bg-dusty-cocoa transition-all active:scale-90"
           >
-            {showAddForm ? <LuX size={24} /> : <LuPlus size={24} />}
+            <FiPlus size={24} />
           </button>
         </div>
-
-        {/* Add Category Form */}
-        <AnimatePresence>
-          {showAddForm && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="bg-white p-6 md:p-8 rounded-2xl border-2 border-dashed border-warm-sand/30 shadow-sm">
-                <h3 className="text-xl font-display font-bold text-deep-espresso mb-6">
-                  Add New Category
-                </h3>
-                <form onSubmit={handleAddCategory} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Category Name */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Category Name
-                    </label>
-                    <input
-                      required
-                      autoFocus
-                      type="text"
-                      value={newCategory.name}
-                      onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                      className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                      placeholder="e.g. Premium Bathroom Fittings"
-                    />
-                  </div>
-
-                  {/* Subcategory Name */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Subcategory Name
-                    </label>
-                    <input
-                      type="text"
-                      value={newCategory.subcategoryName}
-                      onChange={(e) => setNewCategory({ ...newCategory, subcategoryName: e.target.value })}
-                      className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                      placeholder="e.g. Shower Heads"
-                    />
-                  </div>
-
-                  {/* Image URL */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Image URL
-                    </label>
-                    <div className="flex gap-3">
-                      <input
-                        type="text"
-                        value={newCategory.image}
-                        onChange={(e) => setNewCategory({ ...newCategory, image: e.target.value })}
-                        className="flex-grow bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                        placeholder="https://..."
-                      />
-                      <button
-                        type="submit"
-                        className="bg-deep-espresso text-white px-6 py-3 rounded-xl font-bold hover:bg-dusty-cocoa transition-all flex items-center gap-2 shadow-md whitespace-nowrap"
-                      >
-                        <LuCheck size={18} />
-                        <span className="hidden md:inline">Add</span>
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Section Label */}
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-soft-oatmeal/40" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-warm-sand">
-            Homepage Preview
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-warm-sand">
+            Storefront Preview
           </span>
           <div className="h-px flex-1 bg-soft-oatmeal/40" />
         </div>
 
-        {/* Category Cards Grid — mirrors user module CategoryCard style */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          <AnimatePresence>
+        {/* Category Cards Grid — mirrors user module CategoryCard style but more compact for admin */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <AnimatePresence mode="popLayout">
             {categories.map((cat, index) => (
               <motion.div
                 key={cat.id}
@@ -149,11 +71,11 @@ const ManageCategories = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
                 className="group relative"
               >
-                {/* Card — mirrors user CategoryCard */}
-                <div className="relative overflow-hidden rounded-[2rem] h-80 md:h-96 w-full shadow-lg hover:shadow-2xl transition-all duration-500">
+                {/* Card — mirrors user CategoryCard but more compact */}
+                <div className="relative overflow-hidden rounded-[1.5rem] h-64 md:h-72 w-full shadow-lg hover:shadow-2xl transition-all duration-500 border border-soft-oatmeal/20">
                   {/* Background Image */}
                   <img
                     src={cat.image}
@@ -162,49 +84,51 @@ const ManageCategories = () => {
                   />
 
                   {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#3B2F2F]/95 via-[#3B2F2F]/40 to-transparent group-hover:from-[#3B2F2F]/100 transition-all duration-300">
-                    <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#3B2F2F]/90 via-[#3B2F2F]/30 to-transparent group-hover:from-[#3B2F2F]/100 transition-all duration-300">
+                    <div className="absolute bottom-0 left-0 p-5 md:p-6 w-full">
                       <div className="transform transition-all duration-500 group-hover:-translate-y-1">
-                        <h3 className="text-2xl md:text-3xl font-display font-bold text-white mb-2 tracking-tight">
+                        <h3 className="text-xl md:text-2xl font-display font-bold text-white mb-2 tracking-tight line-clamp-1">
                           {cat.name}
                         </h3>
 
                         {/* Product Count Badge */}
-                        <span className="inline-block px-4 py-1.5 bg-white/15 backdrop-blur-xl border border-white/20 text-soft-oatmeal rounded-full text-[10px] uppercase tracking-[0.15em] font-bold mb-3">
+                        <span className="inline-block px-3 py-1 bg-white/10 backdrop-blur-xl border border-white/20 text-soft-oatmeal/90 rounded-full text-[9px] uppercase tracking-[0.15em] font-bold mb-3">
                           {cat.productCount}+ Pieces
                         </span>
 
-                        {/* Subcategory Chips */}
+                        {/* Subcategory Chips - Single line for compact view */}
                         {cat.subcategories && cat.subcategories.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {cat.subcategories.map((sub, i) => (
+                          <div className="flex flex-wrap gap-1.5 mt-1 overflow-hidden max-h-12">
+                            {cat.subcategories.slice(0, 3).map((sub, i) => (
                               <span
                                 key={i}
-                                className="px-3 py-1 bg-white/10 backdrop-blur-md text-white/80 text-[9px] rounded-full border border-white/10 font-medium tracking-wide"
+                                className="px-2 py-0.5 bg-white/5 backdrop-blur-md text-white/70 text-[8px] rounded-full border border-white/5 font-medium tracking-wide"
                               >
                                 {sub.name}
                               </span>
                             ))}
+                            {cat.subcategories.length > 3 && <span className="text-[8px] text-white/40">+{cat.subcategories.length - 3}</span>}
                           </div>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Admin Action Buttons */}
-                  <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                  {/* Admin Action Buttons - More accessible */}
+                  <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
                     <button
-                      className="h-10 w-10 bg-white/90 backdrop-blur-md shadow-xl rounded-full flex items-center justify-center text-deep-espresso hover:text-dusty-cocoa hover:bg-white transition-all"
+                      onClick={() => navigate(`/admin/manage-categories/edit/${cat.id}`)}
+                      className="h-9 w-9 bg-white/95 backdrop-blur-md shadow-lg rounded-xl flex items-center justify-center text-deep-espresso hover:text-dusty-cocoa hover:bg-white transition-all transform hover:scale-110"
                       title="Edit"
                     >
-                      <LuPen size={16} />
+                      <FiEdit3 size={16} />
                     </button>
                     <button
-                      onClick={() => handleDelete(cat.id)}
-                      className="h-10 w-10 bg-white/90 backdrop-blur-md shadow-xl rounded-full flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-white transition-all"
+                      onClick={(e) => { e.stopPropagation(); handleDelete(cat.id); }}
+                      className="h-9 w-9 bg-white/95 backdrop-blur-md shadow-lg rounded-xl flex items-center justify-center text-red-400 hover:text-red-500 hover:bg-white transition-all transform hover:scale-110"
                       title="Delete"
                     >
-                      <LuTrash2 size={16} />
+                      <FiTrash2 size={16} />
                     </button>
                   </div>
                 </div>
@@ -212,28 +136,26 @@ const ManageCategories = () => {
             ))}
           </AnimatePresence>
 
-          {/* Add Placeholder */}
-          {!showAddForm && (
-            <motion.button
-              layout
-              onClick={() => setShowAddForm(true)}
-              className="border-2 border-dashed border-soft-oatmeal rounded-[2rem] h-80 md:h-96 flex flex-col items-center justify-center gap-3 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group"
-            >
-              <div className="w-16 h-16 rounded-full bg-soft-oatmeal/20 flex items-center justify-center group-hover:bg-dusty-cocoa/10 transition-colors">
-                <LuImage size={28} className="group-hover:scale-110 transition-transform" />
-              </div>
-              <span className="font-bold text-sm uppercase tracking-wider">Add Category</span>
-            </motion.button>
-          )}
+          {/* Add Placeholder - Compact Version */}
+          <motion.button
+            layout
+            onClick={() => navigate('/admin/manage-categories/add')}
+            className="border-2 border-dashed border-soft-oatmeal/60 rounded-[1.5rem] h-64 md:h-72 flex flex-col items-center justify-center gap-3 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group active:scale-95"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-soft-oatmeal/10 flex items-center justify-center group-hover:bg-dusty-cocoa/10 transition-colors">
+              <FiImage size={24} className="group-hover:scale-110 transition-transform opacity-50" />
+            </div>
+            <span className="font-black text-[10px] uppercase tracking-[0.2em]">Add New Category</span>
+          </motion.button>
         </div>
 
         {/* Summary Footer */}
-        <div className="bg-white p-4 rounded-xl border border-soft-oatmeal/30 flex items-center justify-between text-xs text-warm-sand">
-          <p>
-            Showing <span className="font-bold text-deep-espresso">{categories.length}</span> categories on homepage
+        <div className="bg-white p-6 rounded-[24px] border border-soft-oatmeal/30 flex items-center justify-between text-xs text-warm-sand shadow-sm">
+          <p className="font-medium">
+            Currently maintaining <span className="font-bold text-deep-espresso">{categories.length}</span> active categories.
           </p>
-          <span className="text-[10px] bg-golden-glow/30 text-deep-espresso/60 px-3 py-1 rounded-full font-bold border border-warm-sand/20">
-            Frontend Preview Only
+          <span className="text-[10px] bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full font-black uppercase tracking-widest border border-emerald-100">
+            System Synchronized
           </span>
         </div>
       </div>

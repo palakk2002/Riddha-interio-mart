@@ -12,6 +12,13 @@ import ManagePromoBanner from './pages/ManagePromoBanner';
 import ManageCategoryGrid from './pages/ManageCategoryGrid';
 import LoginPage from '../user/pages/LoginPage';
 import SignupPage from '../user/pages/SignupPage';
+import AdminProfile from './pages/AdminProfile';
+import AnalyticsPage from './pages/AnalyticsPage';
+import ActivityPage from './pages/ActivityPage';
+import AddProductPage from './pages/AddProductPage';
+import EditProductPage from './pages/EditProductPage';
+import AddCategoryPage from './pages/AddCategoryPage';
+import EditCategoryPage from './pages/EditCategoryPage';
 
 const AdminRoutes = () => {
   return (
@@ -19,15 +26,23 @@ const AdminRoutes = () => {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route element={<AdminLayout />}>
-        <Route path="/" element={<DashboardPage />} />
+        <Route index element={<DashboardPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/catalog" element={<CatalogPage />} />
+        <Route path="/catalog/add" element={<AddProductPage />} />
+        <Route path="/catalog/edit/:id" element={<EditProductPage />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/manage-categories" element={<ManageCategories />} />
+        <Route path="/manage-categories/add" element={<AddCategoryPage />} />
+        <Route path="/manage-categories/edit/:id" element={<EditCategoryPage />} />
         <Route path="/manage-featured" element={<ManageFeaturedProducts />} />
         <Route path="/manage-hero" element={<ManageHeroBanner />} />
         <Route path="/manage-promo" element={<ManagePromoBanner />} />
         <Route path="/manage-grid" element={<ManageCategoryGrid />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/profile" element={<AdminProfile />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/activity" element={<ActivityPage />} />
       </Route>
     </Routes>
   );

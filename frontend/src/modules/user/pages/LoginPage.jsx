@@ -27,13 +27,32 @@ const LoginPage = () => {
     e.preventDefault();
     setError('');
     
-    if (identifier === 'user@riddhainterio.com' && password === '1234') {
-      login({ name: 'Riddha User', id: identifier });
-      navigate('/cart');
-    } else if (!identifier || !password) {
-      setError('Please enter both email and password');
+    const isAdmin = location.pathname.startsWith('/admin');
+    const isSeller = location.pathname.startsWith('/seller');
+
+    if (isAdmin) {
+      if (identifier === 'admin@riddhainterio.com' && password === '1234') {
+        login({ name: 'Admin User', id: identifier, role: 'admin' });
+        navigate('/admin/dashboard');
+      } else {
+        setError('Invalid Admin credentials. Use admin@riddhainterio.com / 1234');
+      }
+    } else if (isSeller) {
+      if (identifier === 'seller@riddhainterio.com' && password === '1234') {
+        login({ name: 'Seller User', id: identifier, role: 'seller' });
+        navigate('/seller/dashboard');
+      } else {
+        setError('Invalid Seller credentials. Use seller@riddhainterio.com / 1234');
+      }
     } else {
-      setError('Invalid email or password. Use user@riddhainterio.com / 1234');
+      if (identifier === 'user@riddhainterio.com' && password === '1234') {
+        login({ name: 'Riddha User', id: identifier, role: 'user' });
+        navigate('/cart');
+      } else if (!identifier || !password) {
+        setError('Please enter both email and password');
+      } else {
+        setError('Invalid email or password. Use user@riddhainterio.com / 1234');
+      }
     }
   };
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import StatCard from '../components/StatCard';
 import { LuPackage, LuTags, LuUsers, LuClock, LuTrendingUp } from 'react-icons/lu';
@@ -7,6 +8,7 @@ import { adminCategories } from '../data/adminCategories';
 import { recentActivity } from '../data/recentActivity';
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
   return (
     <PageWrapper>
       <div className="max-w-7xl mx-auto space-y-8">
@@ -45,7 +47,12 @@ const DashboardPage = () => {
               <h3 className="text-xl font-display font-bold flex items-center gap-2 text-deep-espresso">
                 <LuClock className="text-warm-sand" /> Recent Activity
               </h3>
-              <button className="text-sm font-medium text-dusty-cocoa hover:underline">View All</button>
+              <button 
+                onClick={() => navigate('/admin/activity')}
+                className="text-sm font-medium text-dusty-cocoa hover:underline"
+              >
+                View All
+              </button>
             </div>
             <div className="p-6 space-y-6">
               {recentActivity.map((item) => (
@@ -82,7 +89,10 @@ const DashboardPage = () => {
               </p>
             </div>
             
-            <button className="relative z-10 bg-deep-espresso text-white font-bold py-3 px-6 rounded-xl w-fit transition-all hover:bg-dusty-cocoa hover:scale-105 active:scale-95 shadow-lg shadow-deep-espresso/20">
+            <button 
+              onClick={() => navigate('/admin/analytics')}
+              className="relative z-10 bg-deep-espresso text-white font-bold py-3 px-6 rounded-xl w-fit transition-all hover:bg-dusty-cocoa hover:scale-105 active:scale-95 shadow-lg shadow-deep-espresso/20"
+            >
               Check Analytics
             </button>
 
