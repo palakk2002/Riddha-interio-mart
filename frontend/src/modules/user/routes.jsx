@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import ProductListingPage from './pages/ProductListingPage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
 import CategoryDetailPage from './pages/CategoryDetailPage';
+import CategoriesPage from './pages/CategoriesPage';
 import CartPage from './pages/CartPage';
 import Profile from './pages/Profile';
 import Shop from './pages/Shop';
@@ -30,6 +31,7 @@ const UserRoutes = () => {
       <Route path="/" element={<HomePage />} />
       <Route path="/products" element={<ProductListingPage />} />
       <Route path="/products/:id" element={<ProductDetailsPage />} />
+      <Route path="/categories" element={<CategoriesPage />} />
       <Route path="/category/:slug" element={<CategoryDetailPage />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/profile" element={<Profile />} />

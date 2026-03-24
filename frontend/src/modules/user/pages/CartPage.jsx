@@ -41,19 +41,19 @@ const CartPage = () => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="mb-12 flex justify-center"
+          className="mb-8 md:mb-12 flex justify-center"
         >
-          <div className="h-32 w-32 bg-soft-oatmeal/10 rounded-full flex items-center justify-center border-2 border-dashed border-soft-oatmeal/30">
-            <FiShoppingBag className="h-12 w-12 text-gray-300" />
+          <div className="h-20 w-20 md:h-32 md:w-32 bg-soft-oatmeal/10 rounded-full flex items-center justify-center border-2 border-dashed border-soft-oatmeal/30">
+            <FiShoppingBag className="h-8 w-8 md:h-12 md:w-12 text-gray-300" />
           </div>
         </motion.div>
-        <h1 className="text-5xl font-bold mb-6 tracking-tight">Your sanctuary awaits</h1>
-        <p className="text-deep-espresso/30 text-xl font-medium mb-12 max-w-lg mx-auto leading-relaxed">
+        <h1 className="text-3xl md:text-5xl font-bold mb-4 md:mb-6 tracking-tight">Your sanctuary awaits</h1>
+        <p className="text-deep-espresso/30 text-sm md:text-xl font-medium mb-8 md:mb-12 max-w-lg mx-auto leading-relaxed">
           It seems your cart is empty. Explore our premium collections to find the perfect elements for your dream home.
         </p>
         <Link to="/products">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button size="lg" className="px-12 h-16 rounded-full shadow-2xl text-lg font-black uppercase tracking-widest">Start Shopping</Button>
+            <Button size="lg" className="px-8 md:px-12 h-12 md:h-16 rounded-full shadow-2xl text-sm md:text-lg font-black uppercase tracking-widest">Start Shopping</Button>
           </motion.div>
         </Link>
       </motion.div>
@@ -158,11 +158,11 @@ const CartPage = () => {
               {cart.map((item) => (
                 <div key={item.id}>
                   {/* Mobile Item Card */}
-                  <div className="md:hidden bg-white rounded-2xl p-4 shadow-sm border border-soft-oatmeal/10 flex gap-4">
-                    <div className="w-24 h-24 bg-soft-oatmeal/10 rounded-xl overflow-hidden flex-shrink-0">
+                  <div className="md:hidden bg-white rounded-xl p-3 shadow-sm border border-soft-oatmeal/10 flex gap-3">
+                    <div className="w-20 h-20 bg-soft-oatmeal/10 rounded-lg overflow-hidden flex-shrink-0">
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                     </div>
-                    <div className="flex-1 flex flex-col justify-between py-1">
+                    <div className="flex-1 flex flex-col justify-between py-0.5">
                       <div>
                         <h3 className="text-sm font-bold text-deep-espresso line-clamp-2 leading-snug">{item.name}</h3>
                         <p className="text-xs font-bold text-warm-sand mt-1">₹{item.price} <span className="text-[9px] text-gray-400 font-medium italic">incl. GST</span></p>

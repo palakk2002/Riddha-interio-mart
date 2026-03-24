@@ -12,23 +12,9 @@ const CategoryQuickAccess = () => {
 
   const tabs = ['All', 'Furniture', 'Luxury', 'Living Room', 'Bed Room', 'Decor'];
 
-  // Combined categories with specific tab tags for filtering
-  const allCategories = [
-    { ...categories[0], tabs: ['Luxury'] }, // Tiles
-    { ...categories[1], tabs: ['Decor'] }, // Paints
-    { ...categories[2], tabs: ['Luxury', 'Decor'] }, // Electricals
-    { ...categories[3], tabs: ['Furniture', 'Living Room', 'Bed Room'] }, // Furniture
-    { id: 101, name: 'Home Decor', slug: 'decor', image: furniture2Img, tabs: ['Decor', 'Living Room'] },
-    { id: 102, name: 'Kitchen', slug: 'kitchen', image: furnitureImg, tabs: ['Decor'] },
-    { id: 103, name: 'Lamps', slug: 'lighting', image: lightingImg, tabs: ['Luxury', 'Decor'] },
-    { id: 104, name: 'Furnishings', slug: 'furnishings', image: furniture2Img, tabs: ['Furniture', 'Decor'] },
-    { id: 105, name: 'Bath', slug: 'bath', image: tapImg, tabs: ['Luxury'] },
-    { id: 106, name: 'Curtains', slug: 'curtains', image: furnitureImg, tabs: ['Decor', 'Living Room'] }
-  ];
-
   const filteredCategories = activeTab === 'All'
-    ? allCategories
-    : allCategories.filter(cat => cat.tabs.includes(activeTab));
+    ? categories
+    : categories.filter(cat => cat.tabs.includes(activeTab));
 
   const containerVariants = {
     hidden: { opacity: 0 },

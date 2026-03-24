@@ -11,8 +11,8 @@ const CategoryCard = ({ category, index = 0 }) => {
       transition={{ duration: 0.6, delay: index * 0.1 }}
     >
       <Link 
-        to={`/products?category=${category.slug}`}
-        className="group relative overflow-hidden rounded-[2.5rem] h-96 w-full block shadow-lg hover:shadow-2xl transition-all duration-500"
+        to={`/category/${category.slug}`}
+        className="group relative overflow-hidden rounded-2xl md:rounded-[2.5rem] h-full w-full block shadow-lg hover:shadow-2xl transition-all duration-500"
       >
         {/* Background Image */}
         <motion.img

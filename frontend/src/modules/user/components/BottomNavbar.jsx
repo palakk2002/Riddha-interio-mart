@@ -9,7 +9,7 @@ const BottomNavbar = () => {
 
   const navItems = [
     { name: 'Home', path: '/', icon: FiHome },
-    { name: 'Products', path: '/products', icon: FiGrid },
+    { name: 'Categories', path: '/categories', icon: FiGrid },
     { name: 'Cart', path: '/cart', icon: FiShoppingCart, badge: cartCount },
     { name: 'Profile', path: '/profile', icon: FiUser },
   ];

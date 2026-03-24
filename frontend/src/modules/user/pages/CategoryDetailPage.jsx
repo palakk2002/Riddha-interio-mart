@@ -33,7 +33,7 @@ const CategoryDetailPage = () => {
       {/* Grid */}
       <div className="max-w-7xl mx-auto px-4 md:px-12">
         {currentSubcategories.length > 0 ? (
-          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-3 md:gap-x-12 gap-y-6 md:gap-y-16">
+          <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-x-3 md:gap-x-12 gap-y-6 md:gap-y-16">
             {currentSubcategories.map((sub, index) => (
               <motion.div
                 key={sub.id}
@@ -43,7 +43,7 @@ const CategoryDetailPage = () => {
               >
                 <Link 
                   to={`/products?category=${slug}&subcategory=${sub.slug}`}
-                  className="group flex flex-col items-center gap-2 md:gap-6"
+                  className="group flex flex-col items-center gap-1.5 md:gap-6"
                 >
                   <div className="relative aspect-square w-full rounded-xl md:rounded-[2.5rem] overflow-hidden bg-soft-oatmeal/10 group-hover:shadow-lg transition-all duration-500 border border-soft-oatmeal/5">
                     <img 
@@ -53,7 +53,7 @@ const CategoryDetailPage = () => {
                     />
                     <div className="absolute inset-0 bg-deep-espresso/0 group-hover:bg-deep-espresso/5 transition-colors duration-300" />
                   </div>
-                  <span className="text-[11px] md:text-sm font-bold text-deep-espresso/90 group-hover:text-warm-sand text-center transition-colors leading-tight">
+                  <span className="text-[9px] md:text-sm font-bold text-deep-espresso/90 group-hover:text-warm-sand text-center transition-colors leading-tight min-h-[2em] flex items-center justify-center">
                     {sub.name}
                   </span>
                 </Link>

@@ -22,13 +22,13 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ y: -5 }}
       className={`group bg-white ${isMinimal ? 'rounded-xl' : 'rounded-2xl md:rounded-3xl border border-soft-oatmeal/20'} shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden ${
-        isList ? 'flex flex-row md:flex-col h-[180px] md:h-auto' : 'flex flex-col'
+        isList ? 'flex flex-row md:flex-col h-[135px] md:h-auto' : 'flex flex-col'
       }`}
     >
       <Link 
         to={`/products/${product.id}`} 
         className={`relative block overflow-hidden shrink-0 ${
-          isList ? 'w-[42%] md:w-full h-full md:h-80 border-r md:border-r-0' : (isMinimal ? 'aspect-square w-full' : 'h-30 md:h-80 w-full')
+          isList ? 'w-[40%] md:w-full h-full md:h-80 border-r md:border-r-0' : (isMinimal ? 'aspect-square w-full' : 'h-30 md:h-80 w-full')
         } ${!isMinimal ? 'border-soft-oatmeal/10' : ''}`}
       >
         <motion.img
@@ -56,23 +56,23 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
         )}
       </Link>
 
-      <div className={`flex-1 ${isMinimal ? 'p-2 pt-2.5' : 'p-2.5 md:p-7'} flex flex-col justify-between overflow-hidden ${!isList && !isMinimal ? 'space-y-1 md:space-y-5' : 'space-y-1'}`}>
-        <div className="space-y-1">
+      <div className={`flex-1 ${isMinimal ? 'p-2 pt-2.5' : (isList ? 'p-3 md:p-7' : 'p-2.5 md:p-7')} flex flex-col justify-between overflow-hidden ${!isList && !isMinimal ? 'space-y-1 md:space-y-5' : 'space-y-0.5'}`}>
+        <div className="space-y-0.5">
           <Link to={`/products/${product.id}`}>
-            <h3 className={`${isMinimal ? 'text-[11px] font-bold' : (isList ? 'text-[10px] md:text-xl' : 'text-[10px] md:text-xl')} font-display text-deep-espresso line-clamp-1 leading-tight group-hover:text-warm-sand transition-colors duration-300`}>
+            <h3 className={`${isMinimal ? 'text-[11px] font-bold' : (isList ? 'text-[13px] md:text-xl' : 'text-[10px] md:text-xl')} font-display text-deep-espresso line-clamp-1 leading-tight group-hover:text-warm-sand transition-colors duration-300`}>
               {product.name}
             </h3>
           </Link>
           
-          <h4 className={`${isMinimal ? 'text-[9px] font-medium text-deep-espresso/40 opacity-80' : 'text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-warm-sand font-black'}`}>
+          <h4 className={`${isMinimal ? 'text-[9px] font-medium text-deep-espresso/40 opacity-80' : 'text-[8px] md:text-[10px] uppercase tracking-[0.15em] text-warm-sand font-black'}`}>
             {isMinimal ? `By ${product.brand || 'Riddha Interio'}` : product.category}
           </h4>
         </div>
-
-        <div className={`flex ${isList ? 'flex-col md:flex-row md:items-end' : (isMinimal ? 'flex-col items-start pt-1' : 'items-center')} justify-between gap-1 md:gap-2 md:pt-4`}>
-          <div className="flex flex-col w-full">
+ 
+        <div className={`flex ${isList ? 'flex-row items-end' : (isMinimal ? 'flex-col items-start pt-1' : 'items-center')} justify-between gap-1 md:gap-2 md:pt-4`}>
+          <div className="flex flex-col w-auto grow">
             <div className={`flex items-baseline gap-1.5 ${isMinimal ? 'flex-wrap' : ''}`}>
-              <span className={`${isMinimal ? 'text-[12px]' : 'text-[11px] md:text-2xl'} font-black text-deep-espresso tracking-tight`}>
+              <span className={`${isMinimal ? 'text-[12px]' : (isList ? 'text-[13px] md:text-2xl' : 'text-[11px] md:text-2xl')} font-black text-deep-espresso tracking-tight`}>
                 ₹{product.price}
               </span>
               {product.originalPrice > product.price && (
