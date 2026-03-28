@@ -67,7 +67,7 @@ const CatalogPage = () => {
           <div className="hidden md:block bg-white rounded-2xl border border-soft-oatmeal shadow-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
-                <thead className="bg-[#FDFBF9] border-b border-soft-oatmeal">
+                <thead className="bg-soft-oatmeal/20 border-b border-soft-oatmeal">
                   <tr>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Image</th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Product Name</th>

@@ -26,7 +26,7 @@ const SellerLayout = () => {
 
   return (
     <div 
-      className="flex h-screen w-full bg-[#FDFBF9] text-deep-espresso overflow-hidden" 
+      className="flex h-screen w-full bg-white text-deep-espresso overflow-hidden" 
       onClick={() => {
         setShowNotifications(false);
         setShowUserMenu(false);
@@ -138,7 +138,7 @@ const SellerLayout = () => {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 pb-32 lg:pb-8 custom-scrollbar bg-[#FDFBF9]">
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 pb-32 lg:pb-8 custom-scrollbar bg-white">
           <Outlet />
         </main>
         

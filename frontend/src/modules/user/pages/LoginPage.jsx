@@ -57,7 +57,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
       {/* Desktop Background Layer */}
       <div className="hidden md:block absolute inset-0 z-0">
         <img 

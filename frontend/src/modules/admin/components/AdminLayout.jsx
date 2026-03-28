@@ -25,7 +25,7 @@ const AdminLayout = () => {
 
   return (
     <div 
-      className="flex h-screen w-full bg-[#FDFBF9] text-deep-espresso overflow-hidden"
+      className="flex h-screen w-full bg-white text-deep-espresso overflow-hidden"
       onClick={() => {
         setShowUserMenu(false);
         setShowNotifications(false);
@@ -55,7 +55,7 @@ const AdminLayout = () => {
                 className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-soft-oatmeal text-deep-espresso' : 'text-dusty-cocoa hover:bg-soft-oatmeal'}`}
               >
                 <LuBell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--color-header-red)] rounded-full border-2 border-white"></span>
               </button>
 
               <AnimatePresence>
