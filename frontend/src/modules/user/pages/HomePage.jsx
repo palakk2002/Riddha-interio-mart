@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import Banner from '../components/Banner';
 import OfferBanner from '../components/OfferBanner';
 import FavouriteCategories from '../components/FavouriteCategories';
+import TopBrands from '../components/TopBrands';
 import CategoryQuickAccess from '../components/CategoryQuickAccess';
 import ProductCard from '../components/ProductCard';
 import { products } from '../data/products';
@@ -37,6 +38,9 @@ const HomePage = () => {
 
       {/* Favourite Categories Section */}
       <FavouriteCategories />
+
+      {/* Top Brands Section */}
+      <TopBrands />
 
       {/* Featured Products Section */}
       <section className="bg-soft-oatmeal/10 pt-4 pb-10 md:py-32 border-y border-soft-oatmeal/20">

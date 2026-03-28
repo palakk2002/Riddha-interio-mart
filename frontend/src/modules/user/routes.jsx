@@ -24,6 +24,7 @@ import PaymentPage from './pages/PaymentPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import OrderTrackingPage from './pages/OrderTrackingPage';
 import EditProfile from './pages/EditProfile';
+import BrandPage from './pages/BrandPage';
 
 const UserRoutes = () => {
   return (
@@ -52,6 +53,7 @@ const UserRoutes = () => {
       <Route path="/order-success" element={<OrderSuccessPage />} />
       <Route path="/order-tracking" element={<OrderTrackingPage />} />
       <Route path="/profile/edit" element={<EditProfile />} />
+      <Route path="/brand/:brandName" element={<BrandPage />} />
     </Routes>
   );
 };
