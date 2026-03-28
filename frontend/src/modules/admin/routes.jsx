@@ -22,6 +22,7 @@ import AddProductPage from './pages/AddProductPage';
 import EditProductPage from './pages/EditProductPage';
 import AddCategoryPage from './pages/AddCategoryPage';
 import EditCategoryPage from './pages/EditCategoryPage';
+import AddCategoryGridItemPage from './pages/AddCategoryGridItemPage';
 
 const AdminRoutes = () => {
   return (
@@ -45,6 +46,7 @@ const AdminRoutes = () => {
         <Route path="/manage-hero" element={<ManageHeroBanner />} />
         <Route path="/manage-promo" element={<ManagePromoBanner />} />
         <Route path="/manage-grid" element={<ManageCategoryGrid />} />
+        <Route path="/manage-grid/add" element={<AddCategoryGridItemPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<AdminProfile />} />
         <Route path="/analytics" element={<AnalyticsPage />} />

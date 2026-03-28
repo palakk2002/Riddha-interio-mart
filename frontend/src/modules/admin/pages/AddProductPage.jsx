@@ -38,24 +38,24 @@ const AddProductPage = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         <button 
           onClick={() => navigate('/admin/catalog')}
-          className="flex items-center gap-2 text-warm-sand font-bold hover:text-deep-espresso transition-colors group"
+          className="flex items-center gap-2 text-warm-sand font-bold hover:text-deep-espresso transition-colors group text-xs md:text-sm"
         >
           <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
           Back to Catalog
         </button>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-display font-bold text-deep-espresso">Add New Product</h1>
-            <p className="text-warm-sand mt-1">Populate your catalog with premium items.</p>
+          <div className="space-y-1">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso">Add New Product</h1>
+            <p className="text-warm-sand text-sm md:text-base font-medium">Populate your catalog with premium items.</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8 pb-12">
+        <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8 pb-12">
           {/* Main Form Card */}
-          <div className="bg-white rounded-[32px] border border-soft-oatmeal shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-3">
+          <div className="bg-white rounded-3xl md:rounded-[32px] border border-soft-oatmeal shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-3">
              {/* Left: Image Preview Area */}
-             <div className="p-8 bg-soft-oatmeal/10 border-r border-soft-oatmeal flex flex-col items-center justify-center space-y-4">
+             <div className="p-6 md:p-8 bg-soft-oatmeal/10 border-b lg:border-r lg:border-b-0 border-soft-oatmeal flex flex-col items-center justify-center space-y-4">
                 <div className="w-full aspect-square rounded-2xl border-2 border-dashed border-soft-oatmeal flex flex-col items-center justify-center overflow-hidden bg-white/50 relative group">
                    {formData.image ? (
                       <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
@@ -85,7 +85,7 @@ const AddProductPage = () => {
              </div>
 
              {/* Right: Detailed Fields */}
-             <div className="lg:col-span-2 p-8 md:p-12 space-y-8">
+             <div className="lg:col-span-2 p-6 md:p-10 lg:p-12 space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
@@ -171,9 +171,9 @@ const AddProductPage = () => {
                 <div className="pt-6 flex justify-end">
                    <button 
                      type="submit"
-                     className="bg-deep-espresso text-white font-black uppercase tracking-[0.2em] text-xs px-10 py-4 rounded-xl hover:bg-dusty-cocoa transition-all shadow-xl shadow-deep-espresso/20 flex items-center gap-3"
+                     className="w-full md:w-auto bg-deep-espresso text-white font-black uppercase tracking-[0.2em] text-[10px] md:text-xs px-10 py-4.5 rounded-2xl hover:bg-dusty-cocoa transition-all shadow-xl shadow-deep-espresso/20 flex items-center justify-center gap-3"
                    >
-                      <FiSave size={16} /> Save Product to Catalog
+                      <FiSave size={16} /> Save Product
                    </button>
                 </div>
              </div>

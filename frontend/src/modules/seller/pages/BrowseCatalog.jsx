@@ -19,8 +19,8 @@ const BrowseCatalog = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex-1">
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">Admin Catalog</h1>
-            <p className="text-warm-sand mt-2">Browse the pre-defined catalog and select items to sell.</p>
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-deep-espresso">Admin Catalog</h1>
+            <p className="text-warm-sand text-xs md:text-sm">Browse and select items to sell.</p>
           </div>
           
           <div className="relative w-full md:w-80">
@@ -30,7 +30,7 @@ const BrowseCatalog = () => {
               placeholder="Search catalog..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl bg-white border border-soft-oatmeal focus:ring-2 focus:ring-warm-sand focus:outline-none transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-soft-oatmeal focus:ring-2 focus:ring-warm-sand/20 focus:outline-none transition-all text-sm"
             />
           </div>
         </div>
@@ -51,10 +51,10 @@ const BrowseCatalog = () => {
             <button 
               key={cat.id}
               onClick={() => setActiveCategory(cat.name)}
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+              className={`px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all whitespace-nowrap border ${
                 activeCategory === cat.name 
-                ? 'bg-deep-espresso text-white shadow-lg' 
-                : 'bg-white text-dusty-cocoa border border-soft-oatmeal hover:bg-soft-oatmeal/20'
+                ? 'bg-deep-espresso text-white border-deep-espresso shadow-md' 
+                : 'bg-white text-warm-sand border-soft-oatmeal hover:bg-soft-oatmeal/20'
               }`}
             >
               {cat.name}
@@ -62,30 +62,30 @@ const BrowseCatalog = () => {
           ))}
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* Products Grid - Ultra Compact */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
           {filteredProducts.map(product => (
             <div 
               key={product.id} 
               className="group bg-white rounded-2xl border border-soft-oatmeal overflow-hidden hover:shadow-xl transition-all duration-500 flex flex-col"
             >
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative h-24 sm:h-32 overflow-hidden">
                 <img 
                   src={product.image} 
                   alt={product.name} 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold text-deep-espresso shadow-sm">
+                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-black text-deep-espresso shadow-sm">
                   {product.code}
                 </div>
               </div>
-              <div className="p-5 flex-1 flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-warm-sand mb-1">{product.category}</span>
-                <h3 className="text-lg font-bold text-deep-espresso group-hover:text-dusty-cocoa transition-colors line-clamp-1">{product.name}</h3>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-xl font-black text-deep-espresso">Rs. {product.price}</span>
-                  <button className="p-2.5 bg-warm-sand/10 text-warm-sand hover:bg-warm-sand hover:text-white rounded-xl transition-all duration-300">
-                    <LuPlus size={20} />
+              <div className="p-3 flex-1 flex flex-col">
+                <span className="text-[8px] font-black uppercase tracking-widest text-warm-sand mb-0.5">{product.category}</span>
+                <h3 className="text-xs font-bold text-deep-espresso group-hover:text-dusty-cocoa transition-colors line-clamp-1 leading-tight">{product.name}</h3>
+                <div className="mt-auto pt-2 flex items-center justify-between">
+                  <span className="text-sm font-black text-deep-espresso">Rs. {product.price}</span>
+                  <button className="p-1.5 bg-warm-sand/5 text-warm-sand hover:bg-deep-espresso hover:text-white rounded-lg transition-all duration-300">
+                    <LuPlus size={14} />
                   </button>
                 </div>
               </div>

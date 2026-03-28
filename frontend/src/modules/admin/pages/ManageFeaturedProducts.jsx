@@ -45,7 +45,7 @@ const ManageFeaturedProducts = () => {
         </div>
 
         {/* Product Cards Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
           <AnimatePresence>
             {products.map((product, index) => (
               <motion.div
@@ -58,7 +58,7 @@ const ManageFeaturedProducts = () => {
                 className="group bg-white rounded-xl md:rounded-2xl border border-soft-oatmeal/20 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col"
               >
                 {/* Image */}
-                <div className="relative h-32 md:h-44 overflow-hidden">
+                <div className="relative h-20 md:h-32 overflow-hidden">
                   <img
                     src={product.image}
                     alt={product.name}
@@ -93,7 +93,7 @@ const ManageFeaturedProducts = () => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 p-2 md:p-3 flex flex-col justify-between space-y-1.5 md:space-y-2">
+                <div className="flex-1 p-1 md:p-2 flex flex-col justify-between space-y-0.5 md:space-y-1">
                   <div className="space-y-2">
                     <div className="flex justify-between items-start">
                       <h4 className="text-[8px] md:text-[10px] uppercase tracking-[0.2em] text-warm-sand font-black">
@@ -102,13 +102,13 @@ const ManageFeaturedProducts = () => {
                     </div>
 
                     {/* Product Name */}
-                    <h3 className="text-[10px] md:text-[12px] font-display font-bold text-deep-espresso line-clamp-1 leading-tight group-hover:text-warm-sand transition-colors duration-300">
+                    <h3 className="text-[9px] md:text-[11px] font-display font-bold text-deep-espresso line-clamp-1 leading-tight group-hover:text-warm-sand transition-colors duration-300">
                       {product.name}
                     </h3>
                   </div>
 
                   {/* Price */}
-                  <div className="flex items-center justify-between pt-2 md:pt-4 border-t border-soft-oatmeal/10">
+                  <div className="flex items-center justify-between pt-1 md:pt-2 border-t border-soft-oatmeal/10">
                     <div className="flex flex-col">
                       <div className="flex items-baseline gap-1.5">
                         <span className="text-sm md:text-base font-black text-deep-espresso tracking-tight">
@@ -120,13 +120,13 @@ const ManageFeaturedProducts = () => {
                           </span>
                         )}
                       </div>
-                      <span className="text-[9px] md:text-[10px] text-deep-espresso/30 font-bold uppercase tracking-widest">
+                      <span className="text-[7px] md:text-[8px] text-deep-espresso/30 font-bold uppercase tracking-widest leading-none">
                         Incl. GST
                       </span>
                     </div>
 
                     {/* Tag Pill (visual consistency) */}
-                    <span className="text-[8px] md:text-[9px] bg-soft-oatmeal/30 text-dusty-cocoa px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+                    <span className="text-[7px] md:text-[8px] bg-soft-oatmeal/30 text-dusty-cocoa px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
                       {product.tag}
                     </span>
                   </div>
@@ -139,12 +139,12 @@ const ManageFeaturedProducts = () => {
           <motion.button
             layout
             onClick={() => navigate('/admin/manage-featured/add')}
-            className="border-2 border-dashed border-soft-oatmeal rounded-2xl md:rounded-3xl min-h-[320px] md:min-h-[420px] flex flex-col items-center justify-center gap-3 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group"
+            className="border-2 border-dashed border-soft-oatmeal rounded-2xl md:rounded-3xl min-h-[180px] md:min-h-[260px] flex flex-col items-center justify-center gap-1.5 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group active:scale-95"
           >
-            <div className="w-16 h-16 rounded-full bg-soft-oatmeal/20 flex items-center justify-center group-hover:bg-dusty-cocoa/10 transition-colors">
-              <LuPackagePlus size={28} className="group-hover:scale-110 transition-transform" />
+            <div className="w-10 h-10 rounded-full bg-soft-oatmeal/20 flex items-center justify-center group-hover:bg-dusty-cocoa/10 transition-colors">
+              <LuPackagePlus size={18} className="group-hover:scale-110 transition-transform opacity-60" />
             </div>
-            <span className="font-bold text-sm uppercase tracking-wider">Add Product</span>
+            <span className="font-bold text-[9px] md:text-[10px] uppercase tracking-wider">Add Product</span>
           </motion.button>
         </div>
 

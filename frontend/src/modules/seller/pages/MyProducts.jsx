@@ -28,8 +28,8 @@ const MyProducts = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">My Inventory</h1>
-            <p className="text-warm-sand mt-2">Manage your listed products and track approval status.</p>
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-deep-espresso">My Inventory</h1>
+            <p className="text-warm-sand text-xs md:text-sm">Manage your listed products and tracking.</p>
           </div>
           
           <div className="flex items-center gap-4">
@@ -52,7 +52,7 @@ const MyProducts = () => {
               <select 
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="pl-10 pr-6 py-3 rounded-xl bg-white border border-soft-oatmeal focus:ring-2 focus:ring-warm-sand focus:outline-none transition-all font-bold text-xs uppercase tracking-wider appearance-none cursor-pointer"
+                className="pl-9 pr-4 py-2.5 rounded-xl bg-white border border-soft-oatmeal focus:ring-2 focus:ring-warm-sand/20 focus:outline-none transition-all font-black text-[10px] uppercase tracking-widest appearance-none cursor-pointer"
               >
                 <option value="All">All Status</option>
                 <option value="Approved">Approved</option>
@@ -64,24 +64,24 @@ const MyProducts = () => {
         </div>
 
         {view === 'grid' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {filteredProducts.map(product => (
               <div key={product.id} className="bg-white rounded-2xl border border-soft-oatmeal overflow-hidden shadow-sm hover:shadow-md transition-all group">
-                <div className="relative h-44 overflow-hidden">
+                <div className="relative h-24 sm:h-32 overflow-hidden">
                   <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute top-3 left-3">
+                  <div className="absolute top-2 left-2">
                     <StatusBadge status={product.status} />
                   </div>
                 </div>
-                <div className="p-4 space-y-4">
+                <div className="p-3 space-y-3">
                   <div>
-                    <span className="text-[10px] font-bold text-warm-sand uppercase tracking-widest">{product.category}</span>
-                    <h3 className="font-bold text-deep-espresso truncate">{product.name}</h3>
+                    <span className="text-[8px] font-black text-warm-sand uppercase tracking-widest">{product.category}</span>
+                    <h3 className="text-xs font-bold text-deep-espresso truncate leading-tight">{product.name}</h3>
                   </div>
-                  <div className="flex items-center justify-between border-t border-soft-oatmeal/50 pt-4">
-                    <span className="font-black text-deep-espresso">Rs. {product.price}</span>
+                  <div className="flex items-center justify-between border-t border-soft-oatmeal/50 pt-2">
+                    <span className="text-sm font-black text-deep-espresso">Rs. {product.price}</span>
                     <button className="text-warm-sand hover:text-deep-espresso transition-colors">
-                      <LuSettings size={20} />
+                      <LuSettings size={16} />
                     </button>
                   </div>
                 </div>
@@ -94,34 +94,34 @@ const MyProducts = () => {
               <table className="w-full text-left border-collapse">
                 <thead className="bg-soft-oatmeal/10 border-b border-soft-oatmeal">
                   <tr>
-                    <th className="p-6 text-[10px] font-black uppercase tracking-widest text-warm-sand">Product Info</th>
-                    <th className="p-6 text-[10px] font-black uppercase tracking-widest text-warm-sand">Category</th>
-                    <th className="p-6 text-[10px] font-black uppercase tracking-widest text-warm-sand">Price</th>
-                    <th className="p-6 text-[10px] font-black uppercase tracking-widest text-warm-sand">Status</th>
-                    <th className="p-6 text-[10px] font-black uppercase tracking-widest text-warm-sand">Actions</th>
+                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-warm-sand">Product Info</th>
+                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-warm-sand">Category</th>
+                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-warm-sand">Price</th>
+                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-warm-sand">Status</th>
+                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-warm-sand text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-soft-oatmeal/50">
                   {filteredProducts.map(product => (
                     <tr key={product.id} className="hover:bg-soft-oatmeal/5 transition-colors group">
-                      <td className="p-6">
-                        <div className="flex items-center gap-4">
-                          <img src={product.image} alt="" className="w-12 h-12 rounded-lg object-cover" />
-                          <span className="font-bold text-deep-espresso">{product.name}</span>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <img src={product.image} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                          <span className="text-sm font-bold text-deep-espresso">{product.name}</span>
                         </div>
                       </td>
-                      <td className="p-6">
-                        <span className="text-xs font-medium text-dusty-cocoa">{product.category}</span>
+                      <td className="px-4 py-3">
+                        <span className="text-[10px] font-bold text-dusty-cocoa uppercase tracking-widest">{product.category}</span>
                       </td>
-                      <td className="p-6">
-                        <span className="font-black text-deep-espresso">Rs. {product.price}</span>
+                      <td className="px-4 py-3">
+                        <span className="text-sm font-black text-deep-espresso">Rs. {product.price}</span>
                       </td>
-                      <td className="p-6">
+                      <td className="px-4 py-3">
                         <StatusBadge status={product.status} />
                       </td>
-                      <td className="p-6">
+                      <td className="px-4 py-3 text-right">
                         <button className="p-2 hover:bg-soft-oatmeal rounded-lg transition-colors text-warm-sand">
-                          <LuSettings size={18} />
+                          <LuSettings size={16} />
                         </button>
                       </td>
                     </tr>

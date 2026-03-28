@@ -27,14 +27,14 @@ const SettingsPage = () => {
   return (
     <PageWrapper>
       <div className="max-w-4xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-4xl font-display font-bold text-deep-espresso">System Settings</h1>
-          <p className="text-warm-sand mt-1">Manage your administrator account and preferences.</p>
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso">System Settings</h1>
+          <p className="text-warm-sand text-sm md:text-base font-medium">Manage your administrator account and preferences.</p>
         </div>
 
-        <div className="bg-white rounded-[32px] shadow-xl border border-soft-oatmeal overflow-hidden">
+        <div className="bg-white rounded-2xl md:rounded-[32px] shadow-xl border border-soft-oatmeal overflow-hidden">
           {/* Tabs header */}
-          <div className="flex border-b border-soft-oatmeal px-8 bg-soft-oatmeal/5 overflow-x-auto no-scrollbar">
+          <div className="flex border-b border-soft-oatmeal px-4 md:px-8 bg-soft-oatmeal/5 overflow-x-auto no-scrollbar">
             {['Profile', 'Notifications', 'Security', 'Appearance'].map((tab, i) => (
               <button 
                 key={tab} 
@@ -45,7 +45,7 @@ const SettingsPage = () => {
             ))}
           </div>
 
-          <div className="p-8 md:p-12 space-y-12">
+          <div className="p-6 md:p-12 space-y-10 md:space-y-12">
             {/* Account Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <div className="space-y-6">
@@ -139,7 +139,7 @@ const SettingsPage = () => {
               <button 
                 onClick={handleSave}
                 disabled={isSaving || isSaved}
-                className={`flex items-center gap-3 px-12 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all active:scale-95 shadow-2xl ${
+                className={`w-full md:w-auto flex items-center justify-center gap-3 px-10 py-4.5 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] transition-all active:scale-95 shadow-2xl ${
                   isSaved 
                   ? 'bg-emerald-500 text-white' 
                   : 'bg-deep-espresso text-white hover:bg-dusty-cocoa shadow-deep-espresso/20'
@@ -156,10 +156,10 @@ const SettingsPage = () => {
           </div>
         </div>
 
-        <div className="bg-golden-glow/10 p-8 rounded-[32px] border border-warm-sand/10 flex flex-col items-center text-center">
+        <div className="bg-golden-glow/10 p-6 md:p-8 rounded-2xl md:rounded-[32px] border border-warm-sand/10 flex flex-col items-center text-center">
           <div className="px-4 py-1.5 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-4">Store Active</div>
-          <h4 className="text-2xl font-display font-bold text-deep-espresso">Riddha Interio Mart</h4>
-          <p className="text-sm text-warm-sand mt-2 max-w-md">Your configuration affects all administrative access and catalog automation rules.</p>
+          <h4 className="text-xl md:text-2xl font-display font-bold text-deep-espresso">Riddha Interio Mart</h4>
+          <p className="text-xs md:text-sm text-warm-sand mt-2 max-w-md italic">Your configuration affects all administrative access and catalog automation rules.</p>
         </div>
       </div>
     </PageWrapper>

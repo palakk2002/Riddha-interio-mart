@@ -54,19 +54,19 @@ const AddFeaturedProductPage = () => {
         </button>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-display font-bold text-deep-espresso flex items-center gap-3">
-              <LuStar className="text-golden-glow fill-golden-glow" size={32} />
-              Add Featured Product
+          <div className="space-y-1">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso flex items-center gap-3">
+              <LuStar className="text-golden-glow fill-golden-glow shrink-0" size={28} />
+              Add Featured
             </h1>
-            <p className="text-warm-sand mt-1">Designate a premium item for your store's homepage highlights.</p>
+            <p className="text-warm-sand text-sm font-medium tracking-tight">Designate a premium item for highlights.</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8 pb-12">
-          <div className="bg-white rounded-[32px] border border-soft-oatmeal shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-3">
+        <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8 pb-12">
+          <div className="bg-white rounded-3xl md:rounded-[32px] border border-soft-oatmeal shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-3">
             {/* Left: Image Preview Area */}
-            <div className="p-8 bg-soft-oatmeal/10 border-r border-soft-oatmeal flex flex-col items-center justify-center space-y-6">
+            <div className="p-6 md:p-8 bg-soft-oatmeal/10 border-b lg:border-r lg:border-b-0 border-soft-oatmeal flex flex-col items-center justify-center space-y-6">
               <div className="w-full aspect-square rounded-2xl border-2 border-dashed border-soft-oatmeal flex flex-col items-center justify-center overflow-hidden bg-white/50 relative group shadow-inner">
                 {newProduct.image ? (
                   <img src={newProduct.image} alt="Preview" className="w-full h-full object-cover" />
@@ -96,7 +96,7 @@ const AddFeaturedProductPage = () => {
             </div>
 
             {/* Right: Detailed Fields */}
-            <div className="lg:col-span-2 p-8 md:p-12 space-y-10">
+            <div className="lg:col-span-2 p-6 md:p-10 lg:p-12 space-y-8 md:space-y-10">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Product Name */}
                 <div className="space-y-3">
@@ -166,19 +166,19 @@ const AddFeaturedProductPage = () => {
                 </div>
               </div>
 
-              <div className="pt-8 flex justify-end gap-4 border-t border-soft-oatmeal/50">
+              <div className="pt-8 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 border-t border-soft-oatmeal/50">
                 <button 
                   type="button"
                   onClick={() => navigate('/admin/manage-featured')}
-                  className="px-8 py-4 rounded-xl font-bold text-warm-sand hover:bg-soft-oatmeal/20 transition-all uppercase tracking-widest text-xs"
+                  className="px-8 py-4 rounded-xl font-bold text-warm-sand hover:bg-soft-oatmeal/20 transition-all uppercase tracking-widest text-[10px]"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="bg-deep-espresso text-white font-black uppercase tracking-[0.2em] text-xs px-10 py-4 rounded-xl hover:bg-dusty-cocoa transition-all shadow-xl shadow-deep-espresso/20 flex items-center gap-3"
+                  className="bg-deep-espresso text-white font-black uppercase tracking-[0.2em] text-[10px] px-10 py-4.5 rounded-2xl hover:bg-dusty-cocoa transition-all shadow-xl shadow-deep-espresso/20 flex items-center justify-center gap-3"
                 >
-                  <LuCheck size={18} /> Add to Featured Highlights
+                  <LuCheck size={18} /> Add Featured Item
                 </button>
               </div>
             </div>

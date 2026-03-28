@@ -43,7 +43,15 @@ const menuItems = [
 ];
 
 const homepageItems = [
-  { path: '/admin/manage-categories', icon: LuGrid2X2, label: 'Manage Categories' },
+  { 
+    label: 'Manage Categories', 
+    icon: LuGrid2X2, 
+    path: '/admin/manage-categories',
+    children: [
+      { path: '/admin/manage-categories', icon: LuLayoutGrid, label: 'All Categories' },
+      { path: '/admin/manage-categories/add', icon: LuPlus, label: 'Add Category' },
+    ]
+  },
   { 
     label: 'Featured Products', 
     icon: LuStar, 
@@ -64,7 +72,15 @@ const homepageItems = [
   },
   { path: '/admin/manage-hero', icon: LuImage, label: 'Hero Banner' },
   { path: '/admin/manage-promo', icon: LuBadgePercent, label: 'Promo Banner' },
-  { path: '/admin/manage-grid', icon: LuLayoutGrid, label: 'Category Grid' },
+  { 
+    label: 'Category Grid', 
+    icon: LuLayoutGrid, 
+    path: '/admin/manage-grid',
+    children: [
+      { path: '/admin/manage-grid', icon: LuLayoutGrid, label: 'All Items' },
+      { path: '/admin/manage-grid/add', icon: LuPlus, label: 'Add Grid Item' },
+    ]
+  },
 ];
 
 const NavItem = ({ item, isOpen, onClose, expanded, onToggle }) => {

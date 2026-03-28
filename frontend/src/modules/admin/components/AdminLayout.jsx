@@ -35,7 +35,7 @@ const AdminLayout = () => {
       
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
         {/* Header */}
-        <header className="h-20 bg-white shadow-sm border-b border-soft-oatmeal px-6 flex items-center justify-between z-30">
+        <header className="h-16 md:h-20 bg-white shadow-sm border-b border-soft-oatmeal px-4 md:px-6 flex items-center justify-between z-30">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -141,7 +141,7 @@ const AdminLayout = () => {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           <Outlet />
         </main>
       </div>

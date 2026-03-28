@@ -62,7 +62,7 @@ const ManageCategories = () => {
         </div>
 
         {/* Category Cards Grid — mirrors user module CategoryCard style but more compact for admin */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-5">
           <AnimatePresence mode="popLayout">
             {categories.map((cat, index) => (
               <motion.div
@@ -75,7 +75,7 @@ const ManageCategories = () => {
                 className="group relative"
               >
                 {/* Card — mirrors user CategoryCard but more compact */}
-                <div className="relative overflow-hidden rounded-[1.5rem] h-64 md:h-72 w-full shadow-lg hover:shadow-2xl transition-all duration-500 border border-soft-oatmeal/20">
+                <div className="relative overflow-hidden rounded-[1.25rem] h-48 md:h-56 w-full shadow-md hover:shadow-xl transition-all duration-500 border border-soft-oatmeal/20">
                   {/* Background Image */}
                   <img
                     src={cat.image}
@@ -85,20 +85,20 @@ const ManageCategories = () => {
 
                   {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#3B2F2F]/90 via-[#3B2F2F]/30 to-transparent group-hover:from-[#3B2F2F]/100 transition-all duration-300">
-                    <div className="absolute bottom-0 left-0 p-5 md:p-6 w-full">
+                    <div className="absolute bottom-0 left-0 p-4 w-full">
                       <div className="transform transition-all duration-500 group-hover:-translate-y-1">
-                        <h3 className="text-xl md:text-2xl font-display font-bold text-white mb-2 tracking-tight line-clamp-1">
+                        <h3 className="text-lg md:text-xl font-display font-bold text-white mb-1.5 tracking-tight line-clamp-1">
                           {cat.name}
                         </h3>
 
                         {/* Product Count Badge */}
-                        <span className="inline-block px-3 py-1 bg-white/10 backdrop-blur-xl border border-white/20 text-soft-oatmeal/90 rounded-full text-[9px] uppercase tracking-[0.15em] font-bold mb-3">
+                        <span className="inline-block px-2.5 py-0.5 bg-white/10 backdrop-blur-xl border border-white/20 text-soft-oatmeal/90 rounded-full text-[8px] uppercase tracking-[0.1em] font-bold mb-2">
                           {cat.productCount}+ Pieces
                         </span>
 
                         {/* Subcategory Chips - Single line for compact view */}
                         {cat.subcategories && cat.subcategories.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mt-1 overflow-hidden max-h-12">
+                          <div className="flex flex-wrap gap-1 mt-1 overflow-hidden max-h-12">
                             {cat.subcategories.slice(0, 3).map((sub, i) => (
                               <span
                                 key={i}
@@ -118,17 +118,17 @@ const ManageCategories = () => {
                   <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
                     <button
                       onClick={() => navigate(`/admin/manage-categories/edit/${cat.id}`)}
-                      className="h-9 w-9 bg-white/95 backdrop-blur-md shadow-lg rounded-xl flex items-center justify-center text-deep-espresso hover:text-dusty-cocoa hover:bg-white transition-all transform hover:scale-110"
+                      className="h-8 w-8 bg-white/95 backdrop-blur-md shadow-lg rounded-lg flex items-center justify-center text-deep-espresso hover:text-dusty-cocoa hover:bg-white transition-all transform hover:scale-110"
                       title="Edit"
                     >
-                      <FiEdit3 size={16} />
+                      <FiEdit3 size={14} />
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDelete(cat.id); }}
-                      className="h-9 w-9 bg-white/95 backdrop-blur-md shadow-lg rounded-xl flex items-center justify-center text-red-400 hover:text-red-500 hover:bg-white transition-all transform hover:scale-110"
+                      className="h-8 w-8 bg-white/95 backdrop-blur-md shadow-lg rounded-lg flex items-center justify-center text-red-500/80 hover:text-red-500 hover:bg-white transition-all transform hover:scale-110"
                       title="Delete"
                     >
-                      <FiTrash2 size={16} />
+                      <FiTrash2 size={14} />
                     </button>
                   </div>
                 </div>
@@ -140,12 +140,12 @@ const ManageCategories = () => {
           <motion.button
             layout
             onClick={() => navigate('/admin/manage-categories/add')}
-            className="border-2 border-dashed border-soft-oatmeal/60 rounded-[1.5rem] h-64 md:h-72 flex flex-col items-center justify-center gap-3 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group active:scale-95"
+            className="border-2 border-dashed border-soft-oatmeal/60 rounded-[1.25rem] h-48 md:h-56 flex flex-col items-center justify-center gap-2 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group active:scale-95"
           >
-            <div className="w-12 h-12 rounded-2xl bg-soft-oatmeal/10 flex items-center justify-center group-hover:bg-dusty-cocoa/10 transition-colors">
-              <FiImage size={24} className="group-hover:scale-110 transition-transform opacity-50" />
+            <div className="w-10 h-10 rounded-xl bg-soft-oatmeal/10 flex items-center justify-center group-hover:bg-dusty-cocoa/10 transition-colors">
+              <FiImage size={20} className="group-hover:scale-110 transition-transform opacity-50" />
             </div>
-            <span className="font-black text-[10px] uppercase tracking-[0.2em]">Add New Category</span>
+            <span className="font-black text-[8px] md:text-[9px] uppercase tracking-[0.2em]">Add New Category</span>
           </motion.button>
         </div>
 

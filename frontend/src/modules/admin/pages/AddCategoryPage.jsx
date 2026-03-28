@@ -89,24 +89,24 @@ const AddCategoryPage = () => {
     <PageWrapper>
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 px-1 md:px-0">
           <button 
             onClick={() => navigate('/admin/manage-categories')}
-            className="p-3 bg-white rounded-2xl border border-soft-oatmeal text-warm-sand hover:text-deep-espresso hover:shadow-md transition-all"
+            className="p-2.5 md:p-3 bg-white rounded-xl md:rounded-2xl border border-soft-oatmeal text-warm-sand hover:text-deep-espresso hover:shadow-md transition-all shadow-sm"
           >
-            <FiArrowLeft size={20} />
+            <FiArrowLeft size={18} />
           </button>
-          <div>
-            <h1 className="text-3xl font-display font-bold text-deep-espresso">Create New Category</h1>
-            <p className="text-warm-sand text-sm font-medium">Define a new top-level category and its sub-collections.</p>
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-display font-bold text-deep-espresso truncate">Create Category</h1>
+            <p className="text-warm-sand text-[10px] md:text-sm font-medium tracking-tight">Define a new top-level category collection.</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
           {/* Main Info */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white p-8 md:p-10 rounded-[40px] border border-soft-oatmeal shadow-sm space-y-8">
-              <h3 className="text-lg font-black text-deep-espresso border-b border-soft-oatmeal pb-4 uppercase tracking-[0.1em]">General Information</h3>
+          <div className="lg:col-span-2 space-y-4 md:space-y-6">
+            <div className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm space-y-6 md:space-y-8">
+              <h3 className="text-base md:text-lg font-black text-deep-espresso border-b border-soft-oatmeal pb-4 uppercase tracking-[0.1em]">General Information</h3>
               
               <div className="space-y-6">
                 <div className="space-y-3">
@@ -117,7 +117,7 @@ const AddCategoryPage = () => {
                     value={category.name}
                     onChange={(e) => setCategory({...category, name: e.target.value})}
                     placeholder="e.g. Luxury Lighting"
-                    className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-2xl px-6 py-5 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all font-medium" 
+                    className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl md:rounded-2xl px-5 py-4 md:px-6 md:py-5 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all font-medium" 
                   />
                 </div>
 
@@ -127,17 +127,17 @@ const AddCategoryPage = () => {
                     rows="4"
                     value={category.description}
                     onChange={(e) => setCategory({...category, description: e.target.value})}
-                    placeholder="Describe the aesthetic and target room for this category..."
-                    className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-2xl px-6 py-5 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all font-medium resize-none" 
+                    placeholder="Describe the aesthetic..."
+                    className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl md:rounded-2xl px-5 py-4 md:px-6 md:py-5 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all font-medium resize-none" 
                   />
                 </div>
               </div>
             </div>
 
             {/* Subcategories */}
-            <div className="bg-white p-8 md:p-10 rounded-[40px] border border-soft-oatmeal shadow-sm space-y-8">
+            <div className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm space-y-6 md:space-y-8">
               <div className="flex items-center justify-between border-b border-soft-oatmeal pb-4">
-                <h3 className="text-lg font-black text-deep-espresso uppercase tracking-[0.1em]">Sub-Collections</h3>
+                <h3 className="text-base md:text-lg font-black text-deep-espresso uppercase tracking-[0.1em]">Sub-Collections</h3>
                 <button 
                   type="button"
                   onClick={handleAddSubcategory}
@@ -155,7 +155,7 @@ const AddCategoryPage = () => {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="flex gap-4 p-5 bg-soft-oatmeal/5 rounded-[24px] border border-soft-oatmeal/50 relative group hover:bg-white hover:shadow-xl hover:shadow-soft-oatmeal/20 transition-all duration-300"
+                      className="flex flex-col sm:flex-row gap-4 p-4 md:p-5 bg-soft-oatmeal/5 rounded-2xl md:rounded-[24px] border border-soft-oatmeal/50 relative group hover:bg-white hover:shadow-xl hover:shadow-soft-oatmeal/20 transition-all duration-300"
                     >
                       <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
@@ -197,8 +197,8 @@ const AddCategoryPage = () => {
 
           {/* Sidebar / Media */}
           <div className="space-y-6">
-            <div className="bg-white p-8 rounded-[40px] border border-soft-oatmeal shadow-sm space-y-8 sticky top-24">
-              <h3 className="text-lg font-black text-deep-espresso border-b border-soft-oatmeal pb-4 uppercase tracking-[0.1em]">Banner Media</h3>
+            <div className="bg-white p-6 md:p-8 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm space-y-6 md:space-y-8 sticky top-24">
+              <h3 className="text-base md:text-lg font-black text-deep-espresso border-b border-soft-oatmeal pb-4 uppercase tracking-[0.1em]">Banner Media</h3>
               
               <div className="space-y-6">
                 <input 

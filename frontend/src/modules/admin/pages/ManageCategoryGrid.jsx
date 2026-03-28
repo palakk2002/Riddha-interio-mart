@@ -1,39 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuPlus, LuX, LuCheck, LuPen, LuTrash2, LuLayoutGrid } from 'react-icons/lu';
+import { LuPlus, LuPen, LuTrash2, LuLayoutGrid } from 'react-icons/lu';
 import { categoryGridData } from '../data/manageCategoryGridData';
 
 const ManageCategoryGrid = () => {
-  const [categories, setCategories] = useState(
-    [...categoryGridData].sort((a, b) => a.displayOrder - b.displayOrder)
-  );
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newCategory, setNewCategory] = useState({
-    name: '',
-    image: '',
-    displayOrder: '',
-  });
+  const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
 
-  const handleAddCategory = (e) => {
-    e.preventDefault();
-    if (!newCategory.name) return;
-
-    const catToAdd = {
-      id: Date.now(),
-      name: newCategory.name,
-      image: newCategory.image || 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&q=80',
-      displayOrder: parseInt(newCategory.displayOrder) || categories.length + 1,
-    };
-
-    const updated = [...categories, catToAdd].sort((a, b) => a.displayOrder - b.displayOrder);
-    setCategories(updated);
-    setShowAddForm(false);
-    setNewCategory({ name: '', image: '', displayOrder: '' });
-  };
+  useEffect(() => {
+    const saved = localStorage.getItem('admin_category_grid');
+    if (saved) {
+      setCategories(JSON.parse(saved));
+    } else {
+      setCategories([...categoryGridData].sort((a, b) => a.displayOrder - b.displayOrder));
+    }
+  }, []);
 
   const handleDelete = (id) => {
-    setCategories(categories.filter((c) => c.id !== id));
+    const updated = categories.filter((c) => c.id !== id);
+    setCategories(updated);
+    localStorage.setItem('admin_category_grid', JSON.stringify(updated));
   };
 
   return (
@@ -50,89 +38,12 @@ const ManageCategoryGrid = () => {
             </p>
           </div>
           <button
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="w-12 h-12 bg-dusty-cocoa text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-dusty-cocoa/40 transition-all active:scale-90"
+            onClick={() => navigate('/admin/manage-grid/add')}
+            className="w-12 h-12 bg-dusty-cocoa text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-dusty-cocoa/40 transition-all active:scale-95"
           >
-            {showAddForm ? <LuX size={24} /> : <LuPlus size={24} />}
+            <LuPlus size={24} />
           </button>
         </div>
-
-        {/* Add Category Form */}
-        <AnimatePresence>
-          {showAddForm && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="bg-white p-4 md:p-6 rounded-xl border border-soft-oatmeal shadow-sm mb-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-display font-bold text-deep-espresso">
-                    Add Grid Item
-                  </h3>
-                  <button onClick={() => setShowAddForm(false)} className="text-warm-sand hover:text-deep-espresso">
-                    <LuX size={16} />
-                  </button>
-                </div>
-                <form onSubmit={handleAddCategory} className="flex flex-wrap md:flex-nowrap items-end gap-4">
-                  {/* Category Name */}
-                  <div className="flex-1 min-w-[150px] space-y-1.5">
-                    <label className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">
-                      Name
-                    </label>
-                    <input
-                      required
-                      autoFocus
-                      type="text"
-                      value={newCategory.name}
-                      onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-warm-sand transition-all text-xs"
-                      placeholder="e.g. Curtains"
-                    />
-                  </div>
-
-                  {/* Image URL */}
-                  <div className="flex-[2] min-w-[200px] space-y-1.5">
-                    <label className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">
-                      Image URL
-                    </label>
-                    <input
-                      type="text"
-                      value={newCategory.image}
-                      onChange={(e) => setNewCategory({ ...newCategory, image: e.target.value })}
-                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-warm-sand transition-all text-xs"
-                      placeholder="https://..."
-                    />
-                  </div>
-
-                  {/* Display Order */}
-                  <div className="w-24 space-y-1.5">
-                    <label className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">
-                      Order
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={newCategory.displayOrder}
-                      onChange={(e) => setNewCategory({ ...newCategory, displayOrder: e.target.value })}
-                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-warm-sand transition-all text-xs"
-                      placeholder="1"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="bg-deep-espresso text-white px-5 py-2 rounded-lg font-bold hover:bg-dusty-cocoa transition-all flex items-center gap-2 shadow-sm whitespace-nowrap text-xs"
-                  >
-                    <LuCheck size={14} />
-                    Add
-                  </button>
-                </form>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Section Label */}
         <div className="flex items-center gap-3">
@@ -205,20 +116,18 @@ const ManageCategoryGrid = () => {
           </AnimatePresence>
 
           {/* Add Placeholder */}
-          {!showAddForm && (
-            <motion.button
-              layout
-              onClick={() => setShowAddForm(true)}
-              className="flex flex-col items-center gap-2 group"
-            >
-              <div className="aspect-square w-full rounded-xl border border-dashed border-soft-oatmeal flex items-center justify-center hover:border-dusty-cocoa hover:bg-white/50 transition-all">
-                <div className="flex flex-col items-center gap-1 text-warm-sand/60 group-hover:text-dusty-cocoa transition-colors">
-                  <LuPlus size={20} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-[8px] font-bold uppercase tracking-tighter">Add</span>
-                </div>
+          <motion.button
+            layout
+            onClick={() => navigate('/admin/manage-grid/add')}
+            className="flex flex-col items-center gap-2 group"
+          >
+            <div className="aspect-square w-full rounded-xl border border-dashed border-soft-oatmeal flex items-center justify-center hover:border-dusty-cocoa hover:bg-white/50 transition-all">
+              <div className="flex flex-col items-center gap-1 text-warm-sand/60 group-hover:text-dusty-cocoa transition-colors">
+                <LuPlus size={20} className="group-hover:scale-110 transition-transform" />
+                <span className="text-[8px] font-bold uppercase tracking-tighter">Add</span>
               </div>
-            </motion.button>
-          )}
+            </div>
+          </motion.button>
         </motion.div>
 
         {/* Summary Footer */}
