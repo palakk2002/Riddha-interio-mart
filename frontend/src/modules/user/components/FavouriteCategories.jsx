@@ -31,14 +31,15 @@ const FavouriteCategories = () => {
   const filteredCategories = data.categories.filter(cat => cat.category === activeTab);
 
   return (
-    <section className="max-w-7xl mx-auto px-4 md:px-12 pt-0 md:pt-24 pb-2 md:pb-24 bg-white">
+    <section className="bg-soft-oatmeal/10 py-10 md:py-24 border-y border-soft-oatmeal/20">
+      <div className="max-w-7xl mx-auto px-4 md:px-12">
       {/* Title Section */}
       <div className="text-center mb-10 md:mb-16">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-2xl md:text-3xl font-bold text-[#8B5E3C] tracking-tight mb-6 md:mb-10"
+          className="text-2xl md:text-5xl font-display font-bold text-deep-espresso tracking-tight mb-8 md:mb-16"
         >
           Our Favourite Categories
         </motion.h2>
@@ -50,7 +51,7 @@ const FavouriteCategories = () => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-6 py-2 rounded-full border-2 transition-all duration-300 whitespace-nowrap text-xs md:text-sm font-bold ${activeTab === tab
-                  ? 'border-[#FF6B35] text-[#FF6B35]'
+                  ? 'border-warm-sand text-warm-sand'
                   : 'border-soft-oatmeal/20 text-deep-espresso/40 hover:border-soft-oatmeal/40'
                 }`}
             >
@@ -90,7 +91,7 @@ const FavouriteCategories = () => {
 
                     {/* Category Label at bottom */}
                     <div className="py-3 px-2 text-center bg-white border-t border-soft-oatmeal/5">
-                      <span className="text-[11px] md:text-sm font-medium text-deep-espresso/80 group-hover:text-[#FF6B35] transition-colors tracking-tight">
+                      <span className="text-[11px] md:text-sm font-medium text-deep-espresso/80 group-hover:text-warm-sand transition-colors tracking-tight">
                         {cat.name}
                       </span>
                     </div>
@@ -108,6 +109,7 @@ const FavouriteCategories = () => {
             )}
           </AnimatePresence>
         </motion.div>
+      </div>
       </div>
     </section>
   );

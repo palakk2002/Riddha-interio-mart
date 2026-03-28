@@ -16,7 +16,7 @@ function App() {
   const isDashboardLayout = isAdminPath || isSellerPath || isAuthPath;
 
   return (
-    <div className={`min-h-screen flex flex-col bg-[#FDFBF9] ${!isDashboardLayout ? 'pb-24 md:pb-0' : ''}`}>
+    <div className={`min-h-screen flex flex-col ${!isDashboardLayout ? 'user-theme bg-white pb-24 md:pb-0' : 'bg-[#FDFBF9]'} border-deep-espresso/5`}>
       {!isDashboardLayout && <Navbar />}
       <main className="flex-grow">
         <Routes>

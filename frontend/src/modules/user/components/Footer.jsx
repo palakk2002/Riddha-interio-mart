@@ -32,7 +32,7 @@ const Footer = () => {
           {/* Brand */}
           <motion.div variants={itemVariants} className="space-y-8">
             <h3 className="text-2xl font-display font-black text-white tracking-tighter">
-              RIDDHA <span className="text-warm-sand">INTERIO</span>
+              <span className="text-warm-sand">R</span>IDDHA INTERIO
             </h3>
             <p className="text-sm leading-relaxed text-soft-oatmeal/60 font-medium">
               Transforming your living spaces into luxurious sanctuaries with premium tiles, paints, and designer furniture.

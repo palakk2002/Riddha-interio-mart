@@ -18,7 +18,7 @@ const Banner = () => {
       </div>
       
       {/* Dynamic Soft Fade Overlay (Optional for premium feel) */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-warm-sand/20 to-transparent pointer-events-none" />
     </div>
   );
 };

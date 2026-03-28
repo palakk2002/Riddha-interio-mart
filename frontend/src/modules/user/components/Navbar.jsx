@@ -77,13 +77,13 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-white border-b border-soft-oatmeal/10">
+      <nav className="sticky top-0 z-50 bg-warm-sand border-b border-white/10 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 md:h-20">
             {/* Logo */}
             <Link to="/" className="flex-shrink-0 flex items-center group">
-              <span className="text-xl md:text-2xl font-display font-bold text-deep-espresso tracking-tight">
-                RIDDHA <span className="text-warm-sand">INTERIO</span>
+              <span className="text-xl md:text-2xl font-display font-bold text-white tracking-tight">
+                RIDDHA INTERIO
               </span>
             </Link>
 
@@ -94,8 +94,8 @@ const Navbar = () => {
                   key={link.name}
                   to={link.path}
                   className={({ isActive }) =>
-                    `text-[10px] lg:text-xs uppercase tracking-[0.15em] font-bold transition-all hover:text-warm-sand whitespace-nowrap ${
-                      isActive ? "text-warm-sand" : "text-deep-espresso/60"
+                    `text-[10px] lg:text-xs uppercase tracking-[0.15em] font-bold transition-all hover:text-white/80 whitespace-nowrap ${
+                      isActive ? "text-white" : "text-white/60"
                     }`
                   }
                 >
@@ -110,10 +110,10 @@ const Navbar = () => {
                 onMouseLeave={handlePoliciesLeave}
               >
                 <button
-                  className={`flex items-center gap-1 text-[10px] lg:text-xs uppercase tracking-[0.15em] font-bold transition-all hover:text-warm-sand whitespace-nowrap ${
+                  className={`flex items-center gap-1 text-[10px] lg:text-xs uppercase tracking-[0.15em] font-bold transition-all hover:text-white/80 whitespace-nowrap ${
                     desktopPoliciesOpen
-                      ? "text-warm-sand"
-                      : "text-deep-espresso/60"
+                      ? "text-white"
+                      : "text-white/60"
                   }`}
                 >
                   Policies
@@ -135,7 +135,7 @@ const Navbar = () => {
                           key={link.name}
                           to={link.path}
                           onClick={() => setDesktopPoliciesOpen(false)}
-                          className="block px-5 py-2.5 text-[10px] uppercase tracking-[0.1em] font-bold text-deep-espresso/60 hover:text-warm-sand hover:bg-golden-glow/20 transition-all"
+                          className="block px-5 py-2.5 text-[10px] uppercase tracking-[0.1em] font-bold text-deep-espresso/60 hover:text-warm-sand hover:bg-warm-sand/5 transition-all"
                         >
                           {link.name}
                         </Link>
@@ -155,18 +155,18 @@ const Navbar = () => {
             <div className="flex items-center space-x-1 sm:space-x-4">
               <Link
                 to="/profile"
-                className="p-2 text-deep-espresso/70 hover:text-warm-sand transition-colors"
+                className="p-2 text-white/80 hover:text-white transition-colors"
               >
                 <FiUser className="h-5 w-5 md:h-6 md:w-6" />
               </Link>
 
               <Link
                 to="/cart"
-                className="p-2 text-deep-espresso/70 hover:text-warm-sand transition-colors relative"
+                className="p-2 text-white/80 hover:text-white transition-colors relative"
               >
                 <FiShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
                 {cartCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-warm-sand text-white text-[8px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
+                  <span className="absolute top-1 right-1 bg-white text-warm-sand text-[8px] font-bold h-4 w-4 flex items-center justify-center rounded-full shadow-sm">
                     {cartCount}
                   </span>
                 )}
@@ -175,7 +175,7 @@ const Navbar = () => {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden p-2 text-deep-espresso/70 hover:text-warm-sand transition-colors"
+                className="md:hidden p-2 text-white/80 hover:text-white transition-colors"
               >
                 {isOpen ? (
                   <FiX className="h-6 w-6" />
@@ -204,7 +204,7 @@ const Navbar = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
               onClick={closeMobile}
-              className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[90]"
+              className="md:hidden fixed inset-0 bg-warm-sand/20 backdrop-blur-sm z-[90]"
             />
             {/* Sidebar */}
             <motion.div
@@ -227,7 +227,7 @@ const Navbar = () => {
                   className="flex items-center group"
                 >
                   <span className="text-xl font-display font-black text-deep-espresso tracking-tighter">
-                    RIDDHA <span className="text-warm-sand">INTERIO</span>
+                    <span className="text-warm-sand">R</span>IDDHA INTERIO
                   </span>
                 </Link>
                 <motion.button

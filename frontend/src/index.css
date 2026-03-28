@@ -16,6 +16,14 @@
   --radius-2xl: 16px;
 }
 
+.user-theme {
+  --color-warm-sand: #E31E24;
+  --color-deep-espresso: #7F1D1D; /* Dark Red */
+  --color-dusty-cocoa: #B91C1C;   /* Medium Red */
+  --color-soft-oatmeal: #FEF2F2;  /* Very Light Red Wash */
+  --color-golden-glow: #FEE2E2;   /* Soft Red Highlight */
+}
+
 @layer base {
   body {
     @apply font-sans bg-[#FDFBF9] text-deep-espresso antialiased;

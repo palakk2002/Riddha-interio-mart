@@ -15,7 +15,7 @@ const SearchBar = ({ className = '' }) => {
       <input
         type="text"
         placeholder="Search collections..."
-        className="w-full pl-12 pr-6 py-2.5 md:py-3.5 bg-soft-oatmeal/10 border border-soft-oatmeal/20 rounded-full focus:outline-none focus:ring-4 focus:ring-warm-sand/10 focus:bg-white focus:border-warm-sand transition-all duration-500 placeholder:text-gray-400 text-sm font-medium"
+        className="w-full pl-12 pr-6 py-2.5 md:py-3.5 bg-white border border-gray-100 rounded-xl focus:outline-none focus:ring-4 focus:ring-black/5 focus:border-white transition-all duration-500 placeholder:text-gray-400 text-gray-600 text-sm font-medium shadow-sm"
       />
     </motion.div>
   );
