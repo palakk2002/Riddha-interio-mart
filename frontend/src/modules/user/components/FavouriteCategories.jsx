@@ -31,7 +31,7 @@ const FavouriteCategories = () => {
   const filteredCategories = data.categories.filter(cat => cat.category === activeTab);
 
   return (
-    <section className="bg-soft-oatmeal/10 py-10 md:py-24 border-y border-soft-oatmeal/20">
+    <section className="bg-soft-oatmeal/10 py-4 md:py-8 border-y border-soft-oatmeal/20">
       <div className="max-w-7xl mx-auto px-4 md:px-12">
       {/* Title Section */}
       <div className="text-center mb-10 md:mb-16">

@@ -24,7 +24,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="space-y-2 md:space-y-32 py-2 md:py-10">
+    <div className="space-y-2 md:space-y-4 py-2 md:py-2">
       {/* Quick Access Categories */}
       <CategoryQuickAccess />
 

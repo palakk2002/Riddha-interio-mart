@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import iboBanner from '../../../assets/ibo_partner_banner_1774683460337.png';
 import brandsGrid from '../../../assets/top_brands_grid_1774683605586.png';
 
 const brands = [
@@ -18,7 +17,7 @@ const brands = [
 
 const TopBrands = () => {
   return (
-    <section className="max-w-7xl mx-auto px-4 md:px-12 py-12">
+    <section className="max-w-7xl mx-auto px-4 md:px-12 py-4">
       <div className="bg-[#F2F2F2] py-4 text-center border-x border-t border-gray-100">
         <h2 className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight">Explore our Top Brands</h2>
       </div>
@@ -51,18 +50,6 @@ const TopBrands = () => {
         </div>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mt-4 rounded-xl overflow-hidden shadow-sm border border-gray-100"
-      >
-        <img 
-          src={iboBanner} 
-          alt="IBO Partner Program" 
-          className="w-full h-auto object-cover"
-        />
-      </motion.div>
     </section>
   );
 };
