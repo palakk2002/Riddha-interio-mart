@@ -44,7 +44,7 @@ const BottomNavbar = () => {
                         initial={{ scale: 0, opacity: 0, y: 5 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0, opacity: 0, y: 5 }}
-                        className="absolute -top-2.5 -right-2.5 bg-warm-sand text-white text-[9px] font-black h-5 w-5 flex items-center justify-center rounded-full shadow-[0_4px_12px_rgba(227,30,36,0.4)] border-2 border-white"
+                        className="absolute -top-2.5 -right-2.5 bg-warm-sand text-white text-[9px] font-black h-5 w-5 flex items-center justify-center rounded-full shadow-[0_4px_12px_rgba(114,47,55,0.4)] border-2 border-white"
                       >
                         {item.badge}
                       </motion.span>

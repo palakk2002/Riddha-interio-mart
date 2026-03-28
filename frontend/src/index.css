@@ -17,11 +17,12 @@
 }
 
 .user-theme {
-  --color-warm-sand: #E31E24;
-  --color-deep-espresso: #7F1D1D; /* Dark Red */
-  --color-dusty-cocoa: #B91C1C;   /* Medium Red */
-  --color-soft-oatmeal: #FEF2F2;  /* Very Light Red Wash */
-  --color-golden-glow: #FEE2E2;   /* Soft Red Highlight */
+  --color-warm-sand: #922724;     /* Elegant Red Accent */
+  --color-header-red: #D0312D;   /* Rich Wine Red Header */
+  --color-deep-espresso: #4A0E0E; /* Deep Maroon text */
+  --color-dusty-cocoa: #6B1D1D;   /* Muted Wine Red */
+  --color-soft-oatmeal: #FEF2F2;  /* Clean Red Wash */
+  --color-golden-glow: #FEE2E2;   /* Soft Highlight */
 }
 
 @layer base {
