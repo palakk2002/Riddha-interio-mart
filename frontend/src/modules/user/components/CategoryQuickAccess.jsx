@@ -35,7 +35,7 @@ const CategoryQuickAccess = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`relative text-[10px] md:text-xs font-black uppercase tracking-[0.2em] pb-3 md:pb-4 transition-all duration-300 ${activeTab === tab ? 'text-warm-sand' : 'text-deep-espresso/40 hover:text-deep-espresso/60'
+              className={`relative text-[10px] md:text-xs font-black uppercase tracking-[0.2em] pb-3 md:pb-4 transition-all duration-300 ${activeTab === tab ? 'text-black' : 'text-deep-espresso/40 hover:text-deep-espresso/60'
                 }`}
             >
               {tab}

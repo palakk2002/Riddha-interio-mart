@@ -48,7 +48,7 @@ const HomePage = () => {
             className="flex flex-col md:flex-row justify-between items-center md:items-end mb-8 md:mb-16 gap-6 md:gap-8 text-center md:text-left"
           >
             <div className="max-w-2xl space-y-2 md:space-y-4">
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Featured Highlights</h2>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-[var(--color-header-red)] text-center md:text-left">Featured Highlights</h2>
               <p className="text-deep-espresso/50 text-base md:text-xl font-light leading-relaxed">
                 Handpicked designs that bring character and sophistication to your living spaces.
               </p>

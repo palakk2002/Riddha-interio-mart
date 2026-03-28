@@ -72,7 +72,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
         <div className={`flex ${isList ? 'flex-row items-end' : (isMinimal ? 'flex-col items-start pt-1' : 'items-center')} justify-between gap-1 md:gap-2 md:pt-4`}>
           <div className="flex flex-col w-auto grow">
             <div className={`flex items-baseline gap-1.5 ${isMinimal ? 'flex-wrap' : ''}`}>
-              <span className={`${isMinimal ? 'text-[12px]' : (isList ? 'text-[13px] md:text-2xl' : 'text-[11px] md:text-2xl')} font-black text-deep-espresso tracking-tight`}>
+              <span className={`${isMinimal ? 'text-[12px]' : (isList ? 'text-[13px] md:text-2xl' : 'text-[11px] md:text-2xl')} font-black text-[var(--color-header-red)] tracking-tight`}>
                 ₹{product.price}
               </span>
               {product.originalPrice > product.price && (
@@ -122,7 +122,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
                    whileHover={{ scale: 1.05 }}
                    whileTap={{ scale: 0.95 }}
                    onClick={(e) => { e.preventDefault(); addToCart(product); }}
-                   className="h-8 md:h-12 px-4 min-[360px]:px-6 md:px-8 bg-deep-espresso text-white rounded-lg md:rounded-2xl font-bold text-[9px] md:text-sm hover:bg-warm-sand transition-colors shadow-lg"
+                   className="h-8 md:h-12 px-4 min-[360px]:px-6 md:px-8 bg-[var(--color-header-red)] text-white rounded-lg md:rounded-2xl font-bold text-[9px] md:text-sm hover:bg-black transition-colors shadow-lg"
                  >
                    Add
                  </motion.button>

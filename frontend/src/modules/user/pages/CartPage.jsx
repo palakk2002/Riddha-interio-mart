@@ -53,7 +53,7 @@ const CartPage = () => {
         </p>
         <Link to="/products">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button size="lg" className="px-8 md:px-12 h-12 md:h-16 rounded-full shadow-2xl text-sm md:text-lg font-black uppercase tracking-widest">Start Shopping</Button>
+            <Button size="lg" className="px-8 md:px-12 h-12 md:h-16 rounded-full shadow-2xl shadow-[var(--color-header-red)]/30 bg-[var(--color-header-red)] text-sm md:text-lg font-black uppercase tracking-widest text-white">Start Shopping</Button>
           </motion.div>
         </Link>
       </motion.div>
@@ -305,7 +305,7 @@ const CartPage = () => {
           <motion.button 
             whileTap={{ scale: 0.95 }}
             onClick={handleAction}
-            className="bg-warm-sand text-white px-8 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-warm-sand/20"
+            className="bg-[var(--color-header-red)] text-white px-8 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-[var(--color-header-red)]/20"
           >
             {getButtonText()}
           </motion.button>

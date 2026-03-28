@@ -39,7 +39,7 @@ const FavouriteCategories = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-2xl md:text-5xl font-display font-bold text-deep-espresso tracking-tight mb-8 md:mb-16"
+          className="text-2xl md:text-5xl font-display font-bold text-[var(--color-header-red)] tracking-tight mb-8 md:mb-16"
         >
           Our Favourite Categories
         </motion.h2>
@@ -51,7 +51,7 @@ const FavouriteCategories = () => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-6 py-2 rounded-full border-2 transition-all duration-300 whitespace-nowrap text-xs md:text-sm font-bold ${activeTab === tab
-                  ? 'border-warm-sand text-warm-sand'
+                  ? 'border-[var(--color-header-red)] text-[var(--color-header-red)]'
                   : 'border-soft-oatmeal/20 text-deep-espresso/40 hover:border-soft-oatmeal/40'
                 }`}
             >

@@ -47,7 +47,7 @@ const OfferBanner = () => {
               <div 
                 key={i} 
                 className={`h-1 md:h-2 rounded-full transition-all duration-300 ${
-                i === 1 ? 'w-3 md:w-8 bg-warm-sand shadow-[0_0_10px_rgba(227,30,36,0.3)]' : 'w-1 md:w-2 bg-white/60'
+                i === 1 ? 'w-3 md:w-8 bg-warm-sand shadow-[0_0_10px_rgba(146,39,36,0.3)]' : 'w-1 md:w-2 bg-white/60'
                 }`}
               />
             ))}

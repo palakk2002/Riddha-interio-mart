@@ -184,7 +184,7 @@ const ProductDetailsPage = () => {
             {currentQuantity === 0 ? (
               <Button
                 size="lg"
-                className="w-full h-16 rounded-2xl bg-warm-sand text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-warm-sand/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+                className="w-full h-16 rounded-2xl bg-[var(--color-header-red)] text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-[var(--color-header-red)]/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
                 onClick={() => addToCart(product, 1)}
               >
                 <FiShoppingCart className="h-5 w-5" />
@@ -278,16 +278,16 @@ const ProductDetailsPage = () => {
             <motion.button
               whileTap={{ scale: 0.96 }}
               onClick={() => addToCart(product, 1)}
-              className="flex-1 py-3 bg-white border-2 border-warm-sand text-warm-sand rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all shadow-sm"
+              className="flex-1 py-3 bg-white border-2 border-[var(--color-header-red)] text-[var(--color-header-red)] rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all shadow-sm"
             >
               Add To Cart
             </motion.button>
           ) : (
-            <div className="flex-1 flex items-center justify-between bg-white border-2 border-warm-sand text-warm-sand rounded-2xl px-4 h-[46px] shadow-sm">
+            <div className="flex-1 flex items-center justify-between bg-white border-2 border-[var(--color-header-red)] text-[var(--color-header-red)] rounded-2xl px-4 h-[46px] shadow-sm">
               <motion.button
                 whileTap={{ scale: 0.8 }}
                 onClick={() => updateQuantity(product.id, currentQuantity - 1)}
-                className="h-8 w-8 flex items-center justify-center text-warm-sand bg-warm-sand/10 rounded-lg"
+                className="h-8 w-8 flex items-center justify-center text-[var(--color-header-red)] bg-[var(--color-header-red)]/10 rounded-lg"
               >
                 <FiMinus className="h-4 w-4" />
               </motion.button>
@@ -298,7 +298,7 @@ const ProductDetailsPage = () => {
               <motion.button
                 whileTap={{ scale: 0.8 }}
                 onClick={() => updateQuantity(product.id, currentQuantity + 1)}
-                className="h-8 w-8 flex items-center justify-center text-warm-sand bg-warm-sand/10 rounded-lg"
+                className="h-8 w-8 flex items-center justify-center text-[var(--color-header-red)] bg-[var(--color-header-red)]/10 rounded-lg"
               >
                 <FiPlus className="h-4 w-4" />
               </motion.button>
@@ -316,7 +316,7 @@ const ProductDetailsPage = () => {
           >
             <motion.button
               whileTap={{ scale: 0.96 }}
-              className="w-full py-3 bg-warm-sand text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-warm-sand/20 transition-all border-2 border-warm-sand"
+              className="w-full py-3 bg-[var(--color-header-red)] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-[var(--color-header-red)]/20 transition-all border-2 border-[var(--color-header-red)]"
             >
               Buy Now
             </motion.button>
