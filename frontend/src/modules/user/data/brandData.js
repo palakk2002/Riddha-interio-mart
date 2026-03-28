@@ -6,6 +6,10 @@ import anchorBanner4 from '../../../assets/anchor_banner_4.png';
 import wiresCat from '../../../assets/wires_category.png';
 import fansCat from '../../../assets/fans_category.png';
 import switchesCat from '../../../assets/switches_category.png';
+import lightingCat from '../../../assets/lighting.jpg';
+import tapCat from '../../../assets/tap.jpg';
+import mirrorsCat from '../../../assets/mirrors_premium.png';
+import furnitureCat from '../../../assets/furniture.jpg';
 
 export const brandData = {
   anchor: {
@@ -15,7 +19,7 @@ export const brandData = {
       { id: 1, name: 'Wires & Cables', image: wiresCat, slug: 'wires-and-cables' },
       { id: 2, name: 'Fans', image: fansCat, slug: 'fans' },
       { id: 3, name: 'Switches & Sockets', image: switchesCat, slug: 'switches-and-sockets' },
-      { id: 4, name: 'LED Lighting', image: 'https://images.unsplash.com/photo-1550985616-10810253b84d?q=80&w=400', slug: 'lighting' },
+      { id: 4, name: 'LED Lighting', image: lightingCat, slug: 'lighting' },
       { id: 5, name: 'MCBs & DBs', image: 'https://images.unsplash.com/photo-1558444479-28198f79396e?q=80&w=400', slug: 'mcb' },
     ]
   },
@@ -26,8 +30,8 @@ export const brandData = {
       'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=1200'
     ],
     categories: [
-      { id: 1, name: 'Plywood', image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=400', slug: 'plywood' },
-      { id: 2, name: 'Blockboards', image: 'https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?q=80&w=400', slug: 'blockboard' },
+      { id: 1, name: 'Plywood', image: furnitureCat, slug: 'plywood' },
+      { id: 2, name: 'Blockboards', image: furnitureCat, slug: 'blockboard' },
       { id: 3, name: 'Flush Doors', image: 'https://images.unsplash.com/photo-1506377295352-e3154d43ea9e?q=80&w=400', slug: 'doors' },
     ]
   },
@@ -75,8 +79,8 @@ export const brandData = {
     ],
     categories: [
       { id: 1, name: 'Sanitaryware', image: 'https://images.unsplash.com/photo-1600566752355-3979ff69a3ec?q=80&w=400', slug: 'sanitaryware' },
-      { id: 2, name: 'Faucets', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=400', slug: 'faucets' },
-      { id: 3, name: 'Tiles', image: 'https://images.unsplash.com/photo-1584622781564-1d987f7333c1?q=80&w=400', slug: 'tiles' },
+      { id: 2, name: 'Faucets', image: tapCat, slug: 'faucets' },
+      { id: 3, name: 'Designer Mirrors', image: mirrorsCat, slug: 'mirrors' },
     ]
   },
   havells: {
@@ -87,7 +91,7 @@ export const brandData = {
     ],
     categories: [
       { id: 1, name: 'Fans', image: fansCat, slug: 'fans' },
-      { id: 2, name: 'Professional Lighting', image: 'https://images.unsplash.com/photo-1550985616-10810253b84d?q=80&w=400', slug: 'lighting' },
+      { id: 2, name: 'Professional Lighting', image: lightingCat, slug: 'lighting' },
       { id: 3, name: 'Switchgear', image: 'https://images.unsplash.com/photo-1558444479-28198f79396e?q=80&w=400', slug: 'switchgear' },
     ]
   },
