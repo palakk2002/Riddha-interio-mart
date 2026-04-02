@@ -5,6 +5,7 @@ import OfferBanner from '../components/OfferBanner';
 import FavouriteCategories from '../components/FavouriteCategories';
 import TopBrands from '../components/TopBrands';
 import CategoryQuickAccess from '../components/CategoryQuickAccess';
+import ExpressDeliveryBanner from '../components/ExpressDeliveryBanner';
 import ProductCard from '../components/ProductCard';
 import { products } from '../data/products';
 import Button from '../../../shared/components/Button';
@@ -27,6 +28,9 @@ const HomePage = () => {
     <div className="space-y-2 md:space-y-4 py-2 md:py-2">
       {/* Quick Access Categories */}
       <CategoryQuickAccess />
+
+      {/* Express Delivery Banner */}
+      <ExpressDeliveryBanner />
 
       {/* Banner Section */}
       <section className="max-w-7xl mx-auto px-0 md:px-6 lg:px-12">

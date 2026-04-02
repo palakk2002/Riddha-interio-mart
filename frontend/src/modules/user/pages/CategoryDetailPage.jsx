@@ -2,6 +2,8 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { subcategories } from '../data/subcategories';
+import CategoryQuickAccess from '../components/CategoryQuickAccess';
+import BrandScroll from '../components/BrandScroll';
 
 const CategoryDetailPage = () => {
   const { slug } = useParams();
@@ -68,6 +70,22 @@ const CategoryDetailPage = () => {
             </Link>
           </div>
         )}
+      </div>
+
+      {/* Explore More Categories Section */}
+      <section className="mt-20 pt-16 border-t border-soft-oatmeal/10">
+        <div className="max-w-7xl mx-auto px-4 md:px-12 mb-6">
+          <h2 className="text-2xl md:text-4xl font-black text-deep-espresso tracking-tight">Explore More Collections</h2>
+          <p className="text-deep-espresso/40 text-[10px] md:text-sm font-black tracking-[0.2em] uppercase mt-2">
+            Discover other premium interior categories
+          </p>
+        </div>
+        <CategoryQuickAccess isScrollable={true} />
+      </section>
+
+      {/* Brands in Focus Section */}
+      <div className="mt-8">
+        <BrandScroll title="Brands In Focus" />
       </div>
     </div>
   );

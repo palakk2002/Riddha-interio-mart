@@ -15,11 +15,13 @@ const brands = [
   { name: 'Taparia', offer: 'Up to 15% off', path: '/brand/taparia' },
 ];
 
-const TopBrands = () => {
+const TopBrands = ({ title }) => {
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-12 py-4">
       <div className="bg-[#F2F2F2] py-4 text-center border-x border-t border-gray-100">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight">Explore our Top Brands</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight">
+          {title || "Explore our Top Brands"}
+        </h2>
       </div>
       
       <div className="relative group overflow-hidden border-l border-t border-gray-100 shadow-sm">
