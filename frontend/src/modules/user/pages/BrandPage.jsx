@@ -1,13 +1,39 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { LuChevronRight, LuChevronLeft } from 'react-icons/lu';
-import { brandData } from '../data/brandData';
+import { brandData as staticBrandData } from '../data/brandData';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const BrandPage = () => {
   const { brandName } = useParams();
-  const brand = brandData[brandName?.toLowerCase()];
-  const [currentSlide, setCurrentSlide] = React.useState(0);
+  const [brand, setBrand] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    setLoading(true);
+    const saved = localStorage.getItem('admin_brands');
+    let foundBrand = null;
+
+    if (saved) {
+      const brands = JSON.parse(saved);
+      // Try to find by slug or name
+      foundBrand = brands.find(b => 
+        (b.slug && b.slug.toLowerCase() === brandName?.toLowerCase()) || 
+        (b.name && b.name.toLowerCase() === brandName?.toLowerCase())
+      );
+    }
+
+    if (!foundBrand) {
+      // Fallback to static data
+      foundBrand = staticBrandData[brandName?.toLowerCase()];
+    }
+
+    setBrand(foundBrand);
+    setLoading(false);
+    setCurrentSlide(0);
+    window.scrollTo(0, 0);
+  }, [brandName]);
 
   // Auto-scroll carousel
   useEffect(() => {
@@ -18,11 +44,7 @@ const BrandPage = () => {
     return () => clearInterval(timer);
   }, [brand]);
 
-  // Scroll to top when brand changes
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    setCurrentSlide(0);
-  }, [brandName]);
+  if (loading) return <div className="min-h-screen bg-white" />;
 
   if (!brand) {
     return (
@@ -55,8 +77,8 @@ const BrandPage = () => {
               alt={`${brand.name} Banner ${currentSlide + 1}`} 
               className="w-full h-full object-cover"
             />
-            {/* Subtle overlay for placeholder banners only if they are just images */}
-            {brand.banners[currentSlide].startsWith('http') && (
+            {/* Overlay if it's a URL or generic image */}
+            {(brand.banners[currentSlide]?.startsWith('http') || brand.banners[currentSlide]?.startsWith('data:')) && (
               <div className="absolute inset-0 bg-black/10 flex items-center px-6 md:px-20">
                  <h1 className="text-4xl md:text-7xl font-black text-white italic uppercase tracking-tighter drop-shadow-2xl">
                     {brand.name}
@@ -67,25 +89,27 @@ const BrandPage = () => {
         </AnimatePresence>
 
         {/* Carousel Controls */}
-        <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300">
-           <button onClick={prevSlide} className="p-2 md:p-4 rounded-full bg-white/30 backdrop-blur-md text-white hover:bg-white/50 transition-all active:scale-90">
-              <LuChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
-           </button>
-           <button onClick={nextSlide} className="p-2 md:p-4 rounded-full bg-white/30 backdrop-blur-md text-white hover:bg-white/50 transition-all active:scale-90">
-              <LuChevronRight className="w-6 h-6 md:w-8 md:h-8" />
-           </button>
-        </div>
-
-        {/* Indicators */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-10">
-           {brand.banners.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentSlide(idx)}
-                className={`h-1 rounded-full transition-all duration-500 ${currentSlide === idx ? 'w-10 bg-white' : 'w-4 bg-white/40'}`}
-              />
-           ))}
-        </div>
+        {brand.banners.length > 1 && (
+          <>
+            <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300">
+               <button onClick={prevSlide} className="p-2 md:p-4 rounded-full bg-white/30 backdrop-blur-md text-white hover:bg-white/50 transition-all active:scale-90">
+                  <LuChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+               </button>
+               <button onClick={nextSlide} className="p-2 md:p-4 rounded-full bg-white/30 backdrop-blur-md text-white hover:bg-white/50 transition-all active:scale-90">
+                  <LuChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+               </button>
+            </div>
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+               {brand.banners.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentSlide(idx)}
+                    className={`h-1 rounded-full transition-all duration-500 ${currentSlide === idx ? 'w-10 bg-white' : 'w-4 bg-white/40'}`}
+                  />
+               ))}
+            </div>
+          </>
+        )}
       </section>
 
       {/* Shop By Category - Horizontal Scroll */}
@@ -98,25 +122,23 @@ const BrandPage = () => {
         </div>
         
         <div className="flex overflow-x-auto no-scrollbar gap-4 md:gap-8 px-4 md:px-12 pb-6 snap-x">
-          {brand.categories.map((cat) => (
+          {brand.categories?.map((cat, idx) => (
             <Link 
-              key={cat.id}
+              key={cat.id || idx}
               to={`/products?brand=${brand.name}&category=${cat.slug}`}
-              className="flex flex-col flex-shrink-0 w-[140px] md:w-[220px] snap-start group relative bg-white rounded-xl md:rounded-3xl overflow-hidden shadow-sm border border-soft-oatmeal/10 transition-all hover:shadow-xl"
+              className="flex flex-col flex-shrink-0 items-center gap-2 md:gap-4 w-24 md:w-56 snap-start group relative transition-all"
             >
-              {/* Image Container matching Home Page aspect ratios */}
-              <div className="aspect-square md:aspect-[4/5] overflow-hidden bg-[#F9F9F9] relative">
-                <img 
-                  src={cat.image} 
-                  alt={cat.name} 
-                  className="w-full h-full object-contain p-4 md:p-6 transition-transform duration-700 group-hover:scale-110 mix-blend-multiply" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative aspect-square w-full bg-white border-[1px] md:border-2 border-[#922724] rounded-lg md:rounded-2xl overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300">
+                <div className="w-full h-full flex items-center justify-center p-2 md:p-4 bg-[#F9F9F9]">
+                  <img 
+                    src={cat.image} 
+                    alt={cat.name} 
+                    className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-110 mix-blend-multiply" 
+                  />
+                </div>
               </div>
-              
-              {/* Category Label matching Home Page style */}
-              <div className="py-4 px-2 text-center bg-white border-t border-soft-oatmeal/5">
-                <span className="text-[10px] md:text-sm font-bold text-deep-espresso/80 group-hover:text-[#922724] transition-colors tracking-tight line-clamp-1 uppercase">
+              <div className="text-center">
+                <span className="text-[9px] md:text-lg font-bold text-[#922724] group-hover:text-[#b1312d] transition-colors tracking-tight line-clamp-1 uppercase">
                   {cat.name}
                 </span>
               </div>

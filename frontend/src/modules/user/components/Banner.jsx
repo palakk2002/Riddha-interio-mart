@@ -29,7 +29,7 @@ const Banner = () => {
   const prevSlide = () => setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
 
   return (
-    <div className="relative h-[300px] md:h-[600px] w-full overflow-hidden md:rounded-[2.5rem] rounded-none group shadow-2xl bg-gray-100">
+    <div className="relative h-[200px] md:h-[600px] w-full overflow-hidden md:rounded-[2.5rem] rounded-none group shadow-2xl bg-gray-100">
       <AnimatePresence mode="wait">
         <motion.div
           key={current}
@@ -45,8 +45,8 @@ const Banner = () => {
             className="h-full w-full object-cover"
           />
           {/* Enhanced Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent flex items-center px-6 md:px-20">
-             <div className="max-w-xl space-y-4 md:space-y-6">
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent flex items-center px-4 md:px-20">
+             <div className="max-w-xl space-y-1.5 md:space-y-6">
                 <motion.span 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -59,7 +59,7 @@ const Banner = () => {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="text-3xl md:text-7xl font-display font-bold text-white leading-[1.1] tracking-tighter"
+                  className="text-2xl md:text-7xl font-display font-bold text-white leading-[1.1] tracking-tighter"
                 >
                   {banners[current].title}
                 </motion.h2>
@@ -67,7 +67,7 @@ const Banner = () => {
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
-                  className="text-white/60 text-sm md:text-xl font-light italic"
+                  className="text-white/60 text-[10px] md:text-xl font-light italic"
                 >
                   {banners[current].subtitle}
                 </motion.p>
@@ -87,7 +87,7 @@ const Banner = () => {
       </div>
 
       {/* Pagination Dots */}
-      <div className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+      <div className="absolute bottom-4 md:bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-10">
          {banners.map((_, idx) => (
             <button
                key={idx}

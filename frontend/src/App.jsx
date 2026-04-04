@@ -18,6 +18,7 @@ function App() {
                       location.pathname.endsWith('/login') || location.pathname.endsWith('/signup');
   const isDashboardLayout = isAdminPath || isSellerPath || isAuthPath;
   const isProductPage = location.pathname.startsWith('/product/');
+  const isCheckoutPath = ['/cart', '/address', '/payment'].includes(location.pathname);
 
   useEffect(() => {
     // Check if pincode is set in localStorage
@@ -32,7 +33,7 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col user-theme bg-white border-deep-espresso/5 ${!isDashboardLayout ? 'pb-24 md:pb-0' : ''}`}>
+    <div className={`min-h-screen flex flex-col user-theme bg-white border-deep-espresso/5 ${(!isDashboardLayout && !isCheckoutPath) ? 'pb-24 md:pb-0' : ''}`}>
       {showPincodeModal && <PincodeModal onComplete={handlePincodeComplete} />}
       
       {!isDashboardLayout && (

@@ -13,6 +13,7 @@ import AddFavouriteCategoryItemPage from './pages/AddFavouriteCategoryItemPage';
 import ManageHeroBanner from './pages/ManageHeroBanner';
 import ManagePromoBanner from './pages/ManagePromoBanner';
 import ManageCategoryGrid from './pages/ManageCategoryGrid';
+import ManageBrands from './pages/ManageBrands';
 import LoginPage from '../user/pages/LoginPage';
 import SignupPage from '../user/pages/SignupPage';
 import AdminProfile from './pages/AdminProfile';
@@ -45,6 +46,7 @@ const AdminRoutes = () => {
         <Route path="/manage-featured/add" element={<AddFeaturedProductPage />} />
         <Route path="/manage-hero" element={<ManageHeroBanner />} />
         <Route path="/manage-promo" element={<ManagePromoBanner />} />
+        <Route path="/manage-brands" element={<ManageBrands />} />
         <Route path="/manage-grid" element={<ManageCategoryGrid />} />
         <Route path="/manage-grid/add" element={<AddCategoryGridItemPage />} />
         <Route path="/settings" element={<SettingsPage />} />

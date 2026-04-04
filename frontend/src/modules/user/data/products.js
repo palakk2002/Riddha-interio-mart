@@ -311,5 +311,137 @@ export const products = [
       "Coverage": "40-60 sq.ft/L",
       "Drying Time": "4 hours"
     }
+  },
+  {
+    id: 15,
+    name: "Royal Velvet Wingback Bed",
+    category: "beds",
+    price: 1250,
+    originalPrice: 1500,
+    image: "https://images.unsplash.com/photo-1505693419173-42b9258a6270?w=800&q=80",
+    rating: 4.9,
+    colors: ["#544339", "#2D3436", "#922724"],
+    sizes: ["Queen", "King"],
+    description: "Experience ultimate luxury with our Royal Velvet Wingback Bed. Features a hand-tufted headboard and solid teak wood frame.",
+    features: ["Premium velvet upholstery", "Sturdy wingback design", "Solid teak wood frame"],
+    inStock: true,
+    specifications: {
+      "Brand": "Riddha Interio",
+      "Material": "Teak Wood & Velvet",
+      "Headboard Height": "54 inches",
+      "Assembly": "Professional required",
+      "Warranty": "5 Years",
+      "Storage": "Optional hydraulic"
+    }
+  },
+  {
+    id: 16,
+    name: "Minimalist Zen Platform Bed",
+    category: "beds",
+    price: 850,
+    originalPrice: 1050,
+    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&q=80",
+    rating: 4.8,
+    colors: ["#FFFFFF", "#F5F5F5"],
+    sizes: ["Full", "Queen", "King"],
+    description: "A clean, low-profile platform bed that brings Japanese-inspired minimalism to your bedroom.",
+    features: ["Solid oak construction", "No box spring needed", "Sleek low profile"],
+    inStock: true,
+    specifications: {
+      "Brand": "Zen Living",
+      "Material": "American Oak",
+      "Finish": "Natural Matte",
+      "Weight Capacity": "400 kg",
+      "Clearance": "4 inches",
+      "Slat Material": "Pine Wood"
+    }
+  },
+  {
+    id: 17,
+    name: "Modern Leather Sleigh Bed",
+    category: "beds",
+    price: 1450,
+    originalPrice: 1800,
+    image: "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80",
+    rating: 4.7,
+    colors: ["#2D3436", "#544339"],
+    sizes: ["King"],
+    description: "Crafted with top-grain Italian leather, this sleigh bed is the centerpiece of any master bedroom.",
+    features: ["Italian leather", "Ergonomic curve", "Reinforced steel frame"],
+    inStock: true,
+    specifications: {
+      "Brand": "Luxury Comfort",
+      "Material": "Top-grain Leather",
+      "Legs": "Polished Chrome",
+      "Width": "82 inches",
+      "Depth": "96 inches",
+      "Warranty": "Limited Lifetime"
+    }
+  },
+  {
+    id: 18,
+    name: "Classic Four-Poster Bed",
+    category: "beds",
+    price: 1800,
+    originalPrice: 2200,
+    image: "https://images.unsplash.com/photo-1616594831707-3c7d94320665?w=800&q=80",
+    rating: 5.0,
+    colors: ["#544339"],
+    sizes: ["Queen", "King"],
+    description: "Timeless elegance meets modern craftsmanship. A grand four-poster bed made from solid walnut.",
+    features: ["Solid walnut", "Removable canopy rails", "Antique brass accents"],
+    inStock: true,
+    specifications: {
+      "Brand": "Artisan Wood",
+      "Material": "Exotic Walnut",
+      "Height": "84 inches",
+      "Finish": "Hand-rubbed oil",
+      "Styles": "Victorian Modern",
+      "Shipping": "Flat-pack available"
+    }
+  },
+  {
+    id: 19,
+    name: "Scandi Light Wood Bed",
+    category: "beds",
+    price: 720,
+    originalPrice: 900,
+    image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800&q=80",
+    rating: 4.6,
+    colors: ["#F5F5F5", "#BFA38A"],
+    sizes: ["Single", "Full", "Queen"],
+    description: "Bright and airy Scandinavian design. Perfect for smaller spaces or guest rooms.",
+    features: ["Sustainable birch wood", "Integrated nightstands", "Lightweight design"],
+    inStock: true,
+    specifications: {
+      "Brand": "Nordic Home",
+      "Material": "Birch Laminate",
+      "Footboard Height": "12 inches",
+      "Eco-Cert": "FSC Certified",
+      "Box Spring": "Not required",
+      "Origin": "Sweden"
+    }
+  },
+  {
+    id: 20,
+    name: "Industrial Metal Frame Bed",
+    category: "beds",
+    price: 550,
+    originalPrice: 700,
+    image: "https://images.unsplash.com/photo-1505691938895-1758d7eaa511?w=800&q=80",
+    rating: 4.7,
+    colors: ["#2D3436"],
+    sizes: ["Full", "Queen"],
+    description: "A rugged yet sophisticated industrial bed frame with reclaimed wood accents.",
+    features: ["Powder-coated steel", "Reclaimed pine accents", "High load capacity"],
+    inStock: true,
+    specifications: {
+      "Brand": "Steel & Wood",
+      "Material": "Carbon Steel & Pine",
+      "Finish": "Distressed Black",
+      "Underbed Height": "12.5 inches",
+      "Weight": "45 kg",
+      "Noise-free": "Yes"
+    }
   }
 ];

@@ -16,16 +16,6 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
     ? categories
     : categories.filter(cat => cat.tabs.includes(activeTab));
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, scale: 0.8, y: 10 },
-    visible: { opacity: 1, scale: 1, y: 0 }
-  };
-
   return (
     <section className="pt-1 pb-0 md:py-12 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -53,11 +43,7 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
 
         {/* Categories Grid/Scroll Area */}
         <div className="overflow-x-auto no-scrollbar snap-x snap-mandatory px-0 md:px-0">
-          <motion.div
-            key={activeTab}
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
+          <div
             className={`${isScrollable ? 'flex pb-2 pt-1' : 'flex md:grid md:grid-cols-5 lg:grid-cols-6 pb-6 md:pb-0'} gap-x-4 md:gap-10 min-h-[120px] md:min-h-[180px]`}
           >
             {/* Conditional Layout for Home vs Subcategory Page */}
@@ -74,7 +60,7 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
                 ))}
               </div>
             )}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
@@ -82,12 +68,7 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
 };
 
 const CategoryItem = ({ category, index }) => (
-  <motion.div
-    variants={{
-      hidden: { opacity: 0, scale: 0.8, y: 10 },
-      visible: { opacity: 1, scale: 1, y: 0 }
-    }}
-    layout
+  <div
     className="snap-start shrink-0"
   >
     <Link
@@ -106,7 +87,7 @@ const CategoryItem = ({ category, index }) => (
         {category.name}
       </span>
     </Link>
-  </motion.div>
+  </div>
 );
 
 export default CategoryQuickAccess;

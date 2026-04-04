@@ -15,12 +15,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
     : 0;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      whileHover={{ y: -5 }}
+    <div 
       className={`group bg-white ${isMinimal ? 'rounded-xl' : 'rounded-2xl md:rounded-3xl border border-soft-oatmeal/20'} shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden ${
         isList ? 'flex flex-row md:flex-col h-[135px] md:h-auto' : 'flex flex-col'
       }`}
@@ -31,12 +26,10 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
           isList ? 'w-[40%] md:w-full h-full md:h-80 border-r md:border-r-0' : (isMinimal ? 'aspect-square w-full' : 'h-30 md:h-80 w-full')
         } ${!isMinimal ? 'border-soft-oatmeal/10' : ''}`}
       >
-        <motion.img
-          whileHover={{ scale: 1.1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+        <img
           src={product.image}
           alt={product.name}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         
         {/* Quick Action Icons - Desktop only for grid/list, always for minimal bottom-right */}
@@ -118,20 +111,18 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
                    </button>
                  </div>
                ) : (
-                 <motion.button 
-                   whileHover={{ scale: 1.05 }}
-                   whileTap={{ scale: 0.95 }}
+                 <button 
                    onClick={(e) => { e.preventDefault(); addToCart(product); }}
-                   className="h-8 md:h-12 px-4 min-[360px]:px-6 md:px-8 bg-[var(--color-header-red)] text-white rounded-lg md:rounded-2xl font-bold text-[9px] md:text-sm hover:bg-black transition-colors shadow-lg"
+                   className="h-8 md:h-12 px-4 min-[360px]:px-6 md:px-8 bg-[var(--color-header-red)] text-white rounded-lg md:rounded-2xl font-bold text-[9px] md:text-sm hover:bg-black transition-colors shadow-lg active:scale-95"
                  >
                    Add
-                 </motion.button>
+                 </button>
                )}
             </div>
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

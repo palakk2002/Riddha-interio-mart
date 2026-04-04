@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import {
   FiShoppingCart,
   FiMenu,
@@ -17,7 +17,10 @@ const Navbar = () => {
   const [policiesOpen, setPoliciesOpen] = useState(false);
   const [desktopPoliciesOpen, setDesktopPoliciesOpen] = useState(false);
   const { cartCount } = useCart();
+  const location = useLocation();
   const policiesTimeoutRef = useRef(null);
+
+  const isCartPage = location.pathname === "/cart";
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -147,9 +150,11 @@ const Navbar = () => {
             </div>
 
             {/* Search Bar - Desktop */}
-            <div className="hidden lg:flex flex-1 max-w-xs mx-8">
-              <SearchBar className="scale-90" />
-            </div>
+            {!isCartPage && (
+              <div className="hidden lg:flex flex-1 max-w-xs mx-8">
+                <SearchBar className="scale-90" />
+              </div>
+            )}
 
             {/* Icons */}
             <div className="flex items-center space-x-1 sm:space-x-4">
@@ -187,9 +192,11 @@ const Navbar = () => {
           </div>
 
           {/* Persistent Mobile Search Bar Row */}
-          <div className="md:hidden pb-1">
-            <SearchBar className="scale-95 origin-left" />
-          </div>
+          {!isCartPage && (
+            <div className="md:hidden pb-1">
+              <SearchBar className="scale-95 origin-left" />
+            </div>
+          )}
         </div>
       </nav>
 

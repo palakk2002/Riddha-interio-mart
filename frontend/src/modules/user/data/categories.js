@@ -83,5 +83,13 @@ export const categories = [
     image: furnitureImg,
     productCount: 14,
     tabs: ['Decor', 'Living Room']
+  },
+  {
+    id: 107,
+    name: 'Luxury Beds',
+    slug: 'beds',
+    image: 'https://images.unsplash.com/photo-1505693419173-42b9258a6270?w=800&q=80',
+    productCount: 14,
+    tabs: ['Furniture', 'Bed Room']
   }
 ];

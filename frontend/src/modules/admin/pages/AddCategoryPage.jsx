@@ -137,7 +137,7 @@ const AddCategoryPage = () => {
             {/* Subcategories */}
             <div className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm space-y-6 md:space-y-8">
               <div className="flex items-center justify-between border-b border-soft-oatmeal pb-4">
-                <h3 className="text-base md:text-lg font-black text-deep-espresso uppercase tracking-[0.1em]">Sub-Collections</h3>
+                <h3 className="text-base md:text-lg font-black text-deep-espresso uppercase tracking-[0.1em]">Subcategories</h3>
                 <button 
                   type="button"
                   onClick={handleAddSubcategory}
@@ -159,7 +159,7 @@ const AddCategoryPage = () => {
                     >
                       <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                           <label className="text-[8px] font-black text-warm-sand uppercase tracking-widest pl-1">Sub-Collection Name</label>
+                           <label className="text-[8px] font-black text-warm-sand uppercase tracking-widest pl-1">Subcategory Name</label>
                            <input 
                               type="text" 
                               placeholder="e.g. Chandeliers"

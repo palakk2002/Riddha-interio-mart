@@ -63,11 +63,8 @@ const CartPage = () => {
   return (
     <div className="bg-soft-oatmeal/5 min-h-screen">
       {/* Mobile Top Header (Fixed) */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-warm-sand text-white px-4 h-14 flex items-center gap-4 shadow-lg">
-        <Link to="/products">
-          <FiTrash2 className="h-6 w-6 rotate-90" onClick={() => window.history.back()} />
-        </Link>
-        <h1 className="text-xl font-bold">Cart: {cart.length} Items</h1>
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-warm-sand text-white px-6 h-14 flex items-center shadow-lg">
+        <h1 className="text-xl font-bold text-white tracking-tight">Cart: {cart.length} {cart.length === 1 ? 'item' : 'items'}</h1>
       </div>
 
       {/* Main Content Container */}
@@ -77,7 +74,7 @@ const CartPage = () => {
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-2 md:pt-20 pb-32 md:pb-20"
       >
         {/* Mobile-Only Progress Steps */}
-        <div className="md:hidden mt-14 mb-6 flex items-center justify-between px-2 bg-white py-4 rounded-xl shadow-sm overflow-x-auto no-scrollbar">
+        <div className="md:hidden mt-2 mb-4 flex items-center justify-between px-2 bg-white py-2 rounded-xl shadow-sm overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="h-6 w-6 rounded-full bg-warm-sand text-white text-xs flex items-center justify-center font-bold">1</span>
             <span className="text-xs font-bold text-gray-400">Cart</span>

@@ -147,7 +147,7 @@ const EditCategoryPage = () => {
           </button>
           <div>
             <h1 className="text-3xl font-display font-bold text-deep-espresso">Edit Category: {category.name}</h1>
-            <p className="text-warm-sand text-sm font-medium">Update the metadata and component sub-collections for this category.</p>
+            <p className="text-warm-sand text-sm font-medium">Update the metadata and subcategories for this category.</p>
           </div>
         </div>
 
@@ -184,7 +184,7 @@ const EditCategoryPage = () => {
             {/* Subcategories */}
             <div className="bg-white p-8 md:p-10 rounded-[40px] border border-soft-oatmeal shadow-sm space-y-8">
               <div className="flex items-center justify-between border-b border-soft-oatmeal pb-4">
-                <h3 className="text-lg font-black text-deep-espresso uppercase tracking-[0.1em]">Sub-Collections</h3>
+                <h3 className="text-lg font-black text-deep-espresso uppercase tracking-[0.1em]">Subcategories</h3>
                 <button 
                   type="button"
                   onClick={handleAddSubcategory}
@@ -206,7 +206,7 @@ const EditCategoryPage = () => {
                     >
                       <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                           <label className="text-[8px] font-black text-warm-sand uppercase tracking-widest pl-1">Sub-Collection Name</label>
+                           <label className="text-[8px] font-black text-warm-sand uppercase tracking-widest pl-1">Subcategory Name</label>
                            <input 
                               type="text" 
                               placeholder="e.g. Chandeliers"

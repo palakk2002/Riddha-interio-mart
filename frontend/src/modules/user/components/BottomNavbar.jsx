@@ -1,11 +1,17 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { FiHome, FiGrid, FiShoppingCart, FiUser } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../data/CartContext';
 
 const BottomNavbar = () => {
   const { cartCount } = useCart();
+
+  const location = useLocation();
+  const hideOnRoutes = ['/cart', '/address', '/payment'];
+  const shouldHide = hideOnRoutes.includes(location.pathname);
+
+  if (shouldHide) return null;
 
   const navItems = [
     { name: 'Home', path: '/', icon: FiHome },
