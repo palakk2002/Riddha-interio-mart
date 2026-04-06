@@ -518,7 +518,7 @@ const ManageBrands = () => {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => { setEditingBrand(null); setIsModalOpen(true); }}
+                onClick={() => navigate('/admin/manage-brands/add')}
                 className="px-6 py-3 bg-deep-espresso text-white rounded-xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg active:scale-95"
               >
                 <FiPlus size={16} /> New Record
@@ -641,14 +641,10 @@ const ManageBrands = () => {
                ))
              ) : (
                <div className="w-full">
-                 <EmptyState onAdd={() => { setEditingBrand(null); setIsModalOpen(true); }} isFiltering={searchTerm || filterStatus !== 'all'} />
+                 <EmptyState onAdd={() => navigate('/admin/manage-brands/add')} isFiltering={searchTerm || filterStatus !== 'all'} />
                </div>
              )}
            </AnimatePresence>
-        </div>
-
-        {/* Footer info */}
-        <div className="bg-white/50 backdrop-blur-md p-4 rounded-3xl border border-soft-oatmeal/30 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-deep-espresso text-white flex items-center justify-center shadow-lg shadow-deep-espresso/10">
               <FiCheck size={20} />

@@ -6,6 +6,7 @@ import BottomNavbar from './modules/user/components/BottomNavbar';
 import UserRoutes from './modules/user/routes';
 import AdminRoutes from './modules/admin/routes';
 import SellerRoutes from './modules/seller/routes';
+import DeliveryRoutes from './modules/delivery/routes';
 import PincodeModal from './modules/user/components/PincodeModal';
 import DeliveryBar from './modules/user/components/DeliveryBar';
 
@@ -14,9 +15,10 @@ function App() {
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith('/admin');
   const isSellerPath = location.pathname.startsWith('/seller');
+  const isDeliveryPath = location.pathname.startsWith('/delivery');
   const isAuthPath = location.pathname === '/login' || location.pathname === '/signup' || 
                       location.pathname.endsWith('/login') || location.pathname.endsWith('/signup');
-  const isDashboardLayout = isAdminPath || isSellerPath || isAuthPath;
+  const isDashboardLayout = isAdminPath || isSellerPath || isDeliveryPath || isAuthPath;
   const isProductPage = location.pathname.startsWith('/product/');
   const isCheckoutPath = ['/cart', '/address', '/payment'].includes(location.pathname);
 
@@ -58,6 +60,7 @@ function App() {
         <Routes>
           <Route path="/admin/*" element={<AdminRoutes />} />
           <Route path="/seller/*" element={<SellerRoutes />} />
+          <Route path="/delivery/*" element={<DeliveryRoutes />} />
           <Route path="/*" element={<UserRoutes />} />
         </Routes>
       </main>

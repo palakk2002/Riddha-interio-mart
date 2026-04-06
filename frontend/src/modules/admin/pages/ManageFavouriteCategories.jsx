@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LuPlus, LuX, LuCheck, LuPen, LuTrash2, LuImage, LuLayoutGrid, LuLayoutList, LuArrowRight } from 'react-icons/lu';
@@ -12,18 +12,27 @@ const ManageFavouriteCategories = () => {
   const [showAddTabForm, setShowAddTabForm] = useState(false);
   const [newTab, setNewTab] = useState({ name: '', image: '' });
 
+  const location = useLocation();
+
   useEffect(() => {
     const saved = localStorage.getItem('admin_favourite_categories');
     if (saved) {
       const parsed = JSON.parse(saved);
       setData(parsed);
-      if (parsed.tabs.length > 0) setActiveTab(parsed.tabs[0]);
+      
+      // Preservation logic: use incoming state > existing active > first tab
+      const incomingTab = location.state?.activeTab;
+      if (incomingTab && parsed.tabs.includes(incomingTab)) {
+        setActiveTab(incomingTab);
+      } else if (!activeTab && parsed.tabs.length > 0) {
+        setActiveTab(parsed.tabs[0]);
+      }
     } else {
       setData(manageFavouriteCategoriesData);
       if (manageFavouriteCategoriesData.tabs.length > 0) setActiveTab(manageFavouriteCategoriesData.tabs[0]);
       localStorage.setItem('admin_favourite_categories', JSON.stringify(manageFavouriteCategoriesData));
     }
-  }, []);
+  }, [location]);
 
   const saveToStorage = (updatedData) => {
     setData(updatedData);
@@ -57,12 +66,12 @@ const ManageFavouriteCategories = () => {
     if (newName && newName !== oldName && !data.tabs.includes(newName)) {
       const updatedTabs = data.tabs.map(t => t === oldName ? newName : t);
       const updatedCategories = data.categories.map(c => c.category === oldName ? { ...c, category: newName } : c);
-      
+
       const updatedData = {
         tabs: updatedTabs,
         categories: updatedCategories
       };
-      
+
       saveToStorage(updatedData);
       setActiveTab(newName);
     }
@@ -72,12 +81,12 @@ const ManageFavouriteCategories = () => {
     if (window.confirm(`Delete "${tabName}" and all its contents?`)) {
       const updatedTabs = data.tabs.filter(t => t !== tabName);
       const updatedCategories = data.categories.filter(c => c.category !== tabName);
-      
+
       const updatedData = {
         tabs: updatedTabs,
         categories: updatedCategories
       };
-      
+
       saveToStorage(updatedData);
       if (updatedTabs.length > 0) setActiveTab(updatedTabs[0]);
     }
@@ -96,16 +105,15 @@ const ManageFavouriteCategories = () => {
           </div>
           <div className="flex gap-3">
             <button
-               onClick={() => setShowAddTabForm(!showAddTabForm)}
-               className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all text-sm shadow-sm border ${
-                 showAddTabForm ? 'bg-deep-espresso text-white' : 'bg-white border-soft-oatmeal text-deep-espresso hover:bg-soft-oatmeal/20'
-               }`}
+              onClick={() => setShowAddTabForm(!showAddTabForm)}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all text-sm shadow-sm border ${showAddTabForm ? 'bg-deep-espresso text-white' : 'bg-white border-soft-oatmeal text-deep-espresso hover:bg-soft-oatmeal/20'
+                }`}
             >
               {showAddTabForm ? <LuX size={18} /> : <LuLayoutGrid size={18} />}
               {showAddTabForm ? 'Cancel' : 'Add New Tab'}
             </button>
             <button
-              onClick={() => navigate('/admin/manage-favourites/add')}
+              onClick={() => navigate('/admin/manage-favourites/add', { state: { category: activeTab } })}
               className="flex items-center gap-2 bg-dusty-cocoa text-white px-6 py-2.5 rounded-xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-dusty-cocoa/20 text-sm"
             >
               <LuPlus size={18} />
@@ -172,24 +180,23 @@ const ManageFavouriteCategories = () => {
             <div key={tab} className="relative group/tab">
               <button
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${
-                  activeTab === tab 
-                  ? 'bg-deep-espresso text-white shadow-lg' 
+                className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab
+                  ? 'bg-deep-espresso text-white shadow-lg'
                   : 'bg-soft-oatmeal/20 text-warm-sand hover:bg-soft-oatmeal/40'
-                }`}
+                  }`}
               >
                 {tab}
               </button>
-              
+
               {/* Tab Actions */}
               <div className="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover/tab:opacity-100 transition-opacity">
-                <button 
+                <button
                   onClick={() => handleRenameTab(tab)}
                   className="w-6 h-6 bg-white border border-soft-oatmeal rounded-full flex items-center justify-center text-warm-sand hover:text-dusty-cocoa shadow-sm"
                 >
                   <LuPen size={10} />
                 </button>
-                <button 
+                <button
                   onClick={() => handleDeleteTab(tab)}
                   className="w-6 h-6 bg-white border border-soft-oatmeal rounded-full flex items-center justify-center text-red-400 hover:text-red-500 shadow-sm"
                 >
@@ -201,7 +208,7 @@ const ManageFavouriteCategories = () => {
         </div>
 
         {/* Items Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4">
           <AnimatePresence mode="popLayout">
             {filteredItems.map((cat, index) => (
               <motion.div
@@ -211,31 +218,31 @@ const ManageFavouriteCategories = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="group relative flex flex-col bg-white rounded-2xl overflow-hidden shadow-md border border-soft-oatmeal/20 hover:shadow-2xl transition-all duration-500"
+                className="group relative flex flex-col bg-white rounded-xl overflow-hidden shadow-sm border border-soft-oatmeal/20 hover:shadow-xl transition-all duration-500"
               >
                 {/* Image Container */}
-                <div className="aspect-[3/4] overflow-hidden relative">
+                <div className="aspect-square overflow-hidden relative">
                   <img
                     src={cat.image}
                     alt={cat.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  
+
                   {/* Actions Overlay */}
                   <div className="absolute inset-0 bg-deep-espresso/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                     <button 
-                       onClick={() => handleDeleteItem(cat.id)}
-                       className="bg-white/90 p-2 rounded-lg text-red-400 hover:text-red-500 transition-colors shadow-lg"
-                       title="Delete Item"
-                     >
-                       <LuTrash2 size={16} />
-                     </button>
+                    <button
+                      onClick={() => handleDeleteItem(cat.id)}
+                      className="bg-white/90 p-1.5 rounded-lg text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-lg"
+                      title="Delete Item"
+                    >
+                      <LuTrash2 size={12} />
+                    </button>
                   </div>
                 </div>
 
                 {/* Info */}
-                <div className="py-4 px-3 text-center">
-                  <span className="text-[10px] font-black uppercase tracking-tight text-deep-espresso/70 group-hover:text-dusty-cocoa transition-colors">
+                <div className="py-2.5 px-2 text-center bg-soft-oatmeal/5">
+                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-tight text-deep-espresso/70 group-hover:text-dusty-cocoa transition-colors line-clamp-1">
                     {cat.name}
                   </span>
                 </div>
@@ -245,25 +252,25 @@ const ManageFavouriteCategories = () => {
 
           {/* Empty / Add Placeholder */}
           <button
-            onClick={() => navigate('/admin/manage-favourites/add')}
-            className="border-2 border-dashed border-soft-oatmeal/60 rounded-2xl aspect-[3/4] flex flex-col items-center justify-center gap-3 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group"
+            onClick={() => navigate('/admin/manage-favourites/add', { state: { category: activeTab } })}
+            className="border-2 border-dashed border-soft-oatmeal/60 rounded-xl aspect-square flex flex-col items-center justify-center gap-2 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group"
           >
-            <div className="w-12 h-12 rounded-full bg-soft-oatmeal/10 flex items-center justify-center group-hover:bg-dusty-cocoa/10 transition-colors">
-              <LuPlus size={24} className="group-hover:scale-110 transition-transform" />
+            <div className="w-8 h-8 rounded-full bg-soft-oatmeal/10 flex items-center justify-center group-hover:bg-dusty-cocoa/10 transition-colors">
+              <LuPlus size={16} className="group-hover:scale-110 transition-transform" />
             </div>
-            <span className="font-black text-[10px] uppercase tracking-widest">Add Item</span>
+            <span className="font-black text-[8px] md:text-[9px] uppercase tracking-widest">Add Item</span>
           </button>
         </div>
 
         {/* Footer info */}
         <div className="bg-white p-6 rounded-3xl border border-soft-oatmeal/30 flex items-center justify-between text-xs text-warm-sand shadow-sm">
-           <div className="flex items-center gap-2">
-              <LuLayoutList size={16} className="text-dusty-cocoa" />
-              <p>Managing <span className="font-bold text-deep-espresso">{filteredItems.length}</span> items across <span className="font-bold text-deep-espresso">{data.tabs.length}</span> themes</p>
-           </div>
-           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#10B981]">
-              <LuCheck size={14} /> System Active
-           </div>
+          <div className="flex items-center gap-2">
+            <LuLayoutList size={16} className="text-dusty-cocoa" />
+            <p>Managing <span className="font-bold text-deep-espresso">{filteredItems.length}</span> items across <span className="font-bold text-deep-espresso">{data.tabs.length}</span> themes</p>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#10B981]">
+            <LuCheck size={14} /> System Active
+          </div>
         </div>
       </div>
     </PageWrapper>

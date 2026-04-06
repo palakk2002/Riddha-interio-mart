@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { motion } from 'framer-motion';
@@ -13,12 +13,21 @@ const AddFeaturedProductPage = () => {
     tag: 'Top Choice',
     image: '',
   });
+  const fileInputRef = useRef(null);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setNewProduct({ ...newProduct, image: reader.result });
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!newProduct.name || !newProduct.price) return;
 
-    // Simulate API call/Storage
     const productToAdd = {
       id: Date.now(),
       name: newProduct.name,
@@ -30,8 +39,18 @@ const AddFeaturedProductPage = () => {
       tag: newProduct.tag || 'Top Choice',
     };
 
-    console.log('Featured Product Added:', productToAdd);
-    // In a real app, we'd update global state or hit an API
+    const saved = localStorage.getItem('admin_featured_products');
+    let products = saved ? JSON.parse(saved) : [];
+    
+    // If we're starting fresh, initialize with default data first
+    if (!saved) {
+      const { manageFeaturedData } = require('../data/manageFeaturedData');
+      products = [...manageFeaturedData];
+    }
+    
+    products = [...products, productToAdd];
+    localStorage.setItem('admin_featured_products', JSON.stringify(products));
+    
     navigate('/admin/manage-featured');
   };
 
@@ -81,18 +100,56 @@ const AddFeaturedProductPage = () => {
                 </div>
               </div>
               
-              <div className="w-full space-y-3">
-                <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
-                  <LuImage size={12} /> Image URL
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2 pl-1">
+                    <LuImage size={12} /> Image Media
+                  </label>
+                  {newProduct.image && (
+                    <button 
+                      type="button"
+                      onClick={() => setNewProduct({...newProduct, image: ''})}
+                      className="text-[9px] font-black text-red-400 uppercase tracking-widest hover:text-red-500 transition-colors"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                
                 <input 
-                  type="url" 
-                  value={newProduct.image}
-                  onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
-                  className="w-full bg-white border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all shadow-sm"
-                  placeholder="Paste Unsplash or image link..."
+                  type="file" 
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  className="hidden" 
+                  accept="image/*"
                 />
-              </div>
+
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current.click()}
+                    className="w-full py-4 px-6 bg-white border-2 border-dashed border-soft-oatmeal hover:border-warm-sand/30 hover:bg-warm-sand/5 text-warm-sand hover:text-deep-espresso rounded-xl transition-all flex items-center justify-center gap-3 shadow-sm group"
+                  >
+                    <LuImage size={18} className="group-hover:scale-110 transition-transform" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Upload Local File</span>
+                  </button>
+
+                  <div className="relative flex items-center py-2">
+                    <div className="flex-grow border-t border-soft-oatmeal/40"></div>
+                    <span className="flex-shrink mx-4 text-[8px] font-black uppercase tracking-[0.3em] text-warm-sand/40">OR</span>
+                    <div className="flex-grow border-t border-soft-oatmeal/40"></div>
+                  </div>
+
+                  <div className="relative">
+                    <LuImage className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand/40" size={16} />
+                    <input 
+                      type="url" 
+                      value={newProduct.image.startsWith('data:') ? '' : newProduct.image}
+                      onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
+                      className="w-full bg-white/50 border border-soft-oatmeal rounded-xl pl-12 pr-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all font-medium placeholder:text-warm-sand/20"
+                      placeholder="Paste remote URL instead..."
+                    />
+                  </div>
+                </div>
             </div>
 
             {/* Right: Detailed Fields */}

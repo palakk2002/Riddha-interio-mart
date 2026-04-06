@@ -28,13 +28,8 @@ const CategoriesPage = () => {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-x-3 md:gap-x-12 gap-y-8 md:gap-y-16">
-          {categories.map((category, index) => (
-            <motion.div
-              key={category.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
+          {categories.map((category) => (
+            <div key={category.id}>
               <Link 
                 to={`/category/${category.slug}`}
                 className="group flex flex-col items-center gap-2 md:gap-4"
@@ -51,7 +46,7 @@ const CategoriesPage = () => {
                   {category.name}
                 </span>
               </Link>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

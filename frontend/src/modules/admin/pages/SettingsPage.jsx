@@ -3,6 +3,7 @@ import PageWrapper from '../components/PageWrapper';
 import { FiUser, FiMail, FiShield, FiBell, FiLayers, FiSave, FiCheck } from 'react-icons/fi';
 
 const SettingsPage = () => {
+  const [activeTab, setActiveTab] = useState('Profile');
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   
@@ -35,20 +36,20 @@ const SettingsPage = () => {
         <div className="bg-white rounded-2xl md:rounded-[32px] shadow-xl border border-soft-oatmeal overflow-hidden">
           {/* Tabs header */}
           <div className="flex border-b border-soft-oatmeal px-4 md:px-8 bg-soft-oatmeal/5 overflow-x-auto no-scrollbar">
-            {['Profile', 'Notifications', 'Security', 'Appearance'].map((tab, i) => (
+            {['Profile', 'Notifications', 'Security'].map((tab) => (
               <button 
                 key={tab} 
-                className={`py-5 px-6 text-[10px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap border-b-2 ${i === 0 ? 'text-dusty-cocoa border-dusty-cocoa' : 'text-warm-sand border-transparent hover:text-deep-espresso'}`}
+                onClick={() => setActiveTab(tab)}
+                className={`py-5 px-6 text-[10px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap border-b-2 ${activeTab === tab ? 'text-dusty-cocoa border-dusty-cocoa' : 'text-warm-sand border-transparent hover:text-deep-espresso'}`}
               >
                 {tab}
               </button>
             ))}
           </div>
 
-          <div className="p-6 md:p-12 space-y-10 md:space-y-12">
-            {/* Account Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              <div className="space-y-6">
+          <div className="p-6 md:p-12">
+            {activeTab === 'Profile' && (
+              <div className="space-y-6 max-w-xl">
                 <h3 className="text-xl font-display font-bold text-deep-espresso flex items-center gap-3">
                   <FiUser className="text-warm-sand" /> Personal Details
                 </h3>
@@ -76,8 +77,10 @@ const SettingsPage = () => {
                   </div>
                 </div>
               </div>
+            )}
 
-              <div className="space-y-6">
+            {activeTab === 'Security' && (
+              <div className="space-y-6 max-w-xl">
                 <h3 className="text-xl font-display font-bold text-deep-espresso flex items-center gap-3">
                   <FiShield className="text-warm-sand" /> Authentication
                 </h3>
@@ -87,53 +90,36 @@ const SettingsPage = () => {
                     <input type="password" placeholder="••••••••" className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px) font-black text-warm-sand uppercase tracking-widest pl-1">New Password</label>
+                    <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest pl-1">New Password</label>
                     <input type="password" placeholder="Min. 8 characters" className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all" />
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <hr className="border-soft-oatmeal/50" />
-
-            {/* Preferences */}
-            <div className="space-y-8">
-              <h3 className="text-xl font-display font-bold text-deep-espresso flex items-center gap-3">
-                <FiBell className="text-warm-sand" /> System Preferences
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div onClick={() => setNotifications(!notifications)} className="group flex items-center justify-between p-6 rounded-[24px] bg-soft-oatmeal/5 border border-soft-oatmeal hover:border-warm-sand/30 hover:bg-white transition-all cursor-pointer">
-                  <div className="flex items-center gap-5">
-                    <div className={`p-4 rounded-2xl transition-colors ${notifications ? 'bg-emerald-50 text-emerald-500' : 'bg-soft-oatmeal text-warm-sand'}`}>
-                      <FiBell size={24} />
+            {activeTab === 'Notifications' && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-display font-bold text-deep-espresso flex items-center gap-3">
+                  <FiBell className="text-warm-sand" /> Notification Settings
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div onClick={() => setNotifications(!notifications)} className="group flex items-center justify-between p-6 rounded-[24px] bg-soft-oatmeal/5 border border-soft-oatmeal hover:border-warm-sand/30 hover:bg-white transition-all cursor-pointer">
+                    <div className="flex items-center gap-5">
+                      <div className={`p-4 rounded-2xl transition-colors ${notifications ? 'bg-emerald-50 text-emerald-500' : 'bg-soft-oatmeal text-warm-sand'}`}>
+                        <FiBell size={24} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-deep-espresso">Email Reports</h4>
+                        <p className="text-xs text-warm-sand">Weekly analytics summaries.</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-deep-espresso">Email Reports</h4>
-                      <p className="text-xs text-warm-sand">Weekly analytics summaries.</p>
+                    <div className={`w-14 h-8 rounded-full relative transition-all duration-300 ${notifications ? 'bg-emerald-500' : 'bg-soft-oatmeal'}`}>
+                      <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg transition-all duration-300 ${notifications ? 'right-1' : 'left-1'}`}></div>
                     </div>
-                  </div>
-                  <div className={`w-14 h-8 rounded-full relative transition-all duration-300 ${notifications ? 'bg-emerald-500' : 'bg-soft-oatmeal'}`}>
-                    <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg transition-all duration-300 ${notifications ? 'right-1' : 'left-1'}`}></div>
-                  </div>
-                </div>
-
-                <div onClick={() => setCompactLayout(!compactLayout)} className="group flex items-center justify-between p-6 rounded-[24px] bg-soft-oatmeal/5 border border-soft-oatmeal hover:border-warm-sand/30 hover:bg-white transition-all cursor-pointer">
-                  <div className="flex items-center gap-5">
-                    <div className={`p-4 rounded-2xl transition-colors ${compactLayout ? 'bg-blue-50 text-blue-500' : 'bg-soft-oatmeal text-warm-sand'}`}>
-                      <FiLayers size={24} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-deep-espresso">Compact UI</h4>
-                      <p className="text-xs text-warm-sand">Optimized for high density.</p>
-                    </div>
-                  </div>
-                  <div className={`w-14 h-8 rounded-full relative transition-all duration-300 ${compactLayout ? 'bg-blue-500' : 'bg-soft-oatmeal'}`}>
-                    <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg transition-all duration-300 ${compactLayout ? 'right-1' : 'left-1'}`}></div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div className="pt-6 flex justify-end">
               <button 

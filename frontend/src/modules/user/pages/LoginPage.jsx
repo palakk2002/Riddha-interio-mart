@@ -26,7 +26,7 @@ const LoginPage = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     setError('');
-    
+
     const isAdmin = location.pathname.startsWith('/admin');
     const isSeller = location.pathname.startsWith('/seller');
 
@@ -60,7 +60,7 @@ const LoginPage = () => {
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
       {/* Desktop Background Layer */}
       <div className="hidden md:block absolute inset-0 z-0">
-        <img 
+        <img
           src={LOGIN_BG}
           alt="Luxury Showroom"
           className="w-full h-full object-cover"
@@ -71,7 +71,7 @@ const LoginPage = () => {
       {/* Main Content Container */}
       <div className="relative z-10 flex flex-col md:flex-row min-h-screen">
         {/* Left Section (Desktop Branding) */}
-        <motion.div 
+        <motion.div
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
@@ -91,14 +91,14 @@ const LoginPage = () => {
         <div className="flex-1 flex flex-col min-h-screen">
           {/* Mobile Header Image (Only on Mobile) */}
           <div className="md:hidden relative h-[32vh] min-h-[220px] w-full overflow-hidden">
-            <img 
+            <img
               src={LOGIN_BG}
               alt="Luxury Interior"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-black/10" />
-            
-            <button 
+
+            <button
               onClick={() => navigate(-1)}
               className="absolute top-6 left-6 h-10 w-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 shadow-lg active:scale-90 transition-all z-20"
             >
@@ -116,7 +116,7 @@ const LoginPage = () => {
           {/* Form Area Wrapper */}
           <div className="flex-1 flex items-center justify-center p-6 md:p-12 lg:p-24 relative">
             {/* Desktop Back Button */}
-            <button 
+            <button
               onClick={() => navigate(-1)}
               className="hidden md:flex absolute top-10 right-10 flex items-center gap-2 group text-white/50 hover:text-white transition-all font-bold text-xs tracking-widest uppercase z-50"
             >
@@ -125,11 +125,11 @@ const LoginPage = () => {
             </button>
 
             {/* Form Card */}
-            <motion.div 
+            <motion.div
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="w-full max-w-md bg-white md:bg-white/10 md:backdrop-blur-3xl md:border md:border-white/20 p-8 md:p-12 rounded-[40px] shadow-2xl relative"
+              className="w-full max-w-[560px] md:max-w-md bg-white md:bg-white/10 md:backdrop-blur-3xl md:border md:border-white/20 py-5 px-8 md:p-12 rounded-[50px] md:rounded-[40px] shadow-2xl md:shadow-none relative mx-auto"
             >
               {/* Login/Signup Toggle UI */}
               <div className="hidden md:flex justify-between items-center mb-10">
@@ -141,16 +141,16 @@ const LoginPage = () => {
               </div>
 
               {/* Mobile Header (Visible only on mobile) */}
-              <div className="md:hidden text-center space-y-1 mb-10 w-full">
-                <h1 className="text-3xl font-black text-deep-espresso tracking-tight">Welcome Back</h1>
-                <p className="text-gray-400 font-bold text-xs tracking-[0.15em] uppercase italic">
+              <div className="md:hidden text-center space-y-2 mb-12 w-full pt-4">
+                <h1 className="text-4xl font-display font-black text-deep-espresso tracking-tight">Welcome Back</h1>
+                <p className="text-gray-400 font-black text-[10px] tracking-[0.2em] uppercase">
                   Login to your account
                 </p>
               </div>
 
               <AnimatePresence>
                 {error && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
@@ -166,13 +166,13 @@ const LoginPage = () => {
                   <div className="space-y-1">
                     <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-2 ml-1">Email</label>
                     <div className="relative group">
-                      <FiUser className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-warm-sand group-focus-within:text-deep-espresso transition-colors h-5 w-5" />
-                      <input 
-                        type="text" 
-                        placeholder={window.innerWidth < 768 ? "Full Name / Email" : "Enter your email"} 
+                      <FiUser className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#8E2424]/40 group-focus-within:text-[#8E2424] transition-colors h-5 w-5" />
+                      <input
+                        type="text"
+                        placeholder={window.innerWidth < 768 ? "Email ID" : "Enter your email"}
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
-                        className="w-full md:pl-6 pl-16 pr-6 py-4 md:py-4 rounded-full md:rounded-2xl bg-soft-oatmeal/10 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-warm-sand/50 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-semibold transition-all md:text-white"
+                        className="w-full md:pl-6 pl-16 pr-6 py-5 md:py-4 rounded-full md:rounded-2xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#8E2424]/20 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-bold transition-all md:text-white placeholder:text-gray-400 md:placeholder:text-white/40"
                       />
                     </div>
                   </div>
@@ -180,16 +180,16 @@ const LoginPage = () => {
                   <div className="space-y-1">
                     <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-2 ml-1">Password</label>
                     <div className="relative group">
-                      <FiLock className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-warm-sand group-focus-within:text-deep-espresso transition-colors h-5 w-5" />
-                      <input 
+                      <FiLock className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#8E2424]/40 group-focus-within:text-[#8E2424] transition-colors h-5 w-5" />
+                      <input
                         type={showPassword ? "text" : "password"}
-                        placeholder={window.innerWidth < 768 ? "Password" : "••••••••"} 
+                        placeholder={window.innerWidth < 768 ? "••••••" : "••••••••"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full md:pl-6 pl-16 pr-14 py-4 md:py-4 rounded-full md:rounded-2xl bg-soft-oatmeal/10 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-warm-sand/50 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-semibold transition-all md:text-white"
+                        className="w-full md:pl-6 pl-16 pr-14 py-5 md:py-4 rounded-full md:rounded-2xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#8E2424]/20 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-bold transition-all md:text-white placeholder:text-gray-400 md:placeholder:text-white/40"
                       />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 md:text-white/50 hover:text-white">
-                        {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                        {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-4 w-4 opacity-50" />}
                       </button>
                     </div>
                   </div>
@@ -202,15 +202,15 @@ const LoginPage = () => {
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 group-hover:text-white">Remember Me</span>
                   </button>
-                  <button type="button" className="text-[10px] font-bold text-gray-400 md:text-white/40 uppercase tracking-wider hover:text-warm-sand md:hover:text-white">
+                  <button type="button" className="text-[10px] font-black text-gray-400 md:text-white/40 uppercase tracking-widest hover:text-[#8E2424] md:hover:text-white mx-auto md:mx-0">
                     Forgot Password?
                   </button>
                 </div>
 
-                <div className="flex flex-col md:flex-row items-center gap-6 pt-2">
-                  <Button 
+                <div className="flex flex-col md:flex-row items-center gap-6 pt-4">
+                  <Button
                     type="submit"
-                    className="w-full md:w-auto md:ml-auto h-14 md:h-12 px-10 rounded-full md:rounded-xl bg-warm-sand md:bg-white hover:bg-deep-espresso md:hover:bg-warm-sand text-white md:text-deep-espresso md:hover:text-white font-black text-xs uppercase tracking-widest shadow-xl transition-all active:scale-[0.98]"
+                    className="w-full md:w-auto md:ml-auto h-16 md:h-12 px-10 rounded-full md:rounded-xl bg-[#8E2424] md:bg-white hover:bg-black md:hover:bg-warm-sand text-white md:text-deep-espresso md:hover:text-white font-black text-sm md:text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#8E2424]/20 transition-all active:scale-[0.98]"
                   >
                     Log In
                   </Button>
@@ -237,8 +237,8 @@ const LoginPage = () => {
                 </p>
 
                 {/* Mobile Sign Up Link */}
-                <p className="md:hidden text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                  Don't have account? <span onClick={() => navigate(getSignupPath())} className="text-warm-sand cursor-pointer font-black border-b border-warm-sand/30 pb-0.5">Sign up</span>
+                <p className="md:hidden text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-4">
+                  Don't have account? <span onClick={() => navigate(getSignupPath())} className="text-[#8E2424] cursor-pointer font-black border-b border-[#8E2424]/30 pb-0.5 ml-1">SIGN UP</span>
                 </p>
               </form>
             </motion.div>

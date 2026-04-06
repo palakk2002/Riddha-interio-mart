@@ -123,7 +123,7 @@ const AddProductPage = () => {
                    </div>
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
-                         <FiDollarSign size={12} /> Base Price ($)
+                         <FiDollarSign size={12} /> Base Price (₹)
                       </label>
                       <input 
                         type="number" required placeholder="0.00"

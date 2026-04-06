@@ -98,7 +98,7 @@ const CatalogPage = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 font-black text-deep-espresso">
-                        ${product.price.toFixed(2)}
+                        ₹{product.price.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
@@ -125,7 +125,7 @@ const CatalogPage = () => {
                       <span className="text-[9px] font-black text-deep-espresso/40 bg-soft-oatmeal/30 px-1.5 py-0.5 rounded">{product.code}</span>
                       <span className="text-[9px] font-bold text-dusty-cocoa uppercase tracking-tighter">{product.category}</span>
                     </div>
-                    <p className="font-black text-deep-espresso mt-1">${product.price.toFixed(2)}</p>
+                    <p className="font-black text-deep-espresso mt-1">₹{product.price.toFixed(2)}</p>
                   </div>
                   <div className="flex flex-col gap-2">
                     <button onClick={() => navigate(`/admin/catalog/edit/${product.id}`)} className="p-2.5 bg-soft-oatmeal/20 text-warm-sand rounded-xl"><FiEdit3 size={16} /></button>

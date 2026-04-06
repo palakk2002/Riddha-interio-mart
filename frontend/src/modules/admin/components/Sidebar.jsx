@@ -30,10 +30,6 @@ const menuItems = [
       { path: '/admin/catalog/add', icon: LuPlus, label: 'Add New Product' },
     ]
   },
-  { path: '/admin/settings', icon: LuSettings, label: 'Settings' },
-];
-
-const homepageItems = [
   { 
     label: 'Manage Categories', 
     icon: LuGrid2X2, 
@@ -43,15 +39,8 @@ const homepageItems = [
       { path: '/admin/manage-categories/add', icon: LuPlus, label: 'Add Category' },
     ]
   },
-  { 
-    label: 'Featured Products', 
-    icon: LuStar, 
-    path: '/admin/manage-featured',
-    children: [
-      { path: '/admin/manage-featured', icon: LuLayoutGrid, label: 'All Featured' },
-      { path: '/admin/manage-featured/add', icon: LuPlus, label: 'Add Featured Product' },
-    ]
-  },
+  { path: '/admin/manage-hero', icon: LuImage, label: 'Home Banner' },
+  { path: '/admin/manage-promo', icon: LuBadgePercent, label: 'Promo Banner' },
   { 
     label: 'Favourite Categories', 
     icon: LuLayoutGrid, 
@@ -61,9 +50,25 @@ const homepageItems = [
       { path: '/admin/manage-favourites/add', icon: LuPlus, label: 'Add Category Item' },
     ]
   },
-  { path: '/admin/manage-hero', icon: LuImage, label: 'Hero Banner' },
-  { path: '/admin/manage-promo', icon: LuBadgePercent, label: 'Promo Banner' },
-  { path: '/admin/manage-brands', icon: LuTags, label: 'Manage Brands' },
+  { 
+    label: 'Top Brands', 
+    icon: LuTags, 
+    path: '/admin/manage-brands',
+    children: [
+      { path: '/admin/manage-brands', icon: LuLayoutGrid, label: 'All Brands' },
+      { path: '/admin/manage-brands/add', icon: LuPlus, label: 'Add Brand' },
+    ]
+  },
+  { 
+    label: 'Featured Highlights', 
+    icon: LuStar, 
+    path: '/admin/manage-featured',
+    children: [
+      { path: '/admin/manage-featured', icon: LuLayoutGrid, label: 'All Featured' },
+      { path: '/admin/manage-featured/add', icon: LuPlus, label: 'Add Featured Product' },
+    ]
+  },
+  { path: '/admin/settings', icon: LuSettings, label: 'Settings' },
 ];
 
 const NavItem = ({ item, isOpen, onClose, expanded, onToggle }) => {
@@ -166,7 +171,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const [expandedItems, setExpandedItems] = useState(() => {
     // Initial state: expand sections if a child is active
     const initial = {};
-    [...menuItems, ...homepageItems].forEach(item => {
+    menuItems.forEach(item => {
       if (item.children?.some(child => location.pathname === child.path)) {
         initial[item.label] = true;
       }
@@ -241,21 +246,6 @@ const Sidebar = ({ isOpen, onClose }) => {
               onToggle={toggleExpand}
             />
           ))}
-
-          {/* Homepage Section */}
-          <div className="pt-4 mt-6 border-t border-white/10">
-            <p className="px-3 mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 drop-shadow-md">Homepage</p>
-            {homepageItems.map((item) => (
-              <NavItem 
-                key={item.label} 
-                item={item} 
-                isOpen={isOpen} 
-                onClose={onClose} 
-                expanded={expandedItems[item.label]}
-                onToggle={toggleExpand}
-              />
-            ))}
-          </div>
         </nav>
 
         {/* Footer info */}

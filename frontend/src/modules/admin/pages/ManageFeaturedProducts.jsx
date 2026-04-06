@@ -7,10 +7,22 @@ import { manageFeaturedData } from '../data/manageFeaturedData';
 
 const ManageFeaturedProducts = () => {
   const navigate = useNavigate();
-  const [products, setProducts] = useState(manageFeaturedData);
+  const [products, setProducts] = useState([]);
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem('admin_featured_products');
+    if (saved) {
+      setProducts(JSON.parse(saved));
+    } else {
+      localStorage.setItem('admin_featured_products', JSON.stringify(manageFeaturedData));
+      setProducts(manageFeaturedData);
+    }
+  }, []);
 
   const handleDelete = (id) => {
-    setProducts(products.filter((p) => p.id !== id));
+    const updated = products.filter((p) => p.id !== id);
+    setProducts(updated);
+    localStorage.setItem('admin_featured_products', JSON.stringify(updated));
   };
 
   return (

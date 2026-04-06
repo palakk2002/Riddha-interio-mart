@@ -5,7 +5,7 @@ import { FiTrendingUp, FiUsers, FiShoppingBag, FiDollarSign, FiArrowUpRight, FiA
 
 const AnalyticsPage = () => {
   const stats = [
-    { label: 'Total Revenue', value: 'Rs. 12,45,000', change: '+12.5%', trend: 'up', icon: FiDollarSign, color: 'text-green-600' },
+    { label: 'Total Revenue', value: '₹12,45,000', change: '+12.5%', trend: 'up', icon: FiTrendingUp, color: 'text-green-600' },
     { label: 'Active Sellers', value: '48', change: '+4', trend: 'up', icon: FiUsers, color: 'text-warm-sand' },
     { label: 'Monthly Orders', value: '1,284', change: '-2.1%', trend: 'down', icon: FiShoppingBag, color: 'text-red-500' },
     { label: 'Conversion Rate', value: '3.2%', change: '+0.8%', trend: 'up', icon: FiActivity, color: 'text-deep-espresso' },
