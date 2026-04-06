@@ -29,7 +29,7 @@ const Banner = () => {
   const prevSlide = () => setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
 
   return (
-    <div className="relative h-[200px] md:h-[600px] w-full overflow-hidden md:rounded-[2.5rem] rounded-none group shadow-2xl bg-gray-100">
+    <div className="relative h-[200px] md:h-[480px] w-full overflow-hidden md:rounded-3xl rounded-none group shadow-2xl bg-gray-100">
       <AnimatePresence mode="wait">
         <motion.div
           key={current}

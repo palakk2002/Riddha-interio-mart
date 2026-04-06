@@ -80,8 +80,8 @@ const NavItem = ({ item, isOpen, onClose, expanded, onToggle }) => {
 
   const headerContent = (
     <div className="flex items-center gap-4 w-full">
-      <item.icon size={20} className={`transition-transform duration-300 drop-shadow-md ${isActive ? 'scale-110 text-white' : 'text-white/90 group-hover:scale-110 group-hover:text-white'}`} />
-      <span className={`font-medium drop-shadow-md ${isActive ? 'text-white' : 'text-white/95'}`}>{item.label}</span>
+      <item.icon size={20} className={`transition-transform duration-300 ${isActive ? 'scale-110 text-white' : 'text-white/70 group-hover:scale-110 group-hover:text-white'}`} />
+      <span className="font-medium text-white">{item.label}</span>
     </div>
   );
 
@@ -91,8 +91,8 @@ const NavItem = ({ item, isOpen, onClose, expanded, onToggle }) => {
         className={`
           flex items-center justify-between p-3 rounded-xl transition-all duration-300 group cursor-pointer border border-white/5
           ${isActive 
-            ? 'bg-dusty-cocoa text-white shadow-xl shadow-dusty-cocoa/20 border-white/20 backdrop-blur-lg scale-[1.02]' 
-            : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20 hover:border-white/10'}
+            ? 'bg-red-800 text-white shadow-xl shadow-red-900/20 border-white/10 scale-[1.02]' 
+            : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10'}
         `}
         onClick={() => {
           if (hasChildren) {
@@ -146,14 +146,14 @@ const NavItem = ({ item, isOpen, onClose, expanded, onToggle }) => {
                   className={({ isActive: childActive }) => `
                     flex items-center gap-4 p-2.5 rounded-xl transition-all duration-300 group border border-transparent
                     ${childActive 
-                      ? 'text-white font-bold bg-white/20 border-white/10 shadow-sm' 
-                      : 'text-white/90 bg-white/5 hover:text-white hover:bg-white/15 hover:border-white/5'}
+                      ? 'text-white font-bold bg-white/10 border-white/5 shadow-sm' 
+                      : 'text-white/60 hover:text-white hover:bg-white/5'}
                   `}
                 >
                   {({ isActive: isCurrentChildActive }) => (
                     <>
-                      <child.icon size={16} className={`transition-transform duration-300 group-hover:scale-110 ${isCurrentChildActive ? 'text-white' : 'text-white/70'}`} />
-                      <span className="text-sm tracking-wide drop-shadow-sm">{child.label}</span>
+                      <child.icon size={16} className={`transition-transform duration-300 group-hover:scale-110 ${isCurrentChildActive ? 'text-white' : 'text-white/50'}`} />
+                      <span className="text-sm tracking-wide text-white">{child.label}</span>
                     </>
                   )}
                 </NavLink>
@@ -214,18 +214,18 @@ const Sidebar = ({ isOpen, onClose }) => {
           <img 
             src={sidebarBg} 
             alt="Interior Decorative Lighting" 
-            className="w-full h-full object-cover opacity-40"
+            className="w-full h-full object-cover opacity-10 grayscale"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-deep-espresso/90 via-deep-espresso/60 to-deep-espresso/95"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-deep-espresso via-deep-espresso/95 to-deep-espresso"></div>
         </div>
 
         {/* Header */}
-        <div className="relative z-10 p-6 flex items-center justify-between border-b border-white/10">
+        <div className="relative z-10 p-6 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-warm-sand/90 backdrop-blur-md rounded-lg flex items-center justify-center text-deep-espresso font-bold text-xl drop-shadow-md">
+            <div className="w-10 h-10 bg-warm-sand rounded-lg flex items-center justify-center text-deep-espresso font-bold text-xl">
               R
             </div>
-            <span className="font-display font-bold text-xl tracking-wide uppercase drop-shadow-md">
+            <span className="font-display font-bold text-xl tracking-wide uppercase text-white">
               Riddha <span className="text-warm-sand">Admin</span>
             </span>
           </div>

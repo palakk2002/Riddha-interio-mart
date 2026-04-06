@@ -20,7 +20,7 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         <div>
           <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">Seller Dashboard</h1>
-          <p className="text-warm-sand mt-2">Manage your listings and track your shop performance.</p>
+          <p className="text-red-800 mt-2">Manage your listings and track your shop performance.</p>
         </div>
 
         {/* Stats Grid */}
@@ -29,19 +29,19 @@ const Dashboard = () => {
             label="Total Products" 
             value={totalProducts} 
             icon={LuPackage} 
-            color="bg-warm-sand" 
+            color="bg-red-800" 
           />
           <StatCard 
             label="Pending Approval" 
             value={pendingProducts} 
             icon={LuClock} 
-            color="bg-soft-oatmeal" 
+            color="bg-red-800" 
           />
           <StatCard 
             label="Approved Products" 
             value={approvedProducts} 
             icon={LuCheck} 
-            color="bg-dusty-cocoa" 
+            color="bg-red-800" 
           />
         </div>
 
@@ -84,7 +84,7 @@ const Dashboard = () => {
               </p>
             </div>
             
-            <button className="relative z-10 bg-deep-espresso text-white font-bold py-3 px-6 rounded-xl w-fit transition-all hover:bg-dusty-cocoa hover:scale-105 active:scale-95 shadow-lg shadow-deep-espresso/20 text-sm">
+            <button className="relative z-10 bg-red-800 text-white font-bold py-3 px-6 rounded-xl w-fit transition-all hover:bg-deep-espresso hover:scale-105 active:scale-95 shadow-lg shadow-red-900/20 text-sm">
               View Analytics
             </button>
 

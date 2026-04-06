@@ -131,7 +131,7 @@ const AddProduct = () => {
                     className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 ${
                       submitted 
                       ? 'bg-emerald-500 text-white' 
-                      : 'bg-deep-espresso text-white hover:bg-dusty-cocoa shadow-deep-espresso/20'
+                      : 'bg-red-800 text-white hover:bg-deep-espresso shadow-red-900/20'
                     }`}
                   >
                     {isSubmitting ? <LuClock className="animate-spin" /> : (submitted ? <LuCheck /> : <LuPlus />)}
@@ -205,7 +205,7 @@ const AddProduct = () => {
                     className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 ${
                       submitted 
                       ? 'bg-emerald-500 text-white' 
-                      : 'bg-dusty-cocoa text-white hover:bg-deep-espresso shadow-dusty-cocoa/20'
+                      : 'bg-red-800 text-white hover:bg-deep-espresso shadow-red-900/20'
                     }`}
                   >
                     {isSubmitting ? <LuClock className="animate-spin" /> : (submitted ? <LuCheck /> : <LuPlus />)}

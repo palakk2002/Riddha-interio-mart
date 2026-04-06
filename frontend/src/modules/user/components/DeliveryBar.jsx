@@ -27,7 +27,7 @@ const DeliveryBar = () => {
   }, []);
 
   return (
-    <div className="bg-white border-b border-gray-100 py-2 px-5 flex items-center relative z-40">
+    <div className="bg-white border-b border-gray-100 py-2 px-5 flex items-center relative z-40 md:hidden">
       <div className="flex flex-col items-start">
         <span className="text-[12px] font-bold text-[#1a1a1a] leading-tight flex items-center gap-1.5">
           Delivery in <span className="text-[#922724]">4 hours</span>

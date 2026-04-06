@@ -3,7 +3,7 @@ import { FiZap } from 'react-icons/fi';
 
 const ExpressDeliveryBanner = () => {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-1">
+    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-1">
       <div 
         className="relative overflow-hidden rounded-[24px] bg-gradient-to-r from-[#FEF2F2] to-[#FDFBF9] border border-[#FEE2E2] p-3 md:p-6 flex items-center justify-between gap-4 md:gap-8"
       >

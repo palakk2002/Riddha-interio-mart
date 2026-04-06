@@ -10,15 +10,16 @@ import tapImg from '../../../assets/tap.jpg';
 const CategoryQuickAccess = ({ isScrollable = false }) => {
   const [activeTab, setActiveTab] = useState('All');
 
-  const tabs = ['All', 'Furniture', 'Luxury', 'Living Room', 'Bed Room', 'Decor'];
+  // Derive tabs from category names
+  const tabs = ['All', ...categories.map(cat => cat.name)];
 
   const filteredCategories = activeTab === 'All'
     ? categories
-    : categories.filter(cat => cat.tabs.includes(activeTab));
+    : categories.filter(cat => cat.name === activeTab);
 
   return (
     <section className="pt-1 pb-0 md:py-12 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8">
         {/* Horizontal Category Tabs - Hidden when in scrollable mode (subcategory pages) */}
         {!isScrollable && (
           <div className="flex overflow-x-auto pb-4 mb-1 md:mb-10 gap-6 md:gap-8 no-scrollbar items-center border-b border-soft-oatmeal/20 whitespace-nowrap">
@@ -26,7 +27,7 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`relative text-[10px] md:text-xs font-black uppercase tracking-[0.2em] pb-3 md:pb-4 transition-all duration-300 ${activeTab === tab ? 'text-black' : 'text-deep-espresso/40 hover:text-deep-espresso/60'
+                className={`relative text-[10px] md:text-sm font-black uppercase tracking-[0.2em] pb-3 md:pb-4 transition-all duration-300 ${activeTab === tab ? 'text-black' : 'text-deep-espresso/40 hover:text-deep-espresso/60'
                   }`}
               >
                 {tab}
@@ -44,17 +45,17 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
         {/* Categories Grid/Scroll Area */}
         <div className="overflow-x-auto no-scrollbar snap-x snap-mandatory px-0 md:px-0">
           <div
-            className={`${isScrollable ? 'flex pb-2 pt-1' : 'flex md:grid md:grid-cols-5 lg:grid-cols-6 pb-6 md:pb-0'} gap-x-4 md:gap-10 min-h-[120px] md:min-h-[180px]`}
+            className={`${isScrollable ? 'flex pb-2 pt-1' : 'flex md:grid md:grid-cols-5 lg:grid-cols-6 pb-6 md:pb-0'} gap-x-4 md:gap-12 min-h-[120px] md:min-h-[180px]`}
           >
             {/* Conditional Layout for Home vs Subcategory Page */}
             {!isScrollable ? (
-              <div className="grid grid-rows-2 grid-flow-col gap-x-4 md:gap-x-10 gap-y-6 md:gap-y-10 md:contents px-2 md:px-0">
+              <div className="grid grid-rows-2 grid-flow-col gap-x-4 md:gap-x-12 gap-y-6 md:gap-y-12 md:contents px-2 md:px-0">
                 {filteredCategories.map((category, index) => (
                   <CategoryItem key={category.id} category={category} index={index} />
                 ))}
               </div>
             ) : (
-              <div className="flex gap-x-4 md:gap-x-10 px-4 md:px-0">
+              <div className="flex gap-x-4 md:gap-x-12 px-4 md:px-0">
                 {filteredCategories.map((category, index) => (
                   <CategoryItem key={category.id} category={category} index={index} />
                 ))}
@@ -73,7 +74,7 @@ const CategoryItem = ({ category, index }) => (
   >
     <Link
       to={`/category/${category.slug}`}
-      className="group flex flex-col items-center gap-2 md:gap-4 w-16 md:w-auto"
+      className="group flex flex-col items-center gap-2 md:gap-4 w-16 md:w-40"
     >
       <div className="relative aspect-square w-full rounded-xl md:rounded-[2rem] overflow-hidden bg-soft-oatmeal/5 shadow-sm group-hover:shadow-lg transition-all duration-500">
         <img

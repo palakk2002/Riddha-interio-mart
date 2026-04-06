@@ -35,7 +35,7 @@ const CatalogPage = () => {
           </div>
           <button 
             onClick={() => navigate('/admin/catalog/add')}
-            className="flex items-center justify-center gap-2 bg-dusty-cocoa text-white px-6 py-3.5 rounded-2xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-dusty-cocoa/20 active:scale-95 text-sm"
+            className="flex items-center justify-center gap-2 bg-red-800 text-white px-6 py-3.5 rounded-2xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20 active:scale-95 text-sm"
           >
             <LuPlus size={18} />
             Add New Product
@@ -93,7 +93,7 @@ const CatalogPage = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-[10px] font-bold text-dusty-cocoa uppercase tracking-widest bg-dusty-cocoa/5 px-2.5 py-1 rounded-full">
+                        <span className="text-[10px] font-bold text-red-800 uppercase tracking-widest bg-red-800/5 px-2.5 py-1 rounded-full border border-red-800/10">
                           {product.category}
                         </span>
                       </td>
@@ -174,7 +174,7 @@ const CatalogPage = () => {
                 </button>
                 <button 
                   onClick={() => handleDelete(deleteId)}
-                  className="py-4 bg-red-500 rounded-2xl font-bold text-xs uppercase tracking-widest text-white hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
+                  className="py-4 bg-red-800 rounded-2xl font-bold text-xs uppercase tracking-widest text-white hover:bg-deep-espresso transition-all shadow-lg shadow-red-900/20"
                 >
                    Delete
                 </button>

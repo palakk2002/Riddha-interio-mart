@@ -24,19 +24,19 @@ const DashboardPage = () => {
             label="Total Products" 
             value={adminProducts.length} 
             icon={LuPackage} 
-            color="bg-warm-sand" 
+            color="bg-red-800" 
           />
           <StatCard 
             label="Total Categories" 
             value={adminCategories.length} 
             icon={LuTags} 
-            color="bg-soft-oatmeal" 
+            color="bg-red-800" 
           />
           <StatCard 
             label="Total Sellers" 
             value="14" 
             icon={LuUsers} 
-            color="bg-dusty-cocoa" 
+            color="bg-red-800" 
           />
         </div>
 
@@ -57,14 +57,14 @@ const DashboardPage = () => {
             <div className="p-4 md:p-6 space-y-6">
               {recentActivity.map((item) => (
                 <div key={item.id} className="flex gap-4 items-start group">
-                  <div className="w-2 h-2 rounded-full bg-warm-sand mt-2 group-hover:scale-150 transition-transform"></div>
+                  <div className="w-2 h-2 rounded-full bg-red-800 mt-2 group-hover:scale-150 transition-transform"></div>
                   <div className="flex-1">
                     <p className="text-sm">
                       <span className="font-bold text-deep-espresso">{item.action}</span> 
-                      <span className="text-warm-sand mx-1">on</span> 
-                      <span className="text-dusty-cocoa font-medium">{item.target}</span>
+                      <span className="text-red-800 mx-1">on</span> 
+                      <span className="text-red-800 font-medium">{item.target}</span>
                     </p>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-warm-sand/80">
+                    <div className="flex items-center gap-2 mt-1 text-xs text-red-800/80">
                       <span>By {item.user}</span>
                       <span>•</span>
                       <span>{item.time}</span>
@@ -91,7 +91,7 @@ const DashboardPage = () => {
             
             <button 
               onClick={() => navigate('/admin/analytics')}
-              className="relative z-10 bg-deep-espresso text-white font-bold py-3 px-6 rounded-xl w-fit transition-all hover:bg-dusty-cocoa hover:scale-105 active:scale-95 shadow-lg shadow-deep-espresso/20"
+              className="relative z-10 bg-red-800 text-white font-bold py-3 px-6 rounded-xl w-fit transition-all hover:bg-deep-espresso hover:scale-105 active:scale-95 shadow-lg shadow-red-900/20"
             >
               Check Analytics
             </button>

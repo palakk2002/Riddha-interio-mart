@@ -58,12 +58,12 @@ const SubcategoryModal = ({ category, subcategory, isOpen, onClose, onSave }) =>
                <h2 className="text-2xl font-display font-bold text-deep-espresso">
                  {subcategory ? 'Edit Subcategory' : 'Add New Subcategory'}
                </h2>
-               <p className="text-warm-sand text-[10px] font-black uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
-                 Parent Category: <span className="text-deep-espresso/80">{category.name}</span>
-               </p>
+                <p className="text-red-800 text-[10px] font-black uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
+                  Parent Category: <span className="text-deep-espresso/80">{category.name}</span>
+                </p>
              </div>
            </div>
-           <button onClick={onClose} className="relative z-10 p-3 hover:bg-red-50 hover:text-red-500 rounded-2xl transition-all text-warm-sand/60">
+           <button onClick={onClose} className="relative z-10 p-3 hover:bg-red-50 hover:text-red-800 rounded-2xl transition-all text-red-800/60">
              <FiX size={24} />
            </button>
         </div>
@@ -87,7 +87,7 @@ const SubcategoryModal = ({ category, subcategory, isOpen, onClose, onSave }) =>
                   ) : (
                     <div className="text-center p-3">
                       <FiImage size={28} className="mx-auto mb-2 opacity-30" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-warm-sand/60">Upload Photo</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-red-800/60">Upload Photo</span>
                     </div>
                   )}
                   {sub.image && (
@@ -101,15 +101,15 @@ const SubcategoryModal = ({ category, subcategory, isOpen, onClose, onSave }) =>
               {/* Fields */}
               <div className="md:col-span-8 space-y-6">
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-warm-sand uppercase tracking-widest">Subcategory Name</label>
-                  <input 
-                    type="text" value={sub.name} onChange={(e) => handleChange('name', e.target.value)}
-                    placeholder="e.g. Interior Emulsion" 
-                    className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal/40 rounded-xl px-4 py-4 text-sm focus:ring-2 focus:ring-warm-sand/20 focus:bg-white outline-none transition-all font-medium"
-                  />
+                  <label className="text-[9px] font-black text-red-800 uppercase tracking-widest">Subcategory Name</label>
+                    <input 
+                      type="text" value={sub.name} onChange={(e) => handleChange('name', e.target.value)}
+                      placeholder="e.g. Interior Emulsion" 
+                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal/40 rounded-xl px-4 py-4 text-sm focus:ring-2 focus:ring-red-800/20 focus:bg-white outline-none transition-all font-medium"
+                    />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-warm-sand uppercase tracking-widest">Description</label>
+                  <label className="text-[9px] font-black text-red-800 uppercase tracking-widest">Description</label>
                   <textarea 
                     rows="4" value={sub.description} onChange={(e) => handleChange('description', e.target.value)}
                     placeholder="Provide details about this specific subcategory record..." 
@@ -219,7 +219,7 @@ const ManageCategories = () => {
         <div className="bg-white p-3 rounded-2xl border border-soft-oatmeal/30 shadow-sm flex flex-wrap items-center gap-4">
           <button
             onClick={() => navigate('/admin/manage-categories/add')}
-            className="px-5 py-2.5 bg-deep-espresso text-white rounded-xl flex items-center gap-2 text-[11px] font-black uppercase tracking-widest hover:bg-dusty-cocoa transition-all shadow-md active:scale-95"
+            className="px-5 py-2.5 bg-red-800 text-white rounded-xl flex items-center gap-2 text-[11px] font-black uppercase tracking-widest hover:bg-deep-espresso transition-all shadow-md active:scale-95"
           >
             <FiPlus size={16} /> Add Category
           </button>
@@ -467,7 +467,7 @@ const ManageCategories = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setEditingSubcategory({ category: cat, sub: null, index: -1 })}
-                        className="px-4 py-2 bg-golden-glow text-warm-sand rounded-lg flex items-center gap-2 text-[9px] font-black uppercase tracking-widest hover:bg-soft-oatmeal transition-all"
+                        className="px-4 py-2 bg-red-800 text-white rounded-lg flex items-center gap-2 text-[9px] font-black uppercase tracking-widest hover:bg-deep-espresso transition-all"
                       >
                         <FiPlus size={14} /> Add Subcategory
                       </button>

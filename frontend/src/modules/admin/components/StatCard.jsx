@@ -11,7 +11,7 @@ const StatCard = ({ icon: Icon, label, value, color }) => {
         <Icon className={`text-2xl ${color.replace('bg-', 'text-')}`} />
       </div>
       <div>
-        <p className="text-sm font-medium text-warm-sand uppercase tracking-wider">{label}</p>
+        <p className="text-sm font-medium text-red-800/80 uppercase tracking-wider">{label}</p>
         <h3 className="text-2xl font-bold text-deep-espresso mt-1">{value}</h3>
       </div>
     </motion.div>

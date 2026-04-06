@@ -1,13 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  LuLayoutDashboard, 
-  LuSearch, 
-  LuPlus, 
-  LuPackage, 
-  LuX, 
-  LuChevronRight 
+import {
+  LuLayoutDashboard,
+  LuSearch,
+  LuPlus,
+  LuPackage,
+  LuX,
+  LuChevronRight
 } from 'react-icons/lu';
 import sidebarBg from '../../../assets/seller_sidebar_bg.png';
 
@@ -44,21 +44,21 @@ const SellerSidebar = ({ isOpen, onClose }) => {
       >
         {/* Sidebar Background Image */}
         <div className="absolute inset-0 z-0">
-          <img 
-            src={sidebarBg} 
-            alt="Interior Mockup" 
-            className="w-full h-full object-cover"
+          <img
+            src={sidebarBg}
+            alt="Interior Mockup"
+            className="w-full h-full object-cover opacity-10 grayscale"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-deep-espresso/90 via-deep-espresso/40 to-deep-espresso/90"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-deep-espresso via-deep-espresso/95 to-deep-espresso"></div>
         </div>
 
         {/* Header */}
-        <div className="relative z-10 p-6 flex items-center justify-between border-b border-white/10">
+        <div className="relative z-10 p-6 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-warm-sand/90 backdrop-blur-md rounded-lg flex items-center justify-center text-deep-espresso font-bold text-xl drop-shadow-md">
+            <div className="w-10 h-10 bg-warm-sand rounded-lg flex items-center justify-center text-deep-espresso font-bold text-xl">
               S
             </div>
-            <span className="font-display font-bold text-xl tracking-wide uppercase drop-shadow-md">
+            <span className="font-display font-bold text-xl tracking-wide uppercase text-white">
               Riddha <span className="text-warm-sand">Seller</span>
             </span>
           </div>
@@ -76,17 +76,17 @@ const SellerSidebar = ({ isOpen, onClose }) => {
               end={item.path === '/seller'}
               onClick={() => { if (window.innerWidth < 1024) onClose(); }}
               className={({ isActive }) => `
-                flex items-center justify-between p-3 rounded-xl transition-all duration-300 group
+                flex items-center justify-between p-3 rounded-xl transition-all duration-300 group border border-white/5 mb-2
                 ${isActive 
-                  ? 'bg-dusty-cocoa/90 text-white shadow-lg shadow-dusty-cocoa/20 border border-white/10 backdrop-blur-md' 
-                  : 'bg-white/10 backdrop-blur-sm text-white hover:bg-white/20'}
+                  ? 'bg-red-800 text-white shadow-xl shadow-red-900/20 border-white/10 scale-[1.02]' 
+                  : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10'}
               `}
             >
               <div className="flex items-center gap-4">
                 <item.icon size={20} className="transition-transform duration-300" />
-                <span className="font-medium">{item.label}</span>
+                <span className="font-medium text-white">{item.label}</span>
               </div>
-              <LuChevronRight size={16} className="transition-transform duration-300 opacity-50 group-hover:translate-x-1" />
+              <LuChevronRight size={16} className="transition-transform duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 text-white/60" />
             </NavLink>
           ))}
         </nav>

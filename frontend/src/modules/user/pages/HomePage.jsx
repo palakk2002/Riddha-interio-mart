@@ -33,7 +33,7 @@ const HomePage = () => {
       <ExpressDeliveryBanner />
 
       {/* Banner Section */}
-      <section className="max-w-7xl mx-auto px-0 md:px-6 lg:px-12">
+      <section className="max-w-[1440px] mx-auto px-4 lg:px-8">
         <Banner />
       </section>
 
