@@ -7,7 +7,7 @@ import offerBannerBase from '../../../assets/offer_banner.png';
 import offerBanner1 from '../../../assets/offer_banner_1.png';
 import offerBanner2 from '../../../assets/offer_banner_2.png';
 
-const slides = [
+const defaultSlides = [
   { id: 1, title: 'Turn On\nThe Charm', offer: 'Min. 40% Off', image: offerBannerBase },
   { id: 2, title: 'Bespoke\nFurniture', offer: 'Up to 30% Off', image: offerBanner1 },
   { id: 3, title: 'Elegant\nDecor', offer: 'Flat 20% Off', image: offerBanner2 },
@@ -15,13 +15,42 @@ const slides = [
 
 const OfferBanner = () => {
   const [current, setCurrent] = useState(0);
+  const [slides, setSlides] = useState(defaultSlides);
 
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem('admin_promo_banners');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.length > 0) {
+          // Map admin model to slide model
+          const mappedSlides = parsed
+            .filter(b => b.isActive)
+            .sort((a, b) => a.order - b.order)
+            .map(b => ({
+              id: b.id,
+              title: b.title.replace(' ', '\n'), // Simple way to match the line break style
+              offer: b.subtitle,
+              image: b.image
+            }));
+          
+          if (mappedSlides.length > 0) {
+            setSlides(mappedSlides);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load dynamic slides:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides]);
 
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-12 py-4">

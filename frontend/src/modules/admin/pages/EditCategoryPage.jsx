@@ -180,66 +180,6 @@ const EditCategoryPage = () => {
                 </div>
               </div>
             </div>
-
-            {/* Subcategories */}
-            <div className="bg-white p-8 md:p-10 rounded-[40px] border border-soft-oatmeal shadow-sm space-y-8">
-              <div className="flex items-center justify-between border-b border-soft-oatmeal pb-4">
-                <h3 className="text-lg font-black text-deep-espresso uppercase tracking-[0.1em]">Subcategories</h3>
-                <button 
-                  type="button"
-                  onClick={handleAddSubcategory}
-                  className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-dusty-cocoa hover:text-deep-espresso transition-colors px-4 py-2 border border-soft-oatmeal rounded-full hover:bg-white shadow-sm"
-                >
-                  <FiPlus /> Add new
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <AnimatePresence initial={false}>
-                  {subcategories.map((sub, index) => (
-                    <motion.div 
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className="flex gap-4 p-5 bg-soft-oatmeal/5 rounded-[24px] border border-soft-oatmeal/50 relative group hover:bg-white hover:shadow-xl hover:shadow-soft-oatmeal/20 transition-all duration-300"
-                    >
-                      <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                           <label className="text-[8px] font-black text-warm-sand uppercase tracking-widest pl-1">Subcategory Name</label>
-                           <input 
-                              type="text" 
-                              placeholder="e.g. Chandeliers"
-                              value={sub.name}
-                              onChange={(e) => handleSubChange(index, 'name', e.target.value)}
-                              className="w-full bg-white border border-soft-oatmeal rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all font-medium"
-                           />
-                        </div>
-                        <div className="space-y-1.5">
-                           <label className="text-[8px] font-black text-warm-sand uppercase tracking-widest pl-1">Thumbnail Media URL</label>
-                           <input 
-                              type="text" 
-                              placeholder="https://..."
-                              value={sub.image}
-                              onChange={(e) => handleSubChange(index, 'image', e.target.value)}
-                              className="w-full bg-white border border-soft-oatmeal rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all font-medium"
-                           />
-                        </div>
-                      </div>
-                      <div className="flex items-end pb-1">
-                        <button 
-                           type="button"
-                           onClick={() => handleRemoveSubcategory(index)}
-                           className="p-3 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                        >
-                           <FiTrash2 size={16} />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            </div>
           </div>
 
           {/* Sidebar / Media */}

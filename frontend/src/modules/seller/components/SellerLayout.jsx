@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import SellerSidebar from './SellerSidebar';
 import SellerBottomNavbar from './SellerBottomNavbar';
@@ -6,15 +6,38 @@ import { useUser } from '../../user/data/UserContext';
 import { LuMenu, LuBell, LuUser, LuLogOut, LuChevronDown } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const notifications = [
-  { id: 1, title: 'Product Approved', message: 'Your Classic Marble Tile has been approved.', time: '2h ago', status: 'unread' },
-  { id: 2, title: 'New Catalog Item', message: 'New products added to the admin catalog.', time: '5h ago', status: 'read' },
-  { id: 3, title: 'Welcome', message: 'Welcome to the Riddha Seller Panel!', time: '1d ago', status: 'read' },
+const initialNotifications = [
+  { id: 1, title: 'Product Approved', message: 'Your Classic Marble Tile has been approved and is now live in the catalog.', time: '2 hours ago', status: 'unread', type: 'success' },
+  { id: 2, title: 'New Catalog Item', message: 'Admin has added 5 new items to the Paints category. Check them out!', time: '5 hours ago', status: 'read', type: 'info' },
+  { id: 3, title: 'Welcome', message: 'Welcome to the Riddha Seller Panel! Start by adding your first product.', time: '1 day ago', status: 'read', type: 'info' },
+  { id: 4, title: 'Low Stock Alert', message: 'Your "Modern Fabric Sofa" is running low on stock (2 units left).', time: '2 days ago', status: 'unread', type: 'warning' },
 ];
 
 const SellerLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem('seller_notifications');
+    return saved ? JSON.parse(saved) : initialNotifications;
+  });
+  
+  // Update notifications state from localStorage periodically or when dropdown opens
+  useEffect(() => {
+    const handleStorage = () => {
+      const saved = localStorage.getItem('seller_notifications');
+      if (saved) setNotifications(JSON.parse(saved));
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  const unreadCount = notifications.filter(n => n.status === 'unread').length;
+
+  const markAsRead = (id) => {
+    const updated = notifications.map(n => n.id === id ? { ...n, status: 'read' } : n);
+    setNotifications(updated);
+    localStorage.setItem('seller_notifications', JSON.stringify(updated));
+  };
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { logout, user } = useUser();
   const navigate = useNavigate();
@@ -56,7 +79,9 @@ const SellerLayout = () => {
                 className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-soft-oatmeal text-deep-espresso' : 'text-dusty-cocoa hover:bg-soft-oatmeal'}`}
               >
                 <LuBell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-warm-sand rounded-full border-2 border-white"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-warm-sand rounded-full border-2 border-white animate-pulse"></span>
+                )}
               </button>
 
               <AnimatePresence>
@@ -69,13 +94,17 @@ const SellerLayout = () => {
                   >
                     <div className="p-4 border-b border-soft-oatmeal flex items-center justify-between bg-soft-oatmeal/10">
                       <h3 className="font-bold text-sm">Notifications</h3>
-                      <span className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">3 New</span>
+                      <span className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">{unreadCount} New</span>
                     </div>
                     <div className="max-h-96 overflow-y-auto custom-scrollbar">
-                      {notifications.map((n) => (
-                        <div key={n.id} className={`p-4 border-b border-soft-oatmeal/50 hover:bg-soft-oatmeal/20 transition-colors cursor-pointer group ${n.status === 'unread' ? 'bg-warm-sand/5' : ''}`}>
+                      {notifications.slice(0, 4).map((n) => (
+                        <div 
+                          key={n.id} 
+                          onClick={(e) => { e.stopPropagation(); markAsRead(n.id); }}
+                          className={`p-4 border-b border-soft-oatmeal/50 hover:bg-soft-oatmeal/20 transition-colors cursor-pointer group ${n.status === 'unread' ? 'bg-warm-sand/5' : ''}`}
+                        >
                           <div className="flex justify-between items-start mb-1">
-                            <h4 className="text-sm font-bold text-deep-espresso">{n.title}</h4>
+                            <h4 className={`text-sm font-bold transition-all ${n.status === 'unread' ? 'text-deep-espresso' : 'text-warm-sand'}`}>{n.title}</h4>
                             <span className="text-[10px] text-warm-sand uppercase font-medium">{n.time}</span>
                           </div>
                           <p className="text-xs text-dusty-cocoa line-clamp-2">{n.message}</p>
@@ -83,7 +112,10 @@ const SellerLayout = () => {
                       ))}
                     </div>
                     <div className="p-3 text-center bg-soft-oatmeal/5">
-                      <button className="text-[10px] font-bold text-warm-sand uppercase tracking-widest hover:text-deep-espresso transition-colors">
+                      <button 
+                        onClick={() => navigate('/seller/notifications')}
+                        className="text-[10px] font-bold text-warm-sand uppercase tracking-widest hover:text-deep-espresso transition-colors"
+                      >
                         View All Notifications
                       </button>
                     </div>

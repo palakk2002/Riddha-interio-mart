@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PageWrapper from '../components/PageWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sellerCatalog } from '../data/sellerCatalog';
-import { LuPlus, LuBox, LuTags, LuCheck, LuClock } from 'react-icons/lu';
+import { LuPlus, LuBox, LuTags, LuCheck, LuClock, LuUpload, LuX, LuImage } from 'react-icons/lu';
 
 const AddProduct = () => {
   const [activeTab, setActiveTab] = useState('catalog');
@@ -21,13 +21,63 @@ const AddProduct = () => {
     description: ''
   });
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Image size too large. Please select an image under 2MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCustomProduct({ ...customProduct, imageUrl: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    
+    // Create product data
+    const newProduct = activeTab === 'catalog' 
+      ? {
+          id: Date.now(),
+          name: selectedProduct,
+          category: selectedCategory,
+          price: price,
+          status: 'approved',
+          image: "https://images.unsplash.com/photo-1621506289937-4c44a0e9432e?w=800&q=80", // Default or lookup image
+          dateAdded: new Date().toISOString().split('T')[0]
+        }
+      : {
+          id: Date.now(),
+          name: customProduct.name,
+          category: customProduct.category,
+          price: customProduct.price,
+          status: 'pending',
+          image: customProduct.imageUrl,
+          dateAdded: new Date().toISOString().split('T')[0]
+        };
+
+    // Save to localStorage
+    const existingProducts = JSON.parse(localStorage.getItem('seller_added_products') || '[]');
+    localStorage.setItem('seller_added_products', JSON.stringify([...existingProducts, newProduct]));
+
     setTimeout(() => {
       setIsSubmitting(false);
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 3000);
+      
+      // Reset form
+      if (activeTab === 'catalog') {
+        setSelectedCategory('');
+        setSelectedProduct('');
+        setPrice('');
+      } else {
+        setCustomProduct({ name: '', category: '', price: '', imageUrl: '', description: '' });
+      }
     }, 1500);
   };
 
@@ -130,7 +180,7 @@ const AddProduct = () => {
                     disabled={isSubmitting || submitted}
                     className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 ${
                       submitted 
-                      ? 'bg-emerald-500 text-white' 
+                      ? 'bg-red-800 text-white' 
                       : 'bg-red-800 text-white hover:bg-deep-espresso shadow-red-900/20'
                     }`}
                   >
@@ -188,15 +238,42 @@ const AddProduct = () => {
                     </div>
 
                     <div className="space-y-3 md:col-span-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Image URL</label>
-                      <input 
-                        type="url" 
-                        required
-                        placeholder="https://example.com/image.jpg"
-                        value={customProduct.imageUrl}
-                        onChange={(e) => setCustomProduct({...customProduct, imageUrl: e.target.value})}
-                        className="w-full px-6 py-4 rounded-2xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white focus:outline-none transition-all font-medium"
-                      />
+                      <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Product Image</label>
+                      <div className="relative">
+                        {customProduct.imageUrl ? (
+                          <div className="relative group w-full aspect-[21/9] rounded-2xl overflow-hidden border-2 border-soft-oatmeal bg-white">
+                            <img src={customProduct.imageUrl} alt="Preview" className="w-full h-full object-contain" />
+                            <div className="absolute inset-0 bg-deep-espresso/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                type="button"
+                                onClick={() => setCustomProduct({ ...customProduct, imageUrl: '' })}
+                                className="bg-white text-red-600 p-3 rounded-xl shadow-xl hover:scale-110 transition-transform flex items-center gap-2 font-bold text-xs uppercase"
+                              >
+                                <LuX size={18} /> Remove Image
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <label className="flex flex-col items-center justify-center w-full aspect-[21/9] rounded-2xl border-2 border-dashed border-soft-oatmeal bg-soft-oatmeal/10 hover:bg-soft-oatmeal/20 transition-all cursor-pointer group">
+                            <div className="flex flex-col items-center gap-3 text-warm-sand group-hover:text-deep-espresso transition-colors">
+                              <div className="p-4 rounded-xl bg-white shadow-sm ring-1 ring-soft-oatmeal group-hover:shadow-md transition-all">
+                                <LuImage size={32} />
+                              </div>
+                              <div className="text-center">
+                                <p className="font-bold text-sm">Click to upload product image</p>
+                                <p className="text-[10px] uppercase font-bold tracking-widest opacity-60">PNG, JPG or JPEG (Max 2MB)</p>
+                              </div>
+                            </div>
+                            <input 
+                              type="file" 
+                              required
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              className="hidden"
+                            />
+                          </label>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -204,7 +281,7 @@ const AddProduct = () => {
                     disabled={isSubmitting || submitted}
                     className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 ${
                       submitted 
-                      ? 'bg-emerald-500 text-white' 
+                      ? 'bg-red-800 text-white' 
                       : 'bg-red-800 text-white hover:bg-deep-espresso shadow-red-900/20'
                     }`}
                   >

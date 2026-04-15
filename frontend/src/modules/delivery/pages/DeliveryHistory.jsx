@@ -4,7 +4,7 @@ import OrderCard from '../components/OrderCard';
 import { initialAvailableOrders, initialMyOrders } from '../data/deliveryData';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Orders = () => {
+const DeliveryHistory = () => {
   const [activeTab, setActiveTab] = useState('available');
   const [availableOrders, setAvailableOrders] = useState(initialAvailableOrders);
   const [myOrders, setMyOrders] = useState(initialMyOrders);
@@ -32,7 +32,7 @@ const Orders = () => {
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">Orders</h1>
+            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">Delivery History</h1>
             <p className="text-warm-sand mt-2">Manage your current and available deliveries.</p>
           </div>
           
@@ -139,4 +139,4 @@ const Orders = () => {
 import { LuPackage as LuPackageIcon } from 'react-icons/lu';
 const LuPackage = LuPackageIcon;
 
-export default Orders;
+export default DeliveryHistory;

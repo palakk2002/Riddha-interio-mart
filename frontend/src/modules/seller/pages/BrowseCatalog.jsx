@@ -1,104 +1,126 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import PageWrapper from '../components/PageWrapper';
-import { sellerCatalog } from '../data/sellerCatalog';
-import { LuPlus, LuSearch, LuFilter } from 'react-icons/lu';
+import { LuPlus, LuSearch, LuFilter, LuBox } from 'react-icons/lu';
+import { adminProducts } from '../../admin/data/adminProducts';
 
 const BrowseCatalog = () => {
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredProducts = sellerCatalog.products.filter(product => {
-    const matchesCategory = activeCategory === 'All' || product.category === activeCategory;
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          product.code.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredProducts = useMemo(() => {
+    return adminProducts.filter(p => 
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      p.code.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm]);
 
   return (
     <PageWrapper>
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-deep-espresso">Admin Catalog</h1>
-            <p className="text-warm-sand text-xs md:text-sm">Browse and select items to sell.</p>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso">Browse Catalog</h1>
+            <p className="text-warm-sand text-sm md:text-base">Select items from the admin catalog to add to your shop.</p>
           </div>
-          
-          <div className="relative w-full md:w-80">
-            <LuSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand" />
+        </div>
+
+        {/* Toolbar */}
+        <div className="bg-white p-3 md:p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex flex-col md:flex-row gap-3 md:gap-4">
+          <div className="relative flex-grow">
+            <LuSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand" size={18} />
             <input 
               type="text" 
-              placeholder="Search catalog..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-soft-oatmeal focus:ring-2 focus:ring-warm-sand/20 focus:outline-none transition-all text-sm"
+              placeholder="Search by name or code..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all text-sm"
             />
           </div>
-        </div>
-
-        {/* Categories Bar */}
-        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-2">
-          <button 
-            onClick={() => setActiveCategory('All')}
-            className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
-              activeCategory === 'All' 
-              ? 'bg-deep-espresso text-white shadow-lg' 
-              : 'bg-white text-dusty-cocoa border border-soft-oatmeal hover:bg-soft-oatmeal/20'
-            }`}
-          >
-            All Items
+          <button className="flex items-center justify-center gap-2 border border-soft-oatmeal text-deep-espresso px-6 py-3 md:py-0 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-soft-oatmeal/20 transition-all">
+            <LuFilter size={16} />
+            Filters
           </button>
-          {sellerCatalog.categories.map(cat => (
-            <button 
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.name)}
-              className={`px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all whitespace-nowrap border ${
-                activeCategory === cat.name 
-                ? 'bg-deep-espresso text-white border-deep-espresso shadow-md' 
-                : 'bg-white text-warm-sand border-soft-oatmeal hover:bg-soft-oatmeal/20'
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
         </div>
 
-        {/* Products Grid - Ultra Compact */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
-          {filteredProducts.map(product => (
-            <div 
-              key={product.id} 
-              className="group bg-white rounded-2xl border border-soft-oatmeal overflow-hidden hover:shadow-xl transition-all duration-500 flex flex-col"
-            >
-              <div className="relative h-24 sm:h-32 overflow-hidden">
-                <img 
-                  src={product.image} 
-                  alt={product.name} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-black text-deep-espresso shadow-sm">
-                  {product.code}
-                </div>
-              </div>
-              <div className="p-3 flex-1 flex flex-col">
-                <span className="text-[8px] font-black uppercase tracking-widest text-warm-sand mb-0.5">{product.category}</span>
-                <h3 className="text-xs font-bold text-deep-espresso group-hover:text-dusty-cocoa transition-colors line-clamp-1 leading-tight">{product.name}</h3>
-                <div className="mt-auto pt-2 flex items-center justify-between">
-                  <span className="text-sm font-black text-deep-espresso">Rs. {product.price}</span>
-                  <button className="p-1.5 bg-warm-sand/5 text-warm-sand hover:bg-deep-espresso hover:text-white rounded-lg transition-all duration-300">
-                    <LuPlus size={14} />
-                  </button>
-                </div>
-              </div>
+        {/* Catalog List / Table */}
+        <div className="space-y-4">
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white rounded-2xl border border-soft-oatmeal shadow-md overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-soft-oatmeal/20 border-b border-soft-oatmeal">
+                  <tr>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Image</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Product Name</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Code</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Category</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Price</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-soft-oatmeal/50">
+                  {filteredProducts.map((product) => (
+                    <tr key={product.id} className="hover:bg-soft-oatmeal/5 transition-colors group">
+                      <td className="px-6 py-4">
+                        <img src={product.image} alt={product.name} className="w-12 h-12 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" />
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="font-bold text-deep-espresso">{product.name}</p>
+                        <p className="text-[10px] text-warm-sand uppercase tracking-wider mt-0.5">In Stock</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[10px] font-black text-deep-espresso/60 bg-soft-oatmeal/30 px-2 py-1 rounded border border-soft-oatmeal">
+                          {product.code}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[10px] font-bold text-red-800 uppercase tracking-widest bg-red-800/5 px-2.5 py-1 rounded-full border border-red-800/10">
+                          {product.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 font-black text-deep-espresso">
+                        ₹{product.price.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button className="p-2.5 bg-warm-sand/5 text-warm-sand hover:bg-deep-espresso hover:text-white rounded-lg transition-all duration-300">
+                          <LuPlus size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ))}
-        </div>
-
-        {filteredProducts.length === 0 && (
-          <div className="py-20 text-center">
-            <h3 className="text-xl font-bold text-deep-espresso">No items found</h3>
-            <p className="text-warm-sand mt-2">Try adjusting your search or category filters.</p>
           </div>
-        )}
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {filteredProducts.map((product) => (
+              <div key={product.id} className="bg-white p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex gap-4 items-center">
+                <img src={product.image} alt={product.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-deep-espresso truncate">{product.name}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[9px] font-black text-deep-espresso/40 bg-soft-oatmeal/30 px-1.5 py-0.5 rounded">{product.code}</span>
+                    <span className="text-[9px] font-bold text-dusty-cocoa uppercase tracking-tighter">{product.category}</span>
+                  </div>
+                  <p className="font-black text-deep-espresso mt-1">₹{product.price.toFixed(2)}</p>
+                </div>
+                <button className="p-2.5 bg-soft-oatmeal/20 text-warm-sand rounded-xl hover:bg-deep-espresso hover:text-white transition-all">
+                  <LuPlus size={18} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Empty State */}
+          {filteredProducts.length === 0 && (
+            <div className="bg-white rounded-2xl border border-soft-oatmeal p-12 text-center text-warm-sand shadow-sm">
+              <LuBox size={48} className="mx-auto opacity-20 mb-4" />
+              <p className="font-medium italic">No products matched your search.</p>
+            </div>
+          )}
+        </div>
       </div>
     </PageWrapper>
   );
