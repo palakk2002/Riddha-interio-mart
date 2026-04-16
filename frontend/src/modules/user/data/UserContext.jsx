@@ -16,6 +16,7 @@ export const UserProvider = ({ children }) => {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
+  const [loading, setLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(!!user);
   
   const [address, setAddress] = useState(() => {
@@ -33,15 +34,8 @@ export const UserProvider = ({ children }) => {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (address) {
-      localStorage.setItem('riddha_address', JSON.stringify(address));
-    } else {
-      localStorage.removeItem('riddha_address');
-    }
-  }, [address]);
-
   const login = (userData) => {
+    // userData should contain { id, fullName, email, role, token }
     setUser(userData);
   };
 
@@ -50,19 +44,17 @@ export const UserProvider = ({ children }) => {
     setAddress(null);
   };
 
-  const saveAddress = (addressData) => {
-    setAddress(addressData);
-  };
-
   return (
     <UserContext.Provider
       value={{
         user,
+        loading,
+        setLoading,
         isLoggedIn,
         address,
         login,
         logout,
-        saveAddress,
+        saveAddress: setAddress,
       }}
     >
       {children}

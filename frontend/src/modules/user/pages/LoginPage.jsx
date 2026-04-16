@@ -6,6 +6,7 @@ import { FiArrowLeft, FiUser, FiLock, FiEye, FiEyeOff, FiCheck } from 'react-ico
 import { FaGoogle, FaFacebookF, FaXTwitter } from 'react-icons/fa6';
 import Button from '../../../shared/components/Button';
 import LOGIN_BG from '../../../assets/login_bg_fretshop.png';
+import api from '../../../shared/utils/api';
 
 const LoginPage = () => {
   const [identifier, setIdentifier] = useState('');
@@ -13,57 +14,53 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
-  const { login } = useUser();
+  const { login, loading, setLoading } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
 
+  const getRole = () => {
+    if (location.pathname.startsWith('/admin')) return 'admin';
+    if (location.pathname.startsWith('/seller')) return 'seller';
+    if (location.pathname.startsWith('/delivery')) return 'delivery';
+    return 'user';
+  };
+
   const getSignupPath = () => {
-    if (location.pathname.startsWith('/admin')) return '/admin/signup';
-    if (location.pathname.startsWith('/seller')) return '/seller/signup';
+    const role = getRole();
+    if (role === 'admin') return '/admin/signup';
+    if (role === 'seller') return '/seller/signup';
+    if (role === 'delivery') return '/delivery/signup';
     return '/signup';
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    const isAdmin = location.pathname.startsWith('/admin');
-    const isSeller = location.pathname.startsWith('/seller');
+    try {
+      const role = getRole();
+      
+      const response = await api.post(`/auth/${role}/login`, {
+        email: identifier,
+        password: password,
+        role: role
+      });
 
-    if (isAdmin) {
-      if (identifier === 'admin@riddhainterio.com' && password === '1234') {
-        login({ name: 'Admin User', id: identifier, role: 'admin' });
-        navigate('/admin/dashboard');
-      } else {
-        setError('Invalid Admin credentials. Use admin@riddhainterio.com / 1234');
-      }
-    } else if (isSeller) {
-      const registeredSellers = JSON.parse(localStorage.getItem('registered_sellers') || '[]');
-      const foundSeller = registeredSellers.find(s => s.email === identifier && s.password === password);
+      if (response.data.success) {
+        const { token, user } = response.data;
+        login({ ...user, token });
 
-      if (foundSeller) {
-        login({ 
-          name: foundSeller.fullName, 
-          id: foundSeller.email, 
-          role: 'seller',
-          status: foundSeller.status // 'pending' or 'Active'
-        });
-        navigate('/seller/dashboard');
-      } else if (identifier === 'seller@riddhainterio.com' && password === '1234') {
-        login({ name: 'Seller User', id: identifier, role: 'seller', status: 'Active' });
-        navigate('/seller/dashboard');
-      } else {
-        setError('Invalid Seller credentials');
+        // Navigate based on role
+        if (role === 'admin') navigate('/admin/dashboard');
+        else if (role === 'seller') navigate('/seller/dashboard');
+        else if (role === 'delivery') navigate('/delivery/dashboard');
+        else navigate('/cart');
       }
-    } else {
-      if (identifier === 'user@riddhainterio.com' && password === '1234') {
-        login({ name: 'Riddha User', id: identifier, role: 'user' });
-        navigate('/cart');
-      } else if (!identifier || !password) {
-        setError('Please enter both email and password');
-      } else {
-        setError('Invalid email or password. Use user@riddhainterio.com / 1234');
-      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Invalid credentials. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -221,9 +218,10 @@ const LoginPage = () => {
                 <div className="flex flex-col md:flex-row items-center gap-6 pt-4">
                   <Button
                     type="submit"
-                    className="w-full md:w-auto md:ml-auto h-16 md:h-12 px-10 rounded-full md:rounded-xl bg-[#8E2424] md:bg-white hover:bg-black md:hover:bg-warm-sand text-white md:text-deep-espresso md:hover:text-white font-black text-sm md:text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#8E2424]/20 transition-all active:scale-[0.98]"
+                    disabled={loading}
+                    className={`w-full md:w-auto md:ml-auto h-16 md:h-12 px-10 rounded-full md:rounded-xl bg-[#8E2424] md:bg-white hover:bg-black md:hover:bg-warm-sand text-white md:text-deep-espresso md:hover:text-white font-black text-sm md:text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#8E2424]/20 transition-all active:scale-[0.98] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    Log In
+                    {loading ? 'Logging In...' : 'Log In'}
                   </Button>
                 </div>
 

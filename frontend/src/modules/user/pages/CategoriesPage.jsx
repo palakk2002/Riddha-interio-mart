@@ -1,9 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { categories } from '../data/categories';
+import api from '../../../shared/utils/api';
 
 const CategoriesPage = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get('/categories');
+        setCategories(response.data.data);
+      } catch (err) {
+        console.error('Failed to load categories:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-40 text-center font-display text-warm-sand animate-pulse uppercase tracking-widest">
+        Bringing you the best of interiors...
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white pb-24 pt-10 px-4 md:px-12">
       <div className="max-w-7xl mx-auto">
@@ -29,9 +54,9 @@ const CategoriesPage = () => {
         {/* Categories Grid */}
         <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-x-3 md:gap-x-12 gap-y-8 md:gap-y-16">
           {categories.map((category) => (
-            <div key={category.id}>
+            <div key={category._id}>
               <Link 
-                to={`/category/${category.slug}`}
+                to={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
                 className="group flex flex-col items-center gap-2 md:gap-4"
               >
                 <div className="relative aspect-square w-full rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-soft-oatmeal/10 shadow-sm group-hover:shadow-lg transition-all duration-500 border border-soft-oatmeal/5">

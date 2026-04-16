@@ -1,85 +1,119 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FiArrowLeft, FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
+import { FiArrowLeft, FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiCheck, FiPhone, FiTruck, FiMapPin, FiShoppingBag } from 'react-icons/fi';
 import { FaGoogle, FaFacebookF, FaXTwitter } from 'react-icons/fa6';
 import Button from '../../../shared/components/Button';
 import LOGIN_BG from '../../../assets/login_bg_fretshop.png';
+import api from '../../../shared/utils/api';
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    shopName: '',
+    shopAddress: '',
+    phone: '',
+    vehicleType: 'Bike',
+    vehicleNumber: '',
     password: '',
     confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
+  const getRole = () => {
+    if (location.pathname.startsWith('/admin')) return 'admin';
+    if (location.pathname.startsWith('/seller')) return 'seller';
+    if (location.pathname.startsWith('/delivery')) return 'delivery';
+    return 'user';
+  };
+
   const getLoginPath = () => {
-    if (location.pathname.startsWith('/admin')) return '/admin/login';
-    if (location.pathname.startsWith('/seller')) return '/seller/login';
+    const role = getRole();
+    if (role === 'admin') return '/admin/login';
+    if (role === 'seller') return '/seller/login';
+    if (role === 'delivery') return '/delivery/login';
     return '/login';
   };
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
+    const role = getRole();
+
+    // Basic validation
     if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError('Please fill in all fields');
+      setError('Please fill in all basic fields');
+      setLoading(false);
       return;
+    }
+
+    // Role-specific validation
+    if (role === 'seller') {
+      if (!formData.shopName || !formData.shopAddress || !formData.phone) {
+        setError('Please fill in Shop Name, Address, and Phone');
+        setLoading(false);
+        return;
+      }
+    }
+
+    if (role === 'delivery') {
+      if (!formData.phone || !formData.vehicleNumber) {
+        setError('Please fill in Phone and Vehicle Details');
+        setLoading(false);
+        return;
+      }
     }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      setLoading(false);
       return;
     }
 
     if (!agreeTerms) {
       setError('Please agree to the terms and conditions');
+      setLoading(false);
       return;
     }
 
-    const isSeller = location.pathname.startsWith('/seller');
-    
-    if (isSeller) {
-      // 1. Save to registered_sellers for login lookup
-      const registeredSellers = JSON.parse(localStorage.getItem('registered_sellers') || '[]');
-      const newSeller = {
+    try {
+      // Build Payload
+      const payload = {
         fullName: formData.fullName,
         email: formData.email,
-        password: formData.password,
-        status: 'pending',
-        role: 'seller'
+        password: formData.password
       };
-      
-      if (registeredSellers.some(s => s.email === formData.email)) {
-        setError('Seller with this email already exists');
-        return;
+
+      if (role === 'seller') {
+        payload.shopName = formData.shopName;
+        payload.shopAddress = formData.shopAddress;
+        payload.phone = formData.phone;
       }
       
-      localStorage.setItem('registered_sellers', JSON.stringify([...registeredSellers, newSeller]));
+      if (role === 'delivery') {
+        payload.phone = formData.phone;
+        payload.vehicleType = formData.vehicleType;
+        payload.vehicleNumber = formData.vehicleNumber;
+      }
+      
+      const response = await api.post(`/auth/${role}/register`, payload);
 
-      // 2. Push to admin_pending_sellers for Admin view
-      const pendingSellers = JSON.parse(localStorage.getItem('admin_pending_sellers') || '[]');
-      const newPendingEntry = {
-        id: Date.now(),
-        name: formData.fullName,
-        shopName: `${formData.fullName}'s Shop`,
-        email: formData.email,
-        phone: '+91 00000 00000',
-        applicationDate: new Date().toISOString().split('T')[0],
-        docType: 'GSTIN'
-      };
-      localStorage.setItem('admin_pending_sellers', JSON.stringify([...pendingSellers, newPendingEntry]));
+      if (response.data.success) {
+        navigate(getLoginPath());
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    // Success simulation
-    navigate(getLoginPath());
   };
 
   const handleChange = (e) => {
@@ -87,213 +121,163 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden font-sans">
-      {/* Desktop Background Layer */}
-      <div className="hidden md:block absolute inset-0 z-0">
+    <div className="relative min-h-screen bg-deep-espresso overflow-hidden selection:bg-warm-sand selection:text-white">
+      {/* Background Section */}
+      <div className="fixed inset-0 z-0">
         <img 
-          src={LOGIN_BG}
-          alt="Luxury Showroom"
-          className="w-full h-full object-cover"
+          src={LOGIN_BG} 
+          alt="Luxury Interior" 
+          className="w-full h-full object-cover opacity-40 md:opacity-100"
         />
-        <div className="absolute inset-0 bg-black/45 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-deep-espresso via-deep-espresso/40 to-transparent md:bg-black/40"></div>
       </div>
 
-      {/* Main Content Container */}
-      <div className="relative z-10 flex flex-col md:flex-row min-h-screen">
-        {/* Left Section (Desktop Branding) */}
-        <motion.div 
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          className="hidden md:flex flex-1 items-center justify-center p-20"
-        >
-          <div className="max-w-2xl space-y-6">
-            <h1 className="text-[140px] font-display font-black text-white italic leading-none drop-shadow-2xl">
-              Riddha
-            </h1>
-            <p className="text-2xl font-medium text-white/70 italic tracking-wider ml-4">
-              Interio Mart
-            </p>
-          </div>
-        </motion.div>
+      <div className="relative z-10 flex min-h-screen">
+        {/* Left Side: Brand Story (Desktop only) */}
+        <div className="hidden lg:flex flex-col justify-between w-1/2 p-20 text-white">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-4 group cursor-pointer"
+            onClick={() => navigate('/')}
+          >
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center group-hover:bg-warm-sand transition-colors duration-500 shadow-2xl">
+              <FiArrowLeft className="text-deep-espresso group-hover:text-white w-6 h-6" />
+            </div>
+            <span className="text-sm font-black uppercase tracking-[0.3em]">Back to Store</span>
+          </motion.div>
 
-        {/* Right Section / Form Section */}
-        <div className="flex-1 flex flex-col min-h-screen">
-          {/* Mobile Header Image */}
-          <div className="md:hidden relative h-[25vh] min-h-[180px] w-full overflow-hidden">
-            <img 
-              src={LOGIN_BG}
-              alt="Luxury Interior"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/10" />
-            <button 
-              onClick={() => navigate(-1)}
-              className="absolute top-6 left-6 h-10 w-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 z-20"
-            >
-              <FiArrowLeft className="h-5 w-5" />
-            </button>
-            <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none">
-              <svg viewBox="0 0 1440 320" className="absolute bottom-[-1px] left-0 w-full h-[120%] rotate-180" preserveAspectRatio="none">
-                <path fill="#ffffff" fillOpacity="1" d="M0,160L48,176C96,192,192,224,288,229.3C384,235,480,213,576,192C672,171,768,149,864,154.7C960,160,1056,192,1152,192C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-              </svg>
+          <div className="space-y-6">
+            <motion.h1 className="font-display text-8xl font-black leading-tight tracking-tighter">
+              Join the <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-warm-sand via-white italic font-serif">Family.</span>
+            </motion.h1>
+          </div>
+
+          <div className="flex gap-12">
+            <div className="space-y-1">
+              <div className="text-2xl font-black text-warm-sand">Elite</div>
+              <div className="text-[10px] font-black uppercase tracking-widest text-white/40">Partner Network</div>
             </div>
           </div>
+        </div>
 
-          {/* Form Area Wrapper */}
-          <div className="flex-1 flex items-center justify-center p-6 md:p-12 lg:p-20 relative">
-            <button 
-              onClick={() => navigate(-1)}
-              className="hidden md:flex absolute top-10 right-10 items-center gap-2 group text-white/50 hover:text-white transition-all font-bold text-xs tracking-widest uppercase z-50"
-            >
-              <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-              Back
-            </button>
-
-            {/* Form Card */}
-            <motion.div 
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="w-full max-w-md bg-white md:bg-white/10 md:backdrop-blur-3xl md:border md:border-white/20 p-8 md:p-10 rounded-[40px] shadow-2xl relative"
-            >
-              {/* Desktop Header */}
-              <div className="hidden md:flex justify-between items-center mb-8">
-                <h2 className="text-3xl font-display font-bold text-white">Sign Up</h2>
-                <div className="flex gap-2 text-[10px] font-black uppercase tracking-wider">
-                  <span className="text-white/40 hover:text-white cursor-pointer transition-colors" onClick={() => navigate(getLoginPath())}>Log In</span>
-                  <span className="text-white border-b border-white pb-0.5 pointer-events-none">Sign Up</span>
+        {/* Right Side: Signup Form */}
+        <div className="flex items-center justify-center w-full lg:w-1/2 px-6 py-12">
+          <motion.div className="w-full max-w-lg">
+            <div className="bg-white/10 backdrop-blur-2xl p-8 md:p-12 rounded-[40px] border border-white/20 shadow-2xl">
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="font-display text-4xl font-black text-white italic font-serif">Sign Up</h2>
+                  <div className="flex gap-4">
+                    <button onClick={() => navigate(getLoginPath())} className="text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">Log In</button>
+                    <div className="w-12 h-0.5 bg-warm-sand mt-3"></div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Mobile Header */}
-              <div className="md:hidden text-center space-y-1 mb-6 w-full">
-                <h1 className="text-2xl font-black text-deep-espresso tracking-tight">Create Account</h1>
-                <p className="text-gray-400 font-bold text-[10px] tracking-[0.15em] uppercase italic">
-                  Join Riddha Interio Mart
-                </p>
-              </div>
+                <div className="mb-4 px-4 py-2 bg-warm-sand/10 border border-warm-sand/20 rounded-full inline-block">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">
+                    Account Type: {getRole().toUpperCase()}
+                  </span>
+                </div>
 
-              <AnimatePresence>
                 {error && (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-[10px] font-bold uppercase tracking-wider text-center"
-                  >
+                  <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-xs font-bold text-center uppercase tracking-widest">
                     {error}
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
 
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="grid grid-cols-1 gap-4">
-                  {/* Full Name */}
-                  <div className="space-y-1">
-                    <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-1 ml-1">Full Name</label>
-                    <div className="relative group">
-                      <FiUser className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-warm-sand group-focus-within:text-deep-espresso h-5 w-5" />
-                      <input 
-                        type="text" 
-                        name="fullName"
-                        placeholder="John Doe" 
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        className="w-full md:pl-6 pl-16 pr-6 py-3.5 rounded-full md:rounded-xl bg-soft-oatmeal/10 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-warm-sand/50 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm font-semibold transition-all md:text-white"
-                      />
+                <form onSubmit={handleSignup} className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                  {/* Basic Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Full Name</label>
+                      <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full px-6 py-3.5 rounded-xl bg-white/10 border border-white/10 focus:border-warm-sand/50 focus:outline-none text-sm text-white transition-all" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Email</label>
+                      <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-6 py-3.5 rounded-xl bg-white/10 border border-white/10 focus:border-warm-sand/50 focus:outline-none text-sm text-white transition-all" />
                     </div>
                   </div>
 
-                  {/* Email */}
-                  <div className="space-y-1">
-                    <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-1 ml-1">Email</label>
-                    <div className="relative group">
-                      <FiMail className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-warm-sand group-focus-within:text-deep-espresso h-5 w-5" />
-                      <input 
-                        type="email" 
-                        name="email"
-                        placeholder="email@example.com" 
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full md:pl-6 pl-16 pr-6 py-3.5 rounded-full md:rounded-xl bg-soft-oatmeal/10 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-warm-sand/50 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm font-semibold transition-all md:text-white"
-                      />
+                  {/* Seller Fields */}
+                  {getRole() === 'seller' && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Shop Name</label>
+                          <div className="relative">
+                            <FiShoppingBag className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand/50" />
+                            <input type="text" name="shopName" value={formData.shopName} onChange={handleChange} className="w-full pl-12 pr-6 py-3.5 rounded-xl bg-white/10 border border-white/10 focus:border-warm-sand/50 focus:outline-none text-sm text-white transition-all" />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Phone</label>
+                          <div className="relative">
+                            <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand/50" />
+                            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full pl-12 pr-6 py-3.5 rounded-xl bg-white/10 border border-white/10 focus:border-warm-sand/50 focus:outline-none text-sm text-white transition-all" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Shop Address</label>
+                        <div className="relative">
+                          <FiMapPin className="absolute left-4 top-12 -translate-y-1/2 text-warm-sand/50" />
+                          <textarea name="shopAddress" value={formData.shopAddress} onChange={handleChange} rows="2" className="w-full pl-12 pr-6 py-3.5 rounded-xl bg-white/10 border border-white/10 focus:border-warm-sand/50 focus:outline-none text-sm text-white transition-all resize-none"></textarea>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Delivery Fields */}
+                  {getRole() === 'delivery' && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Phone</label>
+                        <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-6 py-3.5 rounded-xl bg-white/10 border border-white/10 focus:border-warm-sand/50 focus:outline-none text-sm text-white transition-all" />
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Vehicle Type</label>
+                          <select name="vehicleType" value={formData.vehicleType} onChange={handleChange} className="w-full px-6 py-3.5 rounded-xl bg-deep-espresso border border-white/10 focus:border-warm-sand/50 focus:outline-none text-sm text-white transition-all appearance-none">
+                            <option value="Bike">Bike</option>
+                            <option value="Van">Van</option>
+                            <option value="Truck">Truck</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Vehicle No.</label>
+                          <input type="text" name="vehicleNumber" value={formData.vehicleNumber} onChange={handleChange} className="w-full px-6 py-3.5 rounded-xl bg-white/10 border border-white/10 focus:border-warm-sand/50 focus:outline-none text-sm text-white transition-all" />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Password Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <div className="space-y-1 relative">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Password</label>
+                      <input type={showPassword ? "text" : "password"} name="password" value={formData.password} onChange={handleChange} className="w-full px-6 py-3.5 rounded-xl bg-white/10 border border-white/10 focus:border-warm-sand/50 focus:outline-none text-sm text-white transition-all" />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 bottom-3.5 text-white/40">{showPassword ? <FiEyeOff /> : <FiEye />}</button>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Confirm</label>
+                      <input type={showPassword ? "text" : "password"} name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className="w-full px-6 py-3.5 rounded-xl bg-white/10 border border-white/10 focus:border-warm-sand/50 focus:outline-none text-sm text-white transition-all" />
                     </div>
                   </div>
 
-                  {/* Password */}
-                  <div className="space-y-1">
-                    <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-1 ml-1">Password</label>
-                    <div className="relative group">
-                      <FiLock className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-warm-sand group-focus-within:text-deep-espresso h-5 w-5" />
-                      <input 
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        placeholder="••••••••" 
-                        value={formData.password}
-                        onChange={handleChange}
-                        className="w-full md:pl-6 pl-16 pr-14 py-3.5 rounded-full md:rounded-xl bg-soft-oatmeal/10 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-warm-sand/50 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm font-semibold transition-all md:text-white"
-                      />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 md:text-white/50 hover:text-white">
-                        {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                      </button>
-                    </div>
+                  <div className="flex items-center gap-3 pt-4">
+                    <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="accent-warm-sand h-4 w-4" />
+                    <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">I agree to the Terms & Conditions</label>
                   </div>
 
-                  {/* Confirm Password */}
-                  <div className="md:block hidden space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-1 ml-1">Confirm Password</label>
-                    <div className="relative group">
-                      <input 
-                        type="password"
-                        name="confirmPassword"
-                        placeholder="••••••••" 
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        className="w-full pl-6 pr-6 py-3.5 rounded-xl bg-white/10 border-2 border-transparent border-white/10 focus:border-white/40 focus:bg-white/20 focus:outline-none text-sm font-semibold transition-all text-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Terms and Conditions */}
-                <div className="flex items-start gap-3 px-2 py-2">
-                  <button type="button" onClick={() => setAgreeTerms(!agreeTerms)} className="mt-0.5 flex-shrink-0">
-                    <div className={`h-4 w-4 rounded border flex items-center justify-center transition-all ${agreeTerms ? 'bg-warm-sand border-warm-sand md:bg-white md:border-white' : 'border-gray-300 md:border-white/30'}`}>
-                      {agreeTerms && <FiCheck className="md:text-deep-espresso text-white text-[10px] stroke-[4]" />}
-                    </div>
-                  </button>
-                  <p className="text-[10px] font-bold text-gray-400 md:text-white/60 leading-relaxed uppercase tracking-wider">
-                    I agree to the <span className="text-warm-sand md:text-white cursor-pointer border-b border-warm-sand/30 md:border-white/30">Terms & Conditions</span>
-                  </p>
-                </div>
-
-                <div className="pt-2">
-                  <Button 
-                    type="submit"
-                    className="w-full h-14 md:h-12 rounded-full md:rounded-xl bg-warm-sand md:bg-white hover:bg-deep-espresso md:hover:bg-warm-sand text-white md:text-deep-espresso md:hover:text-white font-black text-xs uppercase tracking-widest shadow-xl transition-all"
-                  >
-                    Create Account
+                  <Button type="submit" disabled={loading} className="w-full h-14 mt-4 bg-warm-sand hover:bg-white text-white hover:text-deep-espresso">
+                    {loading ? 'Registering...' : 'Create Account'}
                   </Button>
-                </div>
-
-                {/* Social Logins */}
-                <div className="hidden md:block pt-6 border-t border-white/10 mt-4">
-                  <div className="flex justify-center items-center gap-6">
-                    {[FaGoogle, FaFacebookF, FaXTwitter].map((Icon, idx) => (
-                      <button key={idx} type="button" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-deep-espresso transition-all">
-                        <Icon size={16} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <p className="text-center text-[10px] font-black text-gray-400 md:text-white/50 uppercase tracking-widest mt-4">
-                  Already have an account? <span onClick={() => navigate(getLoginPath())} className="text-warm-sand md:text-white cursor-pointer border-b border-warm-sand/30 md:border-white/30 transition-colors">Log In</span>
-                </p>
-              </form>
-            </motion.div>
-          </div>
+                </form>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>

@@ -1,0 +1,88 @@
+const Admin = require('../models/Admin');
+const Seller = require('../models/Seller');
+const sendTokenResponse = require('../utils/sendTokenResponse');
+const checkEmailExists = require('../utils/checkEmailExists');
+
+// @desc    Register Admin
+exports.registerAdmin = async (req, res, next) => {
+  try {
+    const { fullName, email, password } = req.body;
+    if (await checkEmailExists(email)) {
+      return res.status(400).json({ success: false, error: 'Email already registered' });
+    }
+    const admin = await Admin.create({ fullName, email, password });
+    sendTokenResponse(admin, 201, res);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Login Admin
+exports.loginAdmin = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ success: false, error: 'Please provide email and password' });
+
+    const admin = await Admin.findOne({ email }).select('+password');
+    if (!admin || !(await admin.matchPassword(password))) {
+      return res.status(401).json({ success: false, error: 'Invalid credentials' });
+    }
+    sendTokenResponse(admin, 200, res);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get current logged in Admin
+exports.getAdminMe = async (req, res, next) => {
+  try {
+    const admin = await Admin.findById(req.user.id);
+    res.status(200).json({ success: true, data: admin });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// --- Seller Management ---
+
+// @desc    Get all pending sellers
+exports.getPendingSellers = async (req, res, next) => {
+  try {
+    const sellers = await Seller.find({ isVerified: false }).sort('-createdAt');
+    res.status(200).json({ success: true, data: sellers });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get all active (verified) sellers
+exports.getActiveSellers = async (req, res, next) => {
+  try {
+    const sellers = await Seller.find({ isVerified: true }).sort('-createdAt');
+    res.status(200).json({ success: true, data: sellers });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Approve a seller registration
+exports.approveSeller = async (req, res, next) => {
+  try {
+    const seller = await Seller.findByIdAndUpdate(req.params.id, { isVerified: true }, { new: true });
+    if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
+    res.status(200).json({ success: true, data: seller });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Delete/Reject a seller registration
+exports.deleteSeller = async (req, res, next) => {
+  try {
+    const seller = await Seller.findByIdAndDelete(req.params.id);
+    if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
+    res.status(200).json({ success: true, data: {} });
+  } catch (err) {
+    next(err);
+  }
+};

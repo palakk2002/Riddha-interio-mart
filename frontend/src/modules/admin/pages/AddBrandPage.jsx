@@ -61,6 +61,24 @@ const AddBrandPage = () => {
     }
   };
 
+  const handleBannerUpload = (e, index) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => handleArrayChange('banners', index, reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCategoryImgUpload = (e, index) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => handleCategoryChange(index, 'image', reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = () => {
     const saved = localStorage.getItem('admin_brands');
     let brands = saved ? JSON.parse(saved) : [];
@@ -212,12 +230,22 @@ const AddBrandPage = () => {
                 <div className="grid grid-cols-1 gap-4">
                   {formData.banners.map((url, idx) => (
                     <div key={idx} className="bg-soft-oatmeal/5 p-4 rounded-[32px] border border-soft-oatmeal/40 flex items-center gap-6 group hover:border-warm-sand/30 transition-all">
-                      <div className="w-32 h-16 rounded-2xl bg-white border border-soft-oatmeal/20 flex-shrink-0 overflow-hidden relative shadow-inner">
+                      <div 
+                        onClick={() => document.getElementById(`banner-upload-${idx}`).click()}
+                        className="w-32 h-16 rounded-2xl bg-white border border-soft-oatmeal/20 flex-shrink-0 overflow-hidden relative shadow-inner cursor-pointer"
+                      >
                         {url ? <img src={url} className="w-full h-full object-cover" /> : <FiImage className="absolute inset-0 m-auto text-warm-sand/10" size={20} />}
+                        <div className="absolute inset-0 bg-deep-espresso/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                          <FiPlus className="text-white" />
+                        </div>
                       </div>
+                      <input 
+                        type="file" id={`banner-upload-${idx}`} className="hidden" 
+                        onChange={(e) => handleBannerUpload(e, idx)} accept="image/*"
+                      />
                       <input
                         type="text" value={url} onChange={(e) => handleArrayChange('banners', idx, e.target.value)}
-                        placeholder="https://images.unsplash.com/promo-banner..."
+                        placeholder="Banner URL or Upload File"
                         className="flex-1 bg-transparent border-none text-xs focus:ring-0 font-medium placeholder:text-warm-sand/20"
                       />
                       <button onClick={() => removeArrayItem('banners', idx)} className="p-3 text-warm-sand/20 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all">
@@ -263,12 +291,25 @@ const AddBrandPage = () => {
                           />
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[8px] font-black uppercase tracking-widest text-warm-sand/50 ml-1">Asset Reference URL</label>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[8px] font-black uppercase tracking-widest text-warm-sand/50 ml-1">Asset Reference</label>
+                          <button 
+                            type="button"
+                            onClick={() => document.getElementById(`cat-img-upload-${idx}`).click()}
+                            className="text-[8px] font-black uppercase tracking-widest text-deep-espresso hover:underline"
+                          >
+                            Upload File
+                          </button>
+                        </div>
+                        <input 
+                           type="file" id={`cat-img-upload-${idx}`} className="hidden" 
+                           onChange={(e) => handleCategoryImgUpload(e, idx)} accept="image/*"
+                         />
                         <div className="flex gap-3">
                           <input
                             type="text" value={cat.image} onChange={(e) => handleCategoryChange(idx, 'image', e.target.value)}
-                            placeholder="Paste image link here..."
+                            placeholder="Paste image link or upload..."
                             className="flex-1 bg-white border border-soft-oatmeal/30 rounded-xl px-4 py-3 text-[11px] focus:ring-4 focus:ring-warm-sand/5 outline-none transition-all font-medium"
                           />
                           <button onClick={() => removeArrayItem('categories', idx)} className="p-3 bg-red-50 text-red-300 hover:text-red-500 rounded-xl transition-all">
