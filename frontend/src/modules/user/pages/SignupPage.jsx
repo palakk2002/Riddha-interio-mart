@@ -44,40 +44,6 @@ const SignupPage = () => {
       return;
     }
 
-    const isSeller = location.pathname.startsWith('/seller');
-    
-    if (isSeller) {
-      // 1. Save to registered_sellers for login lookup
-      const registeredSellers = JSON.parse(localStorage.getItem('registered_sellers') || '[]');
-      const newSeller = {
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        status: 'pending',
-        role: 'seller'
-      };
-      
-      if (registeredSellers.some(s => s.email === formData.email)) {
-        setError('Seller with this email already exists');
-        return;
-      }
-      
-      localStorage.setItem('registered_sellers', JSON.stringify([...registeredSellers, newSeller]));
-
-      // 2. Push to admin_pending_sellers for Admin view
-      const pendingSellers = JSON.parse(localStorage.getItem('admin_pending_sellers') || '[]');
-      const newPendingEntry = {
-        id: Date.now(),
-        name: formData.fullName,
-        shopName: `${formData.fullName}'s Shop`,
-        email: formData.email,
-        phone: '+91 00000 00000',
-        applicationDate: new Date().toISOString().split('T')[0],
-        docType: 'GSTIN'
-      };
-      localStorage.setItem('admin_pending_sellers', JSON.stringify([...pendingSellers, newPendingEntry]));
-    }
-
     // Success simulation
     navigate(getLoginPath());
   };

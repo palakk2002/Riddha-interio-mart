@@ -86,11 +86,6 @@ const OrderListPage = ({ specificStatus }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [orders, setOrders] = useState(() => {
-    const saved = localStorage.getItem('riddha_full_orders');
-    return saved ? JSON.parse(saved) : initialOrders;
-  });
-
   // Normalize status for display
   const currentStatus =
     specificStatus ||
@@ -100,9 +95,9 @@ const OrderListPage = ({ specificStatus }) => {
       .join(" ");
 
   const filteredOrders = useMemo(() => {
-    return orders.filter((order) => {
+    return initialOrders.filter((order) => {
       const matchesSearch =
-        order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.orderId.toLowerCase().includes(searchTerm.toLowerCase());
 
       if (currentStatus === "All Order" || !currentStatus) {
@@ -114,7 +109,7 @@ const OrderListPage = ({ specificStatus }) => {
         order.status.toLowerCase() === currentStatus.toLowerCase()
       );
     });
-  }, [searchTerm, currentStatus, orders]);
+  }, [searchTerm, currentStatus]);
 
   return (
     <PageWrapper>

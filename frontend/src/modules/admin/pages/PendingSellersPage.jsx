@@ -43,19 +43,6 @@ const PendingSellersPage = () => {
       const updatedApproved = [...savedApproved, newApprovedSeller];
       localStorage.setItem('admin_approved_sellers', JSON.stringify(updatedApproved));
 
-      // NEW: Sync status with registered_sellers for the frontend-only flow
-      const registeredSellers = JSON.parse(localStorage.getItem('registered_sellers') || '[]');
-      const updatedRegistered = registeredSellers.map(s => 
-        s.email === sellerToApprove.email ? { ...s, status: 'Active' } : s
-      );
-      localStorage.setItem('registered_sellers', JSON.stringify(updatedRegistered));
-
-      // NEW: Also update the current active session if it matches the approved seller
-      const currentUser = JSON.parse(localStorage.getItem('riddha_user') || 'null');
-      if (currentUser && currentUser.id === sellerToApprove.email) {
-        localStorage.setItem('riddha_user', JSON.stringify({ ...currentUser, status: 'Active' }));
-      }
-
       setSelectedSeller(null);
       alert('Seller Approved Successfully!');
     }
