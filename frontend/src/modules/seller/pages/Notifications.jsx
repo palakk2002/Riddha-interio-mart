@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
-import { LuBell, LuCheckCheck, LuTrash2, LuClock, LuAlertCircle, LuInfo, LuCheckCircle2 } from 'react-icons/lu';
+import { LuBell, LuCheckCheck, LuTrash2, LuClock, LuCircleAlert, LuInfo, LuCircleCheck } from 'react-icons/lu';
 
 const initialNotifications = [
   { id: 1, title: 'Product Approved', message: 'Your Classic Marble Tile has been approved and is now live in the catalog.', time: '2 hours ago', status: 'unread', type: 'success' },
@@ -19,6 +19,38 @@ const Notifications = () => {
 
   useEffect(() => {
     localStorage.setItem('seller_notifications', JSON.stringify(notifications));
+  }, [notifications]);
+
+  // Handle new order notifications for the frontend simulation
+  useEffect(() => {
+    const checkNewOrders = () => {
+      const orders = JSON.parse(localStorage.getItem('riddha_full_orders') || '[]');
+      const pendingOrders = orders.filter(o => o.status === 'Pending Seller');
+      
+      const newNotifs = [];
+      pendingOrders.forEach(order => {
+        // Check if we already notified about this order ID
+        const alreadyNotified = notifications.some(n => n.message.includes(order.orderId));
+        if (!alreadyNotified) {
+          newNotifs.push({
+            id: Date.now() + Math.random(),
+            title: 'New Order Received',
+            message: `You have received a new order ${order.orderId} for ₹${order.total.toLocaleString()}.`,
+            time: 'Just now',
+            status: 'unread',
+            type: 'warning'
+          });
+        }
+      });
+
+      if (newNotifs.length > 0) {
+        setNotifications(prev => [...newNotifs, ...prev]);
+      }
+    };
+
+    const interval = setInterval(checkNewOrders, 5000); // Poll every 5 seconds
+    checkNewOrders(); // Initial check
+    return () => clearInterval(interval);
   }, [notifications]);
 
   const markAsRead = (id) => {
@@ -40,8 +72,8 @@ const Notifications = () => {
 
   const getIcon = (type) => {
     switch (type) {
-      case 'success': return <LuCheckCircle2 className="text-green-500" size={20} />;
-      case 'warning': return <LuAlertCircle className="text-amber-500" size={20} />;
+      case 'success': return <LuCircleCheck className="text-green-500" size={20} />;
+      case 'warning': return <LuCircleAlert className="text-amber-500" size={20} />;
       default: return <LuInfo className="text-blue-500" size={20} />;
     }
   };

@@ -135,10 +135,46 @@ const PaymentPage = () => {
   ];
 
   const handlePayNow = () => {
+    const orderId = 'RD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    
+    const newOrder = {
+      id: Date.now(),
+      orderId: orderId,
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: 'Pending Seller',
+      customer: {
+        name: address?.name || 'Guest User',
+        email: 'user@example.com', // Fallback for simulation
+        phone: address?.phone || 'N/A',
+        address: `${address?.address}, ${address?.landmark}, ${address?.city}, ${address?.state} - ${address?.pincode}`
+      },
+      paymentMethod: selectedMethod === 'cod' ? 'Cash on Delivery' : `${selectedMethod.toUpperCase()} (Paid)`,
+      items: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image
+      })),
+      subtotal: cartTotal,
+      shipping: 0,
+      total: cartTotal,
+      timeline: [
+        { status: "Order Placed", date: new Date().toLocaleString(), active: true },
+        { status: "Waiting for Seller", date: "Pending", active: true },
+        { status: "Ready for Pickup", date: "", active: false },
+        { status: "Out for Delivery", date: "", active: false },
+        { status: "Delivered", date: "", active: false }
+      ]
+    };
+
+    const existingOrders = JSON.parse(localStorage.getItem('riddha_full_orders') || '[]');
+    localStorage.setItem('riddha_full_orders', JSON.stringify([newOrder, ...existingOrders]));
+    localStorage.setItem('last_order_id', orderId);
+
     if (selectedMethod === 'cod') {
       clearCart();
-      const orderId = 'RD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-      localStorage.setItem('last_order_id', orderId);
       navigate('/order-success');
       return;
     }
@@ -146,8 +182,6 @@ const PaymentPage = () => {
     setIsProcessing(true);
     setTimeout(() => {
       clearCart();
-      const orderId = 'RD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-      localStorage.setItem('last_order_id', orderId);
       navigate('/order-success');
     }, 2500);
   };

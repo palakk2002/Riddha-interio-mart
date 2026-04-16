@@ -18,6 +18,7 @@ import {
 } from "react-icons/lu";
 import { FiBarChart2 } from "react-icons/fi";
 import { useLocation } from "react-router-dom";
+import { useUser } from "../../user/data/UserContext";
 import sidebarBg from "../../../assets/seller_sidebar_bg.png";
 
 const menuItems = [
@@ -59,7 +60,7 @@ const menuItems = [
   { path: "/seller/catalog", icon: LuSearch, label: "Browse Catalog" },
 ];
 
-const NavItem = ({ item, isOpen, onClose, expanded, onToggle }) => {
+const NavItem = ({ item, isOpen, onClose, expanded, onToggle, disabled }) => {
   const hasChildren = item.children && item.children.length > 0;
   const location = useLocation();
   const isSelfActive = location.pathname === item.path;
@@ -82,9 +83,9 @@ const NavItem = ({ item, isOpen, onClose, expanded, onToggle }) => {
     <div className="mb-2">
       <div
         className={`
-          flex items-center justify-between p-3 rounded-xl transition-all duration-300 group cursor-pointer border border-white/5
+          flex items-center justify-between p-3 rounded-xl transition-all duration-300 group ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer'} border border-white/5
           ${
-            isActive
+            isActive && !disabled
               ? "bg-red-800 text-white shadow-xl shadow-red-900/20 border-white/10 scale-[1.02]"
               : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10"
           }
@@ -160,6 +161,8 @@ const NavItem = ({ item, isOpen, onClose, expanded, onToggle }) => {
 
 const SellerSidebar = ({ isOpen, onClose }) => {
   const [expandedItems, setExpandedItems] = useState({});
+  const { user } = useUser();
+  const isPending = user?.status === "pending";
 
   const toggleItem = (label) => {
     setExpandedItems((prev) => ({
@@ -229,6 +232,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
               onClose={onClose}
               expanded={expandedItems[item.label]}
               onToggle={toggleItem}
+              disabled={isPending && item.path !== "/seller"}
             />
           ))}
         </nav>

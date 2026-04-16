@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, useNavigate, Link } from 'react-router-dom';
 import DeliverySidebar from './DeliverySidebar';
 import DeliveryBottomNavbar from './DeliveryBottomNavbar';
-import { LuMenu, LuBell, LuUser, LuChevronDown } from 'react-icons/lu';
+import { useUser } from '../../user/data/UserContext';
+import { LuMenu, LuBell, LuUser, LuChevronDown, LuLogOut } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const notifications = [
@@ -15,6 +16,13 @@ const DeliveryLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const { logout, user } = useUser();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/delivery/login');
+  };
 
   return (
     <div 
@@ -85,7 +93,7 @@ const DeliveryLayout = () => {
                 className="flex items-center gap-3 cursor-pointer group"
               >
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-bold leading-tight">Vikram Singh</p>
+                  <p className="text-sm font-bold leading-tight">{user?.name || 'Vikram Singh'}</p>
                   <p className="text-xs text-warm-sand font-medium uppercase tracking-tighter">Gold Partner</p>
                 </div>
                 <div className={`w-10 h-10 rounded-full bg-warm-sand/20 flex items-center justify-center text-warm-sand ring-2 shadow-sm transition-all ${showUserMenu ? 'ring-warm-sand' : 'ring-white group-hover:ring-soft-oatmeal'}`}>
@@ -104,11 +112,20 @@ const DeliveryLayout = () => {
                   >
                     <Link 
                       to="/delivery/profile"
+                      onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-deep-espresso hover:bg-soft-oatmeal/30 transition-colors group"
                     >
                       <LuUser size={18} className="text-warm-sand group-hover:scale-110 transition-transform" />
                       View Profile
                     </Link>
+                    <div className="h-[1px] bg-soft-oatmeal my-1 mx-2"></div>
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-colors group"
+                    >
+                      <LuLogOut size={18} className="group-hover:translate-x-1 transition-transform" />
+                      Sign Out
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>

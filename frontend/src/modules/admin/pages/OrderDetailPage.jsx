@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { motion } from 'framer-motion';
@@ -51,20 +51,30 @@ const OrderDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  // Use mock data or fallback
-  const order = orderDetails[id] || {
-    orderId: `ORD-${id || '1000'}`,
-    date: "2024-04-14",
-    status: "Processing",
-    customer: { name: "Guest User", email: "guest@example.com", phone: "N/A" },
-    shippingAddress: "Address details not available.",
-    paymentMethod: "Cash on Delivery",
-    items: [],
-    subtotal: 0,
-    shipping: 0,
-    total: 0,
-    timeline: []
-  };
+  // Use localStorage data for the live flow simulation
+  const order = useMemo(() => {
+    const saved = localStorage.getItem('riddha_full_orders');
+    const allOrders = saved ? JSON.parse(saved) : [];
+    
+    // Find in localStorage first
+    const found = allOrders.find(o => String(o.id) === id);
+    if (found) return found;
+
+    // Fallback to static mock data if available
+    return orderDetails[id] || {
+      orderId: `ORD-${id || '1000'}`,
+      date: "2024-04-14",
+      status: "Processing",
+      customer: { name: "Guest User", email: "guest@example.com", phone: "N/A" },
+      shippingAddress: "Address details not available.",
+      paymentMethod: "Cash on Delivery",
+      items: [],
+      subtotal: 0,
+      shipping: 0,
+      total: 0,
+      timeline: []
+    };
+  }, [id]);
 
   const statusColors = {
     Pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',

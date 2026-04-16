@@ -38,11 +38,22 @@ const LoginPage = () => {
         setError('Invalid Admin credentials. Use admin@riddhainterio.com / 1234');
       }
     } else if (isSeller) {
-      if (identifier === 'seller@riddhainterio.com' && password === '1234') {
-        login({ name: 'Seller User', id: identifier, role: 'seller' });
+      const registeredSellers = JSON.parse(localStorage.getItem('registered_sellers') || '[]');
+      const foundSeller = registeredSellers.find(s => s.email === identifier && s.password === password);
+
+      if (foundSeller) {
+        login({ 
+          name: foundSeller.fullName, 
+          id: foundSeller.email, 
+          role: 'seller',
+          status: foundSeller.status // 'pending' or 'Active'
+        });
+        navigate('/seller/dashboard');
+      } else if (identifier === 'seller@riddhainterio.com' && password === '1234') {
+        login({ name: 'Seller User', id: identifier, role: 'seller', status: 'Active' });
         navigate('/seller/dashboard');
       } else {
-        setError('Invalid Seller credentials. Use seller@riddhainterio.com / 1234');
+        setError('Invalid Seller credentials');
       }
     } else {
       if (identifier === 'user@riddhainterio.com' && password === '1234') {

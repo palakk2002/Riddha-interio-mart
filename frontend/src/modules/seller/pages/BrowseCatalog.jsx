@@ -1,10 +1,22 @@
 import React, { useState, useMemo } from 'react';
 import PageWrapper from '../components/PageWrapper';
-import { LuPlus, LuSearch, LuFilter, LuBox } from 'react-icons/lu';
+import { LuPlus, LuSearch, LuFilter, LuBox, LuCheck } from 'react-icons/lu';
 import { adminProducts } from '../../admin/data/adminProducts';
+import { sellerProducts } from '../data/sellerProducts';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const BrowseCatalog = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const [inventory, setInventory] = useState(() => {
+    const fullSaved = localStorage.getItem('seller_full_inventory');
+    if (fullSaved) return JSON.parse(fullSaved);
+    
+    const savedAdded = JSON.parse(localStorage.getItem('seller_added_products') || '[]');
+    return [...sellerProducts, ...savedAdded];
+  });
 
   const filteredProducts = useMemo(() => {
     return adminProducts.filter(p => 
@@ -12,6 +24,34 @@ const BrowseCatalog = () => {
       p.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [searchTerm]);
+
+  const handleAddToShop = (product) => {
+    if (inventory.some(p => p.id === product.id)) return;
+
+    const newProduct = {
+      ...product,
+      status: 'pending',
+      dateAdded: new Date().toISOString().split('T')[0]
+    };
+
+    const updatedInventory = [...inventory, newProduct];
+    setInventory(updatedInventory);
+    
+    // Persist to localStorage
+    localStorage.setItem('seller_full_inventory', JSON.stringify(updatedInventory));
+    
+    // Also update seller_added_products for partial sync compatibility
+    const addedOnly = updatedInventory.filter(p => !sellerProducts.some(sp => sp.id === p.id));
+    localStorage.setItem('seller_added_products', JSON.stringify(addedOnly));
+
+    setToastMessage(`${product.name} added to your shop!`);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
+  const isProductInInventory = (productId) => {
+    return inventory.some(p => p.id === productId);
+  };
 
   return (
     <PageWrapper>
@@ -82,9 +122,20 @@ const BrowseCatalog = () => {
                         ₹{product.price.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button className="p-2.5 bg-warm-sand/5 text-warm-sand hover:bg-deep-espresso hover:text-white rounded-lg transition-all duration-300">
-                          <LuPlus size={18} />
-                        </button>
+                        {isProductInInventory(product.id) ? (
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 font-bold text-xs">
+                            <LuCheck size={14} />
+                            Added
+                          </div>
+                        ) : (
+                          <button 
+                            onClick={() => handleAddToShop(product)}
+                            className="p-2.5 bg-warm-sand/5 text-warm-sand hover:bg-deep-espresso hover:text-white rounded-lg transition-all duration-300"
+                            title="Add to Shop"
+                          >
+                            <LuPlus size={18} />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -106,9 +157,18 @@ const BrowseCatalog = () => {
                   </div>
                   <p className="font-black text-deep-espresso mt-1">₹{product.price.toFixed(2)}</p>
                 </div>
-                <button className="p-2.5 bg-soft-oatmeal/20 text-warm-sand rounded-xl hover:bg-deep-espresso hover:text-white transition-all">
-                  <LuPlus size={18} />
-                </button>
+                {isProductInInventory(product.id) ? (
+                  <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
+                    <LuCheck size={18} />
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => handleAddToShop(product)}
+                    className="p-2.5 bg-soft-oatmeal/20 text-warm-sand rounded-xl hover:bg-deep-espresso hover:text-white transition-all shadow-sm active:scale-95"
+                  >
+                    <LuPlus size={18} />
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -121,6 +181,26 @@ const BrowseCatalog = () => {
             </div>
           )}
         </div>
+
+        {/* Success Toast */}
+        <AnimatePresence>
+          {showToast && (
+            <motion.div 
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.9 }}
+              className="fixed bottom-6 right-6 z-50 bg-deep-espresso text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10"
+            >
+              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
+                <LuCheck size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="font-bold text-sm">Success!</p>
+                <p className="text-xs text-white/70">{toastMessage}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </PageWrapper>
   );
