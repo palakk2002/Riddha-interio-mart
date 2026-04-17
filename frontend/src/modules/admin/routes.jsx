@@ -27,6 +27,8 @@ import AddCategoryGridItemPage from './pages/AddCategoryGridItemPage';
 import AddBrandPage from './pages/AddBrandPage';
 import PendingSellers from './pages/PendingSellers';
 import ActiveSellers from './pages/ActiveSellers';
+import OrderListPage from './pages/OrderListPage';
+import OrderDetailPage from './pages/OrderDetailPage';
 
 const AdminRoutes = () => {
   return (
@@ -55,6 +57,8 @@ const AdminRoutes = () => {
         <Route path="/manage-grid/add" element={<AddCategoryGridItemPage />} />
         <Route path="/sellers/pending" element={<PendingSellers />} />
         <Route path="/sellers/active" element={<ActiveSellers />} />
+        <Route path="/orders/:status" element={<OrderListPage />} />
+        <Route path="/orders/view/:id" element={<OrderDetailPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<AdminProfile />} />
         <Route path="/analytics" element={<AnalyticsPage />} />

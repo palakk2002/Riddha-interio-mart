@@ -1,125 +1,108 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiShoppingCart, FiHeart } from 'react-icons/fi';
+import { FiShoppingCart, FiHeart, FiMinus, FiPlus } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { useCart } from '../data/CartContext';
 import Button from '../../../shared/components/Button';
 
 const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
   const { addToCart, getItemQuantity, updateQuantity } = useCart();
-  const quantity = getItemQuantity(product.id);
+  const productId = product.id || product._id;
+  const quantity = getItemQuantity(productId);
   const isList = variant === 'list';
   const isMinimal = variant === 'minimal';
-  const discountPercent = product.originalPrice > product.price 
-    ? Math.round((1 - product.price / product.originalPrice) * 100) 
+  
+  const displayPrice = product.discountPrice != null && product.discountPrice !== '' ? product.discountPrice : product.price;
+  const originalPrice = product.discountPrice != null && product.discountPrice !== '' ? product.price : (product.originalPrice || product.price);
+  const displayPriceString = displayPrice != null ? Number(displayPrice).toLocaleString() : '0';
+  const originalPriceString = originalPrice != null ? Number(originalPrice).toLocaleString() : '0';
+  const rawImage = product.image || (product.images && product.images.length > 0 ? product.images[0] : '');
+  // Handle local file paths that won't work in browser
+  const productImage = (rawImage && (rawImage.startsWith('C:') || rawImage.startsWith('/'))) 
+    ? `https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80` // Placeholder for interior
+    : (rawImage || 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80');
+
+  const discountPercent = originalPrice > displayPrice 
+    ? Math.round((1 - displayPrice / originalPrice) * 100) 
     : 0;
 
   return (
     <div 
-      className={`group bg-white ${isMinimal ? 'rounded-xl' : 'rounded-2xl md:rounded-3xl border border-soft-oatmeal/20'} shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden ${
-        isList ? 'flex flex-row md:flex-col h-[135px] md:h-auto' : 'flex flex-col'
+      className={`group bg-white ${isMinimal ? 'rounded-xl' : 'rounded-3xl border border-soft-oatmeal/10'} shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden ${
+        isList ? 'flex flex-row md:flex-col' : 'flex flex-col'
       }`}
     >
       <Link 
-        to={`/products/${product.id}`} 
+        to={`/products/${productId}`} 
         className={`relative block overflow-hidden shrink-0 ${
-          isList ? 'w-[40%] md:w-full h-full md:h-80 border-r md:border-r-0' : (isMinimal ? 'aspect-square w-full' : 'h-30 md:h-80 w-full')
-        } ${!isMinimal ? 'border-soft-oatmeal/10' : ''}`}
+          isList ? 'w-[45%] md:w-full aspect-square md:aspect-auto md:h-80' : 'aspect-square md:aspect-auto md:h-80 w-full'
+        }`}
       >
         <img
-          src={product.image}
+          src={productImage}
           alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
         
-        {/* Quick Action Icons - Desktop only for grid/list, always for minimal bottom-right */}
-        <div className={`${isMinimal ? 'absolute bottom-2 right-2' : 'hidden md:flex absolute top-5 right-5 scale-90'} transform group-hover:translate-x-0 transition-all duration-400`}>
-          <button className={`${isMinimal ? 'h-8 w-8 text-deep-espresso/40 shadow-md' : 'h-11 w-11 text-deep-espresso shadow-xl'} bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center hover:text-red-500 transition-all`}>
-            <FiHeart className={`${isMinimal ? 'h-4 w-4' : 'h-5 w-5'}`} />
+        {/* Heart Icon */}
+        <div className="absolute top-4 right-4">
+          <button className="h-10 w-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition-all active:scale-90 border-none outline-none">
+            <FiHeart className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Badges - Show Top Choice on grid view only */}
-        {!isList && !isMinimal && (
-           <div className="absolute top-2 left-2 md:top-3 md:left-3 flex gap-2">
-             <span className="bg-golden-glow/90 backdrop-blur-md text-deep-espresso text-[9px] md:text-[10px] font-bold px-2 md:px-3 py-1 rounded-full uppercase tracking-tighter shadow-sm">
-               Top Choice
-             </span>
-           </div>
-        )}
+        {/* Top Choice Badge */}
+        <div className="absolute top-4 left-4">
+          <span className="bg-pink-100/90 backdrop-blur-md text-[#8B2323] text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-sm">
+            Top Choice
+          </span>
+        </div>
       </Link>
 
-      <div className={`flex-1 ${isMinimal ? 'p-2 pt-2.5' : (isList ? 'p-3 md:p-7' : 'p-2.5 md:p-7')} flex flex-col justify-between overflow-hidden ${!isList && !isMinimal ? 'space-y-1 md:space-y-5' : 'space-y-0.5'}`}>
-        <div className="space-y-0.5">
-          <Link to={`/products/${product.id}`}>
-            <h3 className={`${isMinimal ? 'text-[11px] font-bold' : (isList ? 'text-[13px] md:text-xl' : 'text-[10px] md:text-xl')} font-display text-deep-espresso line-clamp-1 leading-tight group-hover:text-warm-sand transition-colors duration-300`}>
-              {product.name}
-            </h3>
-          </Link>
-          
-          <h4 className={`${isMinimal ? 'text-[9px] font-medium text-deep-espresso/40 opacity-80' : 'text-[8px] md:text-[10px] uppercase tracking-[0.15em] text-warm-sand font-black'}`}>
-            {isMinimal ? `By ${product.brand || 'Riddha Interio'}` : product.category}
+      <div className="p-5 md:p-8 space-y-4">
+        <div className="space-y-1">
+          <h3 className="text-lg md:text-2xl font-bold text-[#8B2323] leading-tight">
+            {product.name}
+          </h3>
+          <h4 className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-gray-400">
+            {product.category}
           </h4>
         </div>
- 
-        <div className={`flex ${isList ? 'flex-row items-end' : (isMinimal ? 'flex-col items-start pt-1' : 'items-center')} justify-between gap-1 md:gap-2 md:pt-4`}>
-          <div className="flex flex-col w-auto grow">
-            <div className={`flex items-baseline gap-1.5 ${isMinimal ? 'flex-wrap' : ''}`}>
-              <span className={`${isMinimal ? 'text-[12px]' : (isList ? 'text-[13px] md:text-2xl' : 'text-[11px] md:text-2xl')} font-black text-[var(--color-header-red)] tracking-tight`}>
-                ₹{product.price}
+
+        <div className="flex items-center justify-between gap-3 min-w-0">
+          <div className="min-w-0 flex-1 flex flex-col">
+            <div className="flex items-baseline gap-2 min-w-0">
+              <span className="text-xl md:text-3xl font-black text-deep-espresso tracking-tighter whitespace-nowrap">
+                ₹{displayPriceString}
               </span>
-              {product.originalPrice > product.price && (
-                <div className="flex items-center gap-1.5">
-                  <span className={`${isMinimal ? 'text-[10px]' : 'text-[10px] md:text-xs'} text-gray-400 line-through font-medium`}>
-                    ₹{product.originalPrice}
-                  </span>
-                  {isMinimal && (
-                    <span className="text-[10px] font-bold text-green-600">
-                      {discountPercent}%
-                    </span>
-                  )}
-                </div>
+              {originalPrice > displayPrice && (
+                <span className="text-xs md:text-sm text-gray-300 line-through font-medium whitespace-nowrap">
+                  ₹{originalPriceString}
+                </span>
               )}
             </div>
-            {!isMinimal && (
-              <div className="flex items-center gap-2 md:mt-1">
-                <span className="text-[8px] md:text-[10px] text-deep-espresso/30 font-bold uppercase tracking-widest leading-none">
-                  Incl. GST
-                </span>
-              </div>
-            )}
+            <span className="text-[8px] md:text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+              Incl. GST
+            </span>
           </div>
 
-          {!isMinimal && (
-            <div className={`flex items-center ${isList ? 'justify-between md:justify-end' : 'justify-end'} gap-3 mt-1 md:mt-0`}>
-               {quantity > 0 ? (
-                 <div className="flex items-center bg-soft-oatmeal/10 border border-soft-oatmeal/20 rounded-lg md:rounded-2xl overflow-hidden h-8 md:h-12 shadow-inner">
-                   <button 
-                     onClick={(e) => { e.preventDefault(); updateQuantity(product.id, quantity - 1); }}
-                     className="px-1.5 min-[360px]:px-2 md:px-4 h-full hover:bg-soft-oatmeal/20 text-deep-espresso transition-colors text-xs md:text-xl font-bold"
-                   >
-                     −
-                   </button>
-                   <span className="px-1.5 min-[360px]:px-2 text-[9px] md:text-sm font-black text-deep-espresso w-5 min-[360px]:w-6 md:w-10 text-center">
-                     {quantity}
-                   </span>
-                   <button 
-                     onClick={(e) => { e.preventDefault(); updateQuantity(product.id, quantity + 1); }}
-                     className="px-1.5 min-[360px]:px-2 md:px-4 h-full hover:bg-soft-oatmeal/20 text-deep-espresso transition-colors text-xs md:text-xl font-bold"
-                   >
-                     +
-                   </button>
-                 </div>
-               ) : (
-                 <button 
-                   onClick={(e) => { e.preventDefault(); addToCart(product); }}
-                   className="h-8 md:h-12 px-4 min-[360px]:px-6 md:px-8 bg-[var(--color-header-red)] text-white rounded-lg md:rounded-2xl font-bold text-[9px] md:text-sm hover:bg-black transition-colors shadow-lg active:scale-95"
-                 >
-                   Add
-                 </button>
-               )}
-            </div>
-          )}
+          <div className="flex items-center gap-1 bg-soft-oatmeal/5 rounded-2xl p-1 border border-soft-oatmeal/10 shadow-inner flex-shrink-0 max-w-[130px] md:max-w-[150px]">
+            <button 
+              onClick={(e) => { e.preventDefault(); updateQuantity(productId, quantity - 1); }}
+              className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center text-gray-400 hover:text-deep-espresso transition-all active:scale-90 rounded-2xl border border-transparent outline-none"
+            >
+              <FiMinus size={16} />
+            </button>
+            <span className="min-w-[24px] md:min-w-[32px] text-center text-xs md:text-lg font-black text-deep-espresso">
+              {quantity}
+            </span>
+            <button 
+              onClick={(e) => { e.preventDefault(); addToCart(product); }}
+              className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center text-gray-400 hover:text-deep-espresso transition-all active:scale-90 rounded-2xl border border-transparent outline-none"
+            >
+              <FiPlus size={16} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

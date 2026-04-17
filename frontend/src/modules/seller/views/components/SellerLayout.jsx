@@ -24,12 +24,18 @@ const SellerLayout = () => {
   
   // Update notifications state from localStorage periodically or when dropdown opens
   useEffect(() => {
-    const handleStorage = () => {
+    const handleStoredNotifications = () => {
       const saved = localStorage.getItem('seller_notifications');
       if (saved) setNotifications(JSON.parse(saved));
     };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+
+    window.addEventListener('storage', handleStoredNotifications);
+    window.addEventListener('seller_notifications_updated', handleStoredNotifications);
+
+    return () => {
+      window.removeEventListener('storage', handleStoredNotifications);
+      window.removeEventListener('seller_notifications_updated', handleStoredNotifications);
+    };
   }, []);
 
   const unreadCount = notifications.filter(n => n.status === 'unread').length;

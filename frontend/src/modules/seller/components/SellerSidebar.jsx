@@ -16,6 +16,7 @@ import sidebarBg from '../../../assets/seller_sidebar_bg.png';
 
 const menuItems = [
   { path: '/seller', icon: LuLayoutDashboard, label: 'Dashboard' },
+  { path: '/seller/orders', icon: LuPackage, label: 'Manage Orders' },
   { path: '/seller/catalog', icon: LuSearch, label: 'Browse Catalog' },
   { path: '/seller/add-product', icon: LuPlus, label: 'Add Product' },
   { path: '/seller/my-products', icon: LuPackage, label: 'My Products' },

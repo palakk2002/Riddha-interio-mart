@@ -20,15 +20,9 @@ const OrderSuccessPage = () => {
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="w-24 h-24 bg-warm-sand rounded-full flex items-center justify-center shadow-2xl shadow-warm-sand/20 mb-8"
+        className="w-24 h-24 bg-[#8B2323] rounded-full flex items-center justify-center shadow-2xl shadow-[#8B2323]/20 mb-10"
       >
-        <motion.div
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <FiCheck className="text-white text-5xl stroke-[3]" />
-        </motion.div>
+        <FiCheck className="text-white text-5xl stroke-[3]" />
       </motion.div>
 
       {/* Text Content */}
@@ -38,9 +32,9 @@ const OrderSuccessPage = () => {
         transition={{ delay: 0.4 }}
         className="space-y-4 max-w-sm"
       >
-        <h1 className="text-3xl font-black text-deep-espresso uppercase tracking-tight">Order Placed!</h1>
-        <p className="text-sm text-gray-400 font-medium leading-relaxed px-4">
-          Your payment was successful and your order <span className="text-deep-espresso font-bold">#{orderId}</span> has been confirmed.
+        <h1 className="text-3xl font-display font-black text-gray-900 tracking-tight uppercase">Order Placed!</h1>
+        <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.1em] leading-relaxed px-4">
+          Your payment was successful and your order <span className="text-[#8B2323] font-black">#{orderId}</span> has been confirmed.
         </p>
       </motion.div>
 
@@ -49,25 +43,25 @@ const OrderSuccessPage = () => {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="mt-12 w-full max-w-md bg-soft-oatmeal/5 border border-soft-oatmeal/20 rounded-[2.5rem] p-8 space-y-6"
+        className="mt-12 w-full max-w-md bg-gray-50 border border-gray-100 rounded-3xl p-8 space-y-8"
       >
-        <div className="flex items-center gap-4 text-left">
-           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-warm-sand">
-              <FiShoppingBag className="text-xl" />
+        <div className="flex items-center gap-5 text-left">
+           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-[#8B2323]">
+              <FiShoppingBag size={20} />
            </div>
            <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Status</p>
-              <p className="text-sm font-bold text-deep-espresso">Processing your order</p>
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-2">ORDER STATUS</p>
+              <p className="text-xs font-black text-gray-900 uppercase">Confirmed & Processing</p>
            </div>
         </div>
 
-        <div className="flex items-center gap-4 text-left">
-           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-warm-sand">
-              <FiMapPin className="text-xl" />
+        <div className="flex items-center gap-5 text-left">
+           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-[#8B2323]">
+              <FiMapPin size={20} />
            </div>
            <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Estimated Delivery</p>
-              <p className="text-sm font-bold text-deep-espresso">By Wednesday, 25th March</p>
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-2">ESTIMATED DELIVERY</p>
+              <p className="text-xs font-black text-gray-900 uppercase">Within 4 Hours</p>
            </div>
         </div>
       </motion.div>
@@ -80,25 +74,18 @@ const OrderSuccessPage = () => {
         className="mt-12 w-full max-w-md space-y-4"
       >
         <Button 
-          onClick={() => navigate('/order-tracking')}
-          size="lg" 
-          className="w-full h-16 rounded-2xl bg-warm-sand text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-warm-sand/30 flex items-center justify-center gap-3"
+          onClick={() => navigate('/')}
+          className="w-full h-16 rounded-2xl bg-[#8B2323] text-white font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-[#8B2323]/20 flex items-center justify-center gap-3"
         >
-          TRACK ORDER <FiArrowRight className="text-lg" />
+          CONTINUE SHOPPING <FiArrowRight className="text-lg" />
         </Button>
         <button 
-          onClick={() => navigate('/')}
-          className="w-full py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:text-deep-espresso transition-colors"
+          onClick={() => navigate('/orders')}
+          className="w-full py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:text-[#8B2323] transition-colors"
         >
-          Continue Shopping
+          View My Orders
         </button>
       </motion.div>
-
-      {/* Decorative Background Elements */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-20 w-64 h-64 bg-warm-sand/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-soft-oatmeal/10 rounded-full blur-3xl" />
-      </div>
     </div>
   );
 };

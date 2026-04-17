@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import PageWrapper from "../components/PageWrapper";
+import api from "../../../shared/utils/api";
 import {
   LuSearch,
   LuFilter,
@@ -14,60 +15,67 @@ import { FiCheckCircle, FiXCircle, FiFlag } from "react-icons/fi";
 
 const initialOrders = [
   {
-    id: 1,
+    _id: "1",
     orderId: "ORD-1001",
-    customer: "Rohan Sharma",
-    total: 15499,
+    user: { fullName: "Rohan Sharma" },
+    seller: { shopName: "Fresh Mart" },
+    totalPrice: 15499,
     status: "Pending",
-    date: "2024-04-14",
+    createdAt: "2024-04-14",
   },
   {
-    id: 2,
+    _id: "2",
     orderId: "ORD-1002",
-    customer: "Priya Patel",
-    total: 2499,
-    status: "Received",
-    date: "2024-04-14",
+    user: { fullName: "Priya Patel" },
+    seller: { shopName: "Daily Groceries" },
+    totalPrice: 2499,
+    status: "Processing",
+    createdAt: "2024-04-14",
   },
   {
-    id: 3,
+    _id: "3",
     orderId: "ORD-1003",
-    customer: "Amit Gupta",
-    total: 8999,
-    status: "Processed",
-    date: "2024-04-13",
+    user: { fullName: "Amit Gupta" },
+    seller: { shopName: "Premium Foods" },
+    totalPrice: 8999,
+    status: "Processing",
+    createdAt: "2024-04-13",
   },
   {
-    id: 4,
+    _id: "4",
     orderId: "ORD-1004",
-    customer: "Sneha Reddy",
-    total: 12500,
+    user: { fullName: "Sneha Reddy" },
+    seller: { shopName: "Fresh Mart" },
+    totalPrice: 12500,
     status: "Shipped",
-    date: "2024-04-13",
+    createdAt: "2024-04-13",
   },
   {
-    id: 5,
+    _id: "5",
     orderId: "ORD-1005",
-    customer: "Vikram Singh",
-    total: 5600,
-    status: "Out For Delivery",
-    date: "2024-04-12",
+    user: { fullName: "Vikram Singh" },
+    seller: { shopName: "Daily Groceries" },
+    totalPrice: 5600,
+    status: "Shipped",
+    createdAt: "2024-04-12",
   },
   {
-    id: 6,
+    _id: "6",
     orderId: "ORD-1006",
-    customer: "Anjali Verma",
-    total: 3200,
+    user: { fullName: "Anjali Verma" },
+    seller: { shopName: "Premium Foods" },
+    totalPrice: 3200,
     status: "Delivered",
-    date: "2024-04-12",
+    createdAt: "2024-04-12",
   },
   {
-    id: 7,
+    _id: "7",
     orderId: "ORD-1007",
-    customer: "Suresh Raina",
-    total: 1200,
+    user: { fullName: "Suresh Raina" },
+    seller: { shopName: "Fresh Mart" },
+    totalPrice: 1200,
     status: "Cancelled",
-    date: "2024-04-11",
+    createdAt: "2024-04-11",
   },
 ];
 
@@ -85,11 +93,32 @@ const OrderListPage = ({ specificStatus }) => {
   const { status: urlStatus } = useParams();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [orders, setOrders] = useState(() => {
-    const saved = localStorage.getItem('riddha_full_orders');
-    return saved ? JSON.parse(saved) : initialOrders;
-  });
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/orders');
+      if (data.success && data.data && data.data.length > 0) {
+        setOrders(data.data);
+      } else {
+        // Use mock data as fallback
+        console.log('No orders from API, using mock data');
+        setOrders(initialOrders);
+      }
+    } catch (err) {
+      console.error('Failed to fetch orders:', err);
+      // Use mock data as fallback on error
+      setOrders(initialOrders);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   // Normalize status for display
   const currentStatus =
@@ -101,17 +130,21 @@ const OrderListPage = ({ specificStatus }) => {
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
+      const customerName = order.user?.fullName || "Guest";
+      const orderId = order._id || "";
+      
       const matchesSearch =
-        order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.orderId.toLowerCase().includes(searchTerm.toLowerCase());
+        customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        orderId.toLowerCase().includes(searchTerm.toLowerCase());
 
-      if (currentStatus === "All Order" || !currentStatus) {
+      // If viewing "All Orders" page or no specific status required
+      if (currentStatus?.toLowerCase().includes('all') || !currentStatus) {
         return matchesSearch;
       }
 
       return (
         matchesSearch &&
-        order.status.toLowerCase() === currentStatus.toLowerCase()
+        order.status?.toLowerCase() === currentStatus?.toLowerCase()
       );
     });
   }, [searchTerm, currentStatus, orders]);
@@ -162,6 +195,9 @@ const OrderListPage = ({ specificStatus }) => {
                     Customer
                   </th>
                   <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
+                    Seller
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
                     Total Amount
                   </th>
                   <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
@@ -176,28 +212,38 @@ const OrderListPage = ({ specificStatus }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-soft-oatmeal/50">
-                {filteredOrders.length > 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-12 text-center">
+                       <div className="w-10 h-10 border-4 border-soft-oatmeal border-t-red-800 rounded-full animate-spin mx-auto" />
+                       <p className="text-[10px] font-black text-warm-sand mt-3 uppercase tracking-widest">Accessing Pipeline...</p>
+                    </td>
+                  </tr>
+                ) : filteredOrders.length > 0 ? (
                   filteredOrders.map((order) => {
                     const StatusIcon =
                       statusIcons[order.status] || LuClipboardList;
                     return (
                       <tr
-                        key={order.id}
+                        key={order._id}
                         className="hover:bg-soft-oatmeal/5 transition-colors group"
                       >
                         <td className="px-6 py-4">
                           <p className="font-bold text-deep-espresso">
-                            {order.orderId}
+                            ORD-{order._id.slice(-6).toUpperCase()}
                           </p>
                           <p className="text-[10px] text-warm-sand uppercase tracking-wider font-bold">
-                            Standard Delivery
+                            Standard delivery
                           </p>
                         </td>
                         <td className="px-6 py-4 text-sm font-medium text-deep-espresso">
-                          {order.customer}
+                          {order.user?.fullName || "Guest User"}
+                        </td>
+                        <td className="px-6 py-4 text-sm font-medium text-deep-espresso">
+                          {order.seller?.shopName || "N/A"}
                         </td>
                         <td className="px-6 py-4 font-black text-deep-espresso text-sm">
-                          ₹{order.total.toLocaleString()}
+                          ₹{order.totalPrice?.toLocaleString() || 0}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
@@ -208,11 +254,11 @@ const OrderListPage = ({ specificStatus }) => {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-xs text-deep-espresso/70 font-medium">
-                          {order.date}
+                          {new Date(order.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button 
-                            onClick={() => navigate(`/admin/orders/view/${order.id}`)}
+                            onClick={() => navigate(`/admin/orders/view/${order._id}`)}
                             className="p-2 text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-colors"
                           >
                             <LuEye size={18} />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Banner from '../components/Banner';
 import OfferBanner from '../components/OfferBanner';
@@ -7,11 +7,42 @@ import TopBrands from '../components/TopBrands';
 import CategoryQuickAccess from '../components/CategoryQuickAccess';
 import ExpressDeliveryBanner from '../components/ExpressDeliveryBanner';
 import ProductCard from '../components/ProductCard';
-import { products } from '../data/products';
 import Button from '../../../shared/components/Button';
 import { Link } from 'react-router-dom';
+import api from '../../../shared/utils/api';
 
 const HomePage = () => {
+  const [products, setProducts] = useState([]);
+  const [banner, setBanner] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await api.get('/products');
+        setProducts(res.data.data);
+      } catch (err) {
+        console.error('Failed to fetch products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchBanner = async () => {
+      try {
+        const res = await api.get('/home-banner');
+        if (res.data?.success && res.data?.data) {
+          setBanner(res.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch home banner:', err);
+      }
+    };
+
+    fetchProducts();
+    fetchBanner();
+  }, []);
+
   const featuredProducts = products.slice(0, 4);
 
   const containerVariants = {
@@ -34,7 +65,7 @@ const HomePage = () => {
 
       {/* Banner Section */}
       <section className="max-w-[1440px] mx-auto px-4 lg:px-8">
-        <Banner />
+        <Banner banner={banner} />
       </section>
 
       {/* Offer Banner (Just below modern banner) */}
@@ -73,9 +104,15 @@ const HomePage = () => {
             viewport={{ once: true }}
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-10"
           >
-            {featuredProducts.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
-            ))}
+            {loading ? (
+              [1, 2, 3, 4].map(i => (
+                <div key={i} className="aspect-[4/5] bg-soft-oatmeal/10 rounded-3xl animate-pulse" />
+              ))
+            ) : (
+              featuredProducts.map((product, index) => (
+                <ProductCard key={product._id || product.id} product={product} index={index} />
+              ))
+            )}
           </motion.div>
         </div>
       </section>

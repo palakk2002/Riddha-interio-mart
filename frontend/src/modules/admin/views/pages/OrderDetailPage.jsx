@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { motion } from 'framer-motion';
@@ -12,7 +12,8 @@ import {
   LuMail, 
   LuPhone,
   LuCreditCard,
-  LuPrinter
+  LuPrinter,
+  LuChevronDown
 } from 'react-icons/lu';
 import { FiCheckCircle } from 'react-icons/fi';
 
@@ -50,6 +51,11 @@ const orderDetails = {
 const OrderDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState(null);
+  const dropdownRef = useRef(null);
+  
+  const availableStatuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
   
   // Use localStorage data for the live flow simulation
   const order = useMemo(() => {
@@ -75,6 +81,21 @@ const OrderDetailPage = () => {
       timeline: []
     };
   }, [id]);
+
+  useMemo(() => {
+    setCurrentStatus(order.status);
+  }, [order.status]);
+
+  useMemo(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const statusColors = {
     Pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -113,6 +134,38 @@ const OrderDetailPage = () => {
             </div>
           </div>
           <div className="flex gap-3">
+            <div className="relative" ref={dropdownRef}>
+              <button 
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold hover:shadow-lg transition-all text-xs uppercase tracking-widest"
+              >
+                Order Status
+                <LuChevronDown size={16} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {dropdownOpen && (
+                <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-soft-oatmeal rounded-xl shadow-lg z-50">
+                  <div className="p-2">
+                    {availableStatuses.map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => {
+                          setCurrentStatus(status);
+                          setDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all mb-1 ${
+                          currentStatus === status
+                            ? 'bg-purple-100 text-purple-700'
+                            : 'text-deep-espresso hover:bg-soft-oatmeal/20'
+                        }`}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
             <button className="flex items-center gap-2 border border-soft-oatmeal text-deep-espresso px-5 py-2.5 rounded-xl font-bold hover:bg-soft-oatmeal/20 transition-all text-sm">
               <LuPrinter size={16} /> Print Invoice
             </button>

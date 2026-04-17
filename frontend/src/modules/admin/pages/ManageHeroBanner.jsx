@@ -1,16 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
 import { motion } from 'framer-motion';
 import { LuSave, LuRotateCcw } from 'react-icons/lu';
+import api from '../../../shared/utils/api';
 import { heroBannerData } from '../data/manageHeroBannerData';
 
 const ManageHeroBanner = () => {
   const [banner, setBanner] = useState({ ...heroBannerData });
+  const [bannerId, setBannerId] = useState(null);
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
   const fileInputRef = React.useRef(null);
 
   const handleChange = (field, value) => {
-    setBanner({ ...banner, [field]: value });
+    if (field.startsWith('bgImage.')) {
+      const key = field.split('.')[1];
+      setBanner((prev) => ({
+        ...prev,
+        bgImage: {
+          ...prev.bgImage,
+          [key]: value
+        }
+      }));
+    } else {
+      setBanner((prev) => ({ ...prev, [field]: value }));
+    }
     setSaved(false);
   };
 
@@ -19,22 +33,82 @@ const ManageHeroBanner = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        handleChange('bgImage', reader.result);
+        setBanner((prev) => ({
+          ...prev,
+          bgImage: {
+            ...prev.bgImage,
+            src: reader.result
+          }
+        }));
+        setSaved(false);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+
+    try {
+      const payload = {
+        title: banner.title,
+        subtitle: banner.subtitle,
+        bgImage: banner.bgImage,
+        primaryBtnText: banner.primaryBtnText,
+        primaryBtnLink: banner.primaryBtnLink,
+        secondaryBtnText: banner.secondaryBtnText,
+        secondaryBtnLink: banner.secondaryBtnLink
+      };
+
+      if (bannerId) {
+        const { data } = await api.put(`/home-banner/${bannerId}`, payload);
+        if (data.success) {
+          setBanner(data.data);
+        }
+      } else {
+        const { data } = await api.post('/home-banner', payload);
+        if (data.success) {
+          setBanner(data.data);
+          setBannerId(data.data._id);
+        }
+      }
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      console.error('Failed to save banner:', err);
+      setSaved(false);
+    }
   };
 
   const handleReset = () => {
     setBanner({ ...heroBannerData });
+    setBannerId(null);
     setSaved(false);
   };
+
+  useEffect(() => {
+    const fetchBanner = async () => {
+      setLoading(true);
+      try {
+        const { data } = await api.get('/home-banner');
+        if (data.success && data.data) {
+          setBanner(data.data);
+          setBannerId(data.data._id);
+        } else {
+          setBanner({ ...heroBannerData });
+        }
+      } catch (error) {
+        console.error('Failed to fetch hero banner:', error);
+        setBanner({ ...heroBannerData });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBanner();
+  }, []);
+
 
   return (
     <PageWrapper>
@@ -118,10 +192,34 @@ const ManageHeroBanner = () => {
               />
               <input
                 type="text"
-                value={banner.bgImage}
-                onChange={(e) => handleChange('bgImage', e.target.value)}
+                value={banner.bgImage?.src || ''}
+                onChange={(e) => handleChange('bgImage.src', e.target.value)}
                 className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
                 placeholder="Paste remote URL or upload a file..."
+              />
+            </div>
+
+            {/* Image Alt Text */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Image Alt Text</label>
+              <input
+                type="text"
+                value={banner.bgImage?.alt || ''}
+                onChange={(e) => handleChange('bgImage.alt', e.target.value)}
+                className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
+                placeholder="Describe the image for accessibility..."
+              />
+            </div>
+
+            {/* Image Caption */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Image Caption</label>
+              <input
+                type="text"
+                value={banner.bgImage?.caption || ''}
+                onChange={(e) => handleChange('bgImage.caption', e.target.value)}
+                className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
+                placeholder="Optional caption displayed with the image..."
               />
             </div>
 
@@ -169,8 +267,8 @@ const ManageHeroBanner = () => {
         >
           {/* Background Image */}
           <img
-            src={banner.bgImage}
-            alt="Hero Banner"
+            src={banner.bgImage?.src}
+            alt={banner.bgImage?.alt || 'Hero Banner'}
             className="absolute inset-0 h-full w-full object-cover"
           />
 

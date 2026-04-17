@@ -18,13 +18,31 @@ import {
   LuTrendingUp,
   LuPlus,
   LuLogOut,
-  LuUsers
+  LuUsers,
+  LuClipboardList,
+  LuClock,
+  LuPackage,
+  LuTruck
 } from 'react-icons/lu';
+import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import sidebarBg from '../../../assets/seller_sidebar_bg.png';
 
 const menuItems = [
   { path: '/admin', icon: LuLayoutDashboard, label: 'Dashboard' },
   { path: '/admin/analytics', icon: LuTrendingUp, label: 'Analytics' },
+  { 
+    label: 'Order Management', 
+    icon: LuClipboardList, 
+    path: '/admin/orders/all',
+    children: [
+      { path: '/admin/orders/all', icon: LuLayoutGrid, label: 'All Orders' },
+      { path: '/admin/orders/pending', icon: LuClock, label: 'Pending Orders' },
+      { path: '/admin/orders/processing', icon: LuPackage, label: 'Processing' },
+      { path: '/admin/orders/shipped', icon: LuTruck, label: 'Shipped' },
+      { path: '/admin/orders/delivered', icon: FiCheckCircle, label: 'Delivered' },
+      { path: '/admin/orders/cancelled', icon: FiXCircle, label: 'Cancelled' },
+    ]
+  },
   { 
     label: 'Catalog', 
     icon: LuBox, 

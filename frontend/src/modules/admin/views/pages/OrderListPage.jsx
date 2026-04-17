@@ -17,6 +17,7 @@ const initialOrders = [
     id: 1,
     orderId: "ORD-1001",
     customer: "Rohan Sharma",
+    seller: "Fresh Mart",
     total: 15499,
     status: "Pending",
     date: "2024-04-14",
@@ -25,6 +26,7 @@ const initialOrders = [
     id: 2,
     orderId: "ORD-1002",
     customer: "Priya Patel",
+    seller: "Daily Groceries",
     total: 2499,
     status: "Received",
     date: "2024-04-14",
@@ -33,6 +35,7 @@ const initialOrders = [
     id: 3,
     orderId: "ORD-1003",
     customer: "Amit Gupta",
+    seller: "Premium Foods",
     total: 8999,
     status: "Processed",
     date: "2024-04-13",
@@ -41,6 +44,7 @@ const initialOrders = [
     id: 4,
     orderId: "ORD-1004",
     customer: "Sneha Reddy",
+    seller: "Fresh Mart",
     total: 12500,
     status: "Shipped",
     date: "2024-04-13",
@@ -49,6 +53,7 @@ const initialOrders = [
     id: 5,
     orderId: "ORD-1005",
     customer: "Vikram Singh",
+    seller: "Daily Groceries",
     total: 5600,
     status: "Out For Delivery",
     date: "2024-04-12",
@@ -57,6 +62,7 @@ const initialOrders = [
     id: 6,
     orderId: "ORD-1006",
     customer: "Anjali Verma",
+    seller: "Premium Foods",
     total: 3200,
     status: "Delivered",
     date: "2024-04-12",
@@ -65,6 +71,7 @@ const initialOrders = [
     id: 7,
     orderId: "ORD-1007",
     customer: "Suresh Raina",
+    seller: "Fresh Mart",
     total: 1200,
     status: "Cancelled",
     date: "2024-04-11",
@@ -162,6 +169,9 @@ const OrderListPage = ({ specificStatus }) => {
                     Customer
                   </th>
                   <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
+                    Seller
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
                     Total Amount
                   </th>
                   <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
@@ -196,6 +206,9 @@ const OrderListPage = ({ specificStatus }) => {
                         <td className="px-6 py-4 text-sm font-medium text-deep-espresso">
                           {order.customer}
                         </td>
+                        <td className="px-6 py-4 text-sm font-medium text-deep-espresso">
+                          {order.seller}
+                        </td>
                         <td className="px-6 py-4 font-black text-deep-espresso text-sm">
                           ₹{order.total.toLocaleString()}
                         </td>
@@ -224,7 +237,7 @@ const OrderListPage = ({ specificStatus }) => {
                 ) : (
                   <tr>
                     <td
-                      colSpan="6"
+                      colSpan="7"
                       className="px-6 py-12 text-center text-warm-sand italic"
                     >
                       No orders found for this status.

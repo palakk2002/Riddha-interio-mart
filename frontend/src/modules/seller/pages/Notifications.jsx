@@ -1,28 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
 import { LuBell, LuCheckCheck, LuTrash2, LuClock, LuCircleAlert, LuInfo, LuCircleCheck } from 'react-icons/lu';
-
-const initialNotifications = [
-  { id: 1, title: 'Product Approved', message: 'Your Classic Marble Tile has been approved and is now live in the catalog.', time: '2 hours ago', status: 'unread', type: 'success' },
-  { id: 2, title: 'New Catalog Item', message: 'Admin has added 5 new items to the Paints category. Check them out!', time: '5 hours ago', status: 'read', type: 'info' },
-  { id: 3, title: 'Welcome', message: 'Welcome to the Riddha Seller Panel! Start by adding your first product.', time: '1 day ago', status: 'read', type: 'info' },
-  { id: 4, title: 'Low Stock Alert', message: 'Your "Modern Fabric Sofa" is running low on stock (2 units left).', time: '2 days ago', status: 'unread', type: 'warning' },
-];
+import { getSellerNotifications, setSellerNotifications } from '../utils/sellerNotifications';
+import { isSoundEnabled, setSoundEnabled } from '../utils/notificationSound';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState(() => {
-    const saved = localStorage.getItem('seller_notifications');
-    return saved ? JSON.parse(saved) : initialNotifications;
+    return getSellerNotifications();
   });
 
   const [activeFilter, setActiveFilter] = useState('all');
+  const [sound, setSound] = useState(() => isSoundEnabled());
 
   useEffect(() => {
-    localStorage.setItem('seller_notifications', JSON.stringify(notifications));
+    setSellerNotifications(notifications);
   }, [notifications]);
 
   // Handle new order notifications for the frontend simulation
   useEffect(() => {
+    // Socket.IO realtime notifications are handled in SellerLayout (no polling needed).
+    return undefined;
     const checkNewOrders = () => {
       const orders = JSON.parse(localStorage.getItem('riddha_full_orders') || '[]');
       const pendingOrders = orders.filter(o => o.status === 'Pending Seller');
@@ -51,7 +48,7 @@ const Notifications = () => {
     const interval = setInterval(checkNewOrders, 5000); // Poll every 5 seconds
     checkNewOrders(); // Initial check
     return () => clearInterval(interval);
-  }, [notifications]);
+  }, []);
 
   const markAsRead = (id) => {
     setNotifications(notifications.map(n => n.id === id ? { ...n, status: 'read' } : n));
@@ -86,13 +83,29 @@ const Notifications = () => {
             <h1 className="text-2xl md:text-3xl font-display font-bold text-deep-espresso">Notifications</h1>
             <p className="text-warm-sand text-sm">Stay updated with your shop's latest activity.</p>
           </div>
-          <button 
-            onClick={markAllAsRead}
-            className="flex items-center justify-center gap-2 bg-white border border-soft-oatmeal text-deep-espresso px-6 py-3 rounded-2xl font-bold hover:bg-soft-oatmeal/20 transition-all text-sm shadow-sm"
-          >
-            <LuCheckCheck size={18} />
-            Mark all as read
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                const next = !sound;
+                setSound(next);
+                setSoundEnabled(next);
+              }}
+              className={`px-6 py-3 rounded-2xl font-bold transition-all text-sm shadow-sm border ${
+                sound
+                  ? 'bg-deep-espresso text-white border-deep-espresso'
+                  : 'bg-white text-deep-espresso border-soft-oatmeal hover:bg-soft-oatmeal/20'
+              }`}
+            >
+              Sound: {sound ? 'On' : 'Off'}
+            </button>
+            <button 
+              onClick={markAllAsRead}
+              className="flex items-center justify-center gap-2 bg-white border border-soft-oatmeal text-deep-espresso px-6 py-3 rounded-2xl font-bold hover:bg-soft-oatmeal/20 transition-all text-sm shadow-sm"
+            >
+              <LuCheckCheck size={18} />
+              Mark all as read
+            </button>
+          </div>
         </div>
 
         <div className="flex gap-2 p-1 bg-soft-oatmeal/20 rounded-xl w-fit">

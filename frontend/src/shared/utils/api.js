@@ -12,7 +12,7 @@ api.interceptors.request.use(
   (config) => {
     const user = JSON.parse(localStorage.getItem('riddha_user'));
     if (user && user.token) {
-      console.log('Attaching Token for:', user.role);
+      // console.log('Attaching Token for:', user.role);
       config.headers.Authorization = `Bearer ${user.token}`;
     } else {
       console.warn('No token found in localStorage for request:', config.url);

@@ -1,105 +1,181 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiInbox } from 'react-icons/fi';
+import { useNavigate, useParams } from 'react-router-dom';
+import { FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiInbox, FiClock } from 'react-icons/fi';
+import api from '../../../shared/utils/api';
 
 const OrderTrackingPage = () => {
   const navigate = useNavigate();
-  const orderId = localStorage.getItem('last_order_id') || 'RD-77291AB';
+  const { id } = useParams();
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchOrderDetail = async () => {
+    try {
+      const { data } = await api.get(`/orders/${id}`);
+      if (data.success) {
+        setOrder(data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch tracking details:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchOrderDetail();
+    }
+  }, [id]);
 
   const steps = [
-    { id: 1, title: 'Order Placed', time: 'Today, 2:30 PM', completed: true, active: false, icon: <FiInbox /> },
-    { id: 2, title: 'Processing', time: 'In Progress', completed: false, active: true, icon: <FiPackage /> },
-    { id: 3, title: 'Shipped', time: 'Expected by tomorrow', completed: false, active: false, icon: <FiTruck /> },
-    { id: 4, title: 'Delivered', time: 'Expected by 25th March', completed: false, active: false, icon: <FiCheckCircle /> }
+    { 
+       id: 1, 
+       title: 'Order Placed', 
+       status: 'Pending', 
+       icon: <FiInbox />,
+       description: 'We have received your premium interior request.'
+    },
+    { 
+       id: 2, 
+       title: 'Processing', 
+       status: 'Processing', 
+       icon: <FiPackage />,
+       description: 'Our merchant is preparing your order for fulfillment.'
+    },
+    { 
+       id: 3, 
+       title: 'Shipped', 
+       status: 'Shipped', 
+       icon: <FiTruck />,
+       description: 'Your order is in transit to your location.'
+    },
+    { 
+       id: 4, 
+       title: 'Delivered', 
+       status: 'Delivered', 
+       icon: <FiCheckCircle />,
+       description: 'Items have been successfully delivered to your space.'
+    }
   ];
 
+  const getCurrentStep = () => {
+    if (!order) return 0;
+    const statusIndex = steps.findIndex(s => s.status === order.status);
+    return statusIndex === -1 ? 0 : statusIndex;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FDFCFB] flex flex-col items-center justify-center">
+        <div className="w-10 h-10 border-4 border-gray-100 border-t-[#8B2323] rounded-full animate-spin mb-4" />
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Synchronizing Logistics...</p>
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="min-h-screen bg-[#FDFCFB] flex flex-col items-center justify-center p-6 text-center">
+        <FiPackage className="text-gray-100 w-20 h-20 mb-6" />
+        <h2 className="text-2xl font-display font-black text-gray-900 uppercase italic mb-2">Tracking Data Offline</h2>
+        <p className="text-gray-400 text-xs font-black uppercase tracking-widest mb-10">We couldn't retrieve the logs for this transaction.</p>
+        <button onClick={() => navigate('/orders')} className="bg-black text-white px-10 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Back to History</button>
+      </div>
+    );
+  }
+
+  const currentStepIndex = getCurrentStep();
+
   return (
-    <div className="min-h-screen bg-soft-oatmeal/10">
+    <div className="min-h-screen bg-[#FDFCFB] pb-32">
       {/* Header */}
-      <div className="bg-white px-6 py-6 flex items-center gap-6 border-b border-soft-oatmeal/10 sticky top-0 z-10">
-        <button onClick={() => navigate(-1)}>
-          <FiArrowLeft className="h-6 w-6 text-deep-espresso" />
-        </button>
-        <h1 className="text-xl font-bold text-deep-espresso">Track Order</h1>
+      <div className="bg-white px-6 py-8 flex items-center justify-between border-b border-gray-50 sticky top-0 z-10 shadow-sm shadow-gray-100/10">
+        <div className="flex items-center gap-6">
+          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full hover:bg-gray-50 flex items-center justify-center transition-colors">
+            <FiArrowLeft className="h-6 w-6 text-gray-900" />
+          </button>
+          <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter italic">Live <span className="text-[#8B2323]">Tracking</span></h1>
+        </div>
+        <div className="bg-red-50 px-4 py-2 rounded-xl">
+           <span className="text-[9px] font-black text-[#8B2323] uppercase tracking-widest">{order.status}</span>
+        </div>
       </div>
 
-      <div className="max-w-2xl mx-auto p-0 space-y-0">
-        {/* Order ID Section */}
-        <div className="bg-white px-6 py-8 border-b border-soft-oatmeal/10">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <p className="text-[10px] font-black text-warm-sand uppercase tracking-[0.2em] leading-none mb-1">Order Details</p>
-              <p className="text-xl font-black text-deep-espresso font-montserrat tracking-tight">#{orderId}</p>
-            </div>
-            <div className="px-4 py-1.5 bg-warm-sand rounded-lg shadow-lg shadow-warm-sand/10">
-              <span className="text-[9px] font-black text-white uppercase tracking-widest">Confirmed</span>
-            </div>
-          </div>
-          
-          <div className="flex gap-4 items-center">
-             <div className="w-16 h-16 bg-soft-oatmeal/10 rounded-2xl overflow-hidden border border-soft-oatmeal/20">
-                <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&auto=format&fit=crop&q=60" alt="Product" className="w-full h-full object-cover grayscale" />
-             </div>
+      <div className="max-w-2xl mx-auto px-6 pt-12">
+        {/* Order Header */}
+        <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl shadow-gray-200/20 mb-10">
+           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
              <div>
-                <p className="text-sm font-black text-deep-espresso uppercase tracking-tight">Premium Leather Sofa</p>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Brown / Italian Leather</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Transaction Identity</p>
+                <p className="text-3xl font-black text-gray-900 tracking-tighter uppercase italic">#{order._id.slice(-8).toUpperCase()}</p>
              </div>
-          </div>
+             <div className="text-left md:text-right">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Estimated Arrival</p>
+                <p className="text-xl font-black text-gray-900 tracking-tighter">{order.status === 'Delivered' ? 'Fully Received' : '48 Hours'}</p>
+             </div>
+           </div>
+
+           <div className="space-y-6">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50 pb-4">Consignment Manifest</p>
+              <div className="space-y-4">
+                 {order.orderItems.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-5">
+                       <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100">
+                          <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                       </div>
+                       <div>
+                          <p className="text-xs font-black text-gray-900 uppercase tracking-tighter">{item.name}</p>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Quantity: {item.quantity}</p>
+                       </div>
+                    </div>
+                 ))}
+              </div>
+           </div>
         </div>
 
-        {/* Tracking Stepper Section */}
-        <div className="bg-white px-6 py-10 relative overflow-hidden">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand mb-10 flex items-center gap-2">
-            <span className="w-6 h-px bg-warm-sand/30" /> Real-time Tracking
-          </h3>
+        {/* Tracking Stepper */}
+        <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl shadow-gray-200/20 relative">
+           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8B2323] mb-12 flex items-center gap-3">
+              <span className="w-6 h-1 bg-[#8B2323] rounded-full" /> 
+              Journey Status
+           </h3>
 
-          <div className="space-y-12 relative">
-             {/* Progress Line */}
-             <div className="absolute left-[1.15rem] top-2 bottom-2 w-0.5 bg-soft-oatmeal/20" />
-             
-             {steps.map((step) => (
-               <div key={step.id} className="relative flex gap-6">
-                  <div className={`relative z-10 w-10 h-10 rounded-2xl flex items-center justify-center border-4 border-white transition-all duration-500 ${
-                    step.completed ? 'bg-deep-espresso shadow-xl shadow-deep-espresso/10' : 
-                    step.active ? 'bg-warm-sand shadow-xl shadow-warm-sand/20' : 'bg-soft-oatmeal/20'
-                  }`}>
-                    <span className={`text-lg transition-colors ${step.completed || step.active ? 'text-white' : 'text-gray-400'}`}>
-                      {step.icon}
-                    </span>
+           <div className="space-y-12 relative">
+              {/* Progress Line */}
+              <div className="absolute left-[1.12rem] top-2 bottom-2 w-0.5 bg-gray-100" />
+              
+              {steps.map((step, idx) => {
+                const isCompleted = idx < currentStepIndex || order.status === 'Delivered';
+                const isActive = idx === currentStepIndex && order.status !== 'Delivered';
+                
+                return (
+                  <div key={step.id} className="relative flex gap-8 group">
+                    <div className={`relative z-10 w-10 h-10 rounded-2xl flex items-center justify-center text-lg transition-all duration-500 ${
+                      isCompleted ? 'bg-black text-white' : 
+                      isActive ? 'bg-[#8B2323] text-white shadow-xl shadow-red-900/20 scale-110' : 'bg-gray-100 text-gray-400'
+                    }`}>
+                        {step.icon}
+                    </div>
+
+                    <div className="flex-1 pt-1">
+                       <div className="flex items-center justify-between gap-4 mb-2">
+                          <p className={`text-xs font-black uppercase tracking-widest transition-colors ${isActive || isCompleted ? 'text-gray-900' : 'text-gray-400'}`}>
+                            {step.title}
+                          </p>
+                          {(isCompleted || order.status === 'Delivered') && (
+                             <FiCheckCircle className="text-green-500" />
+                          )}
+                       </div>
+                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">
+                         {isCompleted || isActive ? step.description : 'Awaiting completion of previous stage.'}
+                       </p>
+                    </div>
                   </div>
-
-                  <div className="flex-1">
-                     <p className={`text-sm font-black uppercase tracking-tight transition-colors ${step.active ? 'text-deep-espresso' : 'text-gray-400'}`}>
-                       {step.title}
-                     </p>
-                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                       {step.time}
-                     </p>
-                  </div>
-
-                  {step.completed && (
-                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                      <FiCheckCircle className="text-warm-sand text-lg" />
-                    </motion.div>
-                  )}
-               </div>
-             ))}
-          </div>
-        </div>
-
-        {/* Support Section */}
-        <div className="p-6 pb-28">
-          <div className="bg-deep-espresso rounded-[2rem] p-8 text-white flex items-center justify-between shadow-2xl shadow-deep-espresso/20 overflow-hidden relative group">
-             <div className="relative z-10">
-               <p className="text-xs font-bold opacity-60 mb-1">Need help with your order?</p>
-               <p className="text-sm font-black tracking-widest underline decoration-warm-sand decoration-2 underline-offset-8">SUPPORT CENTER</p>
-             </div>
-             <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md relative z-10 group-hover:bg-warm-sand transition-all duration-300">
-               <FiArrowLeft className="rotate-180 text-xl" />
-             </div>
-             <div className="absolute top-0 right-0 w-32 h-32 bg-warm-sand/10 rounded-full blur-3xl -mr-16 -mt-16" />
-          </div>
+                );
+              })}
+           </div>
         </div>
       </div>
     </div>

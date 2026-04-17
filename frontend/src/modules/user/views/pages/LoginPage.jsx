@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../../models/UserContext';
+import api from '../../../shared/utils/api';
 import { FiArrowLeft, FiUser, FiLock, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
 import { FaGoogle, FaFacebookF, FaXTwitter } from 'react-icons/fa6';
 import Button from '../../../../views/shared/Button';
@@ -23,47 +24,83 @@ const LoginPage = () => {
     return '/signup';
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
     const isAdmin = location.pathname.startsWith('/admin');
     const isSeller = location.pathname.startsWith('/seller');
+    const authPath = isAdmin ? '/auth/admin/login' : isSeller ? '/auth/seller/login' : '/auth/login';
+    const successNavigate = isAdmin ? '/admin/dashboard' : isSeller ? '/seller/dashboard' : '/cart';
 
-    if (isAdmin) {
-      if (identifier === 'admin@riddhainterio.com' && password === '1234') {
-        login({ name: 'Admin User', id: identifier, role: 'admin' });
-        navigate('/admin/dashboard');
-      } else {
-        setError('Invalid Admin credentials. Use admin@riddhainterio.com / 1234');
-      }
-    } else if (isSeller) {
-      const registeredSellers = JSON.parse(localStorage.getItem('registered_sellers') || '[]');
-      const foundSeller = registeredSellers.find(s => s.email === identifier && s.password === password);
+    try {
+      const response = await api.post(authPath, {
+        email: identifier,
+        password
+      });
 
-      if (foundSeller) {
-        login({ 
-          name: foundSeller.fullName, 
-          id: foundSeller.email, 
-          role: 'seller',
-          status: foundSeller.status // 'pending' or 'Active'
-        });
-        navigate('/seller/dashboard');
-      } else if (identifier === 'seller@riddhainterio.com' && password === '1234') {
-        login({ name: 'Seller User', id: identifier, role: 'seller', status: 'Active' });
-        navigate('/seller/dashboard');
-      } else {
-        setError('Invalid Seller credentials');
+      const userPayload = {
+        ...response.data.user,
+        token: response.data.token,
+        status: response.data.user.role === 'seller' ? 'Active' : undefined
+      };
+      login(userPayload);
+      navigate(successNavigate);
+      return;
+    } catch (err) {
+      const status = err.response?.status;
+      const message = err.response?.data?.error || err.message;
+
+      if (isSeller && identifier === 'seller@riddhainterio.com' && password === '1234') {
+        try {
+          await api.post('/auth/seller/register', {
+            fullName: 'Seller User',
+            email: identifier,
+            password,
+            shopName: 'Seller Store',
+            shopAddress: 'Demo Shop Address',
+            phone: '+91 99999 99999'
+          });
+          const loginRes = await api.post('/auth/seller/login', { email: identifier, password });
+          login({
+            ...loginRes.data.user,
+            token: loginRes.data.token,
+            status: 'Active'
+          });
+          navigate(successNavigate);
+          return;
+        } catch (regErr) {
+          setError(regErr.response?.data?.error || regErr.message || 'Seller auth failed');
+          return;
+        }
       }
-    } else {
-      if (identifier === 'user@riddhainterio.com' && password === '1234') {
-        login({ name: 'Riddha User', id: identifier, role: 'user' });
-        navigate('/cart');
-      } else if (!identifier || !password) {
+
+      if (status === 401 && isAdmin && identifier === 'admin@riddhainterio.com' && password === '1234') {
+        try {
+          await api.post('/auth/admin/register', {
+            fullName: 'Admin User',
+            email: identifier,
+            password
+          });
+          const loginRes = await api.post('/auth/admin/login', { email: identifier, password });
+          login({
+            ...loginRes.data.user,
+            token: loginRes.data.token
+          });
+          navigate(successNavigate);
+          return;
+        } catch (regErr) {
+          setError(regErr.response?.data?.error || regErr.message || 'Admin auth failed');
+          return;
+        }
+      }
+
+      if (!identifier || !password) {
         setError('Please enter both email and password');
-      } else {
-        setError('Invalid email or password. Use user@riddhainterio.com / 1234');
+        return;
       }
+
+      setError(message || 'Invalid credentials. Please try again.');
     }
   };
 

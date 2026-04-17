@@ -37,6 +37,19 @@ const PendingSellers = () => {
     }
   };
 
+  const handleReject = async (id) => {
+    if (!window.confirm('Reject and delete this seller request?')) return;
+    try {
+      setActionLoading(id);
+      await api.delete(`/auth/admin/sellers/${id}`);
+      setSellers(sellers.filter(s => s._id !== id));
+    } catch (err) {
+      alert('Failed to reject seller');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   return (
     <PageWrapper>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -87,10 +100,14 @@ const PendingSellers = () => {
                         ) : <LuCheck size={20} />}
                       </button>
                       <button 
+                        onClick={() => handleReject(seller._id)}
+                        disabled={actionLoading === seller._id}
                         className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm active:scale-95"
                         title="Reject Request"
                       >
-                        <LuX size={20} />
+                        {actionLoading === seller._id ? (
+                          <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                        ) : <LuX size={20} />}
                       </button>
                     </div>
                   </div>

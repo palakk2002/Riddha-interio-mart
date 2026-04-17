@@ -4,12 +4,14 @@ const Seller = require('../models/Seller');
 // @desc    Get all products (Filter by Verified Sellers only for Public)
 exports.getProducts = async (req, res, next) => {
   try {
-    const verifiedSellers = await Seller.find({ isVerified: true }).select('_id');
-    const verifiedSellerIds = verifiedSellers.map(s => s._id);
+    const queryObj = { ...req.query };
+    const excludeFields = ['page', 'sort', 'limit', 'fields'];
+    excludeFields.forEach(param => delete queryObj[param]);
 
+    // Handle name/category searches if needed (simple match for now)
     const products = await Product.find({ 
-      seller: { $in: verifiedSellerIds },
-      isActive: true 
+      isActive: true,
+      ...queryObj 
     }).populate('seller', 'fullName shopName');
 
     res.status(200).json({ success: true, count: products.length, data: products });
@@ -69,6 +71,59 @@ exports.getSellerProducts = async (req, res, next) => {
   try {
     const products = await Product.find({ seller: req.user.id });
     res.status(200).json({ success: true, count: products.length, data: products });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete product
+exports.deleteProduct = async (req, res, next) => {
+  try {
+    console.log('Delete request received for ID:', req.params.id);
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      console.log('Product not found in DB');
+      return res.status(404).json({ success: false, error: 'Product not found' });
+    }
+
+    // Make sure user is product owner or admin
+    console.log('Product seller:', product.seller.toString(), 'Current user:', req.user.id);
+    if (product.seller.toString() !== req.user.id && req.user.role !== 'admin') {
+      console.log('Unauthorized delete attempt');
+      return res.status(401).json({ success: false, error: 'User not authorized to delete this product' });
+    }
+
+    await Product.findByIdAndDelete(req.params.id);
+    console.log('Product successfully deleted from DB');
+
+    res.status(200).json({ success: true, data: {} });
+  } catch (error) {
+    console.error('Delete controller error:', error);
+    next(error);
+  }
+};
+
+// @desc    Update product
+exports.updateProduct = async (req, res, next) => {
+  try {
+    let product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ success: false, error: 'Product not found' });
+    }
+
+    // Make sure user is product owner or admin
+    if (product.seller.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(401).json({ success: false, error: 'User not authorized to update this product' });
+    }
+
+    product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({ success: true, data: product });
   } catch (error) {
     next(error);
   }

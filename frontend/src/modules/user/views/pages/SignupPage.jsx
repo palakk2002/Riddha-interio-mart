@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
+import api from '../../../shared/utils/api';
 import { FiArrowLeft, FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
 import { FaGoogle, FaFacebookF, FaXTwitter } from 'react-icons/fa6';
 import Button from '../../../../views/shared/Button';
@@ -76,6 +77,19 @@ const SignupPage = () => {
         docType: 'GSTIN'
       };
       localStorage.setItem('admin_pending_sellers', JSON.stringify([...pendingSellers, newPendingEntry]));
+
+      try {
+        await api.post('/auth/seller/register', {
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          shopName: `${formData.fullName}'s Shop`,
+          shopAddress: 'Demo Shop Address',
+          phone: '+91 99999 99999'
+        });
+      } catch (err) {
+        console.warn('Backend seller registration failed:', err.response?.data?.error || err.message);
+      }
     }
 
     // Success simulation

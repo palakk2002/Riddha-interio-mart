@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
-import { sellerProducts } from '../data/sellerProducts';
 import { LuFilter, LuCheck, LuClock, LuPen, LuTrash2, LuLayoutGrid, LuMenu, LuX } from 'react-icons/lu';
+import api from '../../../shared/utils/api';
 
 const MyProducts = () => {
   const [filter, setFilter] = useState('All');
@@ -9,35 +9,40 @@ const MyProducts = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [editFormData, setEditFormData] = useState({ name: '', category: '', price: '' });
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [products, setProducts] = useState(() => {
-    const saved = JSON.parse(localStorage.getItem('seller_added_products') || '[]');
-    // We combine them but give localStorage items priority if they share IDs (not likely here as we use Date.now() for new ones)
-    return [...sellerProducts, ...saved];
-  });
-
-  const filteredProducts = products.filter(p => filter === 'All' || p.status === filter.toLowerCase());
-
-  const handleDelete = (id) => {
-    // Remove from state
-    const updatedProducts = products.filter(p => p.id !== id);
-    setProducts(updatedProducts);
-    
-    // Sync with localStorage (only keep items that were added by user, or keep full state if we want to "delete" static items)
-    // To properly "delete" static items from view, we should store the list of deleted static IDs or just save the whole altered list.
-    // Saving the whole altered list to localStorage is easier for this mock setup.
-    localStorage.setItem('seller_added_products', JSON.stringify(updatedProducts.filter(p => !sellerProducts.find(sp => sp.id === p.id))));
-    // Actually, to make it persist correctly even for static items, we'll store the "Custom State"
-    localStorage.setItem('seller_full_inventory', JSON.stringify(updatedProducts));
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/products/my-products');
+      setProducts(res.data.data);
+    } catch (err) {
+      console.error('Failed to fetch seller products:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Re-read initial state to check for full inventory override
-  useState(() => {
-    const fullSaved = localStorage.getItem('seller_full_inventory');
-    if (fullSaved) {
-      setProducts(JSON.parse(fullSaved));
-    }
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const filteredProducts = products.filter(p => {
+    if (filter === 'All') return true;
+    const status = p.status || (p.isActive ? 'approved' : 'pending');
+    return status.toLowerCase() === filter.toLowerCase();
   });
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    try {
+      await api.delete(`/products/${id}`);
+      setProducts(products.filter(p => p._id !== id));
+    } catch (err) {
+      console.error('Delete failed:', err);
+    }
+  };
 
   const handleEditOpen = (product) => {
     setEditingProduct(product);
@@ -45,17 +50,16 @@ const MyProducts = () => {
     setShowEditModal(true);
   };
 
-  const handleUpdate = (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    const updatedProducts = products.map(p => 
-      p.id === editingProduct.id 
-      ? { ...p, ...editFormData, price: parseFloat(editFormData.price) } 
-      : p
-    );
-    setProducts(updatedProducts);
-    localStorage.setItem('seller_full_inventory', JSON.stringify(updatedProducts));
-    setShowEditModal(false);
-    setEditingProduct(null);
+    try {
+      await api.put(`/products/${editingProduct._id || editingProduct.id}`, editFormData);
+      fetchProducts();
+      setShowEditModal(false);
+      setEditingProduct(null);
+    } catch (err) {
+      console.error('Update failed:', err);
+    }
   };
 
   const StatusBadge = ({ status }) => {
@@ -120,11 +124,17 @@ const MyProducts = () => {
         {view === 'grid' ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {filteredProducts.map(product => (
-              <div key={product.id} className="bg-white rounded-2xl border border-soft-oatmeal overflow-hidden shadow-sm hover:shadow-md transition-all group">
+              <div key={product._id || product.id} className="bg-white rounded-2xl border border-soft-oatmeal overflow-hidden shadow-sm hover:shadow-md transition-all group">
                 <div className="relative h-24 sm:h-32 overflow-hidden">
-                  <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img 
+                    src={(product.image || (product.images && product.images[0]))?.startsWith('C:') 
+                      ? 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80' 
+                      : (product.image || (product.images && product.images[0]) || 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80')} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                  />
                   <div className="absolute top-2 left-2">
-                    <StatusBadge status={product.status} />
+                    <StatusBadge status={product.status || (product.isActive ? 'approved' : 'pending')} />
                   </div>
                 </div>
                 <div className="p-3 space-y-3">
@@ -142,7 +152,7 @@ const MyProducts = () => {
                           <LuPen size={14} />
                         </button>
                         <button 
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => handleDelete(product._id || product.id)}
                           className="p-1.5 text-warm-sand hover:text-red-600 hover:bg-red-50 rounded-md transition-all"
                         >
                           <LuTrash2 size={14} />
@@ -168,10 +178,15 @@ const MyProducts = () => {
                 </thead>
                 <tbody className="divide-y divide-soft-oatmeal/50">
                   {filteredProducts.map(product => (
-                    <tr key={product.id} className="hover:bg-soft-oatmeal/5 transition-colors group">
+                    <tr key={product._id || product.id} className="hover:bg-soft-oatmeal/5 transition-colors group">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <img src={product.image} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                          <img 
+                            src={(product.image || (product.images && product.images[0]))?.startsWith('C:') 
+                              ? 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80' 
+                              : (product.image || (product.images && product.images[0]) || 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80')} 
+                            alt="" className="w-10 h-10 rounded-lg object-cover" 
+                          />
                           <span className="text-sm font-bold text-deep-espresso">{product.name}</span>
                         </div>
                       </td>
@@ -182,7 +197,7 @@ const MyProducts = () => {
                         <span className="text-sm font-black text-deep-espresso">Rs. {product.price}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <StatusBadge status={product.status} />
+                        <StatusBadge status={product.status || (product.isActive ? 'approved' : 'pending')} />
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
@@ -193,7 +208,7 @@ const MyProducts = () => {
                             <LuPen size={16} />
                           </button>
                           <button 
-                            onClick={() => handleDelete(product.id)}
+                            onClick={() => handleDelete(product._id || product.id)}
                             className="p-2 hover:bg-red-50 rounded-lg transition-colors text-warm-sand hover:text-red-600"
                           >
                             <LuTrash2 size={16} />

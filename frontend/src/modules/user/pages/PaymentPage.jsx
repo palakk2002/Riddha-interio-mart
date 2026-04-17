@@ -3,351 +3,317 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../data/CartContext';
 import { useUser } from '../data/UserContext';
-import { FiArrowLeft, FiChevronDown, FiChevronRight, FiCheckCircle, FiCreditCard, FiSmartphone, FiMonitor, FiBriefcase } from 'react-icons/fi';
+import { FiArrowLeft, FiChevronDown, FiChevronUp, FiSmartphone, FiCreditCard, FiSearch, FiUser, FiShoppingCart, FiMenu, FiMapPin, FiCheck } from 'react-icons/fi';
 import Button from '../../../shared/components/Button';
-
-const PaymentOption = ({ option, expandedSection, setExpandedSection, selectedMethod, setSelectedMethod }) => {
-  const isExpanded = expandedSection === option.id;
-  return (
-    <div className="border-b border-soft-oatmeal/10 last:border-0">
-      <button 
-        onClick={() => setExpandedSection(isExpanded ? null : option.id)}
-        className="w-full p-4 md:p-5 flex items-center justify-between hover:bg-soft-oatmeal/5 transition-colors"
-      >
-        <div className="flex items-center gap-3 md:gap-4">
-          <div className={`h-10 w-12 rounded-lg flex items-center justify-center border transition-all ${isExpanded ? 'bg-warm-sand/10 border-warm-sand/30 text-warm-sand' : 'bg-soft-oatmeal/10 border-soft-oatmeal/20 text-gray-400'}`}>
-            {option.icon}
-          </div>
-          <div className="text-left">
-            <p className={`text-sm font-black tracking-tight ${isExpanded ? 'text-warm-sand' : 'text-deep-espresso'}`}>{option.title}</p>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">{option.subtitle}</p>
-          </div>
-        </div>
-        <motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
-          <FiChevronDown className="text-gray-400" />
-        </motion.div>
-      </button>
-
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden bg-gray-50/30"
-          >
-            <div className="p-4 pt-0 space-y-2">
-              {option.subOptions?.map((sub) => (
-                <div 
-                  key={sub.id}
-                  onClick={() => setSelectedMethod(sub.id)}
-                  className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === sub.id ? 'border-warm-sand bg-white shadow-sm' : 'border-transparent bg-transparent'}`}
-                >
-                  <div className="flex items-center gap-3">
-                    {sub.icon && <img src={sub.icon} alt="" className="w-5 h-5 object-contain" />}
-                    <span className="text-xs font-bold text-deep-espresso">{sub.name}</span>
-                  </div>
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selectedMethod === sub.id ? 'border-warm-sand bg-warm-sand' : 'border-gray-200'}`}>
-                    {selectedMethod === sub.id && <div className="w-2 h-2 rounded-full bg-white" />}
-                  </div>
-                </div>
-              ))}
-              {option.id === 'card' && (
-                <div className="space-y-2 mt-2">
-                  <input type="text" placeholder="Card Number" className="w-full px-4 py-3 rounded-lg border border-gray-200 text-xs focus:ring-1 focus:ring-warm-sand outline-none" />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input type="text" placeholder="MM/YY" className="w-full px-4 py-3 rounded-lg border border-gray-200 text-xs outline-none" />
-                    <input type="password" placeholder="CVV" className="w-full px-4 py-3 rounded-lg border border-gray-200 text-xs outline-none" />
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
-      {/* Simple selection for COD */}
-      {!option.subOptions?.length && isExpanded && (
-        <div className="px-5 pb-5">
-           <div 
-             onClick={() => setSelectedMethod(option.id)}
-             className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === option.id ? 'border-warm-sand bg-warm-sand/5' : 'border-gray-100 bg-gray-50/50'}`}
-           >
-             <span className="text-xs font-bold text-deep-espresso">Confirm {option.title}</span>
-             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selectedMethod === option.id ? 'border-warm-sand bg-warm-sand' : 'border-gray-200'}`}>
-                {selectedMethod === option.id && <div className="w-2 h-2 rounded-full bg-white" />}
-             </div>
-           </div>
-        </div>
-      )}
-    </div>
-  );
-};
+import api from '../../../shared/utils/api';
 
 const PaymentPage = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, cartCount, clearCart } = useCart();
-  const { address } = useUser();
-  const [expandedSection, setExpandedSection] = useState('upi');
+  const { address, user } = useUser();
+  const [selectedSection, setSelectedSection] = useState('upi');
   const [selectedMethod, setSelectedMethod] = useState('gpay');
+  const [showRazorpay, setShowRazorpay] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showPriceSummary, setShowPriceSummary] = useState(false);
-
-  const paymentOptions = [
-    {
-      id: 'upi',
-      title: 'UPI',
-      subtitle: 'Google Pay, PhonePe, Paytm',
-      icon: <FiSmartphone className="text-xl" />,
-      subOptions: [
-        { id: 'gpay', name: 'Google Pay', icon: 'https://cdn-icons-png.flaticon.com/512/2991/2991148.png' },
-        { id: 'phonepe', name: 'PhonePe', icon: 'https://cdn.iconscout.com/icon/free/png-256/phonepe-2752139-2284950.png' },
-        { id: 'paytm', name: 'Paytm', icon: 'https://cdn.iconscout.com/icon/free/png-256/paytm-226448.png' }
-      ]
-    },
-    {
-      id: 'card',
-      title: 'Credit / Debit Card',
-      subtitle: 'Visa, Mastercard, RuPay',
-      icon: <FiCreditCard className="text-xl" />,
-      subOptions: [
-        { id: 'new_card', name: 'Add New Card', isForm: true }
-      ]
-    },
-    {
-      id: 'netbanking',
-      title: 'Net Banking',
-      subtitle: 'All major banks',
-      icon: <FiMonitor className="text-xl" />,
-      subOptions: [
-        { id: 'sbi', name: 'SBI' },
-        { id: 'hdfc', name: 'HDFC' },
-        { id: 'icici', name: 'ICICI' }
-      ]
-    },
-    {
-      id: 'cod',
-      title: 'Cash on Delivery',
-      subtitle: 'Pay when you receive',
-      icon: <FiCheckCircle className="text-xl" />,
-      subOptions: []
-    }
-  ];
 
   const handlePayNow = () => {
-    const orderId = 'RD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-    
-    const newOrder = {
-      id: Date.now(),
-      orderId: orderId,
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: 'Pending Seller',
-      customer: {
-        name: address?.name || 'Guest User',
-        email: 'user@example.com', // Fallback for simulation
-        phone: address?.phone || 'N/A',
-        address: `${address?.address}, ${address?.landmark}, ${address?.city}, ${address?.state} - ${address?.pincode}`
-      },
-      paymentMethod: selectedMethod === 'cod' ? 'Cash on Delivery' : `${selectedMethod.toUpperCase()} (Paid)`,
-      items: cart.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        image: item.image
-      })),
-      subtotal: cartTotal,
-      shipping: 0,
-      total: cartTotal,
-      timeline: [
-        { status: "Order Placed", date: new Date().toLocaleString(), active: true },
-        { status: "Waiting for Seller", date: "Pending", active: true },
-        { status: "Ready for Pickup", date: "", active: false },
-        { status: "Out for Delivery", date: "", active: false },
-        { status: "Delivered", date: "", active: false }
-      ]
-    };
+    setShowRazorpay(true);
+  };
 
-    const existingOrders = JSON.parse(localStorage.getItem('riddha_full_orders') || '[]');
-    localStorage.setItem('riddha_full_orders', JSON.stringify([newOrder, ...existingOrders]));
-    localStorage.setItem('last_order_id', orderId);
-
-    if (selectedMethod === 'cod') {
-      clearCart();
-      navigate('/order-success');
-      return;
-    }
-
+  const handleMockPayment = async () => {
     setIsProcessing(true);
-    setTimeout(() => {
-      clearCart();
-      navigate('/order-success');
-    }, 2500);
+    try {
+      // Prepare order data for backend
+      const orderData = {
+        orderItems: cart.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          image: Array.isArray(item.images) ? item.images[0] : item.image,
+          price: item.price,
+          product: item._id || item.id,
+          seller: item.seller // Pass the seller ID from the product data
+        })),
+        shippingAddress: {
+          fullName: address.fullName,
+          mobileNumber: address.mobileNumber,
+          pincode: address.pincode,
+          city: address.city,
+          fullAddress: address.fullAddress,
+          landmark: address.landmark
+        },
+        paymentMethod: 'Online',
+        itemsPrice: cartTotal,
+        shippingPrice: 0,
+        totalPrice: cartTotal
+      };
+
+      const response = await api.post('/orders', orderData);
+      
+      if (response.data.success) {
+        localStorage.setItem('last_order_id', response.data.data._id);
+        
+        setTimeout(() => {
+          setIsProcessing(false);
+          setShowRazorpay(false);
+          clearCart();
+          navigate('/order-success');
+        }, 1500);
+      }
+    } catch (err) {
+      console.error('Failed to place order:', err);
+      setIsProcessing(false);
+      alert('Failed to place order. Please try again.');
+    }
   };
 
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-soft-oatmeal/5 pb-32"
+      className="min-h-screen bg-[#F8F8F8] pb-32"
     >
-      {/* Header */}
-      <div className="bg-white px-4 py-4 md:px-6 md:py-6 flex items-center gap-4 md:gap-6 border-b border-soft-oatmeal/10 relative md:sticky md:top-0 md:z-50">
-        <button onClick={() => navigate(-1)}>
-          <FiArrowLeft className="h-6 w-6 text-deep-espresso" />
-        </button>
-        <h1 className="text-xl font-bold text-deep-espresso">Choose Payment Method</h1>
+      {/* Brand Header */}
+      <div className="bg-[#8B2323] text-white p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-display font-black tracking-tighter uppercase italic">RIDDHA INTERIO</h1>
+          <div className="flex items-center gap-5">
+            <FiUser size={20} />
+            <div className="relative">
+              <FiShoppingCart size={20} />
+              <span className="absolute -top-1.5 -right-1.5 bg-white text-[#8B2323] text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">{cartCount}</span>
+            </div>
+            <FiMenu size={20} />
+          </div>
+        </div>
+        <div className="relative">
+          <input 
+            type="text" 
+            placeholder="Search products or brands..." 
+            className="w-full bg-white rounded-lg py-3 px-12 text-sm text-gray-500 placeholder-gray-400 focus:outline-none"
+          />
+          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        </div>
       </div>
 
-      <div className="max-w-3xl mx-auto p-3 md:p-4 space-y-3 md:space-y-4">
+      {/* Delivery Status */}
+      <div className="bg-white px-4 py-3 border-b border-gray-100 flex items-center gap-1">
+        <span className="text-[10px] font-bold text-gray-400">Delivery in</span>
+        <span className="text-[10px] font-black text-[#8B2323]">4 hours</span>
+        <span className="text-[10px] text-gray-400 ml-1 flex items-center gap-0.5">to {address?.pincode || '452018'} <FiMapPin size={8} /></span>
+      </div>
+
+      <div className="max-w-xl mx-auto p-4 space-y-6">
+        <div className="flex items-center gap-4 py-4">
+          <button onClick={() => navigate(-1)} className="p-1">
+            <FiArrowLeft className="h-6 w-6 text-gray-800" />
+          </button>
+          <h1 className="text-xl font-display font-bold text-gray-800">Choose Payment Method</h1>
+        </div>
+
         {/* Delivering To Section */}
-        <div className="space-y-3">
-          <p className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Delivering To</p>
-          <div className="bg-white border border-soft-oatmeal/20 rounded-2xl p-5 shadow-sm">
+        <div className="space-y-4">
+          <p className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">DELIVERING TO</p>
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-sm font-black text-deep-espresso uppercase tracking-wider">{address?.name || 'User'}</p>
+                <p className="text-sm font-black text-gray-900 uppercase tracking-wide">{address?.fullName || user?.fullName || 'USER'}</p>
                 <p className="text-[11px] text-gray-400 font-medium mt-1 leading-relaxed">
-                  {address?.address}, {address?.landmark && `${address.landmark}, `}
-                  {address?.city}, {address?.state} - {address?.pincode}
+                  {address?.fullAddress}, {address?.landmark && `${address.landmark}, `}
+                  {address?.city}, {address?.pincode}
                 </p>
               </div>
-              <button onClick={() => navigate('/address')} className="text-[10px] font-black text-warm-sand uppercase tracking-widest border-b border-warm-sand/30">Edit</button>
+              <button onClick={() => navigate('/address')} className="text-[10px] font-black text-[#8B2323] uppercase tracking-widest">EDIT</button>
             </div>
           </div>
         </div>
 
-        {/* Item Summary Section */}
-        <div className="bg-white border-y border-soft-oatmeal/10 px-4 md:px-6 py-3 md:py-5 flex items-center justify-between">
-           <div className="flex items-center gap-3">
-             <span className="text-sm font-black text-deep-espresso">{cartCount} {cartCount === 1 ? 'item' : 'items'}</span>
+        {/* Amount Summary */}
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center justify-between">
+           <div className="flex items-center gap-2">
+             <span className="text-sm font-black text-gray-800">{cartCount} {cartCount === 1 ? 'item' : 'items'}</span>
              <FiChevronDown className="text-gray-400" />
            </div>
            <div className="text-right">
-             <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest block leading-none mb-1">Total</span>
-             <span className="text-lg font-black text-deep-espresso font-montserrat">₹{cartTotal.toLocaleString()}</span>
+             <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest block mb-0.5">TOTAL</span>
+             <span className="text-lg font-black text-gray-900">₹{cartTotal.toLocaleString()}</span>
            </div>
         </div>
 
-        {/* Suggested Section */}
-        <div className="space-y-4 pt-4">
-           <h3 className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Payment Options</h3>
-           <div className="bg-white rounded-2xl overflow-hidden border border-soft-oatmeal/20">
-              {paymentOptions.map(option => (
-                <PaymentOption 
-                  key={option.id} 
-                  option={option} 
-                  expandedSection={expandedSection}
-                  setExpandedSection={setExpandedSection}
-                  selectedMethod={selectedMethod}
-                  setSelectedMethod={setSelectedMethod}
-                />
-              ))}
+        {/* Payment Options */}
+        <div className="space-y-4">
+           <p className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">PAYMENT OPTIONS</p>
+           
+           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+             {/* UPI Section */}
+             <div className="border-b border-gray-50">
+               <button 
+                onClick={() => setSelectedSection(selectedSection === 'upi' ? null : 'upi')}
+                className="w-full flex items-center justify-between p-5"
+               >
+                 <div className="flex items-center gap-4">
+                   <div className="w-12 h-10 rounded-lg bg-red-50 flex items-center justify-center border border-red-100">
+                     <FiSmartphone className="text-[#8B2323]" />
+                   </div>
+                   <div className="text-left">
+                     <p className="text-sm font-black text-gray-800 uppercase tracking-tighter">UPI</p>
+                     <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">GOOGLE PAY, PHONEPE, PAYTM</p>
+                   </div>
+                 </div>
+                 {selectedSection === 'upi' ? <FiChevronUp className="text-gray-400" /> : <FiChevronDown className="text-gray-400" />}
+               </button>
+
+               <AnimatePresence>
+                 {selectedSection === 'upi' && (
+                   <motion.div 
+                    initial={{ height: 0 }} 
+                    animate={{ height: 'auto' }} 
+                    exit={{ height: 0 }} 
+                    className="overflow-hidden bg-gray-50/30 px-5 pb-5 space-y-3"
+                   >
+                     {/* Google Pay */}
+                     <div 
+                      onClick={() => setSelectedMethod('gpay')}
+                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'gpay' ? 'border-[#8B2323] bg-white' : 'border-transparent bg-transparent'}`}
+                     >
+                       <div className="flex items-center gap-4">
+                         <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Google_Pay_%28GPay%29_Logo.svg" alt="GPay" className="w-6 h-6" />
+                         <span className="text-xs font-black text-gray-800">Google Pay</span>
+                       </div>
+                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'gpay' ? 'border-[#8B2323] bg-[#8B2323]' : 'border-gray-200'}`}>
+                         {selectedMethod === 'gpay' && <div className="w-2 h-2 rounded-full bg-white" />}
+                       </div>
+                     </div>
+                     {/* PhonePe */}
+                     <div 
+                      onClick={() => setSelectedMethod('phonepe')}
+                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'phonepe' ? 'border-[#8B2323] bg-white' : 'border-transparent bg-transparent'}`}
+                     >
+                       <div className="flex items-center gap-4">
+                         <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/PhonePe_Logo.svg" alt="PhonePe" className="w-6 h-6" />
+                         <span className="text-xs font-black text-gray-800">PhonePe</span>
+                       </div>
+                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'phonepe' ? 'border-[#8B2323] bg-[#8B2323]' : 'border-gray-200'}`}>
+                         {selectedMethod === 'phonepe' && <div className="w-2 h-2 rounded-full bg-white" />}
+                       </div>
+                     </div>
+                     {/* Paytm */}
+                     <div 
+                      onClick={() => setSelectedMethod('paytm')}
+                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'paytm' ? 'border-[#8B2323] bg-white' : 'border-transparent bg-transparent'}`}
+                     >
+                       <div className="flex items-center gap-4">
+                         <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm" className="w-6 h-6" />
+                         <span className="text-xs font-black text-gray-800">Paytm</span>
+                       </div>
+                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'paytm' ? 'border-[#8B2323] bg-[#8B2323]' : 'border-gray-200'}`}>
+                         {selectedMethod === 'paytm' && <div className="w-2 h-2 rounded-full bg-white" />}
+                       </div>
+                     </div>
+                   </motion.div>
+                 )}
+               </AnimatePresence>
+             </div>
+
+             {/* Card Section */}
+             <div>
+               <button 
+                onClick={() => setSelectedSection(selectedSection === 'card' ? null : 'card')}
+                className="w-full flex items-center justify-between p-5"
+               >
+                 <div className="flex items-center gap-4">
+                   <div className="w-12 h-10 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
+                     <FiCreditCard className="text-gray-400" />
+                   </div>
+                   <div className="text-left">
+                     <p className="text-sm font-black text-gray-800 uppercase tracking-tighter">CREDIT / DEBIT CARD</p>
+                     <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">VISA, MASTERCARD, RUPAY</p>
+                   </div>
+                 </div>
+                 {selectedSection === 'card' ? <FiChevronUp className="text-gray-400" /> : <FiChevronDown className="text-gray-400" />}
+               </button>
+             </div>
            </div>
         </div>
       </div>
 
-      {/* Sticky Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-soft-oatmeal/20 p-4 pb-8 flex items-center justify-between shadow-[0_-20px_40px_rgba(0,0,0,0.05)] z-40">
-        <div className="flex flex-col">
-          <span className="text-xl font-black text-deep-espresso font-montserrat">₹{cartTotal.toLocaleString()}</span>
-          <button 
-            onClick={() => setShowPriceSummary(true)}
-            className="text-[10px] font-black text-warm-sand uppercase tracking-widest mt-1 text-left"
-          >
-            View Price Summary
-          </button>
+      {/* Footer */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-6 flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40">
+        <div>
+          <span className="text-xl font-black text-gray-900 block leading-none">₹{cartTotal.toLocaleString()}</span>
+          <button className="text-[9px] font-black text-[#8B2323] uppercase tracking-widest mt-2 border-b border-[#8B2323]/20">VIEW PRICE SUMMARY</button>
         </div>
-        <Button 
-          disabled={isProcessing}
+        <button 
           onClick={handlePayNow}
-          size="lg" 
-          className="px-3 md:px-12 h-10 md:h-16 rounded-lg md:rounded-xl bg-[#922724] hover:bg-[#7a201e] text-white font-black text-[10px] md:text-sm uppercase tracking-wider md:tracking-[0.2em] shadow-2xl shadow-[#922724]/20 whitespace-nowrap"
+          className="bg-black text-white px-10 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gray-900 transition-all"
         >
-          {isProcessing ? 'PROCESSING...' : (selectedMethod === 'cod' ? 'CONFIRM ORDER' : 'PAY NOW')}
-        </Button>
+          PAY NOW
+        </button>
       </div>
 
-      {/* Price Summary Overlay */}
+      {/* Razorpay Mock UI */}
       <AnimatePresence>
-        {showPriceSummary && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowPriceSummary(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
-            />
+        {showRazorpay && (
+          <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm">
             <motion.div 
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[24px] p-6 z-[70] shadow-2xl"
+              className="w-full max-w-md bg-white rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl"
             >
-              <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-6" onClick={() => setShowPriceSummary(false)} />
-              <h3 className="text-base font-black text-deep-espresso uppercase tracking-widest mb-4">Price Summary</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                  <span>Cart Total ({cartCount} {cartCount === 1 ? 'item' : 'items'})</span>
-                  <span>₹{cartTotal.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                  <span>Delivery Charge</span>
-                  <span className="text-green-600">FREE</span>
-                </div>
-                <div className="h-px bg-gray-100 my-3" />
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-black text-deep-espresso uppercase tracking-widest">Total Amount</span>
-                  <span className="text-lg font-black text-deep-espresso font-montserrat">₹{cartTotal.toLocaleString()}</span>
-                </div>
+              {/* Razorpay Header */}
+              <div className="bg-[#1C2541] p-6 text-white flex justify-between items-center">
+                 <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 bg-blue-600 rounded flex items-center justify-center font-black italic">R</div>
+                   <div>
+                     <p className="text-[10px] font-bold text-blue-300 tracking-widest uppercase">RIDDHA INTERIO</p>
+                     <p className="text-sm font-black">₹{cartTotal.toLocaleString()}</p>
+                   </div>
+                 </div>
+                 <button onClick={() => setShowRazorpay(false)} className="text-2xl font-light opacity-50">&times;</button>
               </div>
-              <Button 
-                onClick={() => setShowPriceSummary(false)}
-                className="w-full h-12 rounded-xl bg-[#922724] text-white font-black uppercase tracking-widest text-[10px] mt-6"
-              >
-                CLOSE
-              </Button>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
-      {/* Processing Overlay */}
-      <AnimatePresence>
-        {isProcessing && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-white/90 backdrop-blur-md z-[100] flex flex-col items-center justify-center p-8 text-center"
-          >
-            <div className="relative w-24 h-24 mb-8">
-               <motion.div 
-                 animate={{ rotate: 360 }}
-                 transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                 className="absolute inset-0 border-4 border-warm-sand/20 border-t-warm-sand rounded-full"
-               />
-               <motion.div 
-                 initial={{ scale: 0 }}
-                 animate={{ scale: 1 }}
-                 transition={{ delay: 0.5 }}
-                 className="absolute inset-4 bg-warm-sand/10 rounded-full flex items-center justify-center"
-               >
-                 <FiSmartphone className="text-2xl text-warm-sand" />
-               </motion.div>
-            </div>
-            <h2 className="text-xl font-black text-deep-espresso uppercase tracking-widest mb-2">Redirecting to {selectedMethod === 'gpay' ? 'Google Pay' : 'Payment App'}</h2>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest leading-relaxed">Please do not press back or refresh the page</p>
-            
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: "100%" }}
-              transition={{ duration: 2.5, ease: "easeInOut" }}
-              className="w-48 h-1 bg-warm-sand mt-8 rounded-full"
-            />
-          </motion.div>
+              {/* Razorpay Body */}
+              <div className="p-8 space-y-6">
+                 {!isProcessing ? (
+                   <>
+                     <div className="flex items-center justify-between p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                        <div className="flex items-center gap-3">
+                           <div className="w-10 h-10 bg-white shadow-sm rounded-lg flex items-center justify-center">
+                              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Google_Pay_%28GPay%29_Logo.svg" alt="GPay" className="w-6 h-6" />
+                           </div>
+                           <p className="text-xs font-black text-gray-700">Google Pay (Simulated)</p>
+                        </div>
+                        <FiCheck className="text-blue-500" />
+                     </div>
+
+                     <div className="space-y-4 pt-4">
+                        <button 
+                          onClick={handleMockPayment}
+                          className="w-full py-5 bg-[#3395FF] text-white font-black text-sm rounded-xl shadow-lg shadow-blue-200 uppercase tracking-widest active:scale-[0.98] transition-all"
+                        >
+                          PROCEED TO PAY
+                        </button>
+                        <p className="text-[9px] text-center text-gray-400 font-bold uppercase tracking-widest">RELIABLE & SECURE PAYMENTS BY RAZORPAY</p>
+                     </div>
+                   </>
+                 ) : (
+                   <div className="py-20 flex flex-col items-center justify-center space-y-8">
+                      <div className="relative w-20 h-20">
+                         <motion.div 
+                           animate={{ rotate: 360 }}
+                           transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                           className="absolute inset-0 border-4 border-blue-100 border-t-blue-500 rounded-full"
+                         />
+                      </div>
+                      <div className="text-center">
+                        <h3 className="text-lg font-black text-gray-800 uppercase tracking-widest">Processing Payment</h3>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-2">Please do not refresh or close this tab</p>
+                      </div>
+                   </div>
+                 )}
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </motion.div>

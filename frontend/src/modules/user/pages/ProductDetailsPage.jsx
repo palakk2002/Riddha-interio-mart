@@ -1,34 +1,68 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { products } from '../data/products';
 import { useCart } from '../data/CartContext';
 import { FiShoppingCart, FiArrowLeft, FiTruck, FiShield, FiRotateCcw, FiPlus, FiMinus, FiShare2, FiCheck, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import Button from '../../../shared/components/Button';
 import ProductCard from '../components/ProductCard';
+import api from '../../../shared/utils/api';
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
   const { addToCart, updateQuantity, getItemQuantity } = useCart();
-  const currentQuantity = getItemQuantity(parseInt(id));
   const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
-  const [added, setAdded] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const currentQuantity = getItemQuantity(product?._id || product?.id);
 
   useEffect(() => {
-    const found = products.find(p => p.id === parseInt(id));
-    if (found) {
-      setProduct(found);
-      setSelectedColor(found.colors[0]);
-      setSelectedSize(found.sizes[0]);
-    }
+    const getProduct = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`/products/${id}`);
+        const found = res.data.data;
+        
+        // Normalize fields if they are missing
+        if (!found.colors) found.colors = ["#FFFFFF"];
+        if (!found.sizes) found.sizes = ["Standard"];
+        if (!found.features) found.features = ["Premium Quality", "Authentic Sourcing", "Designer Approved"];
+        if (!found.originalPrice) found.originalPrice = found.price * 1.2; // Fallback estimate
+        if (!found.specifications) {
+            found.specifications = {
+                "Brand": found.brand || "Riddha Mart",
+                "Category": found.category,
+                "Material": found.material || "Premium",
+                "Dimensions": found.dimensions || "N/A",
+                "Thickness": found.thickness || "N/A"
+            };
+        }
+        
+        setProduct(found);
+        setSelectedColor(found.colors[0]);
+        setSelectedSize(found.sizes[0]);
+
+        // Fetch related products (optional: could also filter all products)
+        const allRes = await api.get('/products');
+        setRelatedProducts(allRes.data.data.filter(p => p.category === found.category && (p._id || p.id) !== id).slice(0, 4));
+
+      } catch (err) {
+        console.error('Failed to fetch product:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getProduct();
     window.scrollTo(0, 0);
   }, [id]);
 
-  if (!product) return <div className="py-32 text-center text-warm-sand font-display font-medium text-2xl">Crafting details...</div>;
-
-  const relatedProducts = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 8);
+  if (loading) return <div className="py-32 text-center text-warm-sand font-display font-medium text-2xl flex flex-col items-center gap-4">
+    <div className="h-12 w-12 border-4 border-warm-sand/20 border-t-warm-sand rounded-full animate-spin"></div>
+    Crafting details...
+  </div>;
+  if (!product) return <div className="py-32 text-center text-warm-sand font-display font-medium text-2xl">Product not found.</div>;
 
   const handleAddToCart = () => {
     addToCart(product, 1);
@@ -79,7 +113,9 @@ const ProductDetailsPage = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8 }}
-              src={product.image}
+              src={(product.image || (product.images && product.images[0]))?.startsWith('C:') 
+                ? 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80' 
+                : (product.image || (product.images && product.images[0]) || 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80')}
               alt={product.name}
               className="h-full w-full object-contain p-1 md:p-8 transition-transform duration-1000"
             />
@@ -194,7 +230,7 @@ const ProductDetailsPage = () => {
               <div className="flex items-center justify-between bg-soft-oatmeal/10 rounded-2xl px-6 h-16 border border-soft-oatmeal/20 shadow-inner">
                 <motion.button
                   whileTap={{ scale: 0.8 }}
-                  onClick={() => updateQuantity(product.id, currentQuantity - 1)}
+                  onClick={() => updateQuantity(product._id || product.id, currentQuantity - 1)}
                   className="h-10 w-10 flex items-center justify-center text-deep-espresso/60 hover:text-red-500 transition-colors bg-white rounded-xl shadow-sm"
                 >
                   <FiMinus className="h-5 w-5" />
@@ -205,7 +241,7 @@ const ProductDetailsPage = () => {
                 </div>
                 <motion.button
                   whileTap={{ scale: 0.8 }}
-                  onClick={() => updateQuantity(product.id, currentQuantity + 1)}
+                  onClick={() => updateQuantity(product._id || product.id, currentQuantity + 1)}
                   className="h-10 w-10 flex items-center justify-center text-deep-espresso/60 hover:text-green-600 transition-colors bg-white rounded-xl shadow-sm"
                 >
                   <FiPlus className="h-5 w-5" />
@@ -271,7 +307,7 @@ const ProductDetailsPage = () => {
             <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
               <div className="flex md:grid md:grid-cols-4 gap-4 md:gap-10 pb-4">
                 {relatedProducts.map((p, index) => (
-                  <div key={p.id} className="w-[160px] md:w-auto flex-shrink-0">
+                  <div key={p._id || p.id} className="w-[160px] md:w-auto flex-shrink-0">
                     <ProductCard product={p} index={index} variant="minimal" />
                   </div>
                 ))}
@@ -296,7 +332,7 @@ const ProductDetailsPage = () => {
             <div className="flex-1 flex items-center justify-between bg-white border-2 border-[var(--color-header-red)] text-[var(--color-header-red)] rounded-2xl px-4 h-[46px] shadow-sm">
               <motion.button
                 whileTap={{ scale: 0.8 }}
-                onClick={() => updateQuantity(product.id, currentQuantity - 1)}
+                onClick={() => updateQuantity(product._id || product.id, currentQuantity - 1)}
                 className="h-8 w-8 flex items-center justify-center text-[var(--color-header-red)] bg-[var(--color-header-red)]/10 rounded-lg"
               >
                 <FiMinus className="h-4 w-4" />
@@ -307,7 +343,7 @@ const ProductDetailsPage = () => {
               </div>
               <motion.button
                 whileTap={{ scale: 0.8 }}
-                onClick={() => updateQuantity(product.id, currentQuantity + 1)}
+                onClick={() => updateQuantity(product._id || product.id, currentQuantity + 1)}
                 className="h-8 w-8 flex items-center justify-center text-[var(--color-header-red)] bg-[var(--color-header-red)]/10 rounded-lg"
               >
                 <FiPlus className="h-4 w-4" />

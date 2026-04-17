@@ -6,30 +6,27 @@ import VerificationPending from './VerificationPending';
 import { useUser } from '../../user/data/UserContext';
 import { LuMenu, LuBell, LuUser, LuLogOut, LuChevronDown } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const initialNotifications = [
-  { id: 1, title: 'Product Approved', message: 'Your Classic Marble Tile has been approved and is now live in the catalog.', time: '2 hours ago', status: 'unread', type: 'success' },
-  { id: 2, title: 'New Catalog Item', message: 'Admin has added 5 new items to the Paints category. Check them out!', time: '5 hours ago', status: 'read', type: 'info' },
-  { id: 3, title: 'Welcome', message: 'Welcome to the Riddha Seller Panel! Start by adding your first product.', time: '1 day ago', status: 'read', type: 'info' },
-  { id: 4, title: 'Low Stock Alert', message: 'Your "Modern Fabric Sofa" is running low on stock (2 units left).', time: '2 days ago', status: 'unread', type: 'warning' },
-];
+import { connectSocket, disconnectSocket } from '../../../shared/utils/socket';
+import { playNewOrderChime, primeNotificationAudio, isSoundEnabled } from '../utils/notificationSound';
+import { getSellerNotifications, setSellerNotifications, prependSellerNotification } from '../utils/sellerNotifications';
 
 const SellerLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState(() => {
-    const saved = localStorage.getItem('seller_notifications');
-    return saved ? JSON.parse(saved) : initialNotifications;
+    return getSellerNotifications();
   });
+  const [toast, setToast] = useState(null);
   
   // Update notifications state from localStorage periodically or when dropdown opens
   useEffect(() => {
-    const handleStorage = () => {
-      const saved = localStorage.getItem('seller_notifications');
-      if (saved) setNotifications(JSON.parse(saved));
+    const sync = () => setNotifications(getSellerNotifications());
+    window.addEventListener('storage', sync);
+    window.addEventListener('seller_notifications_updated', sync);
+    return () => {
+      window.removeEventListener('storage', sync);
+      window.removeEventListener('seller_notifications_updated', sync);
     };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   const unreadCount = notifications.filter(n => n.status === 'unread').length;
@@ -37,7 +34,7 @@ const SellerLayout = () => {
   const markAsRead = (id) => {
     const updated = notifications.map(n => n.id === id ? { ...n, status: 'read' } : n);
     setNotifications(updated);
-    localStorage.setItem('seller_notifications', JSON.stringify(updated));
+    setSellerNotifications(updated);
   };
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { logout, user } = useUser();
@@ -45,8 +42,77 @@ const SellerLayout = () => {
 
   const handleLogout = () => {
     logout();
+    disconnectSocket();
     navigate('/seller/login');
   };
+
+  // Prime notification audio on first user interaction (browser requirement)
+  useEffect(() => {
+    const onFirstGesture = () => {
+      primeNotificationAudio();
+      window.removeEventListener('pointerdown', onFirstGesture);
+      window.removeEventListener('keydown', onFirstGesture);
+    };
+    window.addEventListener('pointerdown', onFirstGesture);
+    window.addEventListener('keydown', onFirstGesture);
+    return () => {
+      window.removeEventListener('pointerdown', onFirstGesture);
+      window.removeEventListener('keydown', onFirstGesture);
+    };
+  }, []);
+
+  // Real-time new order notifications (seller)
+  useEffect(() => {
+    if (!user?.token || user?.role !== 'seller') return;
+
+    const socket = connectSocket({ token: user.token });
+
+    const onNewOrder = async (payload) => {
+      const shortId = String(payload?.orderId || '').slice(-8).toUpperCase();
+      const amount = Number(payload?.totalPrice || 0);
+      const customer = payload?.customerName || 'a customer';
+      const city = payload?.shippingCity ? ` • ${payload.shippingCity}` : '';
+
+      const message = `New order #${shortId} for ₹${amount.toLocaleString()} from ${customer}${city}.`;
+
+      setToast({
+        orderId: payload?.orderId,
+        title: 'New Order Received',
+        message
+      });
+
+      prependSellerNotification({
+        id: Date.now() + Math.random(),
+        title: 'New Order Received',
+        message,
+        time: 'Just now',
+        status: 'unread',
+        type: 'warning'
+      });
+
+      if (isSoundEnabled()) {
+        await playNewOrderChime();
+      }
+
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([90, 40, 90]);
+      }
+
+      window.dispatchEvent(new CustomEvent('seller:new-order', { detail: payload }));
+    };
+
+    socket.on('order:new', onNewOrder);
+
+    return () => {
+      socket.off('order:new', onNewOrder);
+    };
+  }, [user?.token, user?.role]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 6500);
+    return () => window.clearTimeout(t);
+  }, [toast]);
 
   return (
     <div 
@@ -56,6 +122,49 @@ const SellerLayout = () => {
         setShowUserMenu(false);
       }}
     >
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -14, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -14, scale: 0.98 }}
+            className="fixed right-6 top-6 z-[60] w-[360px] max-w-[calc(100vw-3rem)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="rounded-3xl bg-white border border-soft-oatmeal shadow-2xl overflow-hidden">
+              <div className="p-5 flex items-start gap-4">
+                <div className="w-10 h-10 rounded-2xl bg-warm-sand/15 text-warm-sand flex items-center justify-center font-black">
+                  ₹
+                </div>
+                <div className="flex-1">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-warm-sand">Realtime</p>
+                  <h4 className="text-sm font-black text-deep-espresso mt-1">{toast.title}</h4>
+                  <p className="text-xs text-dusty-cocoa mt-1 leading-relaxed">{toast.message}</p>
+                  <div className="flex items-center gap-3 mt-4">
+                    <button
+                      onClick={() => {
+                        if (toast.orderId) navigate(`/seller/order/${toast.orderId}`);
+                        setToast(null);
+                      }}
+                      className="px-4 py-2 rounded-2xl bg-deep-espresso text-white text-[10px] font-black uppercase tracking-widest hover:bg-black transition-colors"
+                    >
+                      View Order
+                    </button>
+                    <button
+                      onClick={() => setToast(null)}
+                      className="px-4 py-2 rounded-2xl bg-soft-oatmeal/40 text-deep-espresso text-[10px] font-black uppercase tracking-widest hover:bg-soft-oatmeal/60 transition-colors"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="h-1 bg-warm-sand/70" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <SellerSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
@@ -131,7 +240,7 @@ const SellerLayout = () => {
                 className="flex items-center gap-3 cursor-pointer group"
               >
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-bold leading-tight">{user?.name || 'Elite Interiors'}</p>
+                  <p className="text-sm font-bold leading-tight">{user?.fullName || 'Elite Interiors'}</p>
                   <p className="text-xs text-warm-sand font-medium uppercase tracking-tighter">Premium Seller</p>
                 </div>
                 <div className={`w-10 h-10 rounded-full bg-warm-sand/20 flex items-center justify-center text-warm-sand ring-2 shadow-sm transition-all ${showUserMenu ? 'ring-warm-sand' : 'ring-white group-hover:ring-soft-oatmeal'}`}>

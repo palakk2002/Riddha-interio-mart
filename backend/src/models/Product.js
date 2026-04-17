@@ -6,6 +6,9 @@ const ProductSchema = new mongoose.Schema({
     required: [true, 'Please add a name'],
     trim: true
   },
+  sku: {
+    type: String
+  },
   description: {
     type: String,
     required: [true, 'Please add a description']
@@ -14,13 +17,35 @@ const ProductSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Please add a price']
   },
+  discountPrice: {
+    type: Number
+  },
   category: {
-    type: String, // Or ref to Category if we convert fully
+    type: String,
     required: [true, 'Please add a category']
+  },
+  subcategory: {
+    type: String
   },
   brand: {
     type: String,
     required: [true, 'Please add a brand']
+  },
+  material: {
+    type: String
+  },
+  dimensions: {
+    type: String
+  },
+  thickness: {
+    type: String
+  },
+  color: {
+    type: String
+  },
+  unit: {
+    type: String,
+    default: 'piece'
   },
   images: [String],
   countInStock: {
