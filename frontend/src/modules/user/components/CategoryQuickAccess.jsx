@@ -65,11 +65,11 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
         {/* Categories Grid/Scroll Area */}
         <div className="overflow-x-auto no-scrollbar snap-x snap-mandatory px-0">
           <div
-            className={`${isScrollable ? 'flex pb-2 pt-1' : 'flex md:grid md:grid-cols-5 lg:grid-cols-6 pb-6 md:pb-0'} gap-x-4 md:gap-12 min-h-[120px] md:min-h-[180px]`}
+            className={`${isScrollable ? 'flex pb-2 pt-1' : 'flex md:grid md:grid-cols-5 lg:grid-cols-6 pb-6 md:pb-0'} gap-4 md:gap-12 min-h-[120px] md:min-h-[180px]`}
           >
             {/* Conditional Layout for Home vs Subcategory Page */}
             {!isScrollable ? (
-              <div className="grid grid-rows-2 grid-flow-col gap-x-4 md:gap-x-12 gap-y-6 md:gap-y-12 md:contents px-2 md:px-0">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:contents gap-x-4 md:gap-x-12 gap-y-8 md:gap-y-12 px-4 md:px-0 w-full">
                 {filteredCategories.map((category, index) => (
                   <CategoryItem key={category._id} category={category} index={index} />
                 ))}
@@ -92,17 +92,17 @@ const CategoryItem = ({ category, index }) => (
   <div className="snap-start shrink-0">
     <Link
       to={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
-      className="group flex flex-col items-center gap-2 md:gap-4 w-16 md:w-40"
+      className="group flex flex-col items-center gap-3 md:gap-4 w-full md:w-40"
     >
-      <div className="relative aspect-square w-full rounded-xl md:rounded-[2rem] overflow-hidden bg-soft-oatmeal/5 shadow-sm group-hover:shadow-lg transition-all duration-500">
+      <div className="relative aspect-square w-full max-w-[100px] md:max-w-none rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden bg-white shadow-[0_4px_12px_rgba(0,0,0,0.05)] group-hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)] transition-all duration-500 ring-1 ring-black/[0.03]">
         <img
           src={category.image}
           alt={category.name}
-          className="h-full w-full object-cover transition-all duration-700 group-hover:scale-110"
+          className="h-full w-full object-cover transition-all duration-1000 group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-deep-espresso/0 group-hover:bg-deep-espresso/5 transition-colors duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
-      <span className="text-[10px] md:text-xs font-bold uppercase tracking-tight text-deep-espresso/60 group-hover:text-warm-sand text-center transition-colors leading-tight min-h-[2em] flex items-center justify-center">
+      <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.15em] text-deep-espresso/80 group-hover:text-warm-sand text-center transition-colors leading-tight min-h-[2.5em] flex items-center justify-center px-0.5">
         {category.name}
       </span>
     </Link>
