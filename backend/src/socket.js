@@ -33,13 +33,10 @@ function initSocket(httpServer) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       socket.user = { id: decoded.id, role: decoded.role || 'user' };
 
-      // Only allow seller sockets for now (seller notification requirement)
-      if (socket.user.role !== 'seller') {
+      // Allow both 'admin' and 'seller' roles for real-time notifications
+      if (socket.user.role !== 'seller' && socket.user.role !== 'admin') {
         return next(new Error('auth/role_not_allowed'));
       }
-
-      const sellerExists = await Seller.exists({ _id: socket.user.id });
-      if (!sellerExists) return next(new Error('auth/user_not_found'));
 
       return next();
     } catch (err) {
@@ -50,6 +47,10 @@ function initSocket(httpServer) {
   io.on('connection', (socket) => {
     const { id, role } = socket.user || {};
     socket.join(`${role}:${id}`);
+    
+    // Also join a generic role room for broadcasting to all admins or sellers
+    socket.join(`role:${role}`);
+    
     socket.emit('socket:ready', { role, id });
   });
 
@@ -66,9 +67,20 @@ function notifySellerNewOrder(sellerId, payload) {
   io.to(`seller:${sellerId}`).emit('order:new', payload);
 }
 
+function notifyAdminNewOrder(adminId, payload) {
+  if (!io) return;
+  // If adminId is provided, notify specific admin. If not, notify all admins.
+  if (adminId) {
+    io.to(`admin:${adminId}`).emit('order:new', payload);
+  } else {
+    io.to('role:admin').emit('order:new', payload);
+  }
+}
+
 module.exports = {
   initSocket,
   getIO,
-  notifySellerNewOrder
+  notifySellerNewOrder,
+  notifyAdminNewOrder
 };
 

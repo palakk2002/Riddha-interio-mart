@@ -55,8 +55,14 @@ const ProductSchema = new mongoose.Schema({
   },
   seller: {
     type: mongoose.Schema.ObjectId,
-    ref: 'Seller',
-    required: true
+    required: true,
+    refPath: 'sellerType'
+  },
+  sellerType: {
+    type: String,
+    required: true,
+    enum: ['Seller', 'Admin'],
+    default: 'Seller'
   },
   isActive: {
     type: Boolean,

@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
-const { notifySellerNewOrder } = require('../socket');
+const Product = require('../models/Product');
+const { notifySellerNewOrder, notifyAdminNewOrder } = require('../socket');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -19,17 +20,28 @@ exports.addOrderItems = async (req, res) => {
     return res.status(400).json({ success: false, message: 'No order items' });
   } else {
     try {
-      // Extract ID if seller is a populated object
-      const getSellerId = (s) => (s && s._id) ? s._id : s;
-      const primarySeller = getSellerId(orderItems[0].seller || orderItems[0].productSeller); 
+      // Enrich items with correct seller and sellerType from DB
+      const enrichedItems = await Promise.all(orderItems.map(async (item) => {
+        const product = await Product.findById(item.product);
+        let sType = 'Seller';
+        if (product) {
+          sType = product.sellerType || (product.brand ? 'Admin' : 'Seller'); // Heuristic for old products
+        }
+        return {
+          ...item,
+          seller: product ? product.seller : (item.seller || item.productSeller),
+          sellerType: product ? (product.sellerType || sType) : (item.sellerType || 'Seller')
+        };
+      }));
+
+      const primarySeller = enrichedItems[0].seller;
+      const primarySellerType = enrichedItems[0].sellerType;
 
       const order = new Order({
-        orderItems: orderItems.map(item => ({
-          ...item,
-          seller: getSellerId(item.seller || item.productSeller) // Ensure each item has its seller ID
-        })),
+        orderItems: enrichedItems,
         user: req.user.id,
-        seller: primarySeller, // Link main order to a seller
+        seller: primarySeller,
+        sellerType: primarySellerType,
         shippingAddress,
         paymentMethod,
         itemsPrice,
@@ -45,34 +57,48 @@ exports.addOrderItems = async (req, res) => {
       // Clear the cart after order is placed
       await Cart.findOneAndUpdate({ user: req.user.id }, { items: [] });
 
-      // Real-time notify seller(s)
-      try {
-        const sellerIds = new Set(
-          (createdOrder.orderItems || [])
-            .map((item) => (item && item.seller ? String(item.seller) : null))
-            .filter(Boolean)
-        );
+        // Real-time notify owners (Sellers and/or Admins)
+        try {
+          console.log('--- Order Notification Debug ---');
+          const sellersToNotify = new Set();
+          let isAdminNotified = false;
 
-        // Fallback to top-level order.seller
-        if (createdOrder.seller) sellerIds.add(String(createdOrder.seller));
+          createdOrder.orderItems.forEach(item => {
+            console.log(`Checking Item: ${item.name}, SellerType: ${item.sellerType}, SellerID: ${item.seller}`);
+            if (item.sellerType === 'Admin') {
+              isAdminNotified = true;
+            } else if (item.sellerType === 'Seller') {
+              sellersToNotify.add(String(item.seller));
+            }
+          });
 
-        const payload = {
-          orderId: String(createdOrder._id),
-          totalPrice: createdOrder.totalPrice,
-          itemsCount: (createdOrder.orderItems || []).reduce((sum, item) => sum + (item.quantity || 0), 0),
-          status: createdOrder.status,
-          createdAt: createdOrder.createdAt,
-          customerName: req.user?.fullName,
-          shippingCity: createdOrder.shippingAddress?.city
-        };
+          const payload = {
+            orderId: String(createdOrder._id),
+            totalPrice: createdOrder.totalPrice,
+            itemsCount: (createdOrder.orderItems || []).reduce((sum, item) => sum + (item.quantity || 0), 0),
+            status: createdOrder.status,
+            createdAt: createdOrder.createdAt,
+            customerName: req.user?.fullName,
+            shippingCity: createdOrder.shippingAddress?.city
+          };
 
-        for (const sellerId of sellerIds) {
-          notifySellerNewOrder(sellerId, payload);
+          console.log('Notification Payload:', payload);
+
+          // Notify specific sellers
+          for (const sellerId of sellersToNotify) {
+            console.log(`Emitting to Seller Room: seller:${sellerId}`);
+            notifySellerNewOrder(sellerId, payload);
+          }
+
+          // Notify all admins if any admin-owned product was sold
+          if (isAdminNotified) {
+            console.log('Emitting to Admin Room: role:admin');
+            notifyAdminNewOrder(null, payload);
+          }
+          console.log('--- End Notification Debug ---');
+        } catch (e) {
+          console.error('Socket notify failed:', e.message);
         }
-      } catch (e) {
-        // Never block order placement due to realtime failures
-        console.warn('Socket notify failed:', e.message);
-      }
 
       res.status(201).json({
         success: true,

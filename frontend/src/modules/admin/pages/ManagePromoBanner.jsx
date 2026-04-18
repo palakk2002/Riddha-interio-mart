@@ -1,212 +1,433 @@
-import React, { useState } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  LuEye,
+  LuImagePlus,
+  LuImages,
+  LuLoader,
+  LuPencil,
+  LuRotateCcw,
+  LuSave,
+  LuTrash2,
+} from 'react-icons/lu';
 import PageWrapper from '../components/PageWrapper';
-import { motion } from 'framer-motion';
-import { LuSave, LuRotateCcw } from 'react-icons/lu';
-import { promoBannerData } from '../data/managePromoBannerData';
+import api from '../../../shared/utils/api';
+
+const createEmptyBanner = () => ({
+  title: '',
+  subtitle: '',
+  image: '',
+  ctaText: '',
+  ctaLink: '',
+});
+
+const mapBannerToForm = (banner) => ({
+  title: banner?.title || '',
+  subtitle: banner?.subtitle || '',
+  image: banner?.image || '',
+  ctaText: banner?.ctaText || '',
+  ctaLink: banner?.ctaLink || '',
+});
 
 const ManagePromoBanner = () => {
-  const [promo, setPromo] = useState({ ...promoBannerData });
-  const [saved, setSaved] = useState(false);
-  const fileInputRef = React.useRef(null);
+  const [activeTab, setActiveTab] = useState('create');
+  const [promoForm, setPromoForm] = useState(createEmptyBanner());
+  const [banners, setBanners] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const fileInputRef = useRef(null);
 
-  const handleChange = (field, value) => {
-    setPromo({ ...promo, [field]: value });
-    setSaved(false);
-  };
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        handleChange('image', reader.result);
-      };
-      reader.readAsDataURL(file);
+  const fetchBanners = async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.get('/promo-banner');
+      const list = Array.isArray(data?.data) ? data.data : [];
+      setBanners(list);
+    } catch (error) {
+      console.error('Failed to fetch promo banners:', error);
+      setStatusMessage(error.response?.data?.error || 'Failed to load promo banners.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  useEffect(() => {
+    fetchBanners();
+  }, []);
+
+  const totalBanners = banners.length;
+
+  const createButtonLabel = useMemo(() => {
+    if (submitting) return editingId ? 'Updating...' : 'Creating...';
+    return editingId ? 'Update Promo Banner' : 'Create Promo Banner';
+  }, [editingId, submitting]);
+
+  const handleChange = (field, value) => {
+    setPromoForm((prev) => ({ ...prev, [field]: value }));
+    setStatusMessage('');
   };
 
-  const handleReset = () => {
-    setPromo({ ...promoBannerData });
-    setSaved(false);
+  const handleImageUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPromoForm((prev) => ({ ...prev, image: reader.result }));
+      setStatusMessage('');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const resetForm = () => {
+    setPromoForm(createEmptyBanner());
+    setEditingId(null);
+    setStatusMessage('');
+  };
+
+  const handleSaveBanner = async (event) => {
+    event.preventDefault();
+
+    const payload = {
+      title: promoForm.title.trim(),
+      subtitle: promoForm.subtitle.trim(),
+      image: promoForm.image.trim(),
+      ctaText: promoForm.ctaText.trim() || 'Shop Now',
+      ctaLink: promoForm.ctaLink.trim() || '/offers',
+    };
+
+    if (!payload.title) {
+      setStatusMessage('Please add a promo banner title.');
+      return;
+    }
+
+    if (!payload.image) {
+      setStatusMessage('Please add an image URL or upload an image file.');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      if (editingId) {
+        await api.put(`/promo-banner/${editingId}`, payload);
+        setStatusMessage('Promo banner updated successfully.');
+      } else {
+        await api.post('/promo-banner', payload);
+        setStatusMessage('Promo banner created successfully.');
+      }
+
+      await fetchBanners();
+      resetForm();
+      setActiveTab('all');
+    } catch (error) {
+      console.error('Failed to save promo banner:', error);
+      setStatusMessage(error.response?.data?.error || 'Failed to save promo banner.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleEdit = (banner) => {
+    setPromoForm(mapBannerToForm(banner));
+    setEditingId(banner._id);
+    setActiveTab('create');
+    setStatusMessage(`Editing: ${banner.title}`);
+  };
+
+  const handleDelete = async (banner) => {
+    const shouldDelete = window.confirm(`Delete promo banner "${banner.title}"?`);
+    if (!shouldDelete) return;
+
+    try {
+      setDeletingId(banner._id);
+      await api.delete(`/promo-banner/${banner._id}`);
+
+      if (editingId === banner._id) {
+        resetForm();
+      }
+
+      setStatusMessage('Promo banner deleted.');
+      await fetchBanners();
+    } catch (error) {
+      console.error('Failed to delete promo banner:', error);
+      setStatusMessage(error.response?.data?.error || 'Failed to delete promo banner.');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
     <PageWrapper>
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">
               Promo Banner
             </h1>
             <p className="text-warm-sand mt-1 text-sm md:text-base">
-              Manage the homepage promotional offer banner.
+              Create and manage multiple promotional banners.
             </p>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={handleReset}
-              className="flex items-center gap-2 border border-soft-oatmeal text-deep-espresso px-5 py-2.5 rounded-xl font-bold hover:bg-soft-oatmeal/20 transition-all text-sm"
-            >
-              <LuRotateCcw size={16} /> Reset
-            </button>
-            <button
-              onClick={handleSave}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all text-sm shadow-md ${
-                saved
-                  ? 'bg-green-500 text-white shadow-green-200'
-                  : 'bg-dusty-cocoa text-white hover:bg-deep-espresso shadow-dusty-cocoa/20'
-              }`}
-            >
-              <LuSave size={16} /> {saved ? 'Saved!' : 'Save Changes'}
-            </button>
+          <div className="px-3 py-2 rounded-full bg-soft-oatmeal/40 border border-soft-oatmeal text-xs font-bold tracking-wider text-deep-espresso">
+            Total Promo Banners: {totalBanners}
           </div>
         </div>
 
-        {/* Form */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-soft-oatmeal shadow-sm">
-          <h3 className="text-lg font-display font-bold text-deep-espresso mb-6">Promo Content</h3>
-          <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Title */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Title</label>
-              <input
-                type="text"
-                value={promo.title}
-                onChange={(e) => handleChange('title', e.target.value)}
-                className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                placeholder="e.g. Turn On The Charm"
-              />
-            </div>
+        <div className="inline-flex p-1.5 rounded-2xl border border-soft-oatmeal bg-white shadow-sm w-full md:w-auto">
+          <button
+            onClick={() => setActiveTab('create')}
+            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'create'
+                ? 'bg-deep-espresso text-white'
+                : 'text-deep-espresso hover:bg-soft-oatmeal/30'
+            }`}
+          >
+            <LuImagePlus size={16} />
+            Create Promo Banner
+          </button>
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'all'
+                ? 'bg-deep-espresso text-white'
+                : 'text-deep-espresso hover:bg-soft-oatmeal/30'
+            }`}
+          >
+            <LuImages size={16} />
+            All Promo Banners
+          </button>
+        </div>
 
-            {/* Subtitle */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Subtitle / Offer</label>
-              <input
-                type="text"
-                value={promo.subtitle}
-                onChange={(e) => handleChange('subtitle', e.target.value)}
-                className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                placeholder="e.g. Min. 40% Off"
-              />
-            </div>
+        {statusMessage && (
+          <div className="px-4 py-3 rounded-xl border border-soft-oatmeal bg-white text-sm text-deep-espresso">
+            {statusMessage}
+          </div>
+        )}
 
-            {/* Image URL / Upload */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Image Assets</label>
-                <button 
-                  type="button"
-                  onClick={() => fileInputRef.current.click()}
-                  className="text-[10px] font-black text-deep-espresso uppercase tracking-widest hover:underline"
-                >
-                  Upload File
-                </button>
+        {activeTab === 'create' && (
+          <div className="space-y-8">
+            <form onSubmit={handleSaveBanner} className="bg-white p-6 md:p-8 rounded-2xl border border-soft-oatmeal shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h3 className="text-lg font-display font-bold text-deep-espresso">
+                  {editingId ? 'Edit Promo Banner' : 'Create New Promo Banner'}
+                </h3>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="flex items-center gap-2 border border-soft-oatmeal text-deep-espresso px-5 py-2.5 rounded-xl font-bold hover:bg-soft-oatmeal/20 transition-all text-sm"
+                  >
+                    <LuRotateCcw size={16} /> Reset
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all text-sm shadow-md bg-dusty-cocoa text-white hover:bg-deep-espresso disabled:opacity-60"
+                  >
+                    {submitting ? <LuLoader className="animate-spin" size={16} /> : <LuSave size={16} />}
+                    {createButtonLabel}
+                  </button>
+                </div>
               </div>
-              <input 
-                type="file" 
-                className="hidden" 
-                ref={fileInputRef} 
-                onChange={handleImageUpload} 
-                accept="image/*"
-              />
-              <input
-                type="text"
-                value={promo.image}
-                onChange={(e) => handleChange('image', e.target.value)}
-                className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                placeholder="Paste remote URL or upload..."
-              />
-            </div>
 
-            {/* CTA Text */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">CTA Button Text</label>
-              <input
-                type="text"
-                value={promo.ctaText}
-                onChange={(e) => handleChange('ctaText', e.target.value)}
-                className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                placeholder="e.g. Shop Now"
-              />
-            </div>
-          </form>
-        </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Title</label>
+                  <input
+                    type="text"
+                    value={promoForm.title}
+                    onChange={(event) => handleChange('title', event.target.value)}
+                    className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
+                    placeholder="e.g. Mega Weekend Sale"
+                  />
+                </div>
 
-        {/* Section Label */}
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-soft-oatmeal/40" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-warm-sand">
-            Live Preview
-          </span>
-          <div className="h-px flex-1 bg-soft-oatmeal/40" />
-        </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Subtitle / Offer</label>
+                  <textarea
+                    rows={3}
+                    value={promoForm.subtitle}
+                    onChange={(event) => handleChange('subtitle', event.target.value)}
+                    className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm resize-none"
+                    placeholder="e.g. Flat 50% off on selected collections."
+                  />
+                </div>
 
-        {/* Promo Banner Preview — mirrors user OfferBanner.jsx */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col sm:flex-row h-auto sm:h-40 md:h-64 rounded-xl md:rounded-[2.5rem] overflow-hidden shadow-lg border border-soft-oatmeal/10 bg-white"
-        >
-          {/* Left Content */}
-          <div className="w-full sm:w-[38%] md:w-[30%] bg-white flex flex-col justify-center px-6 md:px-12 py-6 md:py-8 space-y-2 md:space-y-4">
-            <h3 className="text-lg sm:text-xl md:text-3xl font-black text-deep-espresso leading-tight uppercase tracking-tight">
-              {promo.title || 'Your Title'}
-            </h3>
-            <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm md:text-lg font-bold text-warm-sand uppercase tracking-widest">
-                {promo.subtitle || 'Your Offer'}
+                <div className="space-y-2 md:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Banner Image</label>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="text-[10px] font-black text-deep-espresso uppercase tracking-widest hover:underline"
+                    >
+                      Upload File
+                    </button>
+                  </div>
+                  <input
+                    type="file"
+                    className="hidden"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                  />
+                  <input
+                    type="text"
+                    value={promoForm.image}
+                    onChange={(event) => handleChange('image', event.target.value)}
+                    className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
+                    placeholder="Paste remote URL or upload a file..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">CTA Button Text</label>
+                  <input
+                    type="text"
+                    value={promoForm.ctaText}
+                    onChange={(event) => handleChange('ctaText', event.target.value)}
+                    className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
+                    placeholder="e.g. Shop Now"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">CTA Link</label>
+                  <input
+                    type="text"
+                    value={promoForm.ctaLink}
+                    onChange={(event) => handleChange('ctaLink', event.target.value)}
+                    className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
+                    placeholder="e.g. /offers"
+                  />
+                </div>
+              </div>
+            </form>
+
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-soft-oatmeal/40" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-warm-sand">
+                Live Preview
               </span>
-              <span className="text-sm md:text-xl">→</span>
+              <div className="h-px flex-1 bg-soft-oatmeal/40" />
             </div>
-            {promo.ctaText && (
-              <span className="inline-block w-fit px-5 py-2 bg-deep-espresso text-white rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider cursor-default mt-1">
-                {promo.ctaText}
-              </span>
+
+            <div className="relative rounded-[2rem] overflow-hidden min-h-[280px] md:min-h-[360px] bg-soft-oatmeal/30 border border-soft-oatmeal">
+              {promoForm.image ? (
+                <img
+                  src={promoForm.image}
+                  alt={promoForm.title || 'Promo banner preview'}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center text-warm-sand">
+                  Add image to preview promo banner
+                </div>
+              )}
+
+              <div className="absolute inset-0 bg-gradient-to-r from-deep-espresso/80 via-deep-espresso/50 to-transparent" />
+
+              <div className="relative z-10 h-full p-6 md:p-10 flex items-center">
+                <div className="max-w-xl space-y-4">
+                  <span className="inline-block px-4 py-1.5 bg-white/20 border border-white/40 text-white rounded-full text-[10px] md:text-xs font-bold tracking-widest uppercase">
+                    Limited Offer
+                  </span>
+                  <h2 className="text-3xl md:text-5xl font-display font-bold text-white leading-tight">
+                    {promoForm.title || 'Your Promo Headline'}
+                  </h2>
+                  <p className="text-sm md:text-xl text-white/90">
+                    {promoForm.subtitle || 'Your promo subtitle or offer details will appear here.'}
+                  </p>
+                  {promoForm.ctaText && (
+                    <span className="inline-flex items-center px-6 py-3 rounded-full bg-white text-deep-espresso font-bold text-sm">
+                      {promoForm.ctaText}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'all' && (
+          <div className="space-y-6">
+            {loading ? (
+              <div className="bg-white p-10 rounded-2xl border border-soft-oatmeal text-center text-warm-sand">
+                Loading promo banners...
+              </div>
+            ) : banners.length === 0 ? (
+              <div className="bg-white p-12 rounded-2xl border border-soft-oatmeal text-center">
+                <div className="w-16 h-16 bg-soft-oatmeal/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <LuEye size={30} className="text-warm-sand opacity-50" />
+                </div>
+                <h3 className="text-lg font-bold text-deep-espresso mb-1">No promo banners yet</h3>
+                <p className="text-warm-sand text-sm">Create a promo banner and it will appear here.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {banners.map((item) => (
+                  <div
+                    key={item._id}
+                    className="bg-white rounded-2xl border border-soft-oatmeal shadow-sm overflow-hidden"
+                  >
+                    <div className="aspect-[16/9] bg-soft-oatmeal/20">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.title || 'Promo banner'}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-warm-sand text-sm">
+                          No image
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-4 space-y-3">
+                      <h3 className="font-bold text-deep-espresso line-clamp-1">
+                        {item.title || 'Untitled promo banner'}
+                      </h3>
+                      <p className="text-sm text-warm-sand line-clamp-2 min-h-10">
+                        {item.subtitle || 'No subtitle added'}
+                      </p>
+
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        <span className="px-2 py-1 rounded-full bg-soft-oatmeal/30 text-deep-espresso">
+                          {item.ctaText || 'No CTA text'}
+                        </span>
+                        <span className="px-2 py-1 rounded-full bg-soft-oatmeal/30 text-deep-espresso">
+                          {item.ctaLink || 'No CTA link'}
+                        </span>
+                      </div>
+
+                      <div className="pt-2 border-t border-soft-oatmeal/60 flex gap-2">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="flex-1 flex items-center justify-center gap-2 text-sm font-semibold px-3 py-2 rounded-xl bg-soft-oatmeal/30 text-deep-espresso hover:bg-soft-oatmeal/50 transition-all"
+                        >
+                          <LuPencil size={15} />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item)}
+                          disabled={deletingId === item._id}
+                          className="flex-1 flex items-center justify-center gap-2 text-sm font-semibold px-3 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-all disabled:opacity-60"
+                        >
+                          {deletingId === item._id ? <LuLoader className="animate-spin" size={15} /> : <LuTrash2 size={15} />}
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-
-          {/* Right Image */}
-          <div className="w-full sm:w-[62%] md:w-[70%] relative overflow-hidden bg-soft-oatmeal/5 h-48 sm:h-full">
-            <img
-              src={promo.image}
-              alt="Promo Banner"
-              className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-            />
-
-            {/* Slider Dots */}
-            <div className="absolute bottom-3 md:bottom-6 left-4 md:left-10 flex gap-1.5 md:gap-3">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className={`h-1 md:h-2 rounded-full transition-all duration-300 ${
-                    i === 1 ? 'w-4 md:w-8 bg-[#FF6B35]' : 'w-1 md:w-2 bg-white/60'
-                  }`}
-                />
-              ))}
-            </div>
-
-            {/* T&C */}
-            <p className="absolute bottom-3 md:bottom-6 right-4 md:right-10 text-[7px] md:text-[10px] text-white/50 font-bold tracking-widest uppercase">
-              *T&C Apply
-            </p>
-          </div>
-        </motion.div>
-
-        {/* Footer Note */}
-        <div className="bg-white p-4 rounded-xl border border-soft-oatmeal/30 flex items-center justify-between text-xs text-warm-sand">
-          <p>Preview updates as you type — <span className="font-bold text-deep-espresso">no page reload needed</span></p>
-          <span className="text-[10px] bg-golden-glow/30 text-deep-espresso/60 px-3 py-1 rounded-full font-bold border border-warm-sand/20">
-            Frontend Preview Only
-          </span>
-        </div>
+        )}
       </div>
     </PageWrapper>
   );

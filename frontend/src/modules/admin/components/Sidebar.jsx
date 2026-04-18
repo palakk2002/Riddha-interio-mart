@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
 import { 
@@ -73,12 +73,21 @@ const menuItems = [
   { path: '/admin/manage-hero', icon: LuImage, label: 'Home Banner' },
   { path: '/admin/manage-promo', icon: LuBadgePercent, label: 'Promo Banner' },
   { 
-    label: 'Favourite Categories', 
+    label: 'Section', 
     icon: LuLayoutGrid, 
+    path: '/admin/manage-section',
+    children: [
+      { path: '/admin/manage-section', icon: LuLayoutGrid, label: 'All Section' },
+      { path: '/admin/manage-section/create', icon: LuPlus, label: 'Create Section' },
+    ]
+  },
+  {
+    label: 'Favourite Section',
+    icon: LuStar,
     path: '/admin/manage-favourites',
     children: [
-      { path: '/admin/manage-favourites', icon: LuLayoutGrid, label: 'All Favourites' },
-      { path: '/admin/manage-favourites/add', icon: LuPlus, label: 'Add Category Item' },
+      { path: '/admin/manage-favourites', icon: LuLayoutGrid, label: 'All Favourite Sections' },
+      { path: '/admin/manage-favourites/create', icon: LuPlus, label: 'Create Favourite Section' },
     ]
   },
   { 
@@ -102,7 +111,7 @@ const menuItems = [
   { path: '/admin/settings', icon: LuSettings, label: 'Settings' },
 ];
 
-const NavItem = ({ item, isOpen, onClose, expanded, onToggle, pendingCount }) => {
+const NavItem = ({ item, onClose, expanded, onToggle, pendingCount }) => {
   const hasChildren = item.children && item.children.length > 0;
   const location = useLocation();
   const isSelfActive = location.pathname === item.path;
@@ -142,7 +151,7 @@ const NavItem = ({ item, isOpen, onClose, expanded, onToggle, pendingCount }) =>
         )}
         
         {hasChildren && (
-          <motion.div
+          <Motion.div
             animate={{ rotate: expanded ? 90 : 0 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => {
@@ -154,14 +163,14 @@ const NavItem = ({ item, isOpen, onClose, expanded, onToggle, pendingCount }) =>
             }}
           >
             <LuChevronRight size={16} className={`drop-shadow-md transition-colors ${isActive ? 'text-white' : 'text-white/60'}`} />
-          </motion.div>
+          </Motion.div>
         )}
         {!hasChildren && <LuChevronRight size={16} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-white/60" />}
       </div>
 
       <AnimatePresence>
         {hasChildren && expanded && (
-          <motion.div
+          <Motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -195,7 +204,7 @@ const NavItem = ({ item, isOpen, onClose, expanded, onToggle, pendingCount }) =>
                 </NavLink>
               ))}
             </div>
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </div>
@@ -250,7 +259,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Mobile Backdrop */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -299,7 +308,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             <NavItem 
               key={item.label} 
               item={item} 
-              isOpen={isOpen} 
               onClose={onClose} 
               expanded={expandedItems[item.label]}
               onToggle={toggleExpand}

@@ -1,17 +1,35 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { motion as Motion } from 'framer-motion';
 import Banner from '../components/Banner';
 import OfferBanner from '../components/OfferBanner';
 import FavouriteCategories from '../components/FavouriteCategories';
 import TopBrands from '../components/TopBrands';
 import CategoryQuickAccess from '../components/CategoryQuickAccess';
 import ExpressDeliveryBanner from '../components/ExpressDeliveryBanner';
+import DynamicSections from '../../components/DynamicSections';
 import ProductCard from '../components/ProductCard';
 import { products } from '../../models/products';
 import Button from '../../../../views/shared/Button';
 import { Link } from 'react-router-dom';
+import api from '../../../../shared/utils/api';
 
 const HomePage = () => {
+  const [banners, setBanners] = useState([]);
+
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const res = await api.get('/home-banner');
+        const list = Array.isArray(res.data?.data) ? res.data.data : [];
+        setBanners(list);
+      } catch (err) {
+        console.error('Failed to fetch home banners:', err);
+      }
+    };
+
+    fetchBanners();
+  }, []);
+
   const featuredProducts = products.slice(0, 4);
 
   const containerVariants = {
@@ -34,7 +52,7 @@ const HomePage = () => {
 
       {/* Banner Section */}
       <section className="max-w-[1440px] mx-auto px-4 lg:px-8">
-        <Banner />
+        <Banner banners={banners} />
       </section>
 
       {/* Offer Banner (Just below modern banner) */}
@@ -43,8 +61,8 @@ const HomePage = () => {
       {/* Favourite Categories Section */}
       <FavouriteCategories />
 
-      {/* Top Brands Section */}
-      <TopBrands />
+      {/* Admin-Created Custom Sections */}
+      <DynamicSections />
 
       {/* Featured Products Section */}
       <section className="bg-soft-oatmeal/10 pt-4 pb-10 md:py-32 border-y border-soft-oatmeal/20">
@@ -79,6 +97,9 @@ const HomePage = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Top Brands Section */}
+      <TopBrands />
 
     </div>
   );

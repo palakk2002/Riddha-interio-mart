@@ -61,19 +61,19 @@ const menuItems = [
   { path: "/admin/manage-hero", icon: LuImage, label: "Home Banner" },
   { path: "/admin/manage-promo", icon: LuBadgePercent, label: "Promo Banner" },
   {
-    label: "Favourite Categories",
+    label: "Section",
     icon: LuLayoutGrid,
-    path: "/admin/manage-favourites",
+    path: "/admin/manage-section",
     children: [
       {
-        path: "/admin/manage-favourites",
+        path: "/admin/manage-section",
         icon: LuLayoutGrid,
-        label: "All Favourites",
+        label: "All Section",
       },
       {
-        path: "/admin/manage-favourites/add",
+        path: "/admin/manage-section/create",
         icon: LuPlus,
-        label: "Add Category Item",
+        label: "Create Section",
       },
     ],
   },

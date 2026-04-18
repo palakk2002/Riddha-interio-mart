@@ -2,20 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import brandsGrid from '../../../assets/top_brands_grid_1774683605586.png';
+import api from '../../../shared/utils/api';
 
 const TopBrands = ({ title }) => {
   const [brands, setBrands] = useState([]);
   const [useStaticGrid, setUseStaticGrid] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem('admin_brands');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.length > 0) {
-        setBrands(parsed);
-        setUseStaticGrid(false);
+    const fetchBrands = async () => {
+      try {
+        const { data } = await api.get('/brands');
+        if (data.data && data.data.length > 0) {
+          setBrands(data.data);
+          setUseStaticGrid(false);
+        }
+      } catch (err) {
+        console.error('Failed to fetch brands for homepage:', err);
       }
-    }
+    };
+    fetchBrands();
   }, []);
 
   // Fallback static brands for the grid overlay if no admin data
@@ -69,8 +74,8 @@ const TopBrands = ({ title }) => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-px bg-gray-100">
             {brands.map((brand) => (
               <Link
-                key={brand.id}
-                to={`/brand/${brand.slug || brand.name.toLowerCase()}`}
+                key={brand._id}
+                to={`/brand/${brand.slug}`}
                 className="bg-white p-6 md:p-10 flex flex-col items-center justify-center gap-4 group/brand hover:bg-gray-50 transition-all text-center min-h-[160px] md:min-h-[240px]"
               >
                 <div className="w-full h-16 md:h-24 flex items-center justify-center overflow-hidden">

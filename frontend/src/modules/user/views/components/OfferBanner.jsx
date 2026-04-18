@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import api from '../../../shared/utils/api';
 
 // Assets
 import offerBannerBase from '../../../assets/offer_banner.png';
@@ -13,35 +14,47 @@ const defaultSlides = [
   { id: 3, title: 'Elegant\nDecor', offer: 'Flat 20% Off', image: offerBanner2 },
 ];
 
+const mapPromoBanner = (item, index) => {
+  const image = item?.image || item?.bgImage?.src || item?.bannerImage || '';
+
+  if (!image) return null;
+
+  return {
+    id: item?._id || item?.id || `promo-banner-${index}`,
+    title: item?.title || 'Promo Offer',
+    offer: item?.subtitle || item?.ctaText || 'Limited Offer',
+    image,
+    ctaLink: item?.ctaLink || '/products',
+  };
+};
+
 const OfferBanner = () => {
   const [current, setCurrent] = useState(0);
   const [slides, setSlides] = useState(defaultSlides);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('admin_promo_banners');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.length > 0) {
-          // Map admin model to slide model
-          const mappedSlides = parsed
-            .filter(b => b.isActive)
-            .sort((a, b) => a.order - b.order)
-            .map(b => ({
-              id: b.id,
-              title: b.title.replace(' ', '\n'), // Simple way to match the line break style
-              offer: b.subtitle,
-              image: b.image
-            }));
-          
-          if (mappedSlides.length > 0) {
-            setSlides(mappedSlides);
-          }
+    let alive = true;
+
+    const fetchPromoBanners = async () => {
+      try {
+        const { data } = await api.get('/promo-banner');
+        const list = Array.isArray(data?.data) ? data.data : [];
+        const mappedSlides = list.map(mapPromoBanner).filter(Boolean);
+
+        if (alive && mappedSlides.length > 0) {
+          setSlides(mappedSlides);
+          setCurrent(0);
         }
+      } catch (err) {
+        console.error('Failed to load promo banners:', err);
       }
-    } catch (err) {
-      console.error('Failed to load dynamic slides:', err);
-    }
+    };
+
+    fetchPromoBanners();
+
+    return () => {
+      alive = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -56,7 +69,7 @@ const OfferBanner = () => {
     <section className="max-w-7xl mx-auto px-4 md:px-12 py-4">
       <div className="flex flex-row h-32 sm:h-40 md:h-64 rounded-xl md:rounded-[2.5rem] overflow-hidden shadow-lg border border-soft-oatmeal/10 bg-white relative">
         <AnimatePresence mode="wait">
-          <motion.div
+          <Motion.div
             key={current}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -87,7 +100,7 @@ const OfferBanner = () => {
                 *T&C Apply
               </p>
             </div>
-          </motion.div>
+          </Motion.div>
         </AnimatePresence>
 
         {/* Indicators Overlay (Persistent) */}

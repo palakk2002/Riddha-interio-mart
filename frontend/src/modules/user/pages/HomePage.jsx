@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import Banner from '../components/Banner';
 import OfferBanner from '../components/OfferBanner';
 import FavouriteCategories from '../components/FavouriteCategories';
 import TopBrands from '../components/TopBrands';
 import CategoryQuickAccess from '../components/CategoryQuickAccess';
 import ExpressDeliveryBanner from '../components/ExpressDeliveryBanner';
+import DynamicSections from '../components/DynamicSections';
 import ProductCard from '../components/ProductCard';
 import Button from '../../../shared/components/Button';
 import { Link } from 'react-router-dom';
@@ -13,7 +14,7 @@ import api from '../../../shared/utils/api';
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
-  const [banner, setBanner] = useState(null);
+  const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,19 +29,18 @@ const HomePage = () => {
       }
     };
 
-    const fetchBanner = async () => {
+    const fetchBanners = async () => {
       try {
         const res = await api.get('/home-banner');
-        if (res.data?.success && res.data?.data) {
-          setBanner(res.data.data);
-        }
+        const list = Array.isArray(res.data?.data) ? res.data.data : [];
+        setBanners(list);
       } catch (err) {
-        console.error('Failed to fetch home banner:', err);
+        console.error('Failed to fetch home banners:', err);
       }
     };
 
     fetchProducts();
-    fetchBanner();
+    fetchBanners();
   }, []);
 
   const featuredProducts = products.slice(0, 4);
@@ -65,7 +65,7 @@ const HomePage = () => {
 
       {/* Banner Section */}
       <section className="max-w-[1440px] mx-auto px-4 lg:px-8">
-        <Banner banner={banner} />
+        <Banner banners={banners} />
       </section>
 
       {/* Offer Banner (Just below modern banner) */}
@@ -74,13 +74,13 @@ const HomePage = () => {
       {/* Favourite Categories Section */}
       <FavouriteCategories />
 
-      {/* Top Brands Section */}
-      <TopBrands />
+      {/* Admin-Created Custom Sections */}
+      <DynamicSections />
 
       {/* Featured Products Section */}
       <section className="bg-soft-oatmeal/10 pt-4 pb-10 md:py-32 border-y border-soft-oatmeal/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -95,9 +95,9 @@ const HomePage = () => {
             <Link to="/products">
               <Button variant="outline" className="rounded-full px-10 border-deep-espresso/20">Browse All Products</Button>
             </Link>
-          </motion.div>
+          </Motion.div>
 
-          <motion.div
+          <Motion.div
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -113,9 +113,12 @@ const HomePage = () => {
                 <ProductCard key={product._id || product.id} product={product} index={index} />
               ))
             )}
-          </motion.div>
+          </Motion.div>
         </div>
       </section>
+
+      {/* Top Brands Section */}
+      <TopBrands />
 
     </div>
   );

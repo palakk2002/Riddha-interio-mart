@@ -7,9 +7,13 @@ import {
   FiSave, FiInfo, FiChevronLeft
 } from 'react-icons/fi';
 
+import api from '../../../shared/utils/api';
+
 const AddBrandPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('general');
+  const [submitting, setSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     offer: '',
@@ -79,17 +83,28 @@ const AddBrandPage = () => {
     }
   };
 
-  const handleSave = () => {
-    const saved = localStorage.getItem('admin_brands');
-    let brands = saved ? JSON.parse(saved) : [];
-    const newBrand = {
-      ...formData,
-      id: Date.now(),
-      slug: formData.name.toLowerCase().replace(/\s+/g, '-')
-    };
-    brands = [...brands, newBrand];
-    localStorage.setItem('admin_brands', JSON.stringify(brands));
-    navigate('/admin/manage-brands');
+  const handleSave = async () => {
+    try {
+      setSubmitting(true);
+      setStatusMessage('');
+
+      // Sanitize payload: remove empty banners and empty categories
+      const sanitizedPayload = {
+        ...formData,
+        banners: formData.banners.filter(b => b && b.trim() !== ''),
+        categories: formData.categories
+          .filter(c => c.name && c.name.trim() !== '')
+          .map(({ id, ...rest }) => rest) // Remove frontend-only temporary ID
+      };
+
+      await api.post('/brands', sanitizedPayload);
+      navigate('/admin/manage-brands');
+    } catch (error) {
+      console.error('Failed to initialize partner:', error);
+      setStatusMessage(error.response?.data?.error || 'Failed to initialize partner.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const tabs = [
@@ -123,13 +138,19 @@ const AddBrandPage = () => {
             </button>
             <button
               onClick={handleSave}
-              disabled={!formData.name}
+              disabled={!formData.name || submitting}
               className="px-8 py-3 bg-deep-espresso text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:shadow-2xl hover:bg-black transition-all disabled:opacity-50 active:scale-95 flex items-center gap-2"
             >
-              <FiSave size={16} /> Save Partner
+              <FiSave size={16} /> {submitting ? 'Initializing...' : 'Save Partner'}
             </button>
           </div>
         </div>
+
+        {statusMessage && (
+          <div className="bg-red-50 text-red-500 p-4 rounded-2xl text-xs font-bold border border-red-100 animate-shake">
+            {statusMessage}
+          </div>
+        )}
 
         <div className="bg-white rounded-[40px] shadow-2xl border border-soft-oatmeal/30 overflow-hidden flex flex-col">
           {/* Tab Navigation */}

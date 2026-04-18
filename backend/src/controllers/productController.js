@@ -9,10 +9,15 @@ exports.getProducts = async (req, res, next) => {
     excludeFields.forEach(param => delete queryObj[param]);
 
     // Handle name/category searches if needed (simple match for now)
-    const products = await Product.find({ 
-      isActive: true,
-      ...queryObj 
-    }).populate('seller', 'fullName shopName');
+    // If isActive is not specified in query, default to true for public, but allow admin to see all
+    const filter = { ...queryObj };
+    if (filter.isActive === undefined) {
+      filter.isActive = true;
+    } else if (filter.isActive === 'all') {
+      delete filter.isActive;
+    }
+
+    const products = await Product.find(filter).populate('seller', 'fullName shopName');
 
     res.status(200).json({ success: true, count: products.length, data: products });
   } catch (error) {
@@ -23,13 +28,16 @@ exports.getProducts = async (req, res, next) => {
 // @desc    Create new product
 exports.createProduct = async (req, res, next) => {
   try {
-    // 1. Determine Seller ID
-    if (req.user.role === 'seller') {
-      req.body.seller = req.user.id;
-    }
-
+    // Automatically set seller and sellerType based on role if not provided
     if (!req.body.seller) {
-      return res.status(400).json({ success: false, error: 'Seller ID is required to create a product' });
+      req.body.seller = req.user.id;
+      req.body.sellerType = req.user.role === 'admin' ? 'Admin' : 'Seller';
+    } else {
+      // If seller ID is provided (e.g. by admin assigning to someone else), 
+      // we assume it's a 'Seller' unless specified
+      if (!req.body.sellerType) {
+        req.body.sellerType = 'Seller';
+      }
     }
 
     // 2. Create the product
