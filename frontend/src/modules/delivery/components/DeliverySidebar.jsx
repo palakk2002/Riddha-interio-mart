@@ -1,33 +1,30 @@
 import React from 'react';
-import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { 
-  LuLayoutDashboard,
+  LuLayoutDashboard, 
+  LuPackage, 
+  LuWallet, 
   LuUser,
-  LuWallet,
-  LuPackage,
-  LuTrendingUp,
-  LuSettings,
-  LuMessageCircle,
-  LuInfo,
   LuLogOut
 } from 'react-icons/lu';
 
+import { useUser } from '../../user/data/UserContext';
+import { useNavigate } from 'react-router-dom';
+
 const DeliverySidebar = ({ isOpen, onClose }) => {
+  const { logout } = useUser();
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    logout();
     navigate('/delivery/login');
   };
 
   const navItems = [
     { name: 'Dashboard', path: '/delivery/dashboard', icon: LuLayoutDashboard },
+    { name: 'Orders', path: '/delivery/orders', icon: LuPackage },
+    { name: 'Earnings', path: '/delivery/earnings', icon: LuWallet },
     { name: 'Profile', path: '/delivery/profile', icon: LuUser },
-    { name: 'Wallet', path: '/delivery/wallet', icon: LuWallet },
-    { name: 'Delivery History', path: '/delivery/delivery-history', icon: LuPackage },
-    { name: 'Earnings', path: '/delivery/earnings', icon: LuTrendingUp },
-    { name: 'Settings', path: '/delivery/settings', icon: LuSettings },
-    { name: 'Help & Support', path: '/delivery/help', icon: LuMessageCircle },
-    { name: 'About', path: '/delivery/about', icon: LuInfo },
   ];
 
   return (
@@ -49,7 +46,7 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
         <div className="flex flex-col h-full">
           {/* Logo Area */}
           <div className="h-20 px-8 flex items-center border-b border-white/5">
-            <Link to="/delivery/profile" className="flex items-center gap-2">
+            <Link to="/delivery/dashboard" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-warm-sand rounded-lg flex items-center justify-center text-white">
                 <LuPackage size={20} />
               </div>
@@ -88,7 +85,7 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
               className="w-full flex items-center gap-4 px-6 py-4 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors group"
             >
               <LuLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
-              Logout
+              Sign Out
             </button>
           </div>
         </div>

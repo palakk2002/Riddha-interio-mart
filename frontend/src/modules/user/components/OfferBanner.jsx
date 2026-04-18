@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+﻿import React, { useEffect, useState } from 'react';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import api from '../../../shared/utils/api';
 
 // Assets
 import offerBannerBase from '../../../assets/offer_banner.png';
@@ -8,40 +9,47 @@ import offerBanner1 from '../../../assets/offer_banner_1.png';
 import offerBanner2 from '../../../assets/offer_banner_2.png';
 
 const defaultSlides = [
-  { id: 1, title: 'Turn On\nThe Charm', offer: 'Min. 40% Off', image: offerBannerBase },
-  { id: 2, title: 'Bespoke\nFurniture', offer: 'Up to 30% Off', image: offerBanner1 },
-  { id: 3, title: 'Elegant\nDecor', offer: 'Flat 20% Off', image: offerBanner2 },
+  { id: 1, title: 'Turn On\nThe Charm', offer: 'Min. 40% Off', image: offerBannerBase, ctaLink: '/products' },
+  { id: 2, title: 'Bespoke\nFurniture', offer: 'Up to 30% Off', image: offerBanner1, ctaLink: '/products' },
+  { id: 3, title: 'Elegant\nDecor', offer: 'Flat 20% Off', image: offerBanner2, ctaLink: '/products' },
 ];
+
+const mapPromoBanner = (item, index) => {
+  const image = item?.image || item?.bgImage?.src || item?.bannerImage || '';
+
+  if (!image) return null;
+
+  return {
+    id: item?._id || item?.id || `promo-banner-${index}`,
+    title: item?.title || 'Promo Offer',
+    offer: item?.subtitle || item?.ctaText || 'Limited Offer',
+    image,
+    ctaLink: item?.ctaLink || '/products',
+  };
+};
 
 const OfferBanner = () => {
   const [current, setCurrent] = useState(0);
   const [slides, setSlides] = useState(defaultSlides);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('admin_promo_banners');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.length > 0) {
-          // Map admin model to slide model
-          const mappedSlides = parsed
-            .filter(b => b.isActive)
-            .sort((a, b) => a.order - b.order)
-            .map(b => ({
-              id: b.id,
-              title: b.title.replace(' ', '\n'), // Simple way to match the line break style
-              offer: b.subtitle,
-              image: b.image
-            }));
-          
-          if (mappedSlides.length > 0) {
-            setSlides(mappedSlides);
-          }
+    const fetchPromoBanners = async () => {
+      try {
+        const { data } = await api.get('/promo-banner');
+        const list = Array.isArray(data?.data) ? data.data : [];
+
+        const mappedSlides = list.map(mapPromoBanner).filter(Boolean);
+
+        if (mappedSlides.length > 0) {
+          setSlides(mappedSlides);
+          setCurrent(0);
         }
+      } catch (err) {
+        console.error('Failed to load promo banners:', err);
       }
-    } catch (err) {
-      console.error('Failed to load dynamic slides:', err);
-    }
+    };
+
+    fetchPromoBanners();
   }, []);
 
   useEffect(() => {
@@ -56,7 +64,7 @@ const OfferBanner = () => {
     <section className="max-w-7xl mx-auto px-4 md:px-12 py-4">
       <div className="flex flex-row h-32 sm:h-40 md:h-64 rounded-xl md:rounded-[2.5rem] overflow-hidden shadow-lg border border-soft-oatmeal/10 bg-white relative">
         <AnimatePresence mode="wait">
-          <motion.div
+          <Motion.div
             key={current}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -64,33 +72,33 @@ const OfferBanner = () => {
             transition={{ duration: 0.6 }}
             className="absolute inset-0 flex flex-row"
           >
-            {/* Left Content (Dynamic) */}
             <div className="w-[42%] min-[400px]:w-[38%] md:w-[30%] bg-white flex flex-col justify-center px-3 min-[400px]:px-4 md:px-12 py-2 md:py-8 space-y-1 md:space-y-4">
               <h3 className="text-[13px] min-[360px]:text-[15px] sm:text-lg md:text-3xl font-black text-deep-espresso leading-[1.1] md:leading-tight uppercase tracking-tight whitespace-pre-line">
                 {slides[current].title}
               </h3>
-              <Link to="/products" className="text-[9px] min-[360px]:text-[10px] sm:text-xs md:text-lg font-bold text-warm-sand hover:text-deep-espresso uppercase tracking-[0.05em] md:tracking-widest flex items-center gap-1 md:gap-2 transition-colors">
-                {slides[current].offer} <span className="text-sm md:text-xl transform md:translate-y-[1px]">→</span>
+              <Link
+                to={slides[current].ctaLink || '/products'}
+                className="text-[9px] min-[360px]:text-[10px] sm:text-xs md:text-lg font-bold text-warm-sand hover:text-deep-espresso uppercase tracking-[0.05em] md:tracking-widest flex items-center gap-1 md:gap-2 transition-colors"
+              >
+                {slides[current].offer}{' '}
+                <span className="text-sm md:text-xl transform md:translate-y-[1px]">→</span>
               </Link>
             </div>
-            
-            {/* Right Image (Dynamic) */}
+
             <div className="w-[58%] min-[400px]:w-[62%] md:w-[70%] relative overflow-hidden bg-soft-oatmeal/5">
-              <img 
-                src={slides[current].image} 
-                alt="Offer Banner" 
+              <img
+                src={slides[current].image}
+                alt="Offer Banner"
                 className="h-full w-full object-cover"
               />
-              
-              {/* Small Legal Text from Reference */}
+
               <p className="absolute bottom-2 md:bottom-6 right-4 md:right-10 text-[6px] md:text-[10px] text-white/50 font-bold tracking-widest uppercase">
                 *T&C Apply
               </p>
             </div>
-          </motion.div>
+          </Motion.div>
         </AnimatePresence>
 
-        {/* Indicators Overlay (Persistent) */}
         <div className="absolute bottom-4 md:bottom-8 left-[45%] md:left-[35%] flex gap-2 md:gap-3 z-10">
           {slides.map((_, i) => (
             <button

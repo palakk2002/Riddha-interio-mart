@@ -1,25 +1,51 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { LuSearch, LuPlus, LuTrash2, LuPen, LuFilter, LuBox, LuPackage } from 'react-icons/lu';
-import { adminProducts } from '../data/adminProducts';
+import api from '../../../shared/utils/api';
 
 const ProductListPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [products, setProducts] = useState(adminProducts);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState(null);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      // We want all products for admin catalog view
+      const { data } = await api.get('/products', { params: { isActive: 'all' } });
+      setProducts(data.data || []);
+    } catch (err) {
+      console.error('Failed to fetch products:', err);
+      setError('Could not connect to the inventory database.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => 
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      p.code.toLowerCase().includes(searchTerm.toLowerCase())
+      (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [searchTerm, products]);
 
-  const handleDelete = (id) => {
-    setProducts(products.filter(p => p.id !== id));
-    setDeleteId(null);
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/products/${id}`);
+      setProducts(products.filter(p => p._id !== id));
+      setDeleteId(null);
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Failed to delete product.');
+    }
   };
 
   return (
@@ -59,63 +85,82 @@ const ProductListPage = () => {
         </div>
 
         {/* Product List Table */}
-        <div className="bg-white rounded-2xl border border-soft-oatmeal shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-soft-oatmeal/20 border-b border-soft-oatmeal">
-                <tr>
-                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Image</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Product Name</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Code</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Category</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Price</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-soft-oatmeal/50">
-                {filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-soft-oatmeal/5 transition-colors group">
-                    <td className="px-6 py-4">
-                      <img src={product.image} alt={product.name} className="w-12 h-12 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" />
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="font-bold text-deep-espresso">{product.name}</p>
-                      <p className="text-[10px] text-warm-sand uppercase tracking-wider mt-0.5">In Stock</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[10px] font-black text-deep-espresso/60 bg-soft-oatmeal/30 px-2 py-1 rounded border border-soft-oatmeal">
-                        {product.code}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[10px] font-bold text-red-800 uppercase tracking-widest bg-red-800/5 px-2.5 py-1 rounded-full border border-red-800/10">
-                        {product.category}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-black text-deep-espresso">
-                      ₹{product.price.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button 
-                          onClick={() => navigate(`/admin/catalog/edit/${product.id}`)}
-                          className="p-2 text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-colors"
-                        >
-                          <LuPen size={16} />
-                        </button>
-                        <button 
-                          onClick={() => setDeleteId(product.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <LuTrash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
+        <div className="bg-white rounded-2xl border border-soft-oatmeal shadow-md overflow-hidden min-h-[400px]">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-32 space-y-4">
+              <div className="w-12 h-12 border-4 border-soft-oatmeal border-t-red-800 rounded-full animate-spin" />
+              <p className="text-xs font-black uppercase tracking-widest text-warm-sand">Fetching Inventory...</p>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-32 space-y-4 text-center px-6">
+               <div className="w-20 h-20 bg-soft-oatmeal/20 rounded-[40px] flex items-center justify-center text-warm-sand/30 mb-2">
+                 <LuPackage size={40} />
+               </div>
+               <h3 className="text-xl font-display font-bold text-deep-espresso">No Products Found</h3>
+               <p className="text-sm text-warm-sand max-w-xs">{searchTerm ? "No products match your current search criteria." : "Start by adding your first product to the catalog."}</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-soft-oatmeal/20 border-b border-soft-oatmeal">
+                  <tr>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Image</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Product Name</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">SKU</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Category</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Price</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-soft-oatmeal/50">
+                  {filteredProducts.map((product) => (
+                    <tr key={product._id} className="hover:bg-soft-oatmeal/5 transition-colors group">
+                      <td className="px-6 py-4">
+                        <img 
+                          src={product.images?.[0] || 'https://via.placeholder.com/150'} 
+                          alt={product.name} 
+                          className="w-12 h-12 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" 
+                        />
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="font-bold text-deep-espresso">{product.name}</p>
+                        <p className="text-[10px] text-warm-sand uppercase tracking-wider mt-0.5">{product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[10px] font-black text-deep-espresso/60 bg-soft-oatmeal/30 px-2 py-1 rounded border border-soft-oatmeal">
+                          {product.sku || 'NO-SKU'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[10px] font-bold text-red-800 uppercase tracking-widest bg-red-800/5 px-2.5 py-1 rounded-full border border-red-800/10">
+                          {product.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 font-black text-deep-espresso">
+                        ₹{product.price.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button 
+                            onClick={() => navigate(`/admin/catalog/edit/${product._id}`)}
+                            className="p-2 text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-colors"
+                          >
+                            <LuPen size={16} />
+                          </button>
+                          <button 
+                            onClick={() => setDeleteId(product._id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <LuTrash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 

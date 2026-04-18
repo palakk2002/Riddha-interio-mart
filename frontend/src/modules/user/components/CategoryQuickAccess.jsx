@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { categories } from '../data/categories';
-import furnitureImg from '../../../assets/furniture.jpg';
-import furniture2Img from '../../../assets/furniture2.jpg';
-import lightingImg from '../../../assets/lighting.jpg';
-import tapImg from '../../../assets/tap.jpg';
+import api from '../../../shared/utils/api';
 
 const CategoryQuickAccess = ({ isScrollable = false }) => {
+  const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get('/categories');
+        setCategories(response.data.data);
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Derive tabs from category names
   const tabs = ['All', ...categories.map(cat => cat.name)];
@@ -17,10 +29,18 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
     ? categories
     : categories.filter(cat => cat.name === activeTab);
 
+  if (loading) {
+    return (
+      <div className="py-20 text-center font-display text-warm-sand animate-pulse uppercase tracking-[0.2em] text-xs">
+        Loading Collections...
+      </div>
+    );
+  }
+
   return (
     <section className="pt-1 pb-0 md:py-12 bg-white overflow-hidden">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8">
-        {/* Horizontal Category Tabs - Hidden when in scrollable mode (subcategory pages) */}
+        {/* Horizontal Category Tabs */}
         {!isScrollable && (
           <div className="flex overflow-x-auto pb-4 mb-1 md:mb-10 gap-6 md:gap-8 no-scrollbar items-center border-b border-soft-oatmeal/20 whitespace-nowrap">
             {tabs.map((tab) => (
@@ -43,7 +63,7 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
         )}
 
         {/* Categories Grid/Scroll Area */}
-        <div className="overflow-x-auto no-scrollbar snap-x snap-mandatory px-0 md:px-0">
+        <div className="overflow-x-auto no-scrollbar snap-x snap-mandatory px-0">
           <div
             className={`${isScrollable ? 'flex pb-2 pt-1' : 'flex md:grid md:grid-cols-5 lg:grid-cols-6 pb-6 md:pb-0'} gap-x-4 md:gap-12 min-h-[120px] md:min-h-[180px]`}
           >
@@ -51,13 +71,13 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
             {!isScrollable ? (
               <div className="grid grid-rows-2 grid-flow-col gap-x-4 md:gap-x-12 gap-y-6 md:gap-y-12 md:contents px-2 md:px-0">
                 {filteredCategories.map((category, index) => (
-                  <CategoryItem key={category.id} category={category} index={index} />
+                  <CategoryItem key={category._id} category={category} index={index} />
                 ))}
               </div>
             ) : (
               <div className="flex gap-x-4 md:gap-x-12 px-4 md:px-0">
                 {filteredCategories.map((category, index) => (
-                  <CategoryItem key={category.id} category={category} index={index} />
+                  <CategoryItem key={category._id} category={category} index={index} />
                 ))}
               </div>
             )}
@@ -69,11 +89,9 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
 };
 
 const CategoryItem = ({ category, index }) => (
-  <div
-    className="snap-start shrink-0"
-  >
+  <div className="snap-start shrink-0">
     <Link
-      to={`/category/${category.slug}`}
+      to={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
       className="group flex flex-col items-center gap-2 md:gap-4 w-16 md:w-40"
     >
       <div className="relative aspect-square w-full rounded-xl md:rounded-[2rem] overflow-hidden bg-soft-oatmeal/5 shadow-sm group-hover:shadow-lg transition-all duration-500">

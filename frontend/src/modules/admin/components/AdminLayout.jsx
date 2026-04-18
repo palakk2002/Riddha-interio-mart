@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useUser } from '../../user/data/UserContext';
 import { LuMenu, LuBell, LuUser, LuLogOut, LuChevronDown } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
+import AdminNotifications from './AdminNotifications';
 
 const notifications = [
   { id: 1, title: 'New Seller Request', message: 'Elite Interiors requested store approval.', time: '1h ago', status: 'unread' },
@@ -17,11 +18,22 @@ const AdminLayout = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const { logout, user } = useUser();
   const navigate = useNavigate();
+  const hasValidAdminSession = Boolean(user?.token) && user?.role === 'admin';
+
+  useEffect(() => {
+    if (!hasValidAdminSession) {
+      navigate('/admin/login', { replace: true });
+    }
+  }, [hasValidAdminSession, navigate]);
 
   const handleLogout = () => {
     logout();
     navigate('/admin/login');
   };
+
+  if (!hasValidAdminSession) {
+    return null;
+  }
 
   return (
     <div 
@@ -32,6 +44,7 @@ const AdminLayout = () => {
       }}
     >
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <AdminNotifications token={user?.token} />
       
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
         {/* Header */}

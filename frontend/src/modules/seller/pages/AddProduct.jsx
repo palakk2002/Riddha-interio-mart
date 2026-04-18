@@ -1,299 +1,347 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PageWrapper from '../components/PageWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
-import { sellerCatalog } from '../data/sellerCatalog';
-import { LuPlus, LuBox, LuTags, LuCheck, LuClock, LuUpload, LuX, LuImage } from 'react-icons/lu';
+import { LuPlus, LuBox, LuTags, LuCheck, LuClock, LuImage, LuX, LuTrash2 } from 'react-icons/lu';
+import api from '../../../shared/utils/api';
 
 const AddProduct = () => {
-  const [activeTab, setActiveTab] = useState('catalog');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState('');
-  const [price, setPrice] = useState('');
+  const [activeTab, setActiveTab] = useState('custom'); // Defaulting to custom for full form
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
-  // Custom Product States
-  const [customProduct, setCustomProduct] = useState({
+  const fileInputRef = useRef(null);
+
+  const [formData, setFormData] = useState({
     name: '',
-    category: '',
+    sku: '',
+    description: '',
     price: '',
-    imageUrl: '',
-    description: ''
+    discountPrice: '',
+    category: '',
+    subcategory: '',
+    brand: '',
+    material: '',
+    dimensions: '',
+    thickness: '',
+    color: '',
+    unit: 'piece',
+    countInStock: '',
+    images: [] // Array of base64
   });
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert("Image size too large. Please select an image under 2MB.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCustomProduct({ ...customProduct, imageUrl: reader.result });
-      };
-      reader.readAsDataURL(file);
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get('/categories');
+      setCategories(res.data.data);
+    } catch (err) {
+      console.error('Failed to fetch categories:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Create product data
-    const newProduct = activeTab === 'catalog' 
-      ? {
-          id: Date.now(),
-          name: selectedProduct,
-          category: selectedCategory,
-          price: price,
-          status: 'approved',
-          image: "https://images.unsplash.com/photo-1621506289937-4c44a0e9432e?w=800&q=80", // Default or lookup image
-          dateAdded: new Date().toISOString().split('T')[0]
-        }
-      : {
-          id: Date.now(),
-          name: customProduct.name,
-          category: customProduct.category,
-          price: customProduct.price,
-          status: 'pending',
-          image: customProduct.imageUrl,
-          dateAdded: new Date().toISOString().split('T')[0]
-        };
-
-    // Save to localStorage
-    const existingProducts = JSON.parse(localStorage.getItem('seller_added_products') || '[]');
-    localStorage.setItem('seller_added_products', JSON.stringify([...existingProducts, newProduct]));
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitted(true);
-      setTimeout(() => setSubmitted(false), 3000);
-      
-      // Reset form
-      if (activeTab === 'catalog') {
-        setSelectedCategory('');
-        setSelectedProduct('');
-        setPrice('');
-      } else {
-        setCustomProduct({ name: '', category: '', price: '', imageUrl: '', description: '' });
-      }
-    }, 1500);
+  const handleCategoryChange = (e) => {
+    const catName = e.target.value;
+    const selectedCat = categories.find(c => c.name === catName);
+    setFormData({ ...formData, category: catName, subcategory: '' });
+    setSubcategories(selectedCat ? selectedCat.subcategories : []);
   };
 
-  const filteredCatalogProducts = sellerCatalog.products.filter(
-    p => p.category === selectedCategory
-  );
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, reader.result]
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+    
+    try {
+      // Basic validation
+      if (formData.images.length === 0) {
+        throw new Error('Please upload at least one product image');
+      }
+
+      const res = await api.post('/products', formData);
+      if (res.data.success) {
+        setSuccess(true);
+        // Reset form
+        setFormData({
+          name: '', sku: '', description: '', price: '', discountPrice: '',
+          category: '', subcategory: '', brand: '', material: '',
+          dimensions: '', thickness: '', color: '', unit: 'piece',
+          countInStock: '', images: []
+        });
+        setTimeout(() => setSuccess(false), 5000);
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || 'Failed to add product');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <PageWrapper>
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">Add New Product</h1>
-          <p className="text-warm-sand mt-2">Expand your inventory from the catalog or add something unique.</p>
+      <div className="max-w-5xl mx-auto space-y-8">
+        <div className="text-center md:text-left space-y-2">
+          <h1 className="text-3xl md:text-5xl font-display font-bold text-deep-espresso tracking-tight">Add New Product</h1>
+          <p className="text-warm-sand font-medium uppercase tracking-[0.2em] text-[10px]">Merchant Inventory Portal</p>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-xl border border-soft-oatmeal overflow-hidden">
-          {/* Tabs */}
-          <div className="flex border-b border-soft-oatmeal p-2 bg-soft-oatmeal/10">
-            <button 
-              onClick={() => setActiveTab('catalog')}
-              className={`flex-1 py-4 flex items-center justify-center gap-2 rounded-2xl transition-all duration-300 font-bold text-sm ${
-                activeTab === 'catalog' 
-                ? 'bg-white text-deep-espresso shadow-lg border border-soft-oatmeal' 
-                : 'text-dusty-cocoa hover:bg-white/50'
-              }`}
-            >
-              <LuBox size={18} />
-              Add From Catalog
-            </button>
-            <button 
-              onClick={() => setActiveTab('custom')}
-              className={`flex-1 py-4 flex items-center justify-center gap-2 rounded-2xl transition-all duration-300 font-bold text-sm ${
-                activeTab === 'custom' 
-                ? 'bg-white text-deep-espresso shadow-lg border border-soft-oatmeal' 
-                : 'text-dusty-cocoa hover:bg-white/50'
-              }`}
-            >
-              <LuTags size={18} />
-              Custom Listing
-            </button>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
+          
+          {/* Main Form Content */}
+          <div className="lg:col-span-2 space-y-8">
+            
+            {/* General Information Card */}
+            <div className="bg-white rounded-[40px] border border-soft-oatmeal p-8 md:p-12 shadow-sm space-y-10">
+              <div className="flex items-center gap-4 border-b border-soft-oatmeal pb-6">
+                <div className="w-12 h-12 bg-soft-oatmeal/10 rounded-2xl flex items-center justify-center text-warm-sand">
+                  <LuBox size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-deep-espresso">General Information</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3 md:col-span-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Product Title</label>
+                  <input 
+                    required type="text" placeholder="e.g. Premium White Marble Slabs"
+                    value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                  />
+                </div>
+                
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">SKU / Model Number</label>
+                  <input 
+                    type="text" placeholder="e.g. WH-MAR-001"
+                    value={formData.sku} onChange={(e) => setFormData({...formData, sku: e.target.value})}
+                    className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Brand / Manufacturer</label>
+                  <input 
+                    required type="text" placeholder="e.g. Riddha Mart"
+                    value={formData.brand} onChange={(e) => setFormData({...formData, brand: e.target.value})}
+                    className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                  />
+                </div>
+
+                <div className="space-y-3 md:col-span-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Description</label>
+                  <textarea 
+                    required rows="4" placeholder="Highlight the quality, finish, and best uses..."
+                    value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Specifications Card */}
+            <div className="bg-white rounded-[40px] border border-soft-oatmeal p-8 md:p-12 shadow-sm space-y-10">
+              <div className="flex items-center gap-4 border-b border-soft-oatmeal pb-6">
+                <div className="w-12 h-12 bg-soft-oatmeal/10 rounded-2xl flex items-center justify-center text-warm-sand">
+                  <LuTags size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-deep-espresso">Detailed Specifications</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Category</label>
+                    <select 
+                      required value={formData.category} onChange={handleCategoryChange}
+                      className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                    >
+                       <option value="">Select Category</option>
+                       {categories.map(cat => <option key={cat._id} value={cat.name}>{cat.name}</option>)}
+                    </select>
+                 </div>
+                 <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Subcategory</label>
+                    <select 
+                      value={formData.subcategory} onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
+                      disabled={!formData.category}
+                      className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm disabled:opacity-30"
+                    >
+                       <option value="">Select Subcategory</option>
+                       {subcategories.map(sub => <option key={sub._id} value={sub.name}>{sub.name}</option>)}
+                    </select>
+                 </div>
+                 <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Material</label>
+                    <input 
+                      type="text" placeholder="e.g. High Grade Ceramic"
+                      value={formData.material} onChange={(e) => setFormData({...formData, material: e.target.value})}
+                      className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                    />
+                 </div>
+                 <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Dimensions</label>
+                    <input 
+                      type="text" placeholder="e.g. 600 x 600 mm"
+                      value={formData.dimensions} onChange={(e) => setFormData({...formData, dimensions: e.target.value})}
+                      className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                    />
+                 </div>
+                 <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Thickness</label>
+                    <input 
+                      type="text" placeholder="e.g. 10 mm"
+                      value={formData.thickness} onChange={(e) => setFormData({...formData, thickness: e.target.value})}
+                      className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                    />
+                 </div>
+                 <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Color / Finish</label>
+                    <input 
+                      type="text" placeholder="e.g. Glossy White"
+                      value={formData.color} onChange={(e) => setFormData({...formData, color: e.target.value})}
+                      className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                    />
+                 </div>
+              </div>
+            </div>
           </div>
 
-          <div className="p-8 md:p-12">
-            <AnimatePresence mode="wait">
-              {activeTab === 'catalog' ? (
-                <motion.form 
-                  key="catalog"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  onSubmit={handleSubmit}
-                  className="space-y-8"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Select Category</label>
-                      <select 
-                        required
-                        value={selectedCategory}
-                        onChange={(e) => { setSelectedCategory(e.target.value); setSelectedProduct(''); }}
-                        className="w-full px-6 py-4 rounded-2xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white focus:outline-none transition-all font-medium"
-                      >
-                        <option value="">Choose Categories</option>
-                        {sellerCatalog.categories.map(cat => (
-                          <option key={cat.id} value={cat.name}>{cat.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Select Product</label>
-                      <select 
-                        required
-                        disabled={!selectedCategory}
-                        value={selectedProduct}
-                        onChange={(e) => setSelectedProduct(e.target.value)}
-                        className="w-full px-6 py-4 rounded-2xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white focus:outline-none transition-all font-medium disabled:opacity-50"
-                      >
-                        <option value="">Identify Product</option>
-                        {filteredCatalogProducts.map(prod => (
-                          <option key={prod.id} value={prod.name}>{prod.name} ({prod.code})</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-3 md:col-span-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Your Selling Price (Rs.)</label>
+          {/* Right Column - Pricing & Media */}
+          <div className="space-y-8">
+             
+             {/* Pricing Card */}
+             <div className="bg-white rounded-[40px] border border-soft-oatmeal p-8 md:p-10 shadow-sm space-y-8">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand border-b border-soft-oatmeal pb-4">Pricing & Inventory</h3>
+                
+                <div className="space-y-6">
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Base Price (Rs.)</label>
                       <input 
-                        type="number" 
-                        required
-                        placeholder="Enter your price"
-                        value={price}
-                        onChange={(e) => setPrice(e.target.value)}
-                        className="w-full px-6 py-4 rounded-2xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white focus:outline-none transition-all font-medium"
+                        required type="number" placeholder="0.00"
+                        value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})}
+                        className="w-full px-6 py-4 rounded-xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 transition-all font-bold text-deep-espresso"
                       />
-                    </div>
-                  </div>
-
-                  <button 
-                    disabled={isSubmitting || submitted}
-                    className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 ${
-                      submitted 
-                      ? 'bg-red-800 text-white' 
-                      : 'bg-red-800 text-white hover:bg-deep-espresso shadow-red-900/20'
-                    }`}
-                  >
-                    {isSubmitting ? <LuClock className="animate-spin" /> : (submitted ? <LuCheck /> : <LuPlus />)}
-                    {submitted ? 'Product Added' : 'Add to My Inventory'}
-                  </button>
-                </motion.form>
-              ) : (
-                <motion.form 
-                  key="custom"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  onSubmit={handleSubmit}
-                  className="space-y-8"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-3 md:col-span-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Product Name</label>
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Discounted Price (Optional)</label>
                       <input 
-                        type="text" 
-                        required
-                        placeholder="Enter full product name"
-                        value={customProduct.name}
-                        onChange={(e) => setCustomProduct({...customProduct, name: e.target.value})}
-                        className="w-full px-6 py-4 rounded-2xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white focus:outline-none transition-all font-medium"
+                        type="number" placeholder="Enter special price"
+                        value={formData.discountPrice} onChange={(e) => setFormData({...formData, discountPrice: e.target.value})}
+                        className="w-full px-6 py-4 rounded-xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 transition-all font-bold text-emerald-600"
                       />
-                    </div>
-
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Category</label>
-                      <select 
-                        required
-                        value={customProduct.category}
-                        onChange={(e) => setCustomProduct({...customProduct, category: e.target.value})}
-                        className="w-full px-6 py-4 rounded-2xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white focus:outline-none transition-all font-medium"
-                      >
-                        <option value="">Select Category</option>
-                        {sellerCatalog.categories.map(cat => (
-                          <option key={cat.id} value={cat.name}>{cat.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Price (Rs.)</label>
-                      <input 
-                        type="number" 
-                        required
-                        placeholder="Selling price"
-                        value={customProduct.price}
-                        onChange={(e) => setCustomProduct({...customProduct, price: e.target.value})}
-                        className="w-full px-6 py-4 rounded-2xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white focus:outline-none transition-all font-medium"
-                      />
-                    </div>
-
-                    <div className="space-y-3 md:col-span-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Product Image</label>
-                      <div className="relative">
-                        {customProduct.imageUrl ? (
-                          <div className="relative group w-full aspect-[21/9] rounded-2xl overflow-hidden border-2 border-soft-oatmeal bg-white">
-                            <img src={customProduct.imageUrl} alt="Preview" className="w-full h-full object-contain" />
-                            <div className="absolute inset-0 bg-deep-espresso/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button 
-                                type="button"
-                                onClick={() => setCustomProduct({ ...customProduct, imageUrl: '' })}
-                                className="bg-white text-red-600 p-3 rounded-xl shadow-xl hover:scale-110 transition-transform flex items-center gap-2 font-bold text-xs uppercase"
-                              >
-                                <LuX size={18} /> Remove Image
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <label className="flex flex-col items-center justify-center w-full aspect-[21/9] rounded-2xl border-2 border-dashed border-soft-oatmeal bg-soft-oatmeal/10 hover:bg-soft-oatmeal/20 transition-all cursor-pointer group">
-                            <div className="flex flex-col items-center gap-3 text-warm-sand group-hover:text-deep-espresso transition-colors">
-                              <div className="p-4 rounded-xl bg-white shadow-sm ring-1 ring-soft-oatmeal group-hover:shadow-md transition-all">
-                                <LuImage size={32} />
-                              </div>
-                              <div className="text-center">
-                                <p className="font-bold text-sm">Click to upload product image</p>
-                                <p className="text-[10px] uppercase font-bold tracking-widest opacity-60">PNG, JPG or JPEG (Max 2MB)</p>
-                              </div>
-                            </div>
-                            <input 
-                              type="file" 
-                              required
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                              className="hidden"
-                            />
-                          </label>
-                        )}
+                   </div>
+                   <div className="grid grid-cols-2 gap-4 pt-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Unit</label>
+                        <select 
+                          value={formData.unit} onChange={(e) => setFormData({...formData, unit: e.target.value})}
+                          className="w-full px-4 py-3.5 rounded-xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 transition-all text-xs font-bold"
+                        >
+                           <option value="piece">Piece</option>
+                           <option value="sqft">Sq. Ft.</option>
+                           <option value="box">Box</option>
+                           <option value="bundle">Bundle</option>
+                        </select>
                       </div>
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Stock Qty</label>
+                        <input 
+                          required type="number" placeholder="0"
+                          value={formData.countInStock} onChange={(e) => setFormData({...formData, countInStock: e.target.value})}
+                          className="w-full px-4 py-3.5 rounded-xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 transition-all text-sm font-bold"
+                        />
+                      </div>
+                   </div>
+                </div>
+             </div>
 
-                  <button 
-                    disabled={isSubmitting || submitted}
-                    className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 ${
-                      submitted 
-                      ? 'bg-red-800 text-white' 
-                      : 'bg-red-800 text-white hover:bg-deep-espresso shadow-red-900/20'
-                    }`}
-                  >
-                    {isSubmitting ? <LuClock className="animate-spin" /> : (submitted ? <LuCheck /> : <LuPlus />)}
-                    {submitted ? 'Listing Pending Approval' : 'Submit for Review'}
-                  </button>
-                  <p className="text-[10px] text-center text-warm-sand font-bold uppercase tracking-widest">Note: Custom products will be set to 'Pending' status until approved by admin.</p>
-                </motion.form>
-              )}
-            </AnimatePresence>
+             {/* Media Card */}
+             <div className="bg-white rounded-[40px] border border-soft-oatmeal p-8 md:p-10 shadow-sm space-y-8 sticky top-24">
+                <div className="flex items-center justify-between border-b border-soft-oatmeal pb-4">
+                   <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">Media Assets</h3>
+                   <span className="text-[9px] font-bold text-warm-sand px-2 py-1 bg-soft-oatmeal/10 rounded-full">{formData.images.length} / 5</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                   {formData.images.map((img, idx) => (
+                     <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-soft-oatmeal group">
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                        <button 
+                          type="button" onClick={() => removeImage(idx)}
+                          className="absolute inset-0 bg-red-500/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-white"
+                        >
+                           <LuTrash2 size={20} />
+                        </button>
+                     </div>
+                   ))}
+                   {formData.images.length < 5 && (
+                     <div 
+                       onClick={() => fileInputRef.current.click()}
+                       className="aspect-square bg-soft-oatmeal/5 rounded-2xl border-2 border-dashed border-soft-oatmeal flex flex-col items-center justify-center text-warm-sand hover:bg-white hover:border-warm-sand hover:text-deep-espresso transition-all cursor-pointer group"
+                     >
+                        <LuImage size={24} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+                        <span className="text-[8px] font-black uppercase tracking-widest mt-2">Add Media</span>
+                     </div>
+                   )}
+                </div>
+                <input type="file" multiple hidden ref={fileInputRef} onChange={handleImageUpload} accept="image/*" />
+
+                <div className="pt-4 space-y-4">
+                   {error && (
+                     <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 text-red-500">
+                        <LuX className="shrink-0 mt-0.5" size={16} />
+                        <p className="text-[10px] font-bold leading-relaxed">{error}</p>
+                     </div>
+                   )}
+
+                   <button 
+                     type="submit"
+                     disabled={isSubmitting || success}
+                     className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 ${
+                       success 
+                       ? 'bg-emerald-500 text-white' 
+                       : 'bg-red-800 text-white hover:bg-deep-espresso shadow-red-900/20'
+                     }`}
+                   >
+                     {isSubmitting ? <LuClock size={18} className="animate-spin" /> : (success ? <LuCheck size={18} /> : <LuPlus size={18} />)}
+                     {success ? 'Listing Published' : (isSubmitting ? 'Updating Database' : 'Confirm Listing')}
+                   </button>
+                   
+                   <div className="text-[9px] text-center text-warm-sand/50 font-bold uppercase tracking-[0.15em] leading-relaxed">
+                      By publishing, you agree that your store follows our merchant policies.
+                   </div>
+                </div>
+             </div>
           </div>
-        </div>
+        </form>
       </div>
     </PageWrapper>
   );

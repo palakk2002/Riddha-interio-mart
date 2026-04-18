@@ -1,30 +1,51 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '../components/ProductCard';
-import { products } from '../data/products';
 import { categories } from '../data/categories';
 import { FiFilter, FiChevronDown, FiX } from 'react-icons/fi';
+import api from '../../../shared/utils/api';
 
 const ProductListingPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sortBy, setSortBy] = useState('featured');
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const activeCategory = searchParams.get('category') || 'all';
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('/products');
+        setProducts(res.data.data);
+      } catch (err) {
+        console.error('Failed to fetch products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
     if (activeCategory !== 'all') {
-      result = result.filter(p => p.category === activeCategory);
+      const categoryObj = categories.find(c => c.slug === activeCategory);
+      const categoryName = categoryObj ? categoryObj.name : activeCategory;
+      result = result.filter(p => 
+        p.category.toLowerCase() === categoryName.toLowerCase() || 
+        p.category.toLowerCase() === activeCategory.toLowerCase()
+      );
     }
     
-    if (sortBy === 'price-low') result.sort((a, b) => a.price - b.price);
-    if (sortBy === 'price-high') result.sort((a, b) => b.price - a.price);
+    if (sortBy === 'price-low') result.sort((a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
+    if (sortBy === 'price-high') result.sort((a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
 
-    
     return result;
-  }, [activeCategory, sortBy]);
+  }, [activeCategory, sortBy, products]);
 
   const handleCategoryChange = (slug) => {
     if (slug === 'all') {
@@ -138,21 +159,26 @@ const ProductListingPage = () => {
 
         {/* Product Grid */}
         <div className="flex-1">
-          <AnimatePresence mode="wait">
-            {filteredProducts.length > 0 ? (
-              <motion.div 
-                key={activeCategory}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.4 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-10"
-              >
-                {filteredProducts.map((product, index) => (
-                  <ProductCard key={product.id} product={product} index={index} variant="list" />
-                ))}
-              </motion.div>
-            ) : (
+          {loading ? (
+             <div className="flex items-center justify-center py-32">
+               <div className="h-12 w-12 border-4 border-warm-sand/20 border-t-warm-sand rounded-full animate-spin"></div>
+             </div>
+          ) : (
+            <AnimatePresence mode="wait">
+              {filteredProducts.length > 0 ? (
+                <motion.div 
+                  key={activeCategory}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-10"
+                >
+                  {filteredProducts.map((product, index) => (
+                    <ProductCard key={product._id || product.id} product={product} index={index} variant="list" />
+                  ))}
+                </motion.div>
+              ) : (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -173,7 +199,8 @@ const ProductListingPage = () => {
                 </motion.button>
               </motion.div>
             )}
-          </AnimatePresence>
+            </AnimatePresence>
+          )}
         </div>
       </div>
 

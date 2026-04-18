@@ -28,7 +28,9 @@ const SellerRoutes = () => {
         <Route path="/orders" element={<Orders />} />
         <Route path="/order/:id" element={<OrderDetail />} />
         <Route path="/product/add" element={<AddProduct />} />
+        <Route path="/add-product" element={<AddProduct />} />
         <Route path="/product/list" element={<MyProducts />} />
+        <Route path="/my-products" element={<MyProducts />} />
         <Route path="/product/taxes" element={<Taxes />} />
         <Route path="/product/stock" element={<StockManagement />} />
         <Route path="/wallet" element={<Wallet />} />

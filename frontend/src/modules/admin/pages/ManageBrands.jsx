@@ -408,11 +408,15 @@ const BrandModal = ({ brand, isOpen, onClose, onSave }) => {
   );
 };
 
+import api from '../../../shared/utils/api';
+
 const ManageBrands = () => {
   const navigate = useNavigate();
   const [brands, setBrands] = useState([]);
   const [editingBrand, setEditingBrand] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // all, active, hidden
   const [sortBy, setSortBy] = useState('name'); // name, categories, banners
@@ -420,60 +424,68 @@ const ManageBrands = () => {
   // Confirmation Modal State
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, id: null });
 
-  useEffect(() => {
-    const saved = localStorage.getItem('admin_brands');
-    if (saved) {
-      let parsed = JSON.parse(saved);
-      // Migration: Update old clearbit logos to new official domains if they haven't been manually changed
-      const migrated = parsed.map(brand => {
-        if (brand.logo?.includes('clearbit.com') && BRAND_DOMAINS[brand.slug]) {
-          return { ...brand, logo: `https://logo.clearbit.com/${BRAND_DOMAINS[brand.slug]}` };
-        }
-        return brand;
-      });
-      setBrands(migrated);
-      if (JSON.stringify(migrated) !== saved) {
-        localStorage.setItem('admin_brands', JSON.stringify(migrated));
-      }
-    } else {
-      const initialBrands = Object.entries(brandData).map(([slug, data]) => ({
-        id: Date.now() + Math.random(),
-        slug: slug,
-        name: data.name,
-        offer: 'Up to 50% Off',
-        logo: `https://logo.clearbit.com/${BRAND_DOMAINS[slug] || slug + '.com'}`,
-        banners: data.banners || [],
-        categories: data.categories || [],
-        isActive: true
-      }));
-      setBrands(initialBrands);
-      localStorage.setItem('admin_brands', JSON.stringify(initialBrands));
+  const fetchBrands = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/brands/admin');
+      setBrands(data.data || []);
+    } catch (err) {
+      console.error('Failed to fetch brands:', err);
+      setError('Failed to load partners from the directory.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchBrands();
   }, []);
 
-  const handleSave = (brand) => {
-    let updated;
-    if (editingBrand) {
-      updated = brands.map(b => b.id === brand.id ? brand : b);
-    } else {
-      updated = [...brands, { ...brand, id: Date.now(), slug: brand.name.toLowerCase().replace(/\s+/g, '-') }];
+  const handleSave = async (brandData) => {
+    try {
+      // Sanitize payload
+      const sanitizedPayload = {
+        ...brandData,
+        banners: brandData.banners?.filter(b => b && b.trim() !== '') || [],
+        categories: brandData.categories
+          ?.filter(c => c.name && c.name.trim() !== '')
+          .map(({ id, _id, ...rest }) => rest) || [] // Remove IDs from subdocuments for clean update
+      };
+
+      if (editingBrand) {
+        await api.put(`/brands/${editingBrand._id}`, sanitizedPayload);
+      } else {
+        await api.post('/brands', sanitizedPayload);
+      }
+      fetchBrands();
+      setIsModalOpen(false);
+      setEditingBrand(null);
+    } catch (err) {
+      console.error('Failed to save brand:', err);
+      alert(err.response?.data?.error || 'Failed to save brand data.');
     }
-    setBrands(updated);
-    localStorage.setItem('admin_brands', JSON.stringify(updated));
-    setIsModalOpen(false);
-    setEditingBrand(null);
   };
 
-  const toggleVisibility = (id) => {
-    const updated = brands.map(b => b.id === id ? { ...b, isActive: !b.isActive } : b);
-    setBrands(updated);
-    localStorage.setItem('admin_brands', JSON.stringify(updated));
+  const toggleVisibility = async (id) => {
+    const brand = brands.find(b => b._id === id);
+    if (!brand) return;
+    
+    try {
+      await api.put(`/brands/${id}`, { isActive: !brand.isActive });
+      setBrands(brands.map(b => b._id === id ? { ...b, isActive: !b.isActive } : b));
+    } catch (err) {
+      console.error('Failed to toggle visibility:', err);
+    }
   };
 
-  const handleDelete = (id) => {
-    const updated = brands.filter(b => b.id !== id);
-    setBrands(updated);
-    localStorage.setItem('admin_brands', JSON.stringify(updated));
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/brands/${id}`);
+      setBrands(brands.filter(b => b._id === id ? false : true));
+    } catch (err) {
+      console.error('Failed to delete brand:', err);
+      alert('Failed to remove partner from the directory.');
+    }
   };
 
   const filteredBrands = brands
@@ -578,7 +590,7 @@ const ManageBrands = () => {
              {filteredBrands.length > 0 ? (
                filteredBrands.map((brand) => (
                  <div 
-                   key={brand.id}
+                   key={brand._id}
                    className={`bg-white p-3 rounded-2xl border border-soft-oatmeal/40 shadow-sm flex items-center gap-6 relative group ${!brand.isActive ? 'opacity-70 grayscale-[0.3]' : ''}`}
                  >
                     {/* Logo */}
@@ -591,7 +603,7 @@ const ManageBrands = () => {
                        <div className="w-48">
                          <h3 className="text-sm font-display font-bold text-deep-espresso truncate">{brand.name}</h3>
                          <div 
-                           onClick={() => toggleVisibility(brand.id)}
+                           onClick={() => toggleVisibility(brand._id)}
                            className={`mt-1 inline-block px-2 py-0.5 rounded-full text-[6px] font-black uppercase tracking-widest cursor-pointer transition-all ${brand.isActive ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-red-50 text-red-600 border border-red-100'}`}
                          >
                            {brand.isActive ? 'Active' : 'Hidden'}
@@ -630,7 +642,7 @@ const ManageBrands = () => {
                          <FiEdit3 size={14} />
                        </button>
                        <button 
-                         onClick={() => setConfirmConfig({ isOpen: true, id: brand.id })}
+                         onClick={() => setConfirmConfig({ isOpen: true, id: brand._id })}
                          className="p-2 bg-red-50 text-red-400 border border-red-100 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm"
                          title="Delete"
                        >

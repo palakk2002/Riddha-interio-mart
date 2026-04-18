@@ -1,277 +1,794 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  LuLayoutGrid,
+  LuLoader,
+  LuPen,
+  LuPlus,
+  LuRotateCcw,
+  LuSave,
+  LuTrash2,
+  LuX
+} from 'react-icons/lu';
 import PageWrapper from '../components/PageWrapper';
-import { motion, AnimatePresence } from 'framer-motion';
-import { LuPlus, LuX, LuCheck, LuPen, LuTrash2, LuImage, LuLayoutGrid, LuLayoutList, LuArrowRight } from 'react-icons/lu';
-import { manageFavouriteCategoriesData } from '../data/manageFavouriteCategoriesData';
+import api from '../../../shared/utils/api';
+
+const createBlockId = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+};
+
+const createEmptyBlock = () => ({
+  id: createBlockId(),
+  categoryId: '',
+  productIds: []
+});
+
+const createEmptyForm = () => ({
+  heading: '',
+  subheading: '',
+  displayOrder: 0,
+  isActive: true,
+  items: [createEmptyBlock()]
+});
+
+const getId = (item) => item?._id || item?.id || item;
+
+const normalizeText = (value) => String(value || '').trim().toLowerCase();
+
+const mapSectionToForm = (section) => ({
+  heading: section?.heading || '',
+  subheading: section?.subheading || '',
+  displayOrder: Number(section?.displayOrder || 0),
+  isActive: section?.isActive !== false,
+  items: Array.isArray(section?.items) && section.items.length > 0
+    ? section.items.map((item) => ({
+      id: getId(item),
+      categoryId: getId(item?.categoryId),
+      productIds: Array.isArray(item?.productIds) ? item.productIds.map(getId).filter(Boolean) : []
+    }))
+    : [createEmptyBlock()]
+});
 
 const ManageFavouriteCategories = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState({ tabs: [], categories: [] });
-  const [activeTab, setActiveTab] = useState('');
-  const [showAddTabForm, setShowAddTabForm] = useState(false);
-  const [newTab, setNewTab] = useState({ name: '', image: '' });
-
   const location = useLocation();
 
+  const [sections, setSections] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [sectionForm, setSectionForm] = useState(createEmptyForm());
+  const [activeTab, setActiveTab] = useState('all');
+  const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const categoryMap = useMemo(
+    () => new Map(categories.map((category) => [String(category._id), category])),
+    [categories]
+  );
+
+  const productMap = useMemo(
+    () => new Map(products.map((product) => [String(product._id), product])),
+    [products]
+  );
+
+  const categoryNameById = useMemo(() => {
+    const map = new Map();
+    categories.forEach((category) => {
+      map.set(String(category._id), category.name);
+    });
+    return map;
+  }, [categories]);
+
+  const productOptionsForCategory = (categoryId) => {
+    const categoryName = categoryNameById.get(String(categoryId));
+    if (!categoryName) return [];
+
+    return products.filter((product) => normalizeText(product.category) === normalizeText(categoryName));
+  };
+
+  const selectedProductsForBlock = (block) => {
+    if (!block?.productIds?.length) return [];
+    return block.productIds
+      .map((productId) => productMap.get(String(productId)))
+      .filter(Boolean);
+  };
+
+  const selectedCategories = sectionForm.items
+    .map((block) => categoryMap.get(String(block.categoryId)))
+    .filter(Boolean);
+
+  const updateSections = async () => {
+    try {
+      const [{ data: sectionRes }, { data: categoryRes }, { data: productRes }] = await Promise.all([
+        api.get('/favourite-section'),
+        api.get('/categories'),
+        api.get('/products')
+      ]);
+
+      setSections(Array.isArray(sectionRes?.data) ? sectionRes.data : []);
+      setCategories(Array.isArray(categoryRes?.data) ? categoryRes.data : []);
+      setProducts(Array.isArray(productRes?.data) ? productRes.data : []);
+    } catch (error) {
+      console.error('Failed to load favourite section data:', error);
+      setStatusMessage(error.response?.data?.error || 'Failed to load favourite sections.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const saved = localStorage.getItem('admin_favourite_categories');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setData(parsed);
-      
-      // Preservation logic: use incoming state > existing active > first tab
-      const incomingTab = location.state?.activeTab;
-      if (incomingTab && parsed.tabs.includes(incomingTab)) {
-        setActiveTab(incomingTab);
-      } else if (!activeTab && parsed.tabs.length > 0) {
-        setActiveTab(parsed.tabs[0]);
+    updateSections();
+  }, []);
+
+  useEffect(() => {
+    if (location.pathname.includes('/create')) {
+      setActiveTab('create');
+      return;
+    }
+
+    if (location.state?.mode === 'create') {
+      setActiveTab('create');
+      return;
+    }
+
+    setActiveTab('all');
+  }, [location.pathname, location.state]);
+
+  const resetForm = () => {
+    setSectionForm(createEmptyForm());
+    setEditingId(null);
+    setStatusMessage('');
+    if (location.pathname.includes('/create') && editingId) {
+      navigate('/admin/manage-favourites');
+    }
+  };
+
+  const handleEdit = (section) => {
+    setSectionForm(mapSectionToForm(section));
+    setEditingId(getId(section));
+    setActiveTab('create');
+    navigate('/admin/manage-favourites/create');
+    setStatusMessage(`Editing: ${section.heading}`);
+  };
+
+  const handleDelete = async (section) => {
+    const shouldDelete = window.confirm(`Delete favourite section "${section.heading}"?`);
+    if (!shouldDelete) return;
+
+    try {
+      setDeletingId(getId(section));
+      await api.delete(`/favourite-section/${getId(section)}`);
+      await updateSections();
+      if (editingId === getId(section)) {
+        resetForm();
       }
-    } else {
-      setData(manageFavouriteCategoriesData);
-      if (manageFavouriteCategoriesData.tabs.length > 0) setActiveTab(manageFavouriteCategoriesData.tabs[0]);
-      localStorage.setItem('admin_favourite_categories', JSON.stringify(manageFavouriteCategoriesData));
+      setStatusMessage('Favourite section deleted.');
+    } catch (error) {
+      console.error('Failed to delete favourite section:', error);
+      setStatusMessage(error.response?.data?.error || 'Failed to delete favourite section.');
+    } finally {
+      setDeletingId(null);
     }
-  }, [location]);
-
-  const saveToStorage = (updatedData) => {
-    setData(updatedData);
-    localStorage.setItem('admin_favourite_categories', JSON.stringify(updatedData));
   };
 
-  const handleCreateTab = (e) => {
-    e.preventDefault();
-    if (!newTab.name || data.tabs.includes(newTab.name)) return;
-
-    const updatedData = {
-      ...data,
-      tabs: [...data.tabs, newTab.name],
-    };
-    saveToStorage(updatedData);
-    setActiveTab(newTab.name);
-    setShowAddTabForm(false);
-    setNewTab({ name: '', image: '' });
+  const addBlock = () => {
+    setSectionForm((prev) => ({
+      ...prev,
+      items: [...prev.items, createEmptyBlock()]
+    }));
   };
 
-  const handleDeleteItem = (id) => {
-    const updatedData = {
-      ...data,
-      categories: data.categories.filter((c) => c.id !== id),
-    };
-    saveToStorage(updatedData);
-  };
-
-  const handleRenameTab = (oldName) => {
-    const newName = prompt('Rename Tab to:', oldName);
-    if (newName && newName !== oldName && !data.tabs.includes(newName)) {
-      const updatedTabs = data.tabs.map(t => t === oldName ? newName : t);
-      const updatedCategories = data.categories.map(c => c.category === oldName ? { ...c, category: newName } : c);
-
-      const updatedData = {
-        tabs: updatedTabs,
-        categories: updatedCategories
+  const removeBlock = (blockId) => {
+    setSectionForm((prev) => {
+      const nextItems = prev.items.filter((block) => block.id !== blockId);
+      return {
+        ...prev,
+        items: nextItems.length > 0 ? nextItems : [createEmptyBlock()]
       };
+    });
+  };
 
-      saveToStorage(updatedData);
-      setActiveTab(newName);
+  const updateBlock = (blockId, field, value) => {
+    setSectionForm((prev) => ({
+      ...prev,
+      items: prev.items.map((block) => {
+        if (block.id !== blockId) return block;
+
+        if (field === 'categoryId') {
+          return { ...block, categoryId: value, productIds: [] };
+        }
+
+        return { ...block, [field]: value };
+      })
+    }));
+  };
+
+  const toggleProduct = (blockId, productId) => {
+    setSectionForm((prev) => ({
+      ...prev,
+      items: prev.items.map((block) => {
+        if (block.id !== blockId) return block;
+
+        const hasProduct = block.productIds.includes(productId);
+        return {
+          ...block,
+          productIds: hasProduct
+            ? block.productIds.filter((id) => id !== productId)
+            : [...block.productIds, productId]
+        };
+      })
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!sectionForm.heading.trim()) {
+      setStatusMessage('Please add a heading.');
+      return;
+    }
+
+    const payload = {
+      heading: sectionForm.heading.trim(),
+      subheading: sectionForm.subheading.trim(),
+      displayOrder: Number(sectionForm.displayOrder) || 0,
+      isActive: sectionForm.isActive,
+      items: sectionForm.items
+        .filter((block) => block.categoryId) // Filter out blocks without category
+        .map((block) => ({
+          categoryId: block.categoryId,
+          productIds: block.productIds
+        }))
+    };
+
+    if (payload.items.length === 0) {
+      setStatusMessage('Please add at least one category block with products.');
+      return;
+    }
+
+    const hasEmptyBlocks = payload.items.some(block => !block.productIds || block.productIds.length === 0);
+    if (hasEmptyBlocks) {
+      setStatusMessage('Please select at least one product for every category block.');
+      return;
+    }
+
+    console.log('Saving favourite section with payload:', payload);
+
+    try {
+      setSubmitting(true);
+
+      if (editingId) {
+        console.log('Sending PUT request for editingId:', editingId);
+        await api.put(`/favourite-section/${editingId}`, payload);
+        setStatusMessage('Favourite section updated successfully.');
+      } else {
+        console.log('Sending POST request');
+        await api.post('/favourite-section', payload);
+        setStatusMessage('Favourite section created successfully.');
+      }
+
+      await updateSections();
+      resetForm();
+      setActiveTab('all');
+      navigate('/admin/manage-favourites');
+    } catch (error) {
+      console.error('Failed to save favourite section:', error);
+      setStatusMessage(error.response?.data?.error || 'Failed to save favourite section.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleDeleteTab = (tabName) => {
-    if (window.confirm(`Delete "${tabName}" and all its contents?`)) {
-      const updatedTabs = data.tabs.filter(t => t !== tabName);
-      const updatedCategories = data.categories.filter(c => c.category !== tabName);
-
-      const updatedData = {
-        tabs: updatedTabs,
-        categories: updatedCategories
-      };
-
-      saveToStorage(updatedData);
-      if (updatedTabs.length > 0) setActiveTab(updatedTabs[0]);
-    }
+  const openAllTab = () => {
+    setActiveTab('all');
+    navigate('/admin/manage-favourites');
   };
 
-  const filteredItems = data.categories.filter(cat => cat.category === activeTab);
+  const openCreateTab = () => {
+    setActiveTab('create');
+    navigate('/admin/manage-favourites/create');
+  };
 
   return (
     <PageWrapper>
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <h1 className="text-4xl font-display font-bold text-deep-espresso">Favourite Categories</h1>
-            <p className="text-warm-sand mt-1">Manage the tabbed categories section on your homepage.</p>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setShowAddTabForm(!showAddTabForm)}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all text-sm shadow-sm border ${showAddTabForm ? 'bg-deep-espresso text-white' : 'bg-white border-soft-oatmeal text-deep-espresso hover:bg-soft-oatmeal/20'
-                }`}
-            >
-              {showAddTabForm ? <LuX size={18} /> : <LuLayoutGrid size={18} />}
-              {showAddTabForm ? 'Cancel' : 'Add New Tab'}
-            </button>
-            <button
-              onClick={() => navigate('/admin/manage-favourites/add', { state: { category: activeTab } })}
-              className="flex items-center gap-2 bg-dusty-cocoa text-white px-6 py-2.5 rounded-xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-dusty-cocoa/20 text-sm"
-            >
-              <LuPlus size={18} />
-              Add Item to "{activeTab}"
-            </button>
-          </div>
-        </div>
-
-        {/* Add Tab Form Inline */}
-        <AnimatePresence>
-          {showAddTabForm && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="bg-white p-6 md:p-8 rounded-2xl border-2 border-dashed border-warm-sand/30 shadow-sm mb-8">
-                <h3 className="text-lg font-display font-bold text-deep-espresso mb-6">
-                  Add New Category Tab
-                </h3>
-                <form onSubmit={handleCreateTab} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Tab Name
-                    </label>
-                    <input
-                      required autoFocus
-                      type="text"
-                      value={newTab.name}
-                      onChange={(e) => setNewTab({ ...newTab, name: e.target.value })}
-                      className="w-full bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                      placeholder="e.g. Garden Decor"
-                    />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">
-                      Internal Notes / Hint
-                    </label>
-                    <div className="flex gap-3">
-                      <input
-                        type="text"
-                        className="flex-grow bg-soft-oatmeal/20 border border-soft-oatmeal rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all text-sm"
-                        placeholder="Optional description for your reference..."
-                      />
-                      <button
-                        type="submit"
-                        className="bg-deep-espresso text-white px-8 py-3 rounded-xl font-bold hover:bg-dusty-cocoa transition-all flex items-center gap-2 shadow-md whitespace-nowrap"
-                      >
-                        <LuCheck size={18} />
-                        Add Tab
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Tab Switcher / Management */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-soft-oatmeal/30 pb-4">
-          {data.tabs.map((tab) => (
-            <div key={tab} className="relative group/tab">
-              <button
-                onClick={() => setActiveTab(tab)}
-                className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab
-                  ? 'bg-deep-espresso text-white shadow-lg'
-                  : 'bg-soft-oatmeal/20 text-warm-sand hover:bg-soft-oatmeal/40'
-                  }`}
-              >
-                {tab}
-              </button>
-
-              {/* Tab Actions */}
-              <div className="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover/tab:opacity-100 transition-opacity">
-                <button
-                  onClick={() => handleRenameTab(tab)}
-                  className="w-6 h-6 bg-white border border-soft-oatmeal rounded-full flex items-center justify-center text-warm-sand hover:text-dusty-cocoa shadow-sm"
-                >
-                  <LuPen size={10} />
-                </button>
-                <button
-                  onClick={() => handleDeleteTab(tab)}
-                  className="w-6 h-6 bg-white border border-soft-oatmeal rounded-full flex items-center justify-center text-red-400 hover:text-red-500 shadow-sm"
-                >
-                  <LuTrash2 size={10} />
-                </button>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-6 md:space-y-8">
+        <div className="rounded-[2rem] border border-soft-oatmeal bg-gradient-to-r from-white via-soft-oatmeal/20 to-white p-6 md:p-8 shadow-sm">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <h1 className="text-3xl md:text-5xl font-display font-bold text-deep-espresso tracking-tight">
+                  Favourite Section
+                </h1>
+                <p className="max-w-3xl text-sm md:text-base leading-relaxed text-deep-espresso/60">
+                  Create a featured homepage module with a centered heading, supporting text, and
+                  category-led product tabs that feel premium on the storefront.
+                </p>
               </div>
             </div>
-          ))}
+
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
+              <div className="rounded-2xl border border-soft-oatmeal bg-white px-4 py-3 shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-warm-sand">Total sections</p>
+                <p className="mt-1 text-2xl font-display font-bold text-deep-espresso">{sections.length}</p>
+              </div>
+              <div className="rounded-2xl border border-soft-oatmeal bg-white px-4 py-3 shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-warm-sand">Display type</p>
+                <p className="mt-1 text-2xl font-display font-bold text-deep-espresso">Category + Product</p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Items Grid */}
-        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4">
-          <AnimatePresence mode="popLayout">
-            {filteredItems.map((cat, index) => (
-              <motion.div
-                key={cat.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="group relative flex flex-col bg-white rounded-xl overflow-hidden shadow-sm border border-soft-oatmeal/20 hover:shadow-xl transition-all duration-500"
-              >
-                {/* Image Container */}
-                <div className="aspect-square overflow-hidden relative">
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-
-                  {/* Actions Overlay */}
-                  <div className="absolute inset-0 bg-deep-espresso/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => handleDeleteItem(cat.id)}
-                      className="bg-white/90 p-1.5 rounded-lg text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-lg"
-                      title="Delete Item"
-                    >
-                      <LuTrash2 size={12} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Info */}
-                <div className="py-2.5 px-2 text-center bg-soft-oatmeal/5">
-                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-tight text-deep-espresso/70 group-hover:text-dusty-cocoa transition-colors line-clamp-1">
-                    {cat.name}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-
-          {/* Empty / Add Placeholder */}
+        <div className="inline-flex p-1.5 rounded-2xl border border-soft-oatmeal bg-white shadow-sm w-full md:w-auto">
           <button
-            onClick={() => navigate('/admin/manage-favourites/add', { state: { category: activeTab } })}
-            className="border-2 border-dashed border-soft-oatmeal/60 rounded-xl aspect-square flex flex-col items-center justify-center gap-2 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group"
+            onClick={openCreateTab}
+            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'create'
+                ? 'bg-deep-espresso text-white'
+                : 'text-deep-espresso hover:bg-soft-oatmeal/30'
+            }`}
           >
-            <div className="w-8 h-8 rounded-full bg-soft-oatmeal/10 flex items-center justify-center group-hover:bg-dusty-cocoa/10 transition-colors">
-              <LuPlus size={16} className="group-hover:scale-110 transition-transform" />
-            </div>
-            <span className="font-black text-[8px] md:text-[9px] uppercase tracking-widest">Add Item</span>
+            <LuPlus size={16} />
+            New Favourite Section
+          </button>
+          <button
+            onClick={openAllTab}
+            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'all'
+                ? 'bg-deep-espresso text-white'
+                : 'text-deep-espresso hover:bg-soft-oatmeal/30'
+            }`}
+          >
+            <LuLayoutGrid size={16} />
+            All Sections
           </button>
         </div>
 
-        {/* Footer info */}
-        <div className="bg-white p-6 rounded-3xl border border-soft-oatmeal/30 flex items-center justify-between text-xs text-warm-sand shadow-sm">
-          <div className="flex items-center gap-2">
-            <LuLayoutList size={16} className="text-dusty-cocoa" />
-            <p>Managing <span className="font-bold text-deep-espresso">{filteredItems.length}</span> items across <span className="font-bold text-deep-espresso">{data.tabs.length}</span> themes</p>
+        {statusMessage && (
+          <div className="px-4 py-3 rounded-2xl border border-soft-oatmeal bg-white text-sm text-deep-espresso shadow-sm">
+            {statusMessage}
           </div>
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#10B981]">
-            <LuCheck size={14} /> System Active
+        )}
+
+        {loading ? (
+          <div className="rounded-[2rem] border border-soft-oatmeal bg-white p-8 shadow-sm">
+            <div className="flex items-center gap-3 text-warm-sand">
+              <LuLoader className="animate-spin" />
+              <span className="text-sm font-medium">Loading favourite sections...</span>
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            {activeTab === 'create' && (
+              <div className="grid grid-cols-1 xl:grid-cols-[1.05fr_0.95fr] gap-8 xl:gap-10 items-start">
+                <form
+                  onSubmit={handleSubmit}
+                  className="bg-white p-6 md:p-8 rounded-[2rem] border border-soft-oatmeal shadow-sm space-y-8"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5 relative">
+                    <div className="flex-1">
+                      <h3 className="text-xl md:text-2xl font-display font-bold text-deep-espresso">
+                        {editingId ? 'Edit Favourite Section' : 'Create Favourite Section'}
+                      </h3>
+                      <p className="max-w-2xl text-sm md:text-base leading-relaxed text-deep-espresso/60 mt-2">
+                        Add a headline, supporting text, and one or more category blocks. Each block
+                        can display selected products from a single category.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3 relative z-[60]">
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        className="cursor-pointer flex items-center gap-2 border border-soft-oatmeal text-deep-espresso px-5 py-2.5 rounded-xl font-semibold hover:bg-soft-oatmeal/20 transition-all text-sm whitespace-nowrap bg-white"
+                      >
+                        <LuRotateCcw size={16} /> 
+                        {editingId ? 'Cancel Edit' : 'Clear Form'}
+                      </button>
+                      <button
+                        type="submit"
+                        className="cursor-pointer flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold transition-all text-sm shadow-md bg-deep-espresso text-white hover:bg-dusty-cocoa disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
+                        disabled={submitting}
+                      >
+                        {submitting ? (
+                          <LuLoader className="animate-spin" size={16} />
+                        ) : (
+                          <LuSave size={16} />
+                        )}
+                        {submitting ? 'Saving...' : editingId ? 'Update Section' : 'Publish Section'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.22em] text-warm-sand">
+                        Heading
+                      </label>
+                      <input
+                        type="text"
+                        value={sectionForm.heading}
+                        onChange={(event) =>
+                          setSectionForm((prev) => ({ ...prev, heading: event.target.value }))
+                        }
+                        className="w-full rounded-2xl border border-soft-oatmeal bg-soft-oatmeal/10 px-4 py-3.5 text-sm text-deep-espresso placeholder:text-deep-espresso/30 focus:outline-none focus:ring-2 focus:ring-warm-sand"
+                        placeholder="e.g. Our Favourite Categories"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.22em] text-warm-sand">
+                        Display order
+                      </label>
+                      <input
+                        type="number"
+                        value={sectionForm.displayOrder}
+                        onChange={(event) =>
+                          setSectionForm((prev) => ({ ...prev, displayOrder: event.target.value }))
+                        }
+                        className="w-full rounded-2xl border border-soft-oatmeal bg-soft-oatmeal/10 px-4 py-3.5 text-sm text-deep-espresso placeholder:text-deep-espresso/30 focus:outline-none focus:ring-2 focus:ring-warm-sand"
+                        placeholder="0"
+                      />
+                    </div>
+
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.22em] text-warm-sand">
+                        Subheading
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={sectionForm.subheading}
+                        onChange={(event) =>
+                          setSectionForm((prev) => ({ ...prev, subheading: event.target.value }))
+                        }
+                        className="w-full rounded-2xl border border-soft-oatmeal bg-soft-oatmeal/10 px-4 py-3.5 text-sm text-deep-espresso placeholder:text-deep-espresso/30 focus:outline-none focus:ring-2 focus:ring-warm-sand resize-none"
+                        placeholder="Add a short supporting description for the storefront."
+                      />
+                    </div>
+
+                    <label className="md:col-span-2 inline-flex items-center gap-3 rounded-2xl border border-soft-oatmeal bg-white px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={sectionForm.isActive}
+                        onChange={(event) =>
+                          setSectionForm((prev) => ({ ...prev, isActive: event.target.checked }))
+                        }
+                        className="h-4 w-4 rounded border-soft-oatmeal text-dusty-cocoa focus:ring-dusty-cocoa"
+                      />
+                      <span className="text-sm font-medium text-deep-espresso">
+                        Publish this section on the storefront
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <h4 className="text-lg font-display font-bold text-deep-espresso">Category blocks</h4>
+                        <p className="text-sm text-deep-espresso/60">
+                          Select a category, then choose the products that should appear under it.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addBlock}
+                        className="inline-flex items-center gap-2 rounded-xl border border-soft-oatmeal bg-white px-4 py-2.5 text-sm font-semibold text-deep-espresso hover:border-dusty-cocoa hover:text-dusty-cocoa transition-all"
+                      >
+                        <LuPlus size={16} />
+                        Add block
+                      </button>
+                    </div>
+
+                    <div className="space-y-4">
+                      {sectionForm.items.map((block, index) => {
+                        const categoryId = String(block.categoryId || '');
+                        const categoryOptions = categories;
+                        const productOptions = productOptionsForCategory(categoryId);
+
+                        return (
+                          <div
+                            key={block.id}
+                            className="rounded-[1.75rem] border border-soft-oatmeal bg-gradient-to-b from-white to-soft-oatmeal/10 p-4 md:p-5 space-y-4"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-warm-sand">
+                                  Category block {index + 1}
+                                </p>
+                                <p className="text-sm text-deep-espresso/60">
+                                  Choose one category and its products.
+                                </p>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => removeBlock(block.id)}
+                                className="inline-flex items-center gap-2 rounded-xl border border-soft-oatmeal bg-white px-3 py-2 text-xs font-semibold text-deep-espresso hover:text-red-500 hover:border-red-200 transition-all"
+                              >
+                                <LuX size={14} />
+                                Remove
+                              </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-4">
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.22em] text-warm-sand">
+                                  Category
+                                </label>
+                                <select
+                                  value={categoryId}
+                                  onChange={(event) => updateBlock(block.id, 'categoryId', event.target.value)}
+                                  className="w-full rounded-2xl border border-soft-oatmeal bg-white px-4 py-3.5 text-sm text-deep-espresso focus:outline-none focus:ring-2 focus:ring-warm-sand"
+                                >
+                                  <option value="">Select a category</option>
+                                  {categoryOptions.map((category) => (
+                                    <option key={category._id} value={category._id}>
+                                      {category.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.22em] text-warm-sand">
+                                  Products
+                                </label>
+                                <select
+                                  multiple
+                                  disabled={!categoryId}
+                                  value={block.productIds}
+                                  onChange={(event) => {
+                                    const selected = Array.from(event.target.selectedOptions).map((option) => option.value);
+                                    updateBlock(block.id, 'productIds', selected);
+                                  }}
+                                  className="min-h-[140px] w-full rounded-2xl border border-soft-oatmeal bg-white px-4 py-3 text-sm text-deep-espresso focus:outline-none focus:ring-2 focus:ring-warm-sand disabled:bg-soft-oatmeal/40"
+                                >
+                                  {!categoryId ? (
+                                    <option value="">Choose a category first</option>
+                                  ) : (
+                                    productOptions.map((product) => (
+                                      <option key={product._id} value={product._id}>
+                                        {product.name}
+                                      </option>
+                                    ))
+                                  )}
+                                </select>
+                                <p className="text-[11px] text-deep-espresso/45">
+                                  Hold Ctrl or Cmd to select multiple products.
+                                </p>
+                              </div>
+                            </div>
+
+                            {selectedProductsForBlock(block).length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {selectedProductsForBlock(block).map((product) => (
+                                  <button
+                                    key={product._id}
+                                    type="button"
+                                    onClick={() => toggleProduct(block.id, product._id)}
+                                    className="inline-flex items-center gap-2 rounded-full border border-soft-oatmeal bg-white px-3 py-1.5 text-[11px] font-medium text-deep-espresso hover:border-dusty-cocoa hover:text-dusty-cocoa transition-all"
+                                  >
+                                    {product.name}
+                                    <LuX size={12} />
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </form>
+
+                <aside className="space-y-6">
+                  <div className="p-2">
+                    <div className="text-center space-y-4">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-soft-oatmeal/40 border border-soft-oatmeal/60 text-[9px] font-black uppercase tracking-[0.3em] text-warm-sand mb-2 transition-all">
+                        <LuLayoutGrid size={10} />
+                        Live storefront preview
+                      </div>
+                      
+                      <h3 className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-deep-espresso tracking-tight">
+                        {sectionForm.heading || 'Your Favourite Section'}
+                      </h3>
+                      
+                      <div className="flex items-center justify-center gap-4 py-2">
+                        <div className="h-[1px] w-12 bg-soft-oatmeal" />
+                        <div className="w-2 h-2 rounded-full bg-warm-sand/40" />
+                        <div className="h-[1px] w-12 bg-soft-oatmeal" />
+                      </div>
+
+                      {sectionForm.subheading && (
+                        <p className="mx-auto max-w-2xl text-sm md:text-lg leading-relaxed text-deep-espresso/60 font-light italic">
+                          {sectionForm.subheading}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      {selectedCategories.length > 0 ? (
+                        selectedCategories.map((category) => (
+                          <span
+                            key={category._id}
+                            className="rounded-full border border-soft-oatmeal bg-soft-oatmeal/10 px-4 py-2 text-xs font-bold text-deep-espresso"
+                          >
+                            {category.name}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-sm text-warm-sand">Select a category to preview the tabs.</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="rounded-[2rem] border border-soft-oatmeal bg-white p-6 shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-warm-sand">
+                      Selected blocks
+                    </p>
+                    <div className="mt-4 space-y-4">
+                      {sectionForm.items.map((block, index) => {
+                        const category = categoryMap.get(String(block.categoryId));
+                        const chosenProducts = selectedProductsForBlock(block);
+
+                        return (
+                          <div
+                            key={block.id}
+                            className="rounded-2xl border border-soft-oatmeal/70 bg-soft-oatmeal/10 p-4"
+                          >
+                            <p className="text-xs font-black uppercase tracking-[0.18em] text-deep-espresso">
+                              Block {index + 1}
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-deep-espresso">
+                              {category?.name || 'No category selected'}
+                            </p>
+                            <p className="mt-1 text-xs text-deep-espresso/60">
+                              {chosenProducts.length > 0
+                                ? `${chosenProducts.length} products selected`
+                                : 'No products selected yet'}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="rounded-[2rem] border border-soft-oatmeal bg-gradient-to-b from-white to-soft-oatmeal/20 p-6 shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-warm-sand">
+                      Publishing notes
+                    </p>
+                    <div className="mt-4 space-y-3 text-sm text-deep-espresso/70 leading-relaxed">
+                      <p>1. Use one category per block to keep the storefront tabs clean and clear.</p>
+                      <p>2. Every selected product must belong to the chosen category.</p>
+                      <p>3. The storefront will render the active section in the same order you set here.</p>
+                    </div>
+                  </div>
+                </aside>
+              </div>
+            )}
+
+            <div className="space-y-4 md:space-y-5">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <h3 className="text-xl md:text-2xl font-display font-bold text-deep-espresso">
+                    {activeTab === 'create' ? 'Saved Favourite Sections' : 'All Favourite Sections'}
+                  </h3>
+                  <p className="text-sm md:text-base text-deep-espresso/60">
+                    Manage the sections already published for the storefront.
+                  </p>
+                </div>
+              </div>
+
+              {sections.length === 0 ? (
+                <div className="rounded-[2rem] border border-dashed border-soft-oatmeal bg-white p-8 text-center text-warm-sand">
+                  No favourite sections have been created yet.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {sections.map((section) => {
+                    const blockCount = Array.isArray(section.items) ? section.items.length : 0;
+                    const productCount = Array.isArray(section.items)
+                      ? section.items.reduce((count, block) => count + (Array.isArray(block.productIds) ? block.productIds.length : 0), 0)
+                      : 0;
+
+                    return (
+                      <div
+                        key={getId(section)}
+                        className="rounded-[2rem] border border-soft-oatmeal bg-white p-5 md:p-6 shadow-sm"
+                      >
+                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] ${section.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-soft-oatmeal text-deep-espresso/60'}`}>
+                                {section.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                              <span className="inline-flex items-center rounded-full border border-soft-oatmeal bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-warm-sand">
+                                Order {section.displayOrder || 0}
+                              </span>
+                            </div>
+
+                            <div>
+                              <h4 className="text-2xl font-display font-bold text-deep-espresso">
+                                {section.heading}
+                              </h4>
+                              {section.subheading && (
+                                <p className="mt-2 max-w-3xl text-sm md:text-base text-deep-espresso/60 leading-relaxed">
+                                  {section.subheading}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                              {Array.isArray(section.items) && section.items.map((block) => {
+                                const category = block?.categoryId;
+                                return (
+                                  <span
+                                    key={getId(block)}
+                                    className="rounded-full border border-soft-oatmeal bg-soft-oatmeal/10 px-3 py-1 text-[11px] font-bold text-deep-espresso/80"
+                                  >
+                                    {category?.name || 'Category'}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              onClick={() => handleEdit(section)}
+                              className="inline-flex items-center gap-2 rounded-xl border border-soft-oatmeal bg-white px-4 py-2.5 text-sm font-semibold text-deep-espresso hover:border-dusty-cocoa hover:text-dusty-cocoa transition-all"
+                            >
+                              <LuPen size={16} />
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(section)}
+                              disabled={deletingId === getId(section)}
+                              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-100 transition-all disabled:opacity-60"
+                            >
+                              {deletingId === getId(section) ? (
+                                <LuLoader className="animate-spin" size={16} />
+                              ) : (
+                                <LuTrash2 size={16} />
+                              )}
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div className="rounded-2xl border border-soft-oatmeal/70 bg-soft-oatmeal/10 p-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">Categories</p>
+                            <p className="mt-2 text-2xl font-display font-bold text-deep-espresso">{blockCount}</p>
+                          </div>
+                          <div className="rounded-2xl border border-soft-oatmeal/70 bg-soft-oatmeal/10 p-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">Products</p>
+                            <p className="mt-2 text-2xl font-display font-bold text-deep-espresso">{productCount}</p>
+                          </div>
+                          <div className="rounded-2xl border border-soft-oatmeal/70 bg-soft-oatmeal/10 p-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">Created</p>
+                            <p className="mt-2 text-sm font-semibold text-deep-espresso">
+                              {section.createdAt ? new Date(section.createdAt).toLocaleDateString() : 'Recently'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </PageWrapper>
   );

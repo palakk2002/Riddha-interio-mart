@@ -2,28 +2,30 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../data/UserContext';
-import { FiArrowLeft, FiMapPin, FiHome, FiCheck } from 'react-icons/fi';
+import { FiArrowLeft, FiHome, FiMapPin, FiCheck, FiSearch, FiUser, FiShoppingCart, FiMenu } from 'react-icons/fi';
 import Button from '../../../shared/components/Button';
 
 const AddressPage = () => {
   const navigate = useNavigate();
   const { saveAddress } = useUser();
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
+    fullName: '',
+    mobileNumber: '',
     pincode: '560001',
-    address: '',
+    fullAddress: '',
     landmark: '',
     city: 'Bengaluru',
-    state: 'Karnataka',
-    addressType: 'Home' // Home, Work, Other
+    addressType: 'Home', // Home, Work, Other
+    isDefault: true
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.name && formData.phone && formData.address && formData.pincode) {
-      saveAddress(formData);
-      navigate('/cart');
+    if (formData.fullName && formData.mobileNumber && formData.fullAddress && formData.pincode) {
+      const success = await saveAddress(formData);
+      if (success) {
+        navigate('/cart');
+      }
     }
   };
 
@@ -37,151 +39,180 @@ const AddressPage = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-soft-oatmeal/5 pb-32"
+      className="min-h-screen bg-[#F8F8F8] pb-10"
     >
-      {/* Header */}
-      <div className="px-4 py-4 md:px-6 md:py-6 bg-white flex items-center gap-4 md:gap-6 border-b border-soft-oatmeal/10 sticky top-0 z-10">
-        <button onClick={() => navigate(-1)}>
-          <FiArrowLeft className="h-6 w-6 text-deep-espresso" />
-        </button>
-        <h1 className="text-xl font-bold text-deep-espresso">Add Delivery Address</h1>
+      {/* Brand Header (matching Image) */}
+      <div className="bg-[#8B2323] text-white p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-display font-black tracking-tighter uppercase italic">RIDDHA INTERIO</h1>
+          <div className="flex items-center gap-5">
+            <FiUser size={20} />
+            <div className="relative">
+              <FiShoppingCart size={20} />
+              <span className="absolute -top-1.5 -right-1.5 bg-white text-[#8B2323] text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">1</span>
+            </div>
+            <FiMenu size={20} />
+          </div>
+        </div>
+        <div className="relative">
+          <input 
+            type="text" 
+            placeholder="Search products or brands..." 
+            className="w-full bg-white rounded-lg py-3 px-12 text-sm text-gray-500 placeholder-gray-400 focus:outline-none"
+          />
+          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-3 md:p-4 space-y-4 md:space-y-6">
-        {/* Contact Info Section */}
-        <div className="space-y-3 md:space-y-4">
-          <h3 className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand flex items-center gap-2">
-            <span className="w-4 h-px bg-warm-sand/30" /> Contact Info
-          </h3>
-          <div className="space-y-4 md:space-y-5">
-            <div className="space-y-1 md:space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 px-2">Full Name</label>
-              <input 
-                required
-                type="text" 
-                placeholder="Enter your full name" 
-                className="w-full px-4 py-3 md:px-6 md:py-4 rounded-xl md:rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all shadow-sm text-sm"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-              />
-            </div>
-            <div className="space-y-1 md:space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 px-2">Mobile Number</label>
-              <div className="relative">
-                <span className="absolute left-4 md:left-5 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs md:text-sm tracking-widest">+91</span>
-                <input 
-                  required
-                  type="tel" 
-                  pattern="[0-9]{10}"
-                  placeholder="10-digit number" 
-                  className="w-full pl-12 md:pl-16 pr-4 md:pr-6 py-3 md:py-4 rounded-xl md:rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all shadow-sm text-sm"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})}
-                />
-              </div>
-            </div>
-          </div>
+      {/* Delivery Status (matching Image) */}
+      <div className="bg-white px-4 py-3 border-b border-gray-100 flex items-center gap-1">
+        <span className="text-[10px] font-bold text-gray-400">Delivery in</span>
+        <span className="text-[10px] font-black text-[#8B2323]">4 hours</span>
+        <span className="text-[10px] text-gray-400 ml-1 flex items-center gap-0.5">to 452018 <FiMapPin size={8} /></span>
+      </div>
+
+      <div className="max-w-xl mx-auto">
+        <div className="px-6 pt-8 flex items-center gap-4">
+          <button onClick={() => navigate(-1)} className="p-1">
+            <FiArrowLeft className="h-6 w-6 text-deep-espresso" />
+          </button>
+          <h1 className="text-2xl font-display font-bold text-deep-espresso">Add Delivery Address</h1>
         </div>
 
-        {/* Address Details Section */}
-        <div className="space-y-3 md:space-y-4 pt-2 md:pt-4">
-          <h3 className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand flex items-center gap-2">
-            <span className="w-4 h-px bg-warm-sand/30" /> Address Details
-          </h3>
-          <div className="space-y-4 md:space-y-5">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1 md:space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 px-2">Pincode</label>
+        <form onSubmit={handleSubmit} className="px-6 py-8 space-y-8">
+          {/* Contact Info */}
+          <div className="space-y-6">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8B2323] flex items-center gap-3">
+              <span className="w-6 h-px bg-[#8B2323]/20" /> CONTACT INFO
+            </h3>
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">FULL NAME</label>
                 <input 
                   required
                   type="text" 
-                  maxLength="6"
-                  placeholder="6-digit" 
-                  className="w-full px-4 py-3 md:px-6 md:py-4 rounded-xl md:rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all shadow-sm text-sm"
-                  value={formData.pincode}
-                  onChange={(e) => setFormData({...formData, pincode: e.target.value.replace(/\D/g, '').slice(0, 6)})}
+                  placeholder="Enter your full name" 
+                  className="w-full px-5 py-4 rounded-xl border border-gray-200 bg-white focus:border-[#8B2323]/30 focus:outline-none font-medium transition-all text-sm"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                 />
               </div>
-              <div className="space-y-1 md:space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 px-2">City</label>
-                <input 
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">MOBILE NUMBER</label>
+                <div className="relative">
+                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm tracking-widest">+91</span>
+                  <input 
+                    required
+                    type="tel" 
+                    placeholder="10-digit number" 
+                    className="w-full pl-16 pr-5 py-4 rounded-xl border border-gray-200 bg-white focus:border-[#8B2323]/30 focus:outline-none font-medium transition-all text-sm"
+                    value={formData.mobileNumber}
+                    onChange={(e) => setFormData({...formData, mobileNumber: e.target.value.replace(/\D/g, '').slice(0, 10)})}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Address Details */}
+          <div className="space-y-6">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8B2323] flex items-center gap-3">
+              <span className="w-6 h-px bg-[#8B2323]/20" /> ADDRESS DETAILS
+            </h3>
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">PINCODE</label>
+                  <input 
+                    required
+                    type="text" 
+                    placeholder="560001" 
+                    className="w-full px-5 py-4 rounded-xl border border-gray-200 bg-white focus:border-[#8B2323]/30 focus:outline-none font-medium transition-all text-sm"
+                    value={formData.pincode}
+                    onChange={(e) => setFormData({...formData, pincode: e.target.value.replace(/\D/g, '').slice(0, 6)})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">CITY</label>
+                  <input 
+                    required
+                    type="text" 
+                    placeholder="Bengaluru" 
+                    className="w-full px-5 py-4 rounded-xl border border-gray-200 bg-white focus:border-[#8B2323]/30 focus:outline-none font-medium transition-all text-sm"
+                    value={formData.city}
+                    onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">FULL ADDRESS</label>
+                <textarea 
                   required
+                  placeholder="Flat, House no., Building, Apartment" 
+                  className="w-full px-5 py-4 rounded-xl border border-gray-200 bg-white focus:border-[#8B2323]/30 focus:outline-none font-medium transition-all min-h-[100px] text-sm"
+                  value={formData.fullAddress}
+                  onChange={(e) => setFormData({...formData, fullAddress: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">LANDMARK (OPTIONAL)</label>
+                <input 
                   type="text" 
-                  placeholder="Bengaluru" 
-                  className="w-full px-4 py-3 md:px-6 md:py-4 rounded-xl md:rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all shadow-sm text-sm"
-                  value={formData.city}
-                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  placeholder="Nearby famous place" 
+                  className="w-full px-5 py-4 rounded-xl border border-gray-200 bg-white focus:border-[#8B2323]/30 focus:outline-none font-medium transition-all text-sm"
+                  value={formData.landmark}
+                  onChange={(e) => setFormData({...formData, landmark: e.target.value})}
                 />
               </div>
             </div>
-            <div className="space-y-1 md:space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 px-2">Full Address</label>
-              <textarea 
-                required
-                placeholder="Flat, House no., Building, Apartment" 
-                className="w-full px-4 py-3 md:px-6 md:py-4 rounded-xl md:rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all min-h-[80px] md:min-h-[120px] shadow-sm shadow-inner text-sm"
-                value={formData.address}
-                onChange={(e) => setFormData({...formData, address: e.target.value})}
-              />
-            </div>
-            <div className="space-y-1 md:space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 px-2">Landmark (Optional)</label>
-              <input 
-                type="text" 
-                placeholder="Nearby famous place" 
-                className="w-full px-4 py-3 md:px-6 md:py-4 rounded-xl md:rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all shadow-sm text-sm"
-                value={formData.landmark}
-                onChange={(e) => setFormData({...formData, landmark: e.target.value})}
-              />
+          </div>
+
+          {/* Save As */}
+          <div className="space-y-4">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8B2323] flex items-center gap-3">
+              <span className="w-6 h-px bg-[#8B2323]/20" /> SAVE AS
+            </h3>
+            <div className="flex gap-4">
+              {addressTypes.map((type) => (
+                <button
+                  key={type.id}
+                  type="button"
+                  onClick={() => setFormData({...formData, addressType: type.id})}
+                  className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-xl border transition-all font-bold text-xs ${
+                    formData.addressType === type.id 
+                    ? 'border-[#8B2323] bg-[#8B2323] text-white shadow-xl shadow-[#8B2323]/20' 
+                    : 'border-gray-100 bg-white text-gray-400'
+                  }`}
+                >
+                  {type.icon}
+                  {type.id}
+                </button>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* Address Type Section */}
-        <div className="space-y-3 md:space-y-4 pt-2 md:pt-4">
-          <h3 className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand flex items-center gap-2">
-            <span className="w-4 h-px bg-warm-sand/30" /> Save As
-          </h3>
-          <div className="flex gap-2">
-            {addressTypes.map((type) => (
-              <button
-                key={type.id}
-                type="button"
-                onClick={() => setFormData({...formData, addressType: type.id})}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 md:py-3 rounded-lg md:rounded-xl border transition-all font-bold text-xs ${
-                  formData.addressType === type.id 
-                  ? 'border-warm-sand bg-warm-sand text-white shadow-md shadow-warm-sand/10' 
-                  : 'border-gray-200 bg-white text-gray-400'
-                }`}
-              >
-                {type.icon}
-                {type.id}
-              </button>
-            ))}
+          <div className="flex items-center gap-4 py-2">
+            <div 
+              onClick={() => setFormData({...formData, isDefault: !formData.isDefault})}
+              className={`w-6 h-6 rounded flex items-center justify-center cursor-pointer transition-colors ${formData.isDefault ? 'bg-[#8B2323]' : 'bg-gray-200'}`}
+            >
+              {formData.isDefault && <FiCheck className="text-white" size={14} />}
+            </div>
+            <label className="text-[11px] font-black text-deep-espresso tracking-wide uppercase cursor-pointer">
+              SAVE THIS ADDRESS FOR FUTURE USE
+            </label>
           </div>
-        </div>
-        <div className="px-2 py-2 flex items-center gap-3">
-          <input 
-            type="checkbox" 
-            id="saveAddress" 
-            className="w-5 h-5 accent-warm-sand rounded border-gray-300"
-            defaultChecked
-          />
-          <label htmlFor="saveAddress" className="text-xs font-bold text-deep-espresso uppercase tracking-wider">
-            Save this address for future use
-          </label>
-        </div>
 
-        <div className="px-2 py-4 pb-20">
-          <Button 
-            type="submit"
-            size="lg" 
-            className="w-full h-12 md:h-16 rounded-xl md:rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-warm-sand/20"
-          >
-            SAVE ADDRESS
-          </Button>
-        </div>
-      </form>
+          <div className="pt-4">
+            <Button 
+              type="submit"
+              className="w-full h-16 rounded-2xl bg-[#8B2323] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-[#8B2323]/30"
+            >
+              SAVE ADDRESS
+            </Button>
+          </div>
+        </form>
+      </div>
     </motion.div>
   );
 };

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { FiArrowLeft, FiPlus, FiTrash2, FiImage, FiSave, FiUploadCloud, FiCheck } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { manageCategoriesData } from '../data/manageCategoriesData';
+import api from '../../../shared/utils/api';
 
 const EditCategoryPage = () => {
   const { id } = useParams();
@@ -15,7 +15,6 @@ const EditCategoryPage = () => {
     image: '',
     description: '',
   });
-  const [categories, setCategories] = useState(manageCategoriesData);
   const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -23,45 +22,28 @@ const EditCategoryPage = () => {
   const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
-    try {
-      // Load categories from localStorage
-      const savedCats = localStorage.getItem('admin_categories');
-      if (savedCats) {
-        setCategories(JSON.parse(savedCats));
-      }
-    } catch (err) {
-      console.error('Failed to load categories:', err);
-    }
-  }, []);
-
-  useEffect(() => {
-    // Determine the source of truth (localStorage or static data)
-    let sourceData = manageCategoriesData;
-    try {
-      const saved = localStorage.getItem('admin_categories');
-      if (saved) {
-        sourceData = JSON.parse(saved);
-      }
-    } catch (err) {
-      console.error('Failed to parse localStorage during fetch:', err);
-    }
-
-    // Find the category by ID
-    const existingCategory = sourceData.find(c => String(c.id) === String(id));
-    
-    if (existingCategory) {
-      setCategory({
-        name: existingCategory.name,
-        image: existingCategory.image,
-        description: 'Premium collection curated for modern Indian interiors.',
-      });
-      setSubcategories(existingCategory.subcategories || []);
-    } else {
-      console.warn('Category not found for ID:', id);
-      // Optional: navigate away or show error
-    }
-    setLoading(false);
+    fetchCategoryDetails();
   }, [id]);
+
+  const fetchCategoryDetails = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/categories/${id}`);
+      const data = response.data.data;
+      
+      setCategory({
+        name: data.name,
+        image: data.image,
+        description: data.description || '',
+      });
+      setSubcategories(data.subcategories || []);
+    } catch (err) {
+      console.error('Failed to load category:', err);
+      setSaveError('Could not load category details. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -80,7 +62,7 @@ const EditCategoryPage = () => {
   };
 
   const handleAddSubcategory = () => {
-    setSubcategories([...subcategories, { name: '', image: '' }]);
+    setSubcategories([...subcategories, { name: '', image: '', description: '' }]);
   };
 
   const handleRemoveSubcategory = (index) => {
@@ -93,46 +75,36 @@ const EditCategoryPage = () => {
     setSubcategories(newSubs);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSaving(true);
     setSaveError('');
 
-    // Simulate API call
-    setTimeout(() => {
-      try {
-        const saved = localStorage.getItem('admin_categories');
-        const categories = saved ? JSON.parse(saved) : manageCategoriesData;
-        
-        const updatedCategory = {
-          ...category,
-          id: parseInt(id),
-          subcategories: subcategories.filter(s => s.name.trim() !== '')
-        };
+    try {
+      const categoryData = {
+        name: category.name,
+        description: category.description,
+        image: category.image,
+        subcategories: subcategories.filter(s => s.name.trim() !== '')
+      };
 
-        const updatedList = categories.map(c => 
-          c.id === parseInt(id) ? updatedCategory : c
-        );
+      const response = await api.put(`/categories/${id}`, categoryData);
 
-        localStorage.setItem('admin_categories', JSON.stringify(updatedList));
-
-        console.log('Category Updated in LocalStorage:', updatedCategory);
+      if (response.data.success) {
         setIsSaving(false);
         setIsSaved(true);
-        
-        // Success delay and redirect
         setTimeout(() => {
           navigate('/admin/manage-categories');
         }, 1000);
-      } catch (err) {
-        console.error('Update failed:', err);
-        setSaveError('Storage limit reached! Using a smaller image or deleting old entries might help.');
-        setIsSaving(false);
       }
-    }, 1500);
+    } catch (err) {
+      console.error('Update failed:', err);
+      setSaveError(err.response?.data?.error || 'Failed to update category. Check your connection.');
+      setIsSaving(false);
+    }
   };
 
-  if (loading) return <PageWrapper><div className="flex items-center justify-center min-h-[60vh] text-warm-sand">Loading...</div></PageWrapper>;
+  if (loading) return <PageWrapper><div className="flex items-center justify-center min-h-[60vh] text-warm-sand font-display font-black uppercase tracking-widest text-xs animate-pulse">Loading Details...</div></PageWrapper>;
 
   return (
     <PageWrapper>
@@ -147,12 +119,11 @@ const EditCategoryPage = () => {
           </button>
           <div>
             <h1 className="text-3xl font-display font-bold text-deep-espresso">Edit Category: {category.name}</h1>
-            <p className="text-warm-sand text-sm font-medium">Update the metadata and subcategories for this category.</p>
+            <p className="text-warm-sand text-sm font-medium italic">Update the metadata and subcategories for this category record.</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
-          {/* Main Info */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white p-8 md:p-10 rounded-[40px] border border-soft-oatmeal shadow-sm space-y-8">
               <h3 className="text-lg font-black text-deep-espresso border-b border-soft-oatmeal pb-4 uppercase tracking-[0.1em]">General Information</h3>
@@ -180,37 +151,80 @@ const EditCategoryPage = () => {
                 </div>
               </div>
             </div>
+
+            <div className="bg-white p-8 md:p-10 rounded-[40px] border border-soft-oatmeal shadow-sm space-y-8">
+              <div className="flex items-center justify-between border-b border-soft-oatmeal pb-4">
+                <h3 className="text-lg font-black text-deep-espresso uppercase tracking-[0.1em]">Subcategories</h3>
+                <button 
+                  type="button"
+                  onClick={handleAddSubcategory}
+                  className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-dusty-cocoa hover:text-deep-espresso transition-colors px-4 py-2 border border-soft-oatmeal rounded-full shadow-sm"
+                >
+                  <FiPlus /> Add new
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <AnimatePresence initial={false}>
+                  {subcategories.map((sub, index) => (
+                    <motion.div 
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="flex gap-4 p-5 bg-soft-oatmeal/5 rounded-[24px] border border-soft-oatmeal/50 relative group transition-all duration-300"
+                    >
+                      <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                           <label className="text-[8px] font-black text-warm-sand uppercase tracking-widest pl-1">Subcategory Name</label>
+                           <input 
+                              type="text" 
+                              placeholder="e.g. Chandeliers"
+                              value={sub.name}
+                              onChange={(e) => handleSubChange(index, 'name', e.target.value)}
+                              className="w-full bg-white border border-soft-oatmeal rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-warm-sand/20 outline-none transition-all font-medium"
+                           />
+                        </div>
+                        <div className="space-y-1.5">
+                           <label className="text-[8px] font-black text-warm-sand uppercase tracking-widest pl-1">Thumbnail Media URL/Base64</label>
+                           <input 
+                              type="text" 
+                              placeholder="https://..."
+                              value={sub.image}
+                              onChange={(e) => handleSubChange(index, 'image', e.target.value)}
+                              className="w-full bg-white border border-soft-oatmeal rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-warm-sand/20 outline-none transition-all font-medium"
+                           />
+                        </div>
+                      </div>
+                      <div className="flex items-end pb-1">
+                        <button 
+                           type="button"
+                           onClick={() => handleRemoveSubcategory(index)}
+                           className="p-3 text-red-300 hover:text-red-500 rounded-xl transition-all"
+                        >
+                           <FiTrash2 size={16} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </div>
           </div>
 
-          {/* Sidebar / Media */}
           <div className="space-y-6">
             <div className="bg-white p-8 rounded-[40px] border border-soft-oatmeal shadow-sm space-y-8 sticky top-24">
               <h3 className="text-lg font-black text-deep-espresso border-b border-soft-oatmeal pb-4 uppercase tracking-[0.1em]">Banner Media</h3>
               
               <div className="space-y-6">
-                <input 
-                   type="file" 
-                   ref={fileInputRef}
-                   onChange={handleImageUpload}
-                   accept="image/*"
-                   className="hidden"
-                />
-                <div 
-                  onClick={() => fileInputRef.current.click()}
-                  className="aspect-[4/5] bg-soft-oatmeal/10 rounded-[32px] border-2 border-dashed border-soft-oatmeal overflow-hidden relative group cursor-pointer hover:border-warm-sand/50 hover:bg-soft-oatmeal/20 transition-all"
-                >
+                <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+                <div onClick={() => fileInputRef.current.click()} className="aspect-[4/5] bg-soft-oatmeal/10 rounded-[32px] border-2 border-dashed border-soft-oatmeal overflow-hidden relative group cursor-pointer hover:border-warm-sand/50 transition-all">
                   {category.image ? (
-                    <img 
-                      src={category.image} 
-                      alt="Preview" 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                    />
+                    <img src={category.image} alt="Preview" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-warm-sand p-6 text-center">
-                      <div className="w-16 h-16 bg-soft-oatmeal/20 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-warm-sand/10 transition-colors">
-                        <FiUploadCloud size={32} className="opacity-40" />
-                      </div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-1">Click to Upload</p>
+                      <FiUploadCloud size={32} className="opacity-40 mb-2" />
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em]">Upload Media</p>
                     </div>
                   )}
                   {category.image && (
@@ -222,19 +236,13 @@ const EditCategoryPage = () => {
 
                 <div className="space-y-3">
                   <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest pl-1">Media Format</p>
-                  <p className="px-4 py-3 bg-soft-oatmeal/10 rounded-xl text-[10px] font-medium text-warm-sand border border-soft-oatmeal/50">
-                    Supports JPG, PNG, WEBP.
-                  </p>
+                  <p className="px-4 py-3 bg-soft-oatmeal/10 rounded-xl text-[10px] font-medium text-warm-sand border border-soft-oatmeal/50">Supports JPG, PNG, WEBP. Max 2MB.</p>
                 </div>
               </div>
 
               <div className="pt-4">
                 {saveError && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-4 bg-red-50 border border-red-100 rounded-2xl text-[10px] font-bold text-red-500 text-center leading-relaxed"
-                  >
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4 p-4 bg-red-50 border border-red-100 rounded-2xl text-[10px] font-bold text-red-500 text-center leading-relaxed">
                     {saveError}
                   </motion.div>
                 )}
@@ -242,36 +250,15 @@ const EditCategoryPage = () => {
                 <button 
                   type="submit"
                   disabled={isSaving || isSaved}
-                  className={`w-full flex items-center justify-center gap-3 py-5 rounded-[24px] font-black uppercase tracking-[0.2em] text-xs transition-all active:scale-95 shadow-xl ${
+                  className={`w-full flex items-center justify-center gap-3 py-5 rounded-[24px] font-black uppercase tracking-[0.2em] text-xs transition-colors shadow-xl ${
                     isSaved ? 'bg-emerald-500 text-white' : 
                     isSaving ? 'bg-dusty-cocoa text-white' : 
-                    'bg-deep-espresso text-white hover:bg-dusty-cocoa hover:shadow-deep-espresso/20'
+                    'bg-deep-espresso text-white hover:bg-dusty-cocoa'
                   }`}
                 >
-                  {isSaved ? (
-                    <>
-                      <FiCheck size={18} />
-                      Category Updated
-                    </>
-                  ) : isSaving ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Updating...
-                    </>
-                  ) : (
-                    <>
-                      <FiSave size={18} />
-                      Update Category
-                    </>
-                  )}
+                  {isSaved ? <><FiCheck size={18} /> Done</> : isSaving ? 'Updating...' : <><FiSave size={18} /> Save Changes</>}
                 </button>
-                <button 
-                  type="button"
-                  onClick={() => navigate('/admin/manage-categories')}
-                  className="w-full mt-4 py-3 text-[10px] font-black uppercase tracking-[0.25em] text-warm-sand hover:text-red-500 transition-colors text-center font-bold"
-                >
-                  Cancel Edit
-                </button>
+                <button type="button" onClick={() => navigate('/admin/manage-categories')} className="w-full mt-4 py-3 text-[10px] font-black uppercase tracking-[0.25em] text-warm-sand hover:text-red-500 transition-colors text-center">Discard Changes</button>
               </div>
             </div>
           </div>
