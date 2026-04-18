@@ -1,56 +1,76 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
-import { LuPlus, LuSearch, LuFilter, LuBox, LuCheck } from 'react-icons/lu';
-import { adminProducts } from '../../admin/data/adminProducts';
-import { sellerProducts } from '../data/sellerProducts';
+import { LuPlus, LuSearch, LuFilter, LuBox, LuCheck, LuClock } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '../../../shared/utils/api';
 
 const BrowseCatalog = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [catalogProducts, setCatalogProducts] = useState([]);
+  const [inventory, setInventory] = useState([]);
 
-  const [inventory, setInventory] = useState(() => {
-    const fullSaved = localStorage.getItem('seller_full_inventory');
-    if (fullSaved) return JSON.parse(fullSaved);
-    
-    const savedAdded = JSON.parse(localStorage.getItem('seller_added_products') || '[]');
-    return [...sellerProducts, ...savedAdded];
-  });
+  useEffect(() => {
+    fetchCatalog();
+    fetchMyInventory();
+  }, []);
+
+  const fetchCatalog = async () => {
+    try {
+      setLoading(true);
+      // Fetch all approved products that are live
+      const { data } = await api.get('/products', { params: { isApproved: true } });
+      setCatalogProducts(data.data || []);
+    } catch (err) {
+      console.error('Failed to fetch catalog:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMyInventory = async () => {
+    try {
+      const { data } = await api.get('/products/seller/me'); // Hypothetical endpoint for seller's own products
+      setInventory(data.data || []);
+    } catch (err) {
+      console.error('Failed to fetch inventory:', err);
+    }
+  };
 
   const filteredProducts = useMemo(() => {
-    return adminProducts.filter(p => 
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      p.code.toLowerCase().includes(searchTerm.toLowerCase())
+    return catalogProducts.filter(p => 
+      p.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      p.sku?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm]);
+  }, [searchTerm, catalogProducts]);
 
-  const handleAddToShop = (product) => {
-    if (inventory.some(p => p.id === product.id)) return;
-
-    const newProduct = {
-      ...product,
-      status: 'pending',
-      dateAdded: new Date().toISOString().split('T')[0]
-    };
-
-    const updatedInventory = [...inventory, newProduct];
-    setInventory(updatedInventory);
-    
-    // Persist to localStorage
-    localStorage.setItem('seller_full_inventory', JSON.stringify(updatedInventory));
-    
-    // Also update seller_added_products for partial sync compatibility
-    const addedOnly = updatedInventory.filter(p => !sellerProducts.some(sp => sp.id === p.id));
-    localStorage.setItem('seller_added_products', JSON.stringify(addedOnly));
-
-    setToastMessage(`${product.name} added to your shop!`);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+  const handleAddToShop = async (product) => {
+    try {
+       // Logic to 'claim' or 'clone' a catalog item for the seller
+       // For now, let's assume we create a copy marked as from catalog
+       const res = await api.post('/products', {
+         ...product,
+         source: 'catalog',
+         isApproved: true, // Catalog items are auto-approved
+         approvalStatus: 'approved'
+       });
+       
+       if (res.data.success) {
+         setInventory([...inventory, res.data.data]);
+         setToastMessage(`${product.name} added to your shop!`);
+         setShowToast(true);
+         setTimeout(() => setShowToast(false), 3000);
+       }
+    } catch (err) {
+       console.error('Add to shop error:', err);
+       alert('Failed to add product to your shop.');
+    }
   };
 
   const isProductInInventory = (productId) => {
-    return inventory.some(p => p.id === productId);
+    return inventory.some(p => p.sku === catalogProducts.find(cp => cp._id === productId)?.sku);
   };
 
   return (
@@ -84,15 +104,22 @@ const BrowseCatalog = () => {
 
         {/* Catalog List / Table */}
         <div className="space-y-4">
-          {/* Desktop Table View */}
-          <div className="hidden md:block bg-white rounded-2xl border border-soft-oatmeal shadow-md overflow-hidden">
+          {loading ? (
+             <div className="py-20 flex flex-col items-center justify-center space-y-4 text-warm-sand">
+               <LuClock size={48} className="animate-spin opacity-20" />
+               <p className="font-bold text-[10px] uppercase tracking-widest">Fetching Catalog Data...</p>
+             </div>
+          ) : (
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block bg-white rounded-2xl border border-soft-oatmeal shadow-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead className="bg-soft-oatmeal/20 border-b border-soft-oatmeal">
                   <tr>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Image</th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Product Name</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Code</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">SKU</th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Category</th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Price</th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest text-right">Actions</th>
@@ -100,17 +127,17 @@ const BrowseCatalog = () => {
                 </thead>
                 <tbody className="divide-y divide-soft-oatmeal/50">
                   {filteredProducts.map((product) => (
-                    <tr key={product.id} className="hover:bg-soft-oatmeal/5 transition-colors group">
+                    <tr key={product._id} className="hover:bg-soft-oatmeal/5 transition-colors group">
                       <td className="px-6 py-4">
-                        <img src={product.image} alt={product.name} className="w-12 h-12 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" />
+                        <img src={product.images?.[0] || 'https://via.placeholder.com/150'} alt={product.name} className="w-12 h-12 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" />
                       </td>
                       <td className="px-6 py-4">
                         <p className="font-bold text-deep-espresso">{product.name}</p>
-                        <p className="text-[10px] text-warm-sand uppercase tracking-wider mt-0.5">In Stock</p>
+                        <p className="text-[10px] text-warm-sand uppercase tracking-wider mt-0.5">In Catalog</p>
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-[10px] font-black text-deep-espresso/60 bg-soft-oatmeal/30 px-2 py-1 rounded border border-soft-oatmeal">
-                          {product.code}
+                          {product.sku || 'N/A'}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -119,10 +146,10 @@ const BrowseCatalog = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 font-black text-deep-espresso">
-                        ₹{product.price.toFixed(2)}
+                        ₹{product.price?.toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        {isProductInInventory(product.id) ? (
+                        {isProductInInventory(product._id) ? (
                           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 font-bold text-xs">
                             <LuCheck size={14} />
                             Added
@@ -147,17 +174,17 @@ const BrowseCatalog = () => {
           {/* Mobile Card View */}
           <div className="md:hidden space-y-4">
             {filteredProducts.map((product) => (
-              <div key={product.id} className="bg-white p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex gap-4 items-center">
-                <img src={product.image} alt={product.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
+              <div key={product._id} className="bg-white p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex gap-4 items-center">
+                <img src={product.images?.[0] || 'https://via.placeholder.com/150'} alt={product.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-deep-espresso truncate">{product.name}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[9px] font-black text-deep-espresso/40 bg-soft-oatmeal/30 px-1.5 py-0.5 rounded">{product.code}</span>
+                    <span className="text-[9px] font-black text-deep-espresso/40 bg-soft-oatmeal/30 px-1.5 py-0.5 rounded">{product.sku}</span>
                     <span className="text-[9px] font-bold text-dusty-cocoa uppercase tracking-tighter">{product.category}</span>
                   </div>
-                  <p className="font-black text-deep-espresso mt-1">₹{product.price.toFixed(2)}</p>
+                  <p className="font-black text-deep-espresso mt-1">₹{product.price?.toLocaleString()}</p>
                 </div>
-                {isProductInInventory(product.id) ? (
+                {isProductInInventory(product._id) ? (
                   <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
                     <LuCheck size={18} />
                   </div>
@@ -172,6 +199,8 @@ const BrowseCatalog = () => {
               </div>
             ))}
           </div>
+        </>
+      )}
 
           {/* Empty State */}
           {filteredProducts.length === 0 && (

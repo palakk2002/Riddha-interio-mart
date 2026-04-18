@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LuPlus, LuBox, LuTags, LuCheck, LuClock, LuImage, LuX, LuTrash2 } from 'react-icons/lu';
 import api from '../../../shared/utils/api';
 
 const AddProduct = () => {
-  const [activeTab, setActiveTab] = useState('custom'); // Defaulting to custom for full form
+  const [selection, setSelection] = useState(null); // 'new' or 'catalog'
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +88,7 @@ const AddProduct = () => {
         throw new Error('Please upload at least one product image');
       }
 
-      const res = await api.post('/products', formData);
+      const res = await api.post('/products', { ...formData, source: selection });
       if (res.data.success) {
         setSuccess(true);
         // Reset form
@@ -97,7 +98,10 @@ const AddProduct = () => {
           dimensions: '', thickness: '', color: '', unit: 'piece',
           countInStock: '', images: []
         });
-        setTimeout(() => setSuccess(false), 5000);
+        setTimeout(() => {
+          setSuccess(false);
+          setSelection(null);
+        }, 5000);
       }
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Failed to add product');
@@ -109,12 +113,77 @@ const AddProduct = () => {
   return (
     <PageWrapper>
       <div className="max-w-5xl mx-auto space-y-8">
-        <div className="text-center md:text-left space-y-2">
-          <h1 className="text-3xl md:text-5xl font-display font-bold text-deep-espresso tracking-tight">Add New Product</h1>
-          <p className="text-warm-sand font-medium uppercase tracking-[0.2em] text-[10px]">Merchant Inventory Portal</p>
-        </div>
+        <AnimatePresence mode="wait">
+          {!selection ? (
+            <motion.div 
+              key="selection"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="py-12 md:py-20 flex flex-col items-center justify-center space-y-12"
+            >
+              <div className="text-center space-y-4">
+                <h1 className="text-4xl md:text-6xl font-display font-bold text-deep-espresso tracking-tight">Add Product</h1>
+                <p className="text-warm-sand font-black uppercase tracking-[0.3em] text-xs">How would you like to list your product?</p>
+              </div>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl px-4">
+                <button 
+                  onClick={() => setSelection('new')}
+                  className="group relative bg-white border border-soft-oatmeal p-10 rounded-[40px] shadow-sm hover:shadow-2xl hover:border-warm-sand/30 transition-all duration-500 flex flex-col items-center text-center space-y-6"
+                >
+                  <div className="w-20 h-20 bg-soft-oatmeal/10 rounded-3xl flex items-center justify-center text-warm-sand group-hover:bg-warm-sand group-hover:text-white transition-all duration-500">
+                    <LuPlus size={40} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-deep-espresso">Add New Product</h3>
+                    <p className="text-warm-sand/60 text-sm font-medium mt-2 leading-relaxed">Create a completely new product listing. Requires Admin approval before going live.</p>
+                  </div>
+                  <div className="pt-4">
+                    <span className="px-6 py-3 bg-soft-oatmeal/20 rounded-full text-[10px] font-black uppercase tracking-widest text-warm-sand group-hover:bg-warm-sand/10 transition-colors">Start New Entry</span>
+                  </div>
+                </button>
+
+                <Link 
+                  to="/seller/catalog"
+                  className="group relative bg-white border border-soft-oatmeal p-10 rounded-[40px] shadow-sm hover:shadow-2xl hover:border-warm-sand/30 transition-all duration-500 flex flex-col items-center text-center space-y-6"
+                >
+                  <div className="w-20 h-20 bg-soft-oatmeal/10 rounded-3xl flex items-center justify-center text-warm-sand group-hover:bg-warm-sand group-hover:text-white transition-all duration-500">
+                    <LuTags size={40} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-deep-espresso">Add From Catalog</h3>
+                    <p className="text-warm-sand/60 text-sm font-medium mt-2 leading-relaxed">List a product that already exists in the catalog. Instant approval, no waiting required.</p>
+                  </div>
+                  <div className="pt-4">
+                    <span className="px-6 py-3 bg-soft-oatmeal/20 rounded-full text-[10px] font-black uppercase tracking-widest text-warm-sand group-hover:bg-warm-sand/10 transition-colors">Select From Catalog</span>
+                  </div>
+                </Link>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="form"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-8"
+            >
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-soft-oatmeal/30">
+                <div className="space-y-2">
+                  <button 
+                    onClick={() => setSelection(null)}
+                    className="text-[10px] font-black uppercase tracking-widest text-warm-sand hover:text-deep-espresso transition-colors flex items-center gap-2 mb-2"
+                  >
+                    ← Back to selection
+                  </button>
+                  <h1 className="text-3xl md:text-5xl font-display font-bold text-deep-espresso tracking-tight">
+                    {selection === 'new' ? 'Create New Listing' : 'Catalog Listing'}
+                  </h1>
+                  <p className="text-warm-sand font-medium uppercase tracking-[0.2em] text-[10px]">Merchant Inventory Portal • {selection === 'new' ? 'Approval Required' : 'Instant Approval'}</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
           
           {/* Main Form Content */}
           <div className="lg:col-span-2 space-y-8">
@@ -341,7 +410,10 @@ const AddProduct = () => {
                 </div>
              </div>
           </div>
-        </form>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </PageWrapper>
   );

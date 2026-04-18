@@ -5,7 +5,8 @@ const {
   createProduct,
   getSellerProducts,
   deleteProduct,
-  updateProduct
+  updateProduct,
+  updateApprovalStatus
 } = require('../controllers/productController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -16,6 +17,8 @@ router.route('/')
   .post(protect, authorize('seller', 'admin'), createProduct);
 
 router.get('/my-products', protect, authorize('seller'), getSellerProducts);
+
+router.put('/:id/approval', protect, authorize('admin'), updateApprovalStatus);
 
 router.route('/:id')
   .get(getProduct)

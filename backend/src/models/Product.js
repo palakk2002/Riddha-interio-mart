@@ -68,6 +68,20 @@ const ProductSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  approvalStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
+  isApproved: {
+    type: Boolean,
+    default: false
+  },
+  source: {
+    type: String,
+    enum: ['new', 'catalog'],
+    default: 'new'
+  },
   createdAt: {
     type: Date,
     default: Date.now

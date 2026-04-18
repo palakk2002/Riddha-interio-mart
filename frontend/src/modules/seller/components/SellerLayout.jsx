@@ -78,7 +78,8 @@ const SellerLayout = () => {
       setToast({
         orderId: payload?.orderId,
         title: 'New Order Received',
-        message
+        message,
+        type: 'order'
       });
 
       prependSellerNotification({
@@ -101,10 +102,37 @@ const SellerLayout = () => {
       window.dispatchEvent(new CustomEvent('seller:new-order', { detail: payload }));
     };
 
+    const onProductApprovalUpdate = async (payload) => {
+      const message = payload.message || `Your product status has been updated.`;
+      
+      setToast({
+        title: 'Product Status Update',
+        message,
+        type: payload.status === 'approved' ? 'success' : 'danger'
+      });
+
+      prependSellerNotification({
+        id: Date.now() + Math.random(),
+        title: 'Product Status Update',
+        message,
+        time: 'Just now',
+        status: 'unread',
+        type: payload.status === 'approved' ? 'success' : 'danger'
+      });
+
+      if (isSoundEnabled()) {
+        await playNewOrderChime(); // Reusing the chime for now
+      }
+
+      window.dispatchEvent(new CustomEvent('seller:product-approval', { detail: payload }));
+    };
+
     socket.on('order:new', onNewOrder);
+    socket.on('product:approval_update', onProductApprovalUpdate);
 
     return () => {
       socket.off('order:new', onNewOrder);
+      socket.off('product:approval_update', onProductApprovalUpdate);
     };
   }, [user?.token, user?.role]);
 
@@ -133,12 +161,20 @@ const SellerLayout = () => {
           >
             <div className="rounded-3xl bg-white border border-soft-oatmeal shadow-2xl overflow-hidden">
               <div className="p-5 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-2xl bg-warm-sand/15 text-warm-sand flex items-center justify-center font-black">
-                  ₹
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black ${
+                  toast.type === 'success' ? 'bg-emerald-100 text-emerald-600' : 
+                  toast.type === 'danger' ? 'bg-red-100 text-red-600' : 
+                  'bg-warm-sand/15 text-warm-sand'
+                }`}>
+                  {toast.type === 'success' ? <LuCheck size={20} /> : 
+                   toast.type === 'danger' ? <LuX size={20} /> : '₹'}
                 </div>
                 <div className="flex-1">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-warm-sand">Realtime</p>
-                  <h4 className="text-sm font-black text-deep-espresso mt-1">{toast.title}</h4>
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-warm-sand">Realtime Notification</p>
+                  <h4 className={`text-sm font-black mt-1 ${
+                    toast.type === 'success' ? 'text-emerald-700' : 
+                    toast.type === 'danger' ? 'text-red-700' : 'text-deep-espresso'
+                  }`}>{toast.title}</h4>
                   <p className="text-xs text-dusty-cocoa mt-1 leading-relaxed">{toast.message}</p>
                   <div className="flex items-center gap-3 mt-4">
                     <button
