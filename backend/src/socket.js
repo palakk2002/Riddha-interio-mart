@@ -77,10 +77,23 @@ function notifyAdminNewOrder(adminId, payload) {
   }
 }
 
+function notifyAdminNewProduct(payload) {
+  if (!io) return;
+  // Broadcast to all admins
+  io.to('role:admin').emit('product:new_request', payload);
+}
+
+function notifySellerProductApproval(sellerId, payload) {
+  if (!io) return;
+  io.to(`seller:${sellerId}`).emit('product:approval_update', payload);
+}
+
 module.exports = {
   initSocket,
   getIO,
   notifySellerNewOrder,
-  notifyAdminNewOrder
+  notifyAdminNewOrder,
+  notifyAdminNewProduct,
+  notifySellerProductApproval
 };
 

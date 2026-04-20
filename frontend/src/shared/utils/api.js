@@ -48,7 +48,8 @@ const isPublicRequest = (config) => {
       url.startsWith('/favourite-section') ||
       url.startsWith('/sections') ||
       url.startsWith('/products') ||
-      url.startsWith('/categories'))
+      url.startsWith('/categories') ||
+      url.startsWith('/catalog'))
   ) {
     return true;
   }

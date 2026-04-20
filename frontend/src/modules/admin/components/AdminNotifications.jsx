@@ -31,7 +31,13 @@ const AdminNotifications = ({ token }) => {
     socket.on('order:new', (payload) => {
       console.log('ORDER:NEW received in Admin panel:', payload);
       playSound();
-      setActiveNotification(payload);
+      setActiveNotification({ ...payload, type: 'order' });
+    });
+
+    socket.on('product:new_request', (payload) => {
+      console.log('PRODUCT:NEW_REQUEST received in Admin panel:', payload);
+      playSound();
+      setActiveNotification({ ...payload, type: 'product' });
     });
 
     socket.on('connect_error', (err) => {
@@ -41,6 +47,7 @@ const AdminNotifications = ({ token }) => {
     return () => {
       console.log('Cleaning up Admin socket listeners...');
       socket.off('order:new');
+      socket.off('product:new_request');
       socket.off('connect');
       socket.off('connect_error');
     };
@@ -59,14 +66,16 @@ const AdminNotifications = ({ token }) => {
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-800 to-deep-espresso" />
 
             {/* Icon Wrapper */}
-            <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-red-800 flex-shrink-0">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${activeNotification.type === 'product' ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-800'}`}>
                <LuPackage size={28} className="animate-bounce" />
             </div>
 
             {/* Content */}
             <div className="flex-1 space-y-1">
                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-black uppercase tracking-widest text-deep-espresso">Incoming Order</h3>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-deep-espresso">
+                    {activeNotification.type === 'product' ? 'Product Approval' : 'Incoming Order'}
+                  </h3>
                   <button 
                     onClick={() => setActiveNotification(null)}
                     className="p-1 hover:bg-soft-oatmeal rounded-full transition-colors text-warm-sand"
@@ -75,28 +84,44 @@ const AdminNotifications = ({ token }) => {
                   </button>
                </div>
                <p className="text-xl font-display font-bold text-deep-espresso leading-tight">
-                  ₹{activeNotification.totalPrice?.toLocaleString()} Order Received
+                  {activeNotification.type === 'product' 
+                    ? activeNotification.message 
+                    : `₹${activeNotification.totalPrice?.toLocaleString()} Order Received`}
                </p>
                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-warm-sand font-medium mt-2">
                   <span className="flex items-center gap-1">
-                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                     {activeNotification.customerName || 'Premium Client'}
+                     <span className={`w-1.5 h-1.5 rounded-full ${activeNotification.type === 'product' ? 'bg-amber-500' : 'bg-green-500'}`}></span>
+                     {activeNotification.type === 'product' 
+                       ? activeNotification.sellerName 
+                       : (activeNotification.customerName || 'Premium Client')}
                   </span>
                   <span className="opacity-30">•</span>
-                  <span>{activeNotification.shippingCity || 'Global'}</span>
-                  <span className="opacity-30">•</span>
-                  <span>{activeNotification.itemsCount} Items</span>
+                  <span>{activeNotification.type === 'product' ? 'Draft Product' : (activeNotification.shippingCity || 'Global')}</span>
+                  {activeNotification.type !== 'product' && (
+                    <>
+                      <span className="opacity-30">•</span>
+                      <span>{activeNotification.itemsCount} Items</span>
+                    </>
+                  )}
                </div>
 
                <div className="pt-4 flex gap-3">
                   <button 
                     onClick={() => {
-                        navigate(`/admin/orders/view/${activeNotification.orderId}`);
+                        if (activeNotification.type === 'product') {
+                          navigate(`/admin/inventory`); // Navigate to product list where we'll show pending items
+                        } else {
+                          navigate(`/admin/orders/view/${activeNotification.orderId}`);
+                        }
                         setActiveNotification(null);
                     }}
-                    className="flex-1 bg-deep-espresso text-white text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-red-900 transition-all flex items-center justify-center gap-2"
+                    className={`flex-1 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl transition-all flex items-center justify-center gap-2 ${
+                      activeNotification.type === 'product' 
+                      ? 'bg-amber-600 text-white hover:bg-amber-700' 
+                      : 'bg-deep-espresso text-white hover:bg-red-900'
+                    }`}
                   >
-                    Process Now <LuArrowRight size={14} />
+                    {activeNotification.type === 'product' ? 'Review Product' : 'Process Now'} <LuArrowRight size={14} />
                   </button>
                   <button 
                     onClick={() => setActiveNotification(null)}

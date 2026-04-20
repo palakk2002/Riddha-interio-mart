@@ -44,12 +44,21 @@ const menuItems = [
     ]
   },
   { 
-    label: 'Catalog', 
+    label: 'Product Catalog', 
     icon: LuBox, 
     path: '/admin/catalog',
     children: [
-      { path: '/admin/catalog', icon: LuLayoutGrid, label: 'All Products' },
-      { path: '/admin/catalog/add', icon: LuPlus, label: 'Add New Product' },
+      { path: '/admin/catalog', icon: LuLayoutGrid, label: 'Master Catalog' },
+      { path: '/admin/catalog/add', icon: LuPlus, label: 'New Master Item' },
+    ]
+  },
+  { 
+    label: 'Add Product Section', 
+    icon: LuPackage, 
+    path: '/admin/inventory',
+    children: [
+      { path: '/admin/inventory', icon: LuLayoutGrid, label: 'All Products' },
+      { path: '/admin/inventory/add', icon: LuPlus, label: 'Add New Product' },
     ]
   },
   { 

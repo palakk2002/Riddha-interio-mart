@@ -11,10 +11,23 @@ exports.getProducts = async (req, res, next) => {
     // Handle name/category searches if needed (simple match for now)
     // If isActive is not specified in query, default to true for public, but allow admin to see all
     const filter = { ...queryObj };
-    if (filter.isActive === undefined) {
+    
+    // Default: only show approved products unless filter specifies otherwise
+    // Admins can see everything
+    const isAdmin = req.user && req.user.role === 'admin';
+    if (!isAdmin) {
+      filter.isApproved = true;
       filter.isActive = true;
-    } else if (filter.isActive === 'all') {
-      delete filter.isActive;
+    } else {
+      if (filter.isActive === undefined) {
+        filter.isActive = true;
+      } else if (filter.isActive === 'all') {
+        delete filter.isActive;
+      }
+      
+      if (filter.isApproved === 'all') {
+        delete filter.isApproved;
+      }
     }
 
     const products = await Product.find(filter).populate('seller', 'fullName shopName');
@@ -28,20 +41,38 @@ exports.getProducts = async (req, res, next) => {
 // @desc    Create new product
 exports.createProduct = async (req, res, next) => {
   try {
+    const { source = 'new' } = req.body;
+    
     // Automatically set seller and sellerType based on role if not provided
     if (!req.body.seller) {
       req.body.seller = req.user.id;
       req.body.sellerType = req.user.role === 'admin' ? 'Admin' : 'Seller';
+    }
+
+    // Handle Auto-approval logic
+    // 1. Admin added products are auto-approved
+    // 2. Catalog products are auto-approved
+    // 3. New products from sellers need approval
+    if (req.user.role === 'admin' || source === 'catalog') {
+      req.body.isApproved = true;
+      req.body.approvalStatus = 'approved';
     } else {
-      // If seller ID is provided (e.g. by admin assigning to someone else), 
-      // we assume it's a 'Seller' unless specified
-      if (!req.body.sellerType) {
-        req.body.sellerType = 'Seller';
-      }
+      req.body.isApproved = false;
+      req.body.approvalStatus = 'pending';
     }
 
     // 2. Create the product
     const product = await Product.create(req.body);
+
+    // 3. Notify Admin if it's a new product from a seller needing approval
+    if (req.user.role !== 'admin' && source === 'new') {
+      const { notifyAdminNewProduct } = require('../socket');
+      notifyAdminNewProduct({
+        message: `New product "${product.name}" from ${req.user.shopName || req.user.fullName} needs approval.`,
+        productId: product._id,
+        sellerName: req.user. shopName || req.user.fullName
+      });
+    }
     
     res.status(201).json({ success: true, data: product });
   } catch (error) {
@@ -49,6 +80,39 @@ exports.createProduct = async (req, res, next) => {
       const messages = Object.values(error.errors).map(val => val.message);
       return res.status(400).json({ success: false, error: messages.join(', ') });
     }
+    next(error);
+  }
+};
+
+// @desc    Admin: Approve or Reject product
+exports.updateApprovalStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { approvalStatus } = req.body; // 'approved' or 'rejected'
+
+    if (!['approved', 'rejected', 'pending'].includes(approvalStatus)) {
+      return res.status(400).json({ success: false, error: 'Invalid approval status' });
+    }
+
+    const product = await Product.findByIdAndUpdate(id, {
+      approvalStatus,
+      isApproved: approvalStatus === 'approved'
+    }, { new: true });
+
+    if (!product) {
+      return res.status(404).json({ success: false, error: 'Product not found' });
+    }
+
+    // Notify seller about approval/rejection
+    const { notifySellerProductApproval } = require('../socket');
+    notifySellerProductApproval(product.seller, {
+      message: `Your product "${product.name}" has been ${approvalStatus}.`,
+      productId: product._id,
+      status: approvalStatus
+    });
+
+    res.status(200).json({ success: true, data: product });
+  } catch (error) {
     next(error);
   }
 };
@@ -62,10 +126,18 @@ exports.getProduct = async (req, res, next) => {
       return res.status(404).json({ success: false, error: 'Product not found' });
     }
 
-    // Logic: Admin can see everything, others only see verified products
+    // Logic: Admin can see everything, others only see verified/approved products
     const isAdmin = req.user && req.user.role === 'admin';
-    if (!isAdmin && !product.seller.isVerified) {
+    const isOwner = req.user && product.seller._id.toString() === req.user.id;
+    
+    // Check Seller Verification
+    if (!isAdmin && !isOwner && !product.seller.isVerified) {
        return res.status(401).json({ success: false, error: 'This product is currently unavailable (Seller verification pending)' });
+    }
+
+    // Check Product Approval
+    if (!isAdmin && !isOwner && !product.isApproved) {
+      return res.status(401).json({ success: false, error: 'This product is currently under review.' });
     }
 
     res.status(200).json({ success: true, data: product });

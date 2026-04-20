@@ -64,3 +64,29 @@ exports.authorize = (...roles) => {
     next();
   };
 };
+// Optional protect: tries to find user but proceeds if not found
+exports.tryProtect = async (req, res, next) => {
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    let Model;
+    switch (decoded.role) {
+      case 'admin': Model = Admin; break;
+      case 'seller': Model = Seller; break;
+      case 'delivery': Model = Delivery; break;
+      default: Model = User;
+    }
+    req.user = await Model.findById(decoded.id);
+    next();
+  } catch (err) {
+    next(); // Just proceed without user
+  }
+};

@@ -5,17 +5,20 @@ const {
   createProduct,
   getSellerProducts,
   deleteProduct,
-  updateProduct
+  updateProduct,
+  updateApprovalStatus
 } = require('../controllers/productController');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize, tryProtect } = require('../middleware/auth');
 
 const router = express.Router();
 
 router.route('/')
-  .get(getProducts)
+  .get(tryProtect, getProducts)
   .post(protect, authorize('seller', 'admin'), createProduct);
 
 router.get('/my-products', protect, authorize('seller'), getSellerProducts);
+
+router.put('/:id/approval', protect, authorize('admin'), updateApprovalStatus);
 
 router.route('/:id')
   .get(getProduct)

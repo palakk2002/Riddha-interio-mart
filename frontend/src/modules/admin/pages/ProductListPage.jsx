@@ -15,14 +15,24 @@ const ProductListPage = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      // We want all products for admin catalog view
-      const { data } = await api.get('/products', { params: { isActive: 'all' } });
+      // We want all products for admin catalog view, including pending and inactive
+      const { data } = await api.get('/products', { params: { isActive: 'all', isApproved: 'all' } });
       setProducts(data.data || []);
     } catch (err) {
       console.error('Failed to fetch products:', err);
       setError('Could not connect to the inventory database.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApprove = async (id, status) => {
+    try {
+      await api.put(`/products/${id}/approval`, { approvalStatus: status });
+      fetchProducts(); // Refresh list
+    } catch (err) {
+      console.error('Approval error:', err);
+      alert('Failed to update product status.');
     }
   };
 
@@ -58,7 +68,7 @@ const ProductListPage = () => {
             <p className="text-warm-sand text-sm md:text-base">Comprehensive view of all your inventory.</p>
           </div>
           <button 
-            onClick={() => navigate('/admin/catalog/add')}
+            onClick={() => navigate('/admin/inventory/add')}
             className="flex items-center justify-center gap-2 bg-red-800 text-white px-6 py-3.5 rounded-2xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20 active:scale-95 text-sm"
           >
             <LuPlus size={18} />
@@ -108,6 +118,7 @@ const ProductListPage = () => {
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Product Name</th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">SKU</th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Category</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Status</th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Price</th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest text-right">Actions</th>
                   </tr>
@@ -137,12 +148,42 @@ const ProductListPage = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 font-black text-deep-espresso">
-                        ₹{product.price.toLocaleString()}
+                        ₹{product.price?.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                          product.approvalStatus === 'approved' 
+                          ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                          : product.approvalStatus === 'rejected'
+                          ? 'bg-red-50 text-red-600 border-red-100'
+                          : 'bg-amber-50 text-amber-600 border-amber-100'
+                        }`}>
+                          {product.approvalStatus || 'Pending'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 font-black text-deep-espresso">
+                        ₹{product.price?.toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {product.approvalStatus === 'pending' && (
+                            <>
+                              <button 
+                                onClick={() => handleApprove(product._id, 'approved')}
+                                className="px-3 py-1.5 bg-emerald-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-700 transition-colors"
+                              >
+                                Approve
+                              </button>
+                              <button 
+                                onClick={() => handleApprove(product._id, 'rejected')}
+                                className="px-3 py-1.5 bg-red-100 text-red-600 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-red-200 transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </>
+                          )}
                           <button 
-                            onClick={() => navigate(`/admin/catalog/edit/${product._id}`)}
+                            onClick={() => navigate(`/admin/inventory/edit/${product._id}`)}
                             className="p-2 text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-colors"
                           >
                             <LuPen size={16} />

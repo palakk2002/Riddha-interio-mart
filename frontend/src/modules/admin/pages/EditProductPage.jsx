@@ -23,7 +23,7 @@ const EditProductPage = () => {
     description: '',
     material: '',
     dimensions: '',
-    countInStock: 50,
+    stock: 50,
   });
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const EditProductPage = () => {
       try {
         setLoading(true);
         const [prodRes, catRes, brandRes] = await Promise.all([
-          api.get(`/products/${id}`),
+          api.get(`/catalog/${id}`),
           api.get('/categories'),
           api.get('/brands')
         ]);
@@ -53,7 +53,7 @@ const EditProductPage = () => {
           description: product.description || '',
           material: product.material || '',
           dimensions: product.dimensions || '',
-          countInStock: product.countInStock || 0,
+          stock: product.stock || 0,
         });
 
       } catch (err) {
@@ -92,11 +92,11 @@ const EditProductPage = () => {
       const payload = {
         ...formData,
         price: Number(formData.price),
-        countInStock: Number(formData.countInStock),
+        stock: Number(formData.stock),
         images: formData.image ? [formData.image] : []
       };
 
-      await api.put(`/products/${id}`, payload);
+      await api.put(`/catalog/${id}`, payload);
       navigate('/admin/catalog');
     } catch (err) {
       console.error('Failed to update product:', err);
@@ -265,8 +265,8 @@ const EditProductPage = () => {
                         </label>
                         <input 
                           type="number" required
-                          value={formData.countInStock}
-                          onChange={(e) => setFormData({...formData, countInStock: e.target.value})}
+                          value={formData.stock}
+                          onChange={(e) => setFormData({...formData, stock: e.target.value})}
                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
                         />
                       </div>
