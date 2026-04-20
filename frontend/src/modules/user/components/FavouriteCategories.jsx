@@ -33,18 +33,18 @@ const FavouriteSectionCard = ({ section }) => {
   const products = Array.isArray(activeBlock?.productIds) ? activeBlock.productIds.filter(Boolean) : [];
 
   return (
-    <section className="bg-soft-oatmeal/10 py-5 md:py-10 border-y border-soft-oatmeal/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 space-y-8">
-        <div className="text-center space-y-5">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-soft-oatmeal/40 border border-soft-oatmeal/60 text-[10px] font-black uppercase tracking-[0.35em] text-warm-sand mb-2">
+    <section className="bg-soft-oatmeal/10 py-1.5 md:py-10 border-y border-soft-oatmeal/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-2 md:py-6 space-y-3 md:space-y-6">
+        <div className="text-center space-y-1.5 md:space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-soft-oatmeal/40 border border-soft-oatmeal/60 text-[10px] font-black uppercase tracking-[0.35em] text-warm-sand">
             Handpicked Categories
           </div>
           
-          <h2 className="text-4xl md:text-6xl font-display font-bold tracking-tight text-deep-espresso">
+          <h2 className="text-2xl md:text-6xl font-display font-bold tracking-tight text-deep-espresso">
             {section.heading}
           </h2>
 
-          <div className="flex items-center justify-center gap-5 py-2">
+          <div className="flex items-center justify-center gap-4 py-0.5 md:py-1">
             <div className="h-[1.5px] w-16 bg-soft-oatmeal shadow-sm" />
             <div className="w-3 h-3 rounded-full border-2 border-warm-sand/30" />
             <div className="h-[1.5px] w-16 bg-soft-oatmeal shadow-sm" />
@@ -67,7 +67,7 @@ const FavouriteSectionCard = ({ section }) => {
                 key={categoryId || getId(block)}
                 type="button"
                 onClick={() => setActiveCategoryId(categoryId)}
-                className={`px-5 md:px-6 py-2.5 rounded-full border-2 transition-all duration-300 whitespace-nowrap text-xs md:text-sm font-bold ${
+                className={`px-3 md:px-6 py-1.5 md:py-2.5 rounded-full border-2 transition-all duration-300 whitespace-nowrap text-xs md:text-sm font-bold ${
                   String(activeCategoryId) === categoryId
                     ? 'border-[var(--color-header-red)] text-[var(--color-header-red)] bg-white'
                     : 'border-soft-oatmeal/20 text-deep-espresso/45 hover:border-soft-oatmeal/40 bg-white/60'
@@ -79,7 +79,7 @@ const FavouriteSectionCard = ({ section }) => {
           })}
         </div>
 
-        <div className="min-h-[320px]">
+        <div className="min-h-0 md:min-h-[320px]">
           <AnimatePresence mode="popLayout">
             {products.length > 0 ? (
               <Motion.div
@@ -108,8 +108,8 @@ const FavouriteSectionCard = ({ section }) => {
                         />
                       </div>
 
-                      <div className="py-3 px-3 text-center bg-white border-t border-soft-oatmeal/5">
-                        <span className="text-[11px] md:text-sm font-medium text-deep-espresso/80 group-hover:text-warm-sand transition-colors tracking-tight">
+                      <div className="py-2 md:py-3 px-2 md:px-3 text-center bg-white border-t border-soft-oatmeal/5">
+                        <span className="text-[10px] md:text-sm font-medium text-deep-espresso/80 group-hover:text-warm-sand transition-colors tracking-tight">
                           {product?.name}
                         </span>
                       </div>

@@ -71,7 +71,7 @@ const Banner = ({ banners = [] }) => {
   const prevSlide = () => setCurrent((prev) => (prev - 1 + sliderBanners.length) % sliderBanners.length);
 
   return (
-    <div className="relative h-[200px] md:h-[480px] w-full overflow-hidden md:rounded-3xl rounded-none group shadow-2xl bg-gray-100">
+    <div className="relative h-[200px] md:h-[480px] w-full overflow-hidden rounded-none group shadow-2xl bg-gray-100">
       <AnimatePresence mode="wait">
         <Motion.div
           key={currentBanner.id}

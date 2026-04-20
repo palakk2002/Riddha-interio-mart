@@ -64,7 +64,7 @@ const HomePage = () => {
       <ExpressDeliveryBanner />
 
       {/* Banner Section */}
-      <section className="max-w-[1440px] mx-auto px-4 lg:px-8">
+      <section className="max-w-[1440px] mx-auto px-0 md:px-4 lg:px-8">
         <Banner banners={banners} />
       </section>
 
