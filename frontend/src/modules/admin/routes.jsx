@@ -32,6 +32,7 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import ProductListPage from './pages/ProductListPage';
 import AddInventoryPage from './pages/AddInventoryPage';
 import EditInventoryPage from './pages/EditInventoryPage';
+import ManageDeliveries from './pages/ManageDeliveries';
 
 const AdminRoutes = () => {
   return (
@@ -68,6 +69,8 @@ const AdminRoutes = () => {
         <Route path="/sellers/active" element={<ActiveSellers />} />
         <Route path="/orders/:status" element={<OrderListPage />} />
         <Route path="/orders/view/:id" element={<OrderDetailPage />} />
+        <Route path="/delivery" element={<ManageDeliveries />} />
+        <Route path="/delivery/pending" element={<ManageDeliveries />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<AdminProfile />} />
         <Route path="/analytics" element={<AnalyticsPage />} />

@@ -33,8 +33,8 @@ function initSocket(httpServer) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       socket.user = { id: decoded.id, role: decoded.role || 'user' };
 
-      // Allow both 'admin' and 'seller' roles for real-time notifications
-      if (socket.user.role !== 'seller' && socket.user.role !== 'admin') {
+      // Allow 'admin', 'seller', and 'delivery' roles
+      if (socket.user.role !== 'seller' && socket.user.role !== 'admin' && socket.user.role !== 'delivery') {
         return next(new Error('auth/role_not_allowed'));
       }
 
@@ -88,12 +88,41 @@ function notifySellerProductApproval(sellerId, payload) {
   io.to(`seller:${sellerId}`).emit('product:approval_update', payload);
 }
 
+function notifyDeliveryAssignment(deliveryBoyId, payload) {
+  if (!io) return;
+  io.to(`delivery:${deliveryBoyId}`).emit('delivery:assigned', payload);
+}
+
+function notifySellerDeliveryResponse(sellerId, payload) {
+  if (!io) return;
+  io.to(`seller:${sellerId}`).emit('delivery:response', payload);
+}
+
+function notifyAdminDeliveryResponse(adminId, payload) {
+  if (!io) return;
+  io.to(`admin:${adminId}`).emit('delivery:response', payload);
+}
+
+function notifyAdminNewDelivery(payload) {
+  if (!io) return;
+  io.to('role:admin').emit('delivery:new_registration', payload);
+}
+
+function notifyDeliveryApproval(deliveryBoyId, payload) {
+  if (!io) return;
+  io.to(`delivery:${deliveryBoyId}`).emit('delivery:approval_update', payload);
+}
+
 module.exports = {
   initSocket,
   getIO,
   notifySellerNewOrder,
   notifyAdminNewOrder,
   notifyAdminNewProduct,
-  notifySellerProductApproval
+  notifySellerProductApproval,
+  notifyDeliveryAssignment,
+  notifySellerDeliveryResponse,
+  notifyAdminDeliveryResponse,
+  notifyAdminNewDelivery,
+  notifyDeliveryApproval
 };
-

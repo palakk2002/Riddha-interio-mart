@@ -13,6 +13,7 @@ const AddProduct = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [imgFiles, setImgFiles] = useState([]);
 
   const fileInputRef = useRef(null);
 
@@ -58,6 +59,7 @@ const AddProduct = () => {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
+    setImgFiles(prev => [...prev, ...files]);
     files.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -71,6 +73,7 @@ const AddProduct = () => {
   };
 
   const removeImage = (index) => {
+    setImgFiles(prev => prev.filter((_, i) => i !== index));
     setFormData(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
@@ -88,7 +91,25 @@ const AddProduct = () => {
         throw new Error('Please upload at least one product image');
       }
 
-      const res = await api.post('/products', { ...formData, source: selection });
+      // Upload images to Cloudinary
+      const uploadedUrls = [];
+      const existingUrls = formData.images.filter(img => img.startsWith('http'));
+      uploadedUrls.push(...existingUrls);
+
+      for (const file of imgFiles) {
+        const uploadData = new FormData();
+        uploadData.append('image', file);
+        const { data: uploadRes } = await api.post('/upload', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        uploadedUrls.push(uploadRes.url);
+      }
+
+      const res = await api.post('/products', { 
+        ...formData, 
+        images: uploadedUrls,
+        source: selection 
+      });
       if (res.data.success) {
         setSuccess(true);
         // Reset form
@@ -98,6 +119,7 @@ const AddProduct = () => {
           dimensions: '', thickness: '', color: '', unit: 'piece',
           countInStock: '', images: []
         });
+        setImgFiles([]);
         setTimeout(() => {
           setSuccess(false);
           setSelection(null);

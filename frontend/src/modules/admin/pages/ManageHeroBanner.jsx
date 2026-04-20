@@ -10,6 +10,7 @@ import {
   LuTrash2,
 } from 'react-icons/lu';
 import api from '../../../shared/utils/api';
+import { uploadImage } from '../../../shared/utils/upload';
 
 const createEmptyBanner = () => ({
   title: '',
@@ -62,6 +63,7 @@ const ManageHeroBanner = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [imgFile, setImgFile] = useState(null);
   const fileInputRef = React.useRef(null);
 
   const totalBanners = banners.length;
@@ -104,6 +106,7 @@ const ManageHeroBanner = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    setImgFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
       setBannerForm((prev) => ({
@@ -141,6 +144,19 @@ const ManageHeroBanner = () => {
 
     try {
       setSubmitting(true);
+
+      let finalImageUrl = bannerForm.bgImage.src;
+      if (imgFile) {
+        finalImageUrl = await uploadImage(imgFile);
+      }
+
+      const payload = {
+        ...buildPayload(bannerForm),
+        bgImage: {
+          ...bannerForm.bgImage,
+          src: finalImageUrl
+        }
+      };
 
       if (editingId) {
         await api.put(`/home-banner/${editingId}`, payload);

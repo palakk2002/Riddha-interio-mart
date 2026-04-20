@@ -82,7 +82,8 @@ export const UserProvider = ({ children }) => {
         login,
         logout,
         saveAddress,
-        fetchAddresses
+        fetchAddresses,
+        setUser
       }}
     >
       {children}

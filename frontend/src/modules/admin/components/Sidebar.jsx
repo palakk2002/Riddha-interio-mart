@@ -44,6 +44,15 @@ const menuItems = [
     ]
   },
   { 
+    label: 'Manage Delivery Boy', 
+    icon: LuTruck, 
+    path: '/admin/delivery',
+    children: [
+      { path: '/admin/delivery', icon: LuLayoutGrid, label: 'All Partners' },
+      { path: '/admin/delivery/pending', icon: LuClock, label: 'Pending Approval', showBadge: true, badgeType: 'delivery' },
+    ]
+  },
+  { 
     label: 'Product Catalog', 
     icon: LuBox, 
     path: '/admin/catalog',
@@ -53,12 +62,12 @@ const menuItems = [
     ]
   },
   { 
-    label: 'Add Product Section', 
+    label: 'Manage Products', 
     icon: LuPackage, 
     path: '/admin/inventory',
     children: [
       { path: '/admin/inventory', icon: LuLayoutGrid, label: 'All Products' },
-      { path: '/admin/inventory/add', icon: LuPlus, label: 'Add New Product' },
+      { path: '/admin/inventory/pending', icon: LuClock, label: 'Pending Approval', showBadge: true, badgeType: 'product' },
     ]
   },
   { 
@@ -120,7 +129,7 @@ const menuItems = [
   { path: '/admin/settings', icon: LuSettings, label: 'Settings' },
 ];
 
-const NavItem = ({ item, onClose, expanded, onToggle, pendingCount }) => {
+const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCount, productCount }) => {
   const hasChildren = item.children && item.children.length > 0;
   const location = useLocation();
   const isSelfActive = location.pathname === item.path;
@@ -128,7 +137,7 @@ const NavItem = ({ item, onClose, expanded, onToggle, pendingCount }) => {
   const isActive = isSelfActive || isChildActive;
 
   const headerContent = (
-    <div className="flex items-center gap-4 w-full">
+    <div className="flex items-center gap-4 w-full text-left">
       <item.icon size={20} className={`transition-transform duration-300 ${isActive ? 'scale-110 text-white' : 'text-white/70 group-hover:scale-110 group-hover:text-white'}`} />
       <span className="font-medium text-white">{item.label}</span>
     </div>
@@ -186,32 +195,39 @@ const NavItem = ({ item, onClose, expanded, onToggle, pendingCount }) => {
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <div className="ml-6 mt-1 space-y-1 py-1">
-              {item.children.map((child) => (
-                <NavLink
-                  key={child.path + child.label}
-                  to={child.path}
-                  onClick={() => { if (window.innerWidth < 1024) onClose(); }}
-                  className={({ isActive: childActive }) => `
-                    flex items-center gap-4 p-2.5 rounded-xl transition-all duration-300 group border border-transparent
-                    ${childActive 
-                      ? 'text-white font-bold bg-white/10 border-white/5 shadow-sm' 
-                      : 'text-white/60 hover:text-white hover:bg-white/5'}
-                  `}
-                >
-                  {({ isActive: isCurrentChildActive }) => (
-                    <>
-                      <child.icon size={16} className={`transition-transform duration-300 group-hover:scale-110 ${isCurrentChildActive ? 'text-white' : 'text-white/50'}`} />
-                      <span className="text-sm tracking-wide text-white">{child.label}</span>
-                      {child.showBadge && pendingCount > 0 && (
-                        <span className="ml-auto w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/40">
-                          {pendingCount}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </NavLink>
-              ))}
+            <div className="ml-6 mt-1 space-y-1 py-1 text-left">
+              {item.children.map((child) => {
+                let count = 0;
+                if (child.badgeType === 'delivery') count = deliveryCount;
+                else if (child.badgeType === 'product') count = productCount;
+                else count = sellersCount;
+                
+                return (
+                  <NavLink
+                    key={child.path + child.label}
+                    to={child.path}
+                    onClick={() => { if (window.innerWidth < 1024) onClose(); }}
+                    className={({ isActive: childActive }) => `
+                      flex items-center gap-4 p-2.5 rounded-xl transition-all duration-300 group border border-transparent
+                      ${childActive 
+                        ? 'text-white font-bold bg-white/10 border-white/5 shadow-sm' 
+                        : 'text-white/60 hover:text-white hover:bg-white/5'}
+                    `}
+                  >
+                    {({ isActive: isCurrentChildActive }) => (
+                      <>
+                        <child.icon size={16} className={`transition-transform duration-300 group-hover:scale-110 ${isCurrentChildActive ? 'text-white' : 'text-white/50'}`} />
+                        <span className="text-sm tracking-wide text-white">{child.label}</span>
+                        {child.showBadge && count > 0 && (
+                          <span className="ml-auto w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/40">
+                            {count}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                );
+              })}
             </div>
           </Motion.div>
         )}
@@ -234,20 +250,28 @@ const Sidebar = ({ isOpen, onClose }) => {
     return initial;
   });
 
-  const [pendingCount, setPendingCount] = useState(0);
+  const [sellersCount, setSellersCount] = useState(0);
+  const [deliveryCount, setDeliveryCount] = useState(0);
+  const [productCount, setProductCount] = useState(0);
 
   useEffect(() => {
-    const fetchPendingCount = async () => {
+    const fetchPendingCounts = async () => {
       try {
-        const response = await api.get('/auth/admin/sellers/pending');
-        setPendingCount(response.data.data.length);
+        const [sellersRes, deliveryRes, productRes] = await Promise.all([
+          api.get('/auth/admin/sellers/pending'),
+          api.get('/delivery'),
+          api.get('/products', { params: { isApproved: 'pending', isActive: 'all' } })
+        ]);
+        setSellersCount(sellersRes.data.data.length);
+        const pendingPartners = deliveryRes.data.data.filter(p => p.approvalStatus === 'Pending');
+        setDeliveryCount(pendingPartners.length);
+        setProductCount(productRes.data.data.length);
       } catch (err) {
-        console.error('Failed to fetch pending count for sidebar:', err);
+        console.error('Failed to fetch counts for sidebar:', err);
       }
     };
-    fetchPendingCount();
-    // Refresh every 30 seconds for "live" notification feel
-    const interval = setInterval(fetchPendingCount, 30000);
+    fetchPendingCounts();
+    const interval = setInterval(fetchPendingCounts, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -320,7 +344,9 @@ const Sidebar = ({ isOpen, onClose }) => {
               onClose={onClose} 
               expanded={expandedItems[item.label]}
               onToggle={toggleExpand}
-              pendingCount={pendingCount}
+              sellersCount={sellersCount}
+              deliveryCount={deliveryCount}
+              productCount={productCount}
             />
           ))}
         </nav>

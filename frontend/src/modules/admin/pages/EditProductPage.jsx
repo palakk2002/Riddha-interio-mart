@@ -12,6 +12,7 @@ const EditProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
+  const [imgFile, setImgFile] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -71,6 +72,7 @@ const EditProductPage = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setImgFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData(prev => ({ ...prev, image: reader.result }));
@@ -88,12 +90,23 @@ const EditProductPage = () => {
     try {
       setSubmitting(true);
       setStatusMessage('');
+
+      let imageUrl = formData.image;
+
+      if (imgFile) {
+        const uploadData = new FormData();
+        uploadData.append('image', imgFile);
+        const { data: uploadRes } = await api.post('/upload', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        imageUrl = uploadRes.url;
+      }
       
       const payload = {
         ...formData,
         price: Number(formData.price),
         stock: Number(formData.stock),
-        images: formData.image ? [formData.image] : []
+        images: imageUrl ? [imageUrl] : []
       };
 
       await api.put(`/catalog/${id}`, payload);

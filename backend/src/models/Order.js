@@ -95,6 +95,18 @@ const OrderSchema = new mongoose.Schema({
     type: String,
     enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
     default: 'Pending'
+  },
+  deliveryBoy: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Delivery'
+  },
+  deliveryStatus: {
+    type: String,
+    enum: ['None', 'Pending', 'Accepted', 'Picked', 'Out for Delivery', 'Delivered', 'Rejected'],
+    default: 'None'
+  },
+  deliveryAssignmentTime: {
+    type: Date
   }
 }, {
   timestamps: true

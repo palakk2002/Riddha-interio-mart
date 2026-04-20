@@ -4,6 +4,7 @@ import PageWrapper from '../components/PageWrapper';
 import { FiArrowLeft, FiPlus, FiTrash2, FiImage, FiSave, FiUploadCloud, FiCheck } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../shared/utils/api';
+import { uploadImage } from '../../../shared/utils/upload';
 
 const AddCategoryPage = () => {
   const navigate = useNavigate();
@@ -22,11 +23,7 @@ const AddCategoryPage = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) { // 2MB limit
-        setSaveError('Image is too large (max 2MB for storage). Please use a smaller file.');
-        return;
-      }
-      setSaveError('');
+      setImgFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setCategory(prev => ({ ...prev, image: reader.result }));
@@ -34,6 +31,9 @@ const AddCategoryPage = () => {
       reader.readAsDataURL(file);
     }
   };
+
+  const [imgFile, setImgFile] = useState(null);
+  const [subImgFiles, setSubImgFiles] = useState({});
 
   const handleAddSubcategory = () => {
     setSubcategories([...subcategories, { name: '', image: '' }]);
@@ -52,6 +52,7 @@ const AddCategoryPage = () => {
   const handleSubImageUpload = (e, index) => {
     const file = e.target.files[0];
     if (file) {
+      setSubImgFiles(prev => ({ ...prev, [index]: file }));
       const reader = new FileReader();
       reader.onloadend = () => handleSubChange(index, 'image', reader.result);
       reader.readAsDataURL(file);
@@ -72,6 +73,31 @@ const AddCategoryPage = () => {
     };
 
     try {
+      // 1. Upload main category image
+      let mainImageUrl = category.image;
+      if (imgFile) {
+        mainImageUrl = await uploadImage(imgFile);
+      }
+
+      // 2. Upload subcategory images
+      const updatedSubcategories = await Promise.all(
+        subcategories.map(async (sub, index) => {
+          if (sub.name.trim() === '') return null;
+          let subImgUrl = sub.image;
+          if (subImgFiles[index]) {
+            subImgUrl = await uploadImage(subImgFiles[index]);
+          }
+          return { ...sub, image: subImgUrl };
+        })
+      );
+
+      const categoryData = {
+        name: category.name,
+        description: category.description,
+        image: mainImageUrl,
+        subcategories: updatedSubcategories.filter(s => s !== null)
+      };
+
       const response = await api.post('/categories', categoryData);
 
       if (response.data.success) {

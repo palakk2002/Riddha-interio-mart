@@ -6,6 +6,7 @@ import BrowseCatalog from './pages/BrowseCatalog';
 import AddProduct from './pages/AddProduct';
 import MyProducts from './pages/MyProducts';
 import Orders from './pages/Orders';
+import AssignDeliveryBoy from './pages/AssignDeliveryBoy';
 import Taxes from './pages/Taxes';
 import StockManagement from './pages/StockManagement';
 import Wallet from './pages/Wallet';
@@ -15,6 +16,7 @@ import OrderDetail from './pages/OrderDetail';
 import LoginPage from '../user/pages/LoginPage';
 import SignupPage from '../user/pages/SignupPage';
 import SellerProfile from './pages/SellerProfile';
+import OrderTracking from './pages/OrderTracking';
 import Notifications from './pages/Notifications';
 
 const SellerRoutes = () => {
@@ -26,6 +28,8 @@ const SellerRoutes = () => {
         <Route index element={<Dashboard />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/orders/track" element={<OrderTracking />} />
+        <Route path="/assign-delivery" element={<AssignDeliveryBoy />} />
         <Route path="/order/:id" element={<OrderDetail />} />
         <Route path="/product/add" element={<AddProduct />} />
         <Route path="/add-product" element={<AddProduct />} />
