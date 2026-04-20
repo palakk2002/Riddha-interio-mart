@@ -9,6 +9,7 @@ const AddInventoryPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [imgFile, setImgFile] = useState(null);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [formData, setFormData] = useState({
@@ -47,6 +48,7 @@ const AddInventoryPage = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setImgFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData(prev => ({ ...prev, image: reader.result }));
@@ -61,11 +63,23 @@ const AddInventoryPage = () => {
     
     try {
       setLoading(true);
+
+      let imageUrl = formData.image;
+
+      if (imgFile) {
+        const uploadData = new FormData();
+        uploadData.append('image', imgFile);
+        const { data: uploadRes } = await api.post('/upload', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        imageUrl = uploadRes.url;
+      }
+
       const payload = {
         ...formData,
         price: Number(formData.price),
         countInStock: Number(formData.countInStock),
-        images: formData.image ? [formData.image] : [],
+        images: imageUrl ? [imageUrl] : [],
         isApproved: true, 
         approvalStatus: 'approved',
         sellerType: 'Admin',

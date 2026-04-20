@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import PageWrapper from '../components/PageWrapper';
 import api from '../../../shared/utils/api';
+import { uploadImage } from '../../../shared/utils/upload';
 import {
   LuBox,
   LuCheck,
@@ -270,6 +271,7 @@ const ManageSection = () => {
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [productSearch, setProductSearch] = useState('');
+  const [bannerImgFiles, setBannerImgFiles] = useState({});
 
   const fetchAll = async () => {
     setLoading(true);
@@ -415,6 +417,7 @@ const ManageSection = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setBannerImgFiles(prev => ({ ...prev, [index]: file }));
     const reader = new FileReader();
     reader.onloadend = () => {
       updateBannerItem(index, 'image', reader.result);
@@ -450,59 +453,40 @@ const ManageSection = () => {
 
   const handleSaveSection = async (event) => {
     event.preventDefault();
-
-    const payload = {
-      title: sectionForm.title.trim(),
-      subtitle: sectionForm.subtitle.trim(),
-      displayType: sectionForm.displayType,
-      displayOrder: Number(sectionForm.displayOrder) || 0,
-      isActive: !!sectionForm.isActive,
-      categoryIds:
-        sectionForm.displayType === 'banner' ? [] : sectionForm.categoryIds,
-      productIds: sectionForm.displayType === 'product' ? sectionForm.productIds : [],
-      bannerIds: [],
-      bannerItems: sectionForm.displayType === 'banner'
-        ? sectionForm.bannerItems
-            .map((item) => ({
-              title: String(item.title || '').trim(),
-              subtitle: String(item.subtitle || '').trim(),
-              image: String(item.image || '').trim(),
-              ctaText: String(item.ctaText || 'Shop Now').trim() || 'Shop Now',
-              ctaLink: String(item.ctaLink || '').trim(),
-              alt: String(item.alt || '').trim(),
-            }))
-            .filter((item) => item.title && item.image)
-        : [],
-    };
-
-    if (!payload.title) {
-      setStatusMessage('Please add a section heading.');
-      return;
-    }
-
-    if (payload.displayType === 'product') {
-      if (!payload.categoryIds.length) {
-        setStatusMessage('Please select at least one category for the product section.');
-        return;
-      }
-      if (!payload.productIds.length) {
-        setStatusMessage('Please select at least one product for the product section.');
-        return;
-      }
-    }
-
-    if (payload.displayType === 'category' && !payload.categoryIds.length) {
-      setStatusMessage('Please select at least one category for the category section.');
-      return;
-    }
-
-    if (payload.displayType === 'banner' && !payload.bannerItems.length) {
-      setStatusMessage('Please add at least one custom banner for the banner section.');
-      return;
-    }
-
     try {
       setSubmitting(true);
+
+      // Upload banner images to Cloudinary
+      const finalBannerItems = await Promise.all(
+        sectionForm.bannerItems.map(async (item, index) => {
+          let finalImg = item.image;
+          if (bannerImgFiles[index]) {
+            finalImg = await uploadImage(bannerImgFiles[index]);
+          }
+          return {
+            ...item,
+            title: String(item.title || '').trim(),
+            subtitle: String(item.subtitle || '').trim(),
+            image: finalImg,
+            ctaText: String(item.ctaText || 'Shop Now').trim() || 'Shop Now',
+            ctaLink: String(item.ctaLink || '').trim(),
+            alt: String(item.alt || '').trim(),
+          };
+        })
+      );
+
+      const payload = {
+        title: sectionForm.title.trim(),
+        subtitle: sectionForm.subtitle.trim(),
+        displayType: sectionForm.displayType,
+        displayOrder: Number(sectionForm.displayOrder) || 0,
+        isActive: !!sectionForm.isActive,
+        categoryIds: sectionForm.displayType === 'banner' ? [] : sectionForm.categoryIds,
+        productIds: sectionForm.displayType === 'product' ? sectionForm.productIds : [],
+        bannerIds: [],
+        bannerItems: sectionForm.displayType === 'banner' ? finalBannerItems.filter(i => i.title && i.image) : [],
+      };
+
       if (editingId) {
         await api.put(`/sections/${editingId}`, payload);
         setStatusMessage('Section updated successfully.');
