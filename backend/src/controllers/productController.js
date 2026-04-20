@@ -10,27 +10,45 @@ exports.getProducts = async (req, res, next) => {
 
     // Handle name/category searches if needed (simple match for now)
     // If isActive is not specified in query, default to true for public, but allow admin to see all
-    const filter = { ...queryObj };
+    // Sanitize Boolean Filters to avoid CastError
+    const filter = {};
     
+    if (req.query.category && req.query.category !== 'all') {
+      filter.category = req.query.category;
+    }
+    
+    if (req.query.brand && req.query.brand !== 'all') {
+      filter.brand = req.query.brand;
+    }
+
     // Default: only show approved products unless filter specifies otherwise
     // Admins can see everything
     const isAdmin = req.user && req.user.role === 'admin';
+    
     if (!isAdmin) {
       filter.isApproved = true;
       filter.isActive = true;
     } else {
-      if (filter.isActive === undefined) {
-        filter.isActive = true;
-      } else if (filter.isActive === 'all') {
-        delete filter.isActive;
+      // Admin filters
+      if (req.query.isActive !== undefined && req.query.isActive !== 'all') {
+        filter.isActive = req.query.isActive === 'true' || req.query.isActive === true;
       }
       
-      if (filter.isApproved === 'all') {
-        delete filter.isApproved;
+      if (req.query.isApproved !== undefined && req.query.isApproved !== 'all') {
+        filter.isApproved = req.query.isApproved === 'true' || req.query.isApproved === true;
+      }
+
+      // Special case for approvalStatus string
+      if (req.query.approvalStatus && req.query.approvalStatus !== 'all') {
+        filter.approvalStatus = req.query.approvalStatus;
       }
     }
 
-    const products = await Product.find(filter).populate('seller', 'fullName shopName');
+    // Newest first by default
+    const sortBy = req.query.sort || '-createdAt';
+    const products = await Product.find(filter)
+      .sort(sortBy)
+      .populate('seller', 'fullName shopName');
 
     res.status(200).json({ success: true, count: products.length, data: products });
   } catch (error) {
@@ -128,10 +146,11 @@ exports.getProduct = async (req, res, next) => {
 
     // Logic: Admin can see everything, others only see verified/approved products
     const isAdmin = req.user && req.user.role === 'admin';
-    const isOwner = req.user && product.seller._id.toString() === req.user.id;
+    const isOwner = req.user && product.seller?._id?.toString() === req.user?.id;
     
-    // Check Seller Verification
-    if (!isAdmin && !isOwner && !product.seller.isVerified) {
+    // Check Seller Verification (Skip if seller is Admin)
+    const isSellerAdmin = product.sellerType === 'Admin';
+    if (!isAdmin && !isOwner && !isSellerAdmin && !product.seller?.isVerified) {
        return res.status(401).json({ success: false, error: 'This product is currently unavailable (Seller verification pending)' });
     }
 

@@ -37,9 +37,14 @@ exports.protect = async (req, res, next) => {
     }
 
     req.user = await Model.findById(decoded.id);
-
+    
     if (!req.user) {
       return res.status(401).json({ success: false, error: `Account with role ${decoded.role} not found.` });
+    }
+
+    // Safety: ensure role is available for authorize middleware
+    if (!req.user.role) {
+      req.user.role = decoded.role;
     }
 
     next();
@@ -55,10 +60,14 @@ exports.protect = async (req, res, next) => {
 // Grant access to specific roles
 exports.authorize = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    const userRole = req.user.role ? req.user.role.toLowerCase() : '';
+    const normalizedRoles = roles.map(r => r.toLowerCase());
+
+    if (!normalizedRoles.includes(userRole)) {
+      console.log(`[AUTH DEBUG] 403 Forbidden: User Role "${userRole}" not in Allowed Roles [${normalizedRoles.join(', ')}]`);
       return res.status(403).json({
         success: false,
-        error: `User role ${req.user.role} is not authorized to access this route`
+        error: `User role ${userRole} is not authorized to access this route`
       });
     }
     next();

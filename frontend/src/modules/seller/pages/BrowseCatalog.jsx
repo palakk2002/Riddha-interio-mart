@@ -48,12 +48,14 @@ const BrowseCatalog = () => {
 
   const handleAddToShop = async (product) => {
     try {
-      // Logic to 'claim' or 'clone' a catalog item for the seller
-      // For now, let's assume we create a copy marked as from catalog
+      // Create a clean copy without internal DB metadata
+      const { _id, createdAt, updatedAt, __v, ...productData } = product;
+      
       const res = await api.post('/products', {
-        ...product,
+        ...productData,
+        countInStock: product.stock || 0,
         source: 'catalog',
-        isApproved: true, // Catalog items are auto-approved
+        isApproved: true,
         approvalStatus: 'approved'
       });
 

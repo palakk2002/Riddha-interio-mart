@@ -7,19 +7,8 @@ import {
   FiSave, FiInfo, FiExternalLink, FiChevronDown, FiEye, FiEyeOff,
   FiSearch, FiFilter, FiDownload, FiMoreVertical, FiCopy
 } from 'react-icons/fi';
-import { brandData } from '../../user/data/brandData';
-
-const BRAND_DOMAINS = {
-  anchor: 'anchor-world.com',
-  greenply: 'greenply.com',
-  hettich: 'hettich.com',
-  nippon: 'nipponpaint.co.in',
-  prince: 'princepipes.com',
-  cera: 'cera-india.com',
-  havells: 'havells.com',
-  bosch: 'bosch.com',
-  taparia: 'tapariatools.com'
-};
+import api from '../../../shared/utils/api';
+import { uploadImage } from '../../../shared/utils/upload';
 
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Delete', type = 'danger' }) => {
   if (!isOpen) return null;
@@ -101,7 +90,7 @@ const EmptyState = ({ onAdd, isFiltering }) => (
   </motion.div>
 );
 
-const BrandModal = ({ brand, isOpen, onClose, onSave }) => {
+const BrandModal = ({ brand, isOpen, onClose, onSave, saving }) => {
   const [activeTab, setActiveTab] = useState('general');
   const [formData, setFormData] = useState({
     name: '',
@@ -396,10 +385,19 @@ const BrandModal = ({ brand, isOpen, onClose, onSave }) => {
             <button onClick={onClose} className="flex-1 md:flex-none px-8 py-4 text-[10px] font-black uppercase tracking-[0.25em] text-warm-sand hover:text-red-500 transition-colors">Cancel</button>
             <button
               onClick={() => onSave(formData)}
-              disabled={!formData.name}
+              disabled={!formData.name || saving}
               className="flex-1 md:flex-none px-12 bg-deep-espresso text-white disabled:opacity-50 py-4 rounded-[20px] font-black uppercase tracking-[0.2em] text-[10px] shadow-xl hover:shadow-2xl hover:bg-black transition-all flex items-center justify-center gap-3 active:scale-95"
             >
-              <FiSave size={18} /> {brand ? 'Finalize Changes' : 'Initialize Partner'}
+              {saving ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <FiSave size={18} /> {brand ? 'Finalize Changes' : 'Initialize Partner'}
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -408,14 +406,13 @@ const BrandModal = ({ brand, isOpen, onClose, onSave }) => {
   );
 };
 
-import api from '../../../shared/utils/api';
-
 const ManageBrands = () => {
   const navigate = useNavigate();
   const [brands, setBrands] = useState([]);
   const [editingBrand, setEditingBrand] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // all, active, hidden
@@ -443,13 +440,22 @@ const ManageBrands = () => {
 
   const handleSave = async (brandData) => {
     try {
+      setSaving(true);
+      let finalLogo = brandData.logo;
+
+      // Upload logo to Cloudinary if it's base64
+      if (finalLogo && finalLogo.startsWith('data:image')) {
+        finalLogo = await uploadImage(finalLogo);
+      }
+
       // Sanitize payload
       const sanitizedPayload = {
         ...brandData,
+        logo: finalLogo,
         banners: brandData.banners?.filter(b => b && b.trim() !== '') || [],
         categories: brandData.categories
           ?.filter(c => c.name && c.name.trim() !== '')
-          .map(({ id, _id, ...rest }) => rest) || [] // Remove IDs from subdocuments for clean update
+          .map(({ id, _id, ...rest }) => rest) || [] 
       };
 
       if (editingBrand) {
@@ -463,6 +469,8 @@ const ManageBrands = () => {
     } catch (err) {
       console.error('Failed to save brand:', err);
       alert(err.response?.data?.error || 'Failed to save brand data.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -481,7 +489,7 @@ const ManageBrands = () => {
   const handleDelete = async (id) => {
     try {
       await api.delete(`/brands/${id}`);
-      setBrands(brands.filter(b => b._id === id ? false : true));
+      setBrands(brands.filter(b => b._id !== id));
     } catch (err) {
       console.error('Failed to delete brand:', err);
       alert('Failed to remove partner from the directory.');
@@ -530,7 +538,7 @@ const ManageBrands = () => {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => navigate('/admin/manage-brands/add')}
+                onClick={() => { setEditingBrand(null); setIsModalOpen(true); }}
                 className="px-6 py-3 bg-deep-espresso text-white rounded-xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg active:scale-95"
               >
                 <FiPlus size={16} /> New Record
@@ -587,7 +595,11 @@ const ManageBrands = () => {
         {/* Brands List (Full-Width Card Column) */}
         <div className="flex flex-col gap-3">
            <AnimatePresence mode="popLayout">
-             {filteredBrands.length > 0 ? (
+             {loading ? (
+                <div className="py-20 text-center text-warm-sand font-bold uppercase tracking-widest text-xs animate-pulse">
+                   Fetching directory partners...
+                </div>
+             ) : filteredBrands.length > 0 ? (
                filteredBrands.map((brand) => (
                  <div 
                    key={brand._id}
@@ -653,28 +665,31 @@ const ManageBrands = () => {
                ))
              ) : (
                <div className="w-full">
-                 <EmptyState onAdd={() => navigate('/admin/manage-brands/add')} isFiltering={searchTerm || filterStatus !== 'all'} />
+                 <EmptyState onAdd={() => setIsModalOpen(true)} isFiltering={searchTerm || filterStatus !== 'all'} />
                </div>
              )}
            </AnimatePresence>
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-deep-espresso text-white flex items-center justify-center shadow-lg shadow-deep-espresso/10">
-              <FiCheck size={20} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-deep-espresso uppercase tracking-tighter">System Live</p>
-              <p className="text-[8px] text-warm-sand uppercase tracking-widest font-black mt-0.5">Automated Asset Hosting</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:block text-right">
-              <p className="text-[10px] font-bold text-deep-espresso">{brands.length} Partners</p>
-              <p className="text-[8px] text-warm-sand uppercase font-black tracking-tighter">Directory v2.4</p>
-            </div>
-            <button className="px-5 py-2 bg-white border border-soft-oatmeal/60 rounded-full text-[8px] font-black uppercase tracking-widest text-deep-espresso hover:bg-soft-oatmeal/20 transition-all flex items-center gap-2">
-              <FiCopy /> Copy
-            </button>
-          </div>
+
+           <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-deep-espresso text-white flex items-center justify-center shadow-lg shadow-deep-espresso/10">
+                  <FiCheck size={20} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-deep-espresso uppercase tracking-tighter">System Live</p>
+                  <p className="text-[8px] text-warm-sand uppercase tracking-widest font-black mt-0.5">Automated Asset Hosting</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="hidden sm:block text-right">
+                  <p className="text-[10px] font-bold text-deep-espresso">{brands.length} Partners</p>
+                  <p className="text-[8px] text-warm-sand uppercase font-black tracking-tighter">Directory v2.4</p>
+                </div>
+                <button className="px-5 py-2 bg-white border border-soft-oatmeal/60 rounded-full text-[8px] font-black uppercase tracking-widest text-deep-espresso hover:bg-soft-oatmeal/20 transition-all flex items-center gap-2">
+                  <FiCopy /> Copy
+                </button>
+              </div>
+           </div>
         </div>
       </div>
 
@@ -685,6 +700,7 @@ const ManageBrands = () => {
             isOpen={isModalOpen}
             onClose={() => { setIsModalOpen(false); setEditingBrand(null); }}
             onSave={handleSave}
+            saving={saving}
           />
         )}
       </AnimatePresence>

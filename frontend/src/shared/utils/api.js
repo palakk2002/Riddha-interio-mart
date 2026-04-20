@@ -88,9 +88,14 @@ api.interceptors.response.use(
       const path = window.location.pathname || '';
       const loginPath = resolveLoginPath(path);
 
+      // Important: Only clear token and redirect if it was a PRIVATE request
+      // If it was a public request (like categories) that failed with 401,
+      // we might just have a stale token. We should clear it but stay on the page.
+      const wasPublic = isPublicRequest(error.config || {});
+
       localStorage.removeItem(AUTH_STORAGE_KEY);
 
-      if (path !== loginPath) {
+      if (!wasPublic && path !== loginPath) {
         window.location.assign(loginPath);
       }
     }

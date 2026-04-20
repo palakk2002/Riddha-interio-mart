@@ -22,14 +22,34 @@ import {
   LuClipboardList,
   LuClock,
   LuPackage,
-  LuTruck
+  LuTruck,
+  LuMapPin
 } from 'react-icons/lu';
 import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import sidebarBg from '../../../assets/seller_sidebar_bg.png';
 
 const menuItems = [
   { path: '/admin', icon: LuLayoutDashboard, label: 'Dashboard' },
-  { path: '/admin/analytics', icon: LuTrendingUp, label: 'Analytics' },
+  { path: '/admin/orders/tracking', icon: LuMapPin, label: 'Order Tracking' },
+  { path: '/admin/delivery/assign', icon: LuTruck, label: 'Assign Delivery' },
+  { 
+    label: 'Create Listing', 
+    icon: LuPlus, 
+    path: '/admin/inventory/add-flow',
+    children: [
+      { path: '/admin/inventory/add', icon: LuPlus, label: 'Create Order' },
+      { path: '/admin/catalog', icon: LuPackage, label: 'Select from Catalog' },
+    ]
+  },
+  { 
+    label: 'Product Management', 
+    icon: LuPackage, 
+    path: '/admin/inventory',
+    children: [
+      { path: '/admin/inventory', icon: LuLayoutGrid, label: 'All Inventory' },
+      { path: '/admin/inventory/pending', icon: LuClock, label: 'Pending Approval', showBadge: true, badgeType: 'product' },
+    ]
+  },
   { 
     label: 'Order Management', 
     icon: LuClipboardList, 
@@ -37,19 +57,6 @@ const menuItems = [
     children: [
       { path: '/admin/orders/all', icon: LuLayoutGrid, label: 'All Orders' },
       { path: '/admin/orders/pending', icon: LuClock, label: 'Pending Orders' },
-      { path: '/admin/orders/processing', icon: LuPackage, label: 'Processing' },
-      { path: '/admin/orders/shipped', icon: LuTruck, label: 'Shipped' },
-      { path: '/admin/orders/delivered', icon: FiCheckCircle, label: 'Delivered' },
-      { path: '/admin/orders/cancelled', icon: FiXCircle, label: 'Cancelled' },
-    ]
-  },
-  { 
-    label: 'Manage Delivery Boy', 
-    icon: LuTruck, 
-    path: '/admin/delivery',
-    children: [
-      { path: '/admin/delivery', icon: LuLayoutGrid, label: 'All Partners' },
-      { path: '/admin/delivery/pending', icon: LuClock, label: 'Pending Approval', showBadge: true, badgeType: 'delivery' },
     ]
   },
   { 
@@ -59,15 +66,6 @@ const menuItems = [
     children: [
       { path: '/admin/catalog', icon: LuLayoutGrid, label: 'Master Catalog' },
       { path: '/admin/catalog/add', icon: LuPlus, label: 'New Master Item' },
-    ]
-  },
-  { 
-    label: 'Manage Products', 
-    icon: LuPackage, 
-    path: '/admin/inventory',
-    children: [
-      { path: '/admin/inventory', icon: LuLayoutGrid, label: 'All Products' },
-      { path: '/admin/inventory/pending', icon: LuClock, label: 'Pending Approval', showBadge: true, badgeType: 'product' },
     ]
   },
   { 
@@ -147,37 +145,30 @@ const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCoun
     <div className="mb-2">
       <div 
         className={`
-          flex items-center justify-between p-3 rounded-xl transition-all duration-300 group cursor-pointer border border-white/5
+          flex items-center justify-between p-3 rounded-xl transition-all duration-300 group border border-white/5
           ${isActive 
             ? 'bg-red-800 text-white shadow-xl shadow-red-900/20 border-white/10 scale-[1.02]' 
             : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10'}
         `}
-        onClick={() => {
-          if (hasChildren) {
-            onToggle(item.label);
-          } else {
-            if (window.innerWidth < 1024) onClose();
-          }
-        }}
       >
-        {item.path && !hasChildren ? (
-          <NavLink to={item.path} end={item.path === '/admin'} className="w-full">
-            {headerContent}
-          </NavLink>
-        ) : (
-          headerContent
-        )}
+        <div className="flex-1" onClick={() => { if (window.innerWidth < 1024 && !hasChildren) onClose(); }}>
+          {item.path ? (
+            <NavLink to={item.path} end={item.path === '/admin'} className="w-full">
+              {headerContent}
+            </NavLink>
+          ) : (
+            headerContent
+          )}
+        </div>
         
         {hasChildren && (
           <Motion.div
+            className="p-1 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
             animate={{ rotate: expanded ? 90 : 0 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => {
-              // Prevent navigation if only clicking the chevron
-              if (item.path) {
-                e.stopPropagation();
-                onToggle(item.label);
-              }
+              e.stopPropagation();
+              onToggle(item.label);
             }}
           >
             <LuChevronRight size={16} className={`drop-shadow-md transition-colors ${isActive ? 'text-white' : 'text-white/60'}`} />

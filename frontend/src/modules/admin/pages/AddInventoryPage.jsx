@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { LuPlus, LuImage, LuBriefcase, LuTags, LuInfo, LuArrowLeft, LuPackage, LuCheck, LuGrid2X2, LuUpload } from 'react-icons/lu';
 import { FiPackage, FiEdit3 } from 'react-icons/fi';
@@ -7,6 +7,10 @@ import api from '../../../shared/utils/api';
 
 const AddInventoryPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const catalogId = searchParams.get('catalogId');
+
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [imgFile, setImgFile] = useState(null);
@@ -28,6 +32,7 @@ const AddInventoryPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const [catRes, brandRes] = await Promise.all([
           api.get('/categories'),
           api.get('/brands')
@@ -35,15 +40,37 @@ const AddInventoryPage = () => {
         setCategories(catRes.data.data || []);
         setBrands(brandRes.data.data || []);
         
-        // Set defaults if available
-        if (catRes.data.data?.length > 0) setFormData(prev => ({ ...prev, category: catRes.data.data[0].name }));
-        if (brandRes.data.data?.length > 0) setFormData(prev => ({ ...prev, brand: brandRes.data.data[0].name }));
+        // If catalogId exists, fetch catalog item to pre-fill
+        if (catalogId) {
+          const { data: catalogItem } = await api.get(`/catalog/${catalogId}`);
+          const itm = catalogItem.data;
+          if (itm) {
+            setFormData({
+              name: itm.name || '',
+              sku: itm.sku || '',
+              category: itm.category || '',
+              brand: itm.brand || '',
+              price: itm.price || '',
+              image: itm.images?.[0] || '',
+              description: itm.description || '',
+              material: itm.material || '',
+              dimensions: itm.dimensions || '',
+              countInStock: 50,
+            });
+          }
+        } else {
+          // Set defaults if available
+          if (catRes.data.data?.length > 0) setFormData(prev => ({ ...prev, category: catRes.data.data[0].name }));
+          if (brandRes.data.data?.length > 0) setFormData(prev => ({ ...prev, brand: brandRes.data.data[0].name }));
+        }
       } catch (err) {
-        console.error('Failed to fetch categories/brands:', err);
+        console.error('Failed to fetch initialization data:', err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
-  }, []);
+  }, [catalogId]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];

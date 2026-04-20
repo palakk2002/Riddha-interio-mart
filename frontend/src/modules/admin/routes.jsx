@@ -19,6 +19,7 @@ import SignupPage from '../user/pages/SignupPage';
 import AdminProfile from './pages/AdminProfile';
 import AnalyticsPage from './pages/AnalyticsPage';
 import ActivityPage from './pages/ActivityPage';
+import OrderTracking from './pages/OrderTracking';
 import AddProductPage from './pages/AddProductPage';
 import EditProductPage from './pages/EditProductPage';
 import AddCategoryPage from './pages/AddCategoryPage';
@@ -33,6 +34,8 @@ import ProductListPage from './pages/ProductListPage';
 import AddInventoryPage from './pages/AddInventoryPage';
 import EditInventoryPage from './pages/EditInventoryPage';
 import ManageDeliveries from './pages/ManageDeliveries';
+import AssignDeliveryPage from './pages/DeliveryAssignment';
+import AddProductFlowPage from './pages/AddProductFlowPage';
 
 const AdminRoutes = () => {
   return (
@@ -46,6 +49,7 @@ const AdminRoutes = () => {
         <Route path="/catalog/add" element={<AddProductPage />} />
         <Route path="/catalog/edit/:id" element={<EditProductPage />} />
         <Route path="/inventory" element={<ProductListPage />} />
+        <Route path="/inventory/add-flow" element={<AddProductFlowPage />} />
         <Route path="/inventory/add" element={<AddInventoryPage />} />
         <Route path="/inventory/edit/:id" element={<EditInventoryPage />} />
         <Route path="/categories" element={<CategoriesPage />} />
@@ -69,8 +73,10 @@ const AdminRoutes = () => {
         <Route path="/sellers/active" element={<ActiveSellers />} />
         <Route path="/orders/:status" element={<OrderListPage />} />
         <Route path="/orders/view/:id" element={<OrderDetailPage />} />
+        <Route path="/orders/tracking" element={<OrderTracking />} />
         <Route path="/delivery" element={<ManageDeliveries />} />
         <Route path="/delivery/pending" element={<ManageDeliveries />} />
+        <Route path="/delivery/assign" element={<AssignDeliveryPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<AdminProfile />} />
         <Route path="/analytics" element={<AnalyticsPage />} />

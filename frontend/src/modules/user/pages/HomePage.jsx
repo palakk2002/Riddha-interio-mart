@@ -43,7 +43,7 @@ const HomePage = () => {
     fetchBanners();
   }, []);
 
-  const featuredProducts = products.slice(0, 4);
+  const featuredProducts = products.slice(0, 8);
 
   const containerVariants = {
     hidden: { opacity: 0 },

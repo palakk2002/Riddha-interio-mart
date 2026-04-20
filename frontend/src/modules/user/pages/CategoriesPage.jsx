@@ -6,6 +6,7 @@ import api from '../../../shared/utils/api';
 const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -52,28 +53,40 @@ const CategoriesPage = () => {
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-x-3 md:gap-x-12 gap-y-3 md:gap-y-16">
-          {categories.map((category) => (
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-x-3 md:gap-x-12 gap-y-6 md:gap-y-16">
+          {categories.slice(0, showAll ? categories.length : 8).map((category) => (
             <div key={category._id}>
               <Link 
                 to={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
                 className="group flex flex-col items-center gap-1 md:gap-4"
               >
-                <div className="relative aspect-square w-full rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-soft-oatmeal/10 shadow-sm group-hover:shadow-lg transition-all duration-500 border border-soft-oatmeal/5">
+                <div className="relative aspect-square w-full rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white shadow-sm group-hover:shadow-lg transition-all duration-500 border border-soft-oatmeal/10 flex items-center justify-center p-2">
                   <img 
                     src={category.image} 
                     alt={category.name} 
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="h-full w-full object-contain transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-deep-espresso/0 group-hover:bg-deep-espresso/5 transition-colors duration-300" />
                 </div>
-                <span className="text-[9px] md:text-xs font-black uppercase tracking-widest text-deep-espresso/60 group-hover:text-warm-sand text-center transition-colors leading-tight min-h-[2.5em] px-1">
+                <span className="text-[8px] md:text-xs font-black uppercase tracking-widest text-deep-espresso/60 group-hover:text-warm-sand text-center transition-colors leading-tight min-h-[2.5em] px-1">
                   {category.name}
                 </span>
               </Link>
             </div>
           ))}
         </div>
+
+        {/* View More Button */}
+        {!showAll && categories.length > 8 && (
+          <div className="mt-12 text-center">
+            <button 
+              onClick={() => setShowAll(true)}
+              className="px-8 py-3 rounded-full border border-warm-sand/30 text-warm-sand text-[10px] font-black uppercase tracking-widest hover:bg-warm-sand hover:text-white transition-all duration-500"
+            >
+              View All {categories.length} Collections
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

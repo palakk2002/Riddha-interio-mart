@@ -69,20 +69,9 @@ const OrderDetailPage = () => {
       const { data } = await api.get(`/orders/${id}`);
       if (data.success) {
         setOrder(data.data);
-      } else {
-        // Try to find in mock data if API fails
-        const mockOrder = initialOrders.find(o => o._id === id);
-        if (mockOrder) {
-          setOrder(mockOrder);
-        }
       }
     } catch (err) {
       console.error('Failed to fetch order details:', err);
-      // Fallback to mock data
-      const mockOrder = initialOrders.find(o => o._id === id);
-      if (mockOrder) {
-        setOrder(mockOrder);
-      }
     } finally {
       setLoading(false);
     }
@@ -335,9 +324,16 @@ const OrderDetailPage = () => {
                   <LuPackage className="text-warm-sand" size={18} />
                   <h3 className="font-bold">Seller Information</h3>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-deep-espresso">{order.seller.shopName || "Elite Seller"}</p>
-                  <p className="text-xs text-warm-sand">{order.seller.email || "seller@riddhamart.com"}</p>
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-deep-espresso">
+                    {order.seller.shopName || order.seller.fullName || "Admin Merchant"}
+                  </p>
+                  {order.sellerType === 'Admin' && (
+                    <span className="inline-block px-2 py-0.5 bg-red-800/10 text-red-800 text-[9px] font-black uppercase tracking-widest rounded border border-red-800/20">
+                      Mart Direct
+                    </span>
+                  )}
+                  <p className="text-xs text-warm-sand">{order.seller.email}</p>
                 </div>
               </div>
             )}

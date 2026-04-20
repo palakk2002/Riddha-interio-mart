@@ -33,25 +33,21 @@ const FavouriteSectionCard = ({ section }) => {
   const products = Array.isArray(activeBlock?.productIds) ? activeBlock.productIds.filter(Boolean) : [];
 
   return (
-    <section className="bg-soft-oatmeal/10 py-1.5 md:py-10 border-y border-soft-oatmeal/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-2 md:py-6 space-y-3 md:space-y-6">
-        <div className="text-center space-y-1.5 md:space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-soft-oatmeal/40 border border-soft-oatmeal/60 text-[10px] font-black uppercase tracking-[0.35em] text-warm-sand">
-            Handpicked Categories
+    <section className="bg-soft-oatmeal/5 py-4 md:py-12 border-b border-soft-oatmeal/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 md:space-y-8">
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-warm-sand/5 border border-warm-sand/10 text-[9px] font-black uppercase tracking-[0.4em] text-warm-sand/80">
+            Premium Selection
           </div>
           
-          <h2 className="text-2xl md:text-6xl font-display font-bold tracking-tight text-[var(--color-header-red)]">
+          <h2 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-black leading-tight">
             {section.heading}
           </h2>
 
-          <div className="flex items-center justify-center gap-4 py-0.5 md:py-1">
-            <div className="h-[1.5px] w-16 bg-soft-oatmeal shadow-sm" />
-            <div className="w-3 h-3 rounded-full border-2 border-warm-sand/30" />
-            <div className="h-[1.5px] w-16 bg-soft-oatmeal shadow-sm" />
-          </div>
+          <div className="h-px w-12 bg-warm-sand/30 mx-auto" />
 
           {section.subheading && (
-            <p className="mx-auto max-w-2xl text-sm md:text-xl leading-relaxed text-deep-espresso/50 font-light italic">
+            <p className="mx-auto max-w-xl text-xs md:text-base leading-relaxed text-deep-espresso/60 font-medium tracking-wide">
               {section.subheading}
             </p>
           )}
@@ -67,10 +63,10 @@ const FavouriteSectionCard = ({ section }) => {
                 key={categoryId || getId(block)}
                 type="button"
                 onClick={() => setActiveCategoryId(categoryId)}
-                className={`px-3 md:px-6 py-1.5 md:py-2.5 rounded-full border-2 transition-all duration-300 whitespace-nowrap text-xs md:text-sm font-bold ${
+                className={`px-4 py-2 rounded-xl border transition-all duration-300 whitespace-nowrap text-[10px] md:text-xs font-black uppercase tracking-widest ${
                   String(activeCategoryId) === categoryId
-                    ? 'border-[var(--color-header-red)] text-[var(--color-header-red)] bg-white'
-                    : 'border-soft-oatmeal/20 text-deep-espresso/45 hover:border-soft-oatmeal/40 bg-white/60'
+                    ? 'border-warm-sand text-white bg-warm-sand shadow-lg shadow-warm-sand/20'
+                    : 'border-soft-oatmeal/40 text-deep-espresso/50 hover:border-warm-sand/30 bg-white'
                 }`}
               >
                 {category?.name || 'Category'}
@@ -108,8 +104,8 @@ const FavouriteSectionCard = ({ section }) => {
                         />
                       </div>
 
-                      <div className="py-2 md:py-3 px-2 md:px-3 text-center bg-white border-t border-soft-oatmeal/5">
-                        <span className="text-[10px] md:text-sm font-medium text-deep-espresso/80 group-hover:text-warm-sand transition-colors tracking-tight">
+                      <div className="py-2 px-2 text-center bg-gray-50/50">
+                        <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-deep-espresso/60 group-hover:text-warm-sand transition-colors">
                           {product?.name}
                         </span>
                       </div>

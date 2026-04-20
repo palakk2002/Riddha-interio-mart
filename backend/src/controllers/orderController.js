@@ -124,7 +124,7 @@ exports.getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate('user', 'fullName email')
-      .populate('seller', 'shopName email phone shopAddress');
+      .populate('seller', 'fullName shopName email phone shopAddress');
 
     if (order) {
       res.status(200).json({
@@ -160,6 +160,7 @@ exports.getMyOrders = async (req, res) => {
 exports.getOrders = async (req, res) => {
   try {
     const query = {};
+    const isAdmin = req.user && req.user.role === 'admin';
     
     // If user is seller, only show orders belonging to them or containing their products
     if (req.user.role === 'seller') {
@@ -169,10 +170,11 @@ exports.getOrders = async (req, res) => {
         { "orderItems.seller": sellerId }
       ];
     }
-    
+    // Admin sees everything by default (query stays empty)
+
     const orders = await Order.find(query)
       .populate('user', 'fullName email')
-      .populate('seller', 'shopName email')
+      .populate('seller', 'fullName shopName email')
       .sort('-createdAt');
 
     res.status(200).json({

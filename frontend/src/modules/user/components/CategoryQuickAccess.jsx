@@ -8,6 +8,8 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
   const [activeTab, setActiveTab] = useState('All');
   const [loading, setLoading] = useState(true);
 
+  const [showAll, setShowAll] = useState(false);
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -28,6 +30,8 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
   const filteredCategories = activeTab === 'All'
     ? categories
     : categories.filter(cat => cat.name === activeTab);
+
+  const displayedCategories = showAll ? filteredCategories : filteredCategories.slice(0, 6);
 
   if (loading) {
     return (
@@ -63,24 +67,47 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
         )}
 
         {/* Categories Grid/Scroll Area */}
-        <div className="overflow-x-auto no-scrollbar snap-x snap-mandatory px-0">
-          <div
-            className={`${isScrollable ? 'flex pb-2 pt-1' : 'flex md:grid md:grid-cols-5 lg:grid-cols-6 pb-2 md:pb-0'} gap-2 md:gap-12 min-h-[120px] md:min-h-[180px]`}
-          >
-            {/* Conditional Layout for Home vs Subcategory Page */}
-            {!isScrollable ? (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:contents gap-x-2 md:gap-x-12 gap-y-2 md:gap-y-12 px-4 md:px-0 w-full">
-                {filteredCategories.map((category, index) => (
-                  <CategoryItem key={category._id} category={category} index={index} />
-                ))}
-              </div>
-            ) : (
-              <div className="flex gap-x-4 md:gap-x-12 px-4 md:px-0">
-                {filteredCategories.map((category, index) => (
-                  <CategoryItem key={category._id} category={category} index={index} />
-                ))}
-              </div>
-            )}
+        <div className="overflow-x-auto no-scrollbar snap-x snap-mandatory px-0 py-4 -mx-4 md:mx-0">
+          <div className="flex flex-nowrap md:grid md:grid-cols-5 lg:grid-cols-6 gap-6 md:gap-12 px-4 md:px-0">
+             {categories.slice(0, showAll ? categories.length : 6).map((category, index) => (
+                <div key={category._id} className="snap-start shrink-0">
+                  <Link
+                    to={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="group flex flex-col items-center gap-2 md:gap-4 w-20 md:w-40"
+                  >
+                    <div className="relative aspect-square w-full rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white shadow-sm group-hover:shadow-lg transition-all duration-500 ring-1 ring-black/[0.03]">
+                      <img
+                        src={category.image}
+                        alt={category.name}
+                        className="h-full w-full object-cover transition-all duration-1000 group-hover:scale-110"
+                      />
+                    </div>
+                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-deep-espresso/80 group-hover:text-warm-sand text-center transition-colors leading-tight min-h-[2.5em] flex items-center justify-center px-0.5">
+                      {category.name}
+                    </span>
+                  </Link>
+                </div>
+             ))}
+
+             {/* Show More Button */}
+             {!showAll && categories.length > 6 && (
+                <div className="snap-start shrink-0">
+                  <button
+                    onClick={() => setShowAll(true)}
+                    className="group flex flex-col items-center gap-2 md:gap-4 w-20 md:w-40"
+                  >
+                    <div className="relative aspect-square w-full rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-soft-oatmeal/20 flex items-center justify-center shadow-inner group-hover:bg-soft-oatmeal/40 transition-all duration-500">
+                      <div className="text-warm-sand group-hover:scale-125 transition-transform duration-500">
+                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                           <line x1="12" y1="5" x2="12" y2="19"></line>
+                           <line x1="5" y1="12" x2="19" y2="12"></line>
+                         </svg>
+                      </div>
+                    </div>
+                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-warm-sand text-center">More</span>
+                  </button>
+                </div>
+             )}
           </div>
         </div>
       </div>

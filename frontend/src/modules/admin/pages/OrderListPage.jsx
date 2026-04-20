@@ -100,17 +100,11 @@ const OrderListPage = ({ specificStatus }) => {
     try {
       setLoading(true);
       const { data } = await api.get('/orders');
-      if (data.success && data.data && data.data.length > 0) {
-        setOrders(data.data);
-      } else {
-        // Use mock data as fallback
-        console.log('No orders from API, using mock data');
-        setOrders(initialOrders);
+      if (data.success) {
+        setOrders(data.data || []);
       }
     } catch (err) {
       console.error('Failed to fetch orders:', err);
-      // Use mock data as fallback on error
-      setOrders(initialOrders);
     } finally {
       setLoading(false);
     }
@@ -221,44 +215,48 @@ const OrderListPage = ({ specificStatus }) => {
                   </tr>
                 ) : filteredOrders.length > 0 ? (
                   filteredOrders.map((order) => {
-                    const StatusIcon =
-                      statusIcons[order.status] || LuClipboardList;
+                    const StatusIcon = statusIcons[order.status] || LuClipboardList;
+                    const orderDisplayId = order.orderId || (order._id ? `ORD-${order._id.slice(-6).toUpperCase()}` : 'ORD-NEW');
+                    
                     return (
                       <tr
-                        key={order._id}
+                        key={order._id || Math.random()}
                         className="hover:bg-soft-oatmeal/5 transition-colors group"
                       >
                         <td className="px-6 py-4">
                           <p className="font-bold text-deep-espresso">
-                            ORD-{order._id.slice(-6).toUpperCase()}
+                            {orderDisplayId}
                           </p>
                           <p className="text-[10px] text-warm-sand uppercase tracking-wider font-bold">
-                            Standard delivery
+                            {order.paymentMethod || 'Online'}
                           </p>
                         </td>
                         <td className="px-6 py-4 text-sm font-medium text-deep-espresso">
                           {order.user?.fullName || "Guest User"}
                         </td>
                         <td className="px-6 py-4 text-sm font-medium text-deep-espresso">
-                          {order.seller?.shopName || "N/A"}
+                          <div className="flex flex-col">
+                            <span className="font-bold">{order.seller?.shopName || order.seller?.fullName || "Mart Direct"}</span>
+                            {order.sellerType === 'Admin' && <span className="text-[9px] text-red-800 font-black uppercase tracking-tighter">Admin Fulfilled</span>}
+                          </div>
                         </td>
                         <td className="px-6 py-4 font-black text-deep-espresso text-sm">
                           ₹{order.totalPrice?.toLocaleString() || 0}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <StatusIcon size={14} className="text-warm-sand" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-deep-espresso/70">
-                              {order.status}
-                            </span>
+                             <StatusIcon size={14} className="text-warm-sand" />
+                             <span className="text-[10px] font-bold uppercase tracking-widest text-deep-espresso/70">
+                               {order.status || 'Pending'}
+                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4 text-xs text-deep-espresso/70 font-medium">
-                          {new Date(order.createdAt).toLocaleDateString()}
+                          {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Just now'}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button
-                            onClick={() => navigate(`/admin/orders/view/${order._id}`)}
+                            onClick={() => order._id && navigate(`/admin/orders/view/${order._id}`)}
                             className="p-2 text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-colors"
                           >
                             <LuEye size={18} />
@@ -270,10 +268,18 @@ const OrderListPage = ({ specificStatus }) => {
                 ) : (
                   <tr>
                     <td
-                      colSpan="6"
-                      className="px-6 py-12 text-center text-warm-sand italic"
+                      colSpan="7"
+                      className="px-6 py-24 text-center"
                     >
-                      No orders found for this status.
+                      <div className="flex flex-col items-center justify-center space-y-4">
+                        <div className="w-20 h-20 bg-soft-oatmeal/20 rounded-full flex items-center justify-center text-warm-sand/30">
+                          <LuPackage size={40} />
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className="text-xl font-display font-bold text-deep-espresso">No Orders Found</h3>
+                          <p className="text-sm text-warm-sand max-w-xs mx-auto">There are currently no orders for the "{currentStatus || 'All'}" status in your database.</p>
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 )}

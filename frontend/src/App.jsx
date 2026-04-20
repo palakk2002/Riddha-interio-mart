@@ -7,6 +7,7 @@ import UserRoutes from './modules/user/routes';
 import AdminRoutes from './modules/admin/routes';
 import SellerRoutes from './modules/seller/routes';
 import DeliveryRoutes from './modules/delivery/routes';
+// import { Toaster } from 'react-hot-toast'; // Triggering re-save for Vite
 import PincodeModal from './modules/user/components/PincodeModal';
 import DeliveryBar from './modules/user/components/DeliveryBar';
 
@@ -36,6 +37,7 @@ function App() {
 
   return (
     <div className={`min-h-screen flex flex-col user-theme bg-white border-deep-espresso/5 ${(!isDashboardLayout && !isCheckoutPath) ? 'pb-24 md:pb-0' : ''}`}>
+      {/* <Toaster position="top-center" reverseOrder={false} /> */}
       {showPincodeModal && <PincodeModal onComplete={handlePincodeComplete} />}
       
       {!isDashboardLayout && (

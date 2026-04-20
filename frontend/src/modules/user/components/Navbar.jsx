@@ -23,6 +23,7 @@ const Navbar = () => {
   const location = useLocation();
   const isCartPage = location.pathname === "/cart";
   const [pincode, setPincode] = useState('452018');
+  const [showMoreCategories, setShowMoreCategories] = useState(false);
 
   useEffect(() => {
     const savedPincode = localStorage.getItem('userPincode');
@@ -228,12 +229,42 @@ const Navbar = () => {
               </div>
               <div className="flex-1 overflow-y-auto px-6 pt-6">
                 <div className="space-y-4">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Shop Categories</p>
-                  {categories.map((cat) => (
-                    <div key={cat._id}>
-                       <Link to={`/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`} onClick={closeMobile} className="block py-2 text-deep-espresso font-bold">{cat.name}</Link>
-                    </div>
-                  ))}
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Shop Categories</p>
+                    {categories.length > 6 && (
+                      <button 
+                        onClick={() => setShowMoreCategories(!showMoreCategories)}
+                        className="text-[9px] font-black uppercase tracking-widest text-red-800"
+                      >
+                        {showMoreCategories ? 'Show Less' : 'Show More'}
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {categories.slice(0, showMoreCategories ? categories.length : 6).map((cat) => (
+                      <div key={cat._id}>
+                         <Link 
+                           to={`/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                           onClick={closeMobile} 
+                           className="block py-2 text-deep-espresso font-bold border-b border-soft-oatmeal/5"
+                         >
+                           {cat.name}
+                         </Link>
+                      </div>
+                    ))}
+                  </div>
+
+                  {!showMoreCategories && categories.length > 6 && (
+                    <button 
+                      onClick={() => setShowMoreCategories(true)}
+                      className="w-full py-4 text-center border-t border-soft-oatmeal/10"
+                    >
+                      <span className="text-[10px] font-black uppercase tracking-widest text-warm-sand flex items-center justify-center gap-2">
+                        +{categories.length - 6} More Collections <FiChevronRight />
+                      </span>
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="px-8 py-6 border-t border-soft-oatmeal/15">

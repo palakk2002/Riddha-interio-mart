@@ -1,33 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import api from '../../../shared/utils/api';
 
 const BrandLogo = ({ brand }) => {
   const [error, setError] = useState(false);
 
-  // High-reliability brand colors
-  const brandColors = {
-    'POLYCAB': '#e21e26',
-    'Finolex': '#0054a6',
-    'ANCHOR': '#e21e25',
-    'HAVELLS': '#e31e24',
-    'NIPPON': '#0054a6',
-    'PRINCE': '#e21e26'
-  };
-
   if (error || !brand.logo) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center text-deep-espresso">
-        <span 
-          className="text-xs md:text-2xl font-black tracking-tighter uppercase italic"
-          style={{ color: brandColors[brand.name?.toUpperCase()] || '#922724' }}
-        >
-          {brand.name}
+      <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center text-deep-espresso bg-soft-oatmeal/5">
+        <span className="text-xl font-black tracking-tighter uppercase italic text-warm-sand opacity-40">
+          {brand.name?.slice(0, 2)}
         </span>
-        <div 
-          className="h-1 w-8 mt-1 rounded-full opacity-30"
-          style={{ backgroundColor: brandColors[brand.name?.toUpperCase()] || '#922724' }}
-        />
       </div>
     );
   }
@@ -37,30 +21,30 @@ const BrandLogo = ({ brand }) => {
       src={brand.logo} 
       alt={brand.name} 
       onError={() => setError(true)}
-      className="max-w-[80%] max-h-[80%] object-contain transition-transform duration-500 group-hover:scale-110"
+      className="max-w-[70%] max-h-[70%] object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
     />
   );
 };
 
 const BrandScroll = ({ title }) => {
   const [brands, setBrands] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem('admin_brands');
-    if (saved) {
-      setBrands(JSON.parse(saved));
-    } else {
-      // Static fallback
-      setBrands([
-        { name: 'POLYCAB', offer: 'Up to 55% Off', logo: 'https://logo.clearbit.com/polycab.com', slug: 'polycab' },
-        { name: 'Finolex', offer: 'Up To 35% Off', logo: 'https://logo.clearbit.com/finolex.com', slug: 'finolex' },
-        { name: 'ANCHOR', offer: 'Up To 55% Off', logo: 'https://logo.clearbit.com/panasonic.com', slug: 'anchor' },
-        { name: 'HAVELLS', offer: 'Up To 40% Off', logo: 'https://logo.clearbit.com/havells.com', slug: 'havells' },
-        { name: 'NIPPON', offer: 'Up To 30% Off', logo: 'https://logo.clearbit.com/nipponpaint.co.in', slug: 'nippon' },
-        { name: 'PRINCE', offer: 'Up To 45% Off', logo: 'https://logo.clearbit.com/princepipes.com', slug: 'prince' },
-      ]);
-    }
+    const fetchBrands = async () => {
+      try {
+        const { data } = await api.get('/brands');
+        setBrands(data.data || []);
+      } catch (err) {
+        console.error('Failed to fetch brands for scroll:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBrands();
   }, []);
+
+  if (!loading && brands.length === 0) return null;
 
   return (
     <section className="bg-white py-1 md:py-16">
@@ -73,10 +57,10 @@ const BrandScroll = ({ title }) => {
           <div className="flex gap-4 md:gap-10 pb-4">
             {brands.map((brand, index) => (
               <div
-                key={brand.id || index}
+                key={brand._id || index}
                 className="flex-shrink-0"
               >
-                <Link to={`/brand/${brand.slug || brand.name.toLowerCase()}`} className="group flex flex-col items-center gap-2 md:gap-5 w-24 md:w-56">
+                <Link to={`/brand/${brand.slug || brand.name.toLowerCase().replace(/\s+/g, '-')}`} className="group flex flex-col items-center gap-2 md:gap-5 w-24 md:w-56">
                   {/* Brand Card */}
                   <div className="relative aspect-square w-full bg-white border-[1px] md:border-2 border-[#922724] rounded-lg md:rounded-2xl overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300">
                     <div className="w-full h-full flex items-center justify-center">

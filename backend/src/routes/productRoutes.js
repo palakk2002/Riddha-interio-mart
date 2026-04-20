@@ -16,7 +16,7 @@ router.route('/')
   .get(tryProtect, getProducts)
   .post(protect, authorize('seller', 'admin'), createProduct);
 
-router.get('/my-products', protect, authorize('seller'), getSellerProducts);
+router.get('/my-products', protect, authorize('seller', 'admin'), getSellerProducts);
 
 router.put('/:id/approval', protect, authorize('admin'), updateApprovalStatus);
 

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
-import { LuSearch, LuPlus, LuTrash2, LuPen, LuFilter, LuBox } from 'react-icons/lu';
+import { LuSearch, LuPlus, LuTrash2, LuPen, LuFilter, LuBox, LuCheck } from 'react-icons/lu';
 import { FiTrash2, FiEdit3 } from 'react-icons/fi';
 import api from '../../../shared/utils/api';
 
@@ -10,15 +10,20 @@ const CatalogPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [inventory, setInventory] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/catalog');
-      setProducts(res.data.data);
+      const [catalogRes, inventoryRes] = await Promise.all([
+        api.get('/catalog'),
+        api.get('/products')
+      ]);
+      setProducts(catalogRes.data.data || []);
+      setInventory(inventoryRes.data.data || []);
     } catch (err) {
-      console.error('Failed to fetch catalog products:', err);
+      console.error('Failed to fetch catalog/inventory:', err);
     } finally {
       setLoading(false);
     }
@@ -27,6 +32,10 @@ const CatalogPage = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const isProductInInventory = (sku) => {
+    return inventory.some(p => p.sku === sku);
+  };
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => 
@@ -123,8 +132,22 @@ const CatalogPage = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => navigate(`/admin/catalog/edit/${product._id}`)} className="p-2 text-warm-sand hover:text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-all"><FiEdit3 size={18} /></button>
-                          <button onClick={() => setDeleteId(product._id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><FiTrash2 size={18} /></button>
+                          {isProductInInventory(product.sku) ? (
+                            <div className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-lg border border-emerald-100 flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-tighter shadow-sm">
+                              <LuCheck size={14} />
+                              In Shop
+                            </div>
+                          ) : (
+                            <button 
+                              onClick={() => navigate(`/admin/inventory/add?catalogId=${product._id}`)}
+                              className="p-2 text-warm-sand hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                              title="Select for Inventory"
+                            >
+                              <LuPlus size={18} />
+                            </button>
+                          )}
+                          <button onClick={() => navigate(`/admin/catalog/edit/${product._id}`)} className="p-2 text-warm-sand hover:text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-all" title="Edit Catalog Item"><FiEdit3 size={18} /></button>
+                          <button onClick={() => setDeleteId(product._id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Remove from Catalog"><FiTrash2 size={18} /></button>
                         </div>
                       </td>
                     </tr>
@@ -149,6 +172,18 @@ const CatalogPage = () => {
                     <p className="font-black text-deep-espresso mt-1">₹{Number(product.price).toFixed(2)}</p>
                   </div>
                   <div className="flex flex-col gap-2">
+                    {isProductInInventory(product.sku) ? (
+                      <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100 flex items-center justify-center">
+                        <LuCheck size={16} />
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => navigate(`/admin/inventory/add?catalogId=${product._id}`)}
+                        className="p-2.5 bg-warm-sand/5 text-warm-sand rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-all"
+                      >
+                        <LuPlus size={16} />
+                      </button>
+                    )}
                     <button onClick={() => navigate(`/admin/catalog/edit/${product._id}`)} className="p-2.5 bg-soft-oatmeal/20 text-warm-sand rounded-xl"><FiEdit3 size={16} /></button>
                     <button onClick={() => setDeleteId(product._id)} className="p-2.5 bg-red-50 text-red-400 rounded-xl"><FiTrash2 size={16} /></button>
                   </div>
