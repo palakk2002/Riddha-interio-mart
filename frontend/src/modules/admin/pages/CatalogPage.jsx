@@ -1,27 +1,48 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { LuSearch, LuPlus, LuTrash2, LuPen, LuFilter, LuBox } from 'react-icons/lu';
 import { FiTrash2, FiEdit3 } from 'react-icons/fi';
-import { adminProducts } from '../data/adminProducts';
-import { adminCategories } from '../data/adminCategories';
+import api from '../../../shared/utils/api';
 
 const CatalogPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [products, setProducts] = useState(adminProducts);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState(null);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/catalog');
+      setProducts(res.data.data);
+    } catch (err) {
+      console.error('Failed to fetch catalog products:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => 
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      p.code.toLowerCase().includes(searchTerm.toLowerCase())
+      (p.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+       p.sku?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [searchTerm, products]);
 
-  const handleDelete = (id) => {
-    setProducts(products.filter(p => p.id !== id));
-    setDeleteId(null);
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/catalog/${id}`);
+      setProducts(products.filter(p => p._id !== id));
+      setDeleteId(null);
+    } catch (err) {
+      console.error('Failed to delete catalog product:', err);
+    }
   };
 
   return (
@@ -79,9 +100,9 @@ const CatalogPage = () => {
                 </thead>
                 <tbody className="divide-y divide-soft-oatmeal/50">
                   {filteredProducts.map((product) => (
-                    <tr key={product.id} className="hover:bg-soft-oatmeal/5 transition-colors group">
+                    <tr key={product._id} className="hover:bg-soft-oatmeal/5 transition-colors group">
                       <td className="px-6 py-4">
-                        <img src={product.image} alt={product.name} className="w-12 h-12 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" />
+                        <img src={product.images?.[0] || 'https://via.placeholder.com/150'} alt={product.name} className="w-12 h-12 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" />
                       </td>
                       <td className="px-6 py-4">
                         <p className="font-bold text-deep-espresso">{product.name}</p>
@@ -89,7 +110,7 @@ const CatalogPage = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-[10px] font-black text-deep-espresso/60 bg-soft-oatmeal/30 px-2 py-1 rounded border border-soft-oatmeal">
-                          {product.code}
+                          {product.sku}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -98,12 +119,12 @@ const CatalogPage = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 font-black text-deep-espresso">
-                        ₹{product.price.toFixed(2)}
+                        ₹{Number(product.price).toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => navigate(`/admin/catalog/edit/${product.id}`)} className="p-2 text-warm-sand hover:text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-all"><FiEdit3 size={18} /></button>
-                          <button onClick={() => setDeleteId(product.id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><FiTrash2 size={18} /></button>
+                          <button onClick={() => navigate(`/admin/catalog/edit/${product._id}`)} className="p-2 text-warm-sand hover:text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-all"><FiEdit3 size={18} /></button>
+                          <button onClick={() => setDeleteId(product._id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><FiTrash2 size={18} /></button>
                         </div>
                       </td>
                     </tr>
@@ -117,27 +138,35 @@ const CatalogPage = () => {
           <div className="md:hidden space-y-4">
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
-                <div key={product.id} className="bg-white p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex gap-4 items-center">
-                  <img src={product.image} alt={product.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
+                <div key={product._id} className="bg-white p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex gap-4 items-center">
+                  <img src={product.images?.[0] || 'https://via.placeholder.com/150'} alt={product.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-deep-espresso truncate">{product.name}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[9px] font-black text-deep-espresso/40 bg-soft-oatmeal/30 px-1.5 py-0.5 rounded">{product.code}</span>
+                      <span className="text-[9px] font-black text-deep-espresso/40 bg-soft-oatmeal/30 px-1.5 py-0.5 rounded">{product.sku}</span>
                       <span className="text-[9px] font-bold text-dusty-cocoa uppercase tracking-tighter">{product.category}</span>
                     </div>
-                    <p className="font-black text-deep-espresso mt-1">₹{product.price.toFixed(2)}</p>
+                    <p className="font-black text-deep-espresso mt-1">₹{Number(product.price).toFixed(2)}</p>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <button onClick={() => navigate(`/admin/catalog/edit/${product.id}`)} className="p-2.5 bg-soft-oatmeal/20 text-warm-sand rounded-xl"><FiEdit3 size={16} /></button>
-                    <button onClick={() => setDeleteId(product.id)} className="p-2.5 bg-red-50 text-red-400 rounded-xl"><FiTrash2 size={16} /></button>
+                    <button onClick={() => navigate(`/admin/catalog/edit/${product._id}`)} className="p-2.5 bg-soft-oatmeal/20 text-warm-sand rounded-xl"><FiEdit3 size={16} /></button>
+                    <button onClick={() => setDeleteId(product._id)} className="p-2.5 bg-red-50 text-red-400 rounded-xl"><FiTrash2 size={16} /></button>
                   </div>
                 </div>
               ))
             ) : null}
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-20 animate-pulse">
+              <div className="w-12 h-12 border-4 border-soft-oatmeal border-t-red-800 rounded-full animate-spin mb-4" />
+              <p className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Syncing Portfolio...</p>
+            </div>
+          )}
+
           {/* Empty State */}
-          {filteredProducts.length === 0 && (
+          {!loading && filteredProducts.length === 0 && (
             <div className="bg-white rounded-2xl border border-soft-oatmeal p-12 text-center text-warm-sand shadow-sm">
               <LuBox size={48} className="mx-auto opacity-20 mb-4" />
               <p className="font-medium italic">No products matched your search.</p>

@@ -68,7 +68,7 @@ const ProductListPage = () => {
             <p className="text-warm-sand text-sm md:text-base">Comprehensive view of all your inventory.</p>
           </div>
           <button 
-            onClick={() => navigate('/admin/catalog/add')}
+            onClick={() => navigate('/admin/inventory/add')}
             className="flex items-center justify-center gap-2 bg-red-800 text-white px-6 py-3.5 rounded-2xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20 active:scale-95 text-sm"
           >
             <LuPlus size={18} />
@@ -148,7 +148,7 @@ const ProductListPage = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 font-black text-deep-espresso">
-                        ₹{product.price.toLocaleString()}
+                        ₹{product.price?.toLocaleString()}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${
@@ -183,7 +183,7 @@ const ProductListPage = () => {
                             </>
                           )}
                           <button 
-                            onClick={() => navigate(`/admin/catalog/edit/${product._id}`)}
+                            onClick={() => navigate(`/admin/inventory/edit/${product._id}`)}
                             className="p-2 text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-colors"
                           >
                             <LuPen size={16} />

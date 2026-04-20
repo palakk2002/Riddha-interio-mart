@@ -20,8 +20,8 @@ const BrowseCatalog = () => {
   const fetchCatalog = async () => {
     try {
       setLoading(true);
-      // Fetch all approved products that are live
-      const { data } = await api.get('/products', { params: { isApproved: true } });
+      // Fetch all items from the master catalog
+      const { data } = await api.get('/catalog');
       setCatalogProducts(data.data || []);
     } catch (err) {
       console.error('Failed to fetch catalog:', err);
@@ -32,7 +32,7 @@ const BrowseCatalog = () => {
 
   const fetchMyInventory = async () => {
     try {
-      const { data } = await api.get('/products/seller/me'); // Hypothetical endpoint for seller's own products
+      const { data } = await api.get('/products/my-products');
       setInventory(data.data || []);
     } catch (err) {
       console.error('Failed to fetch inventory:', err);

@@ -22,7 +22,7 @@ const AddProductPage = () => {
     description: '',
     material: '',
     dimensions: '',
-    countInStock: 50,
+    stock: 50,
   });
 
   useEffect(() => {
@@ -86,11 +86,11 @@ const AddProductPage = () => {
       const payload = {
         ...formData,
         price: Number(formData.price),
-        countInStock: Number(formData.countInStock),
+        stock: Number(formData.stock),
         images: formData.image ? [formData.image] : []
       };
 
-      await api.post('/products', payload);
+      await api.post('/catalog', payload);
       navigate('/admin/catalog');
     } catch (err) {
       console.error('Failed to add product:', err);
@@ -263,8 +263,8 @@ const AddProductPage = () => {
                         </label>
                         <input 
                           type="number" required
-                          value={formData.countInStock}
-                          onChange={(e) => setFormData({...formData, countInStock: e.target.value})}
+                          value={formData.stock}
+                          onChange={(e) => setFormData({...formData, stock: e.target.value})}
                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
                         />
                       </div>

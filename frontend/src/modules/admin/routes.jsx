@@ -29,6 +29,9 @@ import PendingSellers from './pages/PendingSellers';
 import ActiveSellers from './pages/ActiveSellers';
 import OrderListPage from './pages/OrderListPage';
 import OrderDetailPage from './pages/OrderDetailPage';
+import ProductListPage from './pages/ProductListPage';
+import AddInventoryPage from './pages/AddInventoryPage';
+import EditInventoryPage from './pages/EditInventoryPage';
 
 const AdminRoutes = () => {
   return (
@@ -41,6 +44,9 @@ const AdminRoutes = () => {
         <Route path="/catalog" element={<CatalogPage />} />
         <Route path="/catalog/add" element={<AddProductPage />} />
         <Route path="/catalog/edit/:id" element={<EditProductPage />} />
+        <Route path="/inventory" element={<ProductListPage />} />
+        <Route path="/inventory/add" element={<AddInventoryPage />} />
+        <Route path="/inventory/edit/:id" element={<EditInventoryPage />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/manage-categories" element={<ManageCategories />} />
         <Route path="/manage-categories/add" element={<AddCategoryPage />} />
