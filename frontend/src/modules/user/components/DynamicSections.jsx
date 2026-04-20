@@ -101,7 +101,7 @@ const SectionShell = ({ section, children, action }) => {
           Curated Collection
         </div>
 
-        <h2 className="text-2xl md:text-6xl font-display font-bold tracking-tight text-deep-espresso">
+        <h2 className="text-2xl md:text-6xl font-display font-bold tracking-tight text-[var(--color-header-red)]">
           {section.title}
         </h2>
 

@@ -30,7 +30,9 @@ const Button = ({
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
-      <span className="relative z-10">{children}</span>
+      <span className="relative z-10 flex items-center justify-center gap-2 w-full">
+        {children}
+      </span>
     </motion.button>
   );
 };

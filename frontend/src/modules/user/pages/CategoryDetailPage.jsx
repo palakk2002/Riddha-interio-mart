@@ -93,7 +93,7 @@ const CategoryDetailPage = () => {
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 md:px-12 py-12 md:py-24">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-12 py-4 md:py-24">
         <div className="flex flex-col lg:flex-row gap-12 md:gap-24 relative">
           
           {/* Professional Sidebar - Categories Navigation */}
@@ -149,7 +149,7 @@ const CategoryDetailPage = () => {
 
           {/* Main Visual Grid Area */}
           <main className="flex-1">
-             <div className="flex flex-col md:flex-row items-baseline justify-between mb-12 md:mb-16 gap-6">
+             <div className="flex flex-col md:flex-row items-baseline justify-between mb-4 md:mb-16 gap-6">
                 <div>
                    <h2 className="text-3xl md:text-5xl font-display font-bold text-deep-espresso mb-3 leading-tight">Superior {category.name}</h2>
                    <div className="flex items-center gap-3">
@@ -178,7 +178,7 @@ const CategoryDetailPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
                       >
-                         <ProductCard product={product} index={index} />
+                         <ProductCard product={product} index={index} variant="list" />
                       </motion.div>
                     ))
                   ) : (

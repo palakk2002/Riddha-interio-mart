@@ -39,7 +39,7 @@ const TopBrands = ({ title }) => {
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-12 py-4">
       <div className="bg-[#F2F2F2] py-4 text-center border-x border-t border-gray-100">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight">
+        <h2 className="text-xl md:text-2xl font-bold text-[var(--color-header-red)] tracking-tight">
           {title || "Explore our Top Brands"}
         </h2>
       </div>

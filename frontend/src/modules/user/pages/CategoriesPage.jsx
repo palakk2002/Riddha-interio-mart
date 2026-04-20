@@ -30,14 +30,14 @@ const CategoriesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-24 pt-10 px-4 md:px-12">
+    <div className="min-h-screen bg-white pb-24 pt-4 md:pt-10 px-4 md:px-12">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="text-center mb-12 md:mb-16">
+        <div className="text-center mb-4 md:mb-16">
           <motion.h1 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-black text-deep-espresso tracking-tight mb-4"
+            className="text-2xl md:text-6xl font-black text-deep-espresso tracking-tight mb-4"
           >
             Product <span className="text-warm-sand">Categories</span>
           </motion.h1>
@@ -52,12 +52,12 @@ const CategoriesPage = () => {
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-x-3 md:gap-x-12 gap-y-8 md:gap-y-16">
+        <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-x-3 md:gap-x-12 gap-y-3 md:gap-y-16">
           {categories.map((category) => (
             <div key={category._id}>
               <Link 
                 to={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
-                className="group flex flex-col items-center gap-2 md:gap-4"
+                className="group flex flex-col items-center gap-1 md:gap-4"
               >
                 <div className="relative aspect-square w-full rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-soft-oatmeal/10 shadow-sm group-hover:shadow-lg transition-all duration-500 border border-soft-oatmeal/5">
                   <img 

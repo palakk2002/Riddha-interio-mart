@@ -40,7 +40,7 @@ const FavouriteSectionCard = ({ section }) => {
             Handpicked Categories
           </div>
           
-          <h2 className="text-2xl md:text-6xl font-display font-bold tracking-tight text-deep-espresso">
+          <h2 className="text-2xl md:text-6xl font-display font-bold tracking-tight text-[var(--color-header-red)]">
             {section.heading}
           </h2>
 

@@ -43,12 +43,12 @@ const CartPage = () => {
   return (
     <div className="bg-soft-oatmeal/5 min-h-screen pb-40">
       {/* Header with Title & Stepper */}
-      <div className="bg-[#8B2323] text-white px-6 py-8">
-        <h1 className="text-2xl font-display font-bold">Cart: {cart.length} items</h1>
+      <div className="bg-[#8B2323] text-white px-6 py-4 md:py-8">
+        <h1 className="text-lg md:text-2xl font-display font-bold text-white">Cart: {cart.length} items</h1>
       </div>
 
       {/* Main Content Area */}
-      <div className="max-w-xl mx-auto -mt-4 space-y-4 px-4">
+      <div className="max-w-xl mx-auto mt-2 md:-mt-4 space-y-3 md:space-y-4 px-4">
         {/* Delivery Info Card */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-soft-oatmeal/10">
           <div className="flex items-center justify-between mb-4">
@@ -191,7 +191,7 @@ const CartPage = () => {
       </div>
 
       {/* Sticky Bottom Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-soft-oatmeal/10 px-6 py-6 flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40 max-w-xl mx-auto rounded-t-[2.5rem]">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-soft-oatmeal/10 px-4 md:px-6 py-4 md:py-6 flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40 max-w-xl mx-auto rounded-t-[2.5rem]">
         <div className="space-y-0.5">
           <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Total Price</p>
           <div className="flex items-center gap-2">
@@ -202,7 +202,7 @@ const CartPage = () => {
         <motion.button 
           whileTap={{ scale: 0.96 }}
           onClick={handleAction}
-          className="bg-[#8B2323] text-white px-10 py-4 rounded-2xl font-black text-[12px] uppercase tracking-[0.15em] shadow-2xl shadow-[#8B2323]/30 flex items-center gap-3"
+          className="bg-[#8B2323] text-white px-6 md:px-10 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[11px] md:text-[12px] uppercase tracking-[0.15em] shadow-2xl shadow-[#8B2323]/30 flex items-center gap-3"
         >
           {address ? 'CHECKOUT' : 'ADD ADDRESS'}
           <div className="bg-white/20 p-1 rounded-lg">

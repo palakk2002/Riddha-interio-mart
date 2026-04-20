@@ -60,13 +60,13 @@ const ProductListingPage = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-6 md:py-16"
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-2 md:py-16"
     >
       {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 md:mb-16 gap-8"
+        className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-16 gap-4 md:gap-8"
       >
         <div className="space-y-2">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight">Our Collection</h1>
@@ -166,17 +166,17 @@ const ProductListingPage = () => {
           ) : (
             <AnimatePresence mode="wait">
               {filteredProducts.length > 0 ? (
-                <motion.div 
-                  key={activeCategory}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.4 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-10"
-                >
-                  {filteredProducts.map((product, index) => (
-                    <ProductCard key={product._id || product.id} product={product} index={index} variant="list" />
-                  ))}
+                  <motion.div 
+                    key={activeCategory}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.4 }}
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-10"
+                  >
+                    {filteredProducts.map((product, index) => (
+                      <ProductCard key={product._id || product.id} product={product} index={index} variant="list" />
+                    ))}
                 </motion.div>
               ) : (
               <motion.div 

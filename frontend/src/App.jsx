@@ -48,7 +48,7 @@ function App() {
               <DeliveryBar />
             </>
           ) : (
-            <div className="sticky top-0 z-50 shadow-sm">
+            <div className={`sticky top-0 z-50 shadow-sm ${location.pathname === '/cart' ? 'hidden md:block' : ''}`}>
               <Navbar />
               <DeliveryBar />
             </div>

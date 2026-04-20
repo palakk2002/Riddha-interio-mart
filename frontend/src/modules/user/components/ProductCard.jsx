@@ -59,9 +59,9 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
         </div>
       </Link>
 
-      <div className="p-2 md:p-8 space-y-1.5 md:space-y-4">
+      <div className="flex-1 min-w-0 p-2 md:p-8 flex flex-col justify-between space-y-1.5 md:space-y-4">
         <div className="space-y-0 md:space-y-1">
-          <h3 className="text-[15px] md:text-2xl font-bold text-[#8B2323] leading-tight line-clamp-1 md:line-clamp-none">
+          <h3 className="text-[13px] md:text-2xl font-bold text-[#8B2323] leading-tight line-clamp-1 md:line-clamp-none">
             {product.name}
           </h3>
           <h4 className="text-[8px] md:text-xs uppercase tracking-[0.2em] font-black text-gray-400">
@@ -72,7 +72,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
         <div className="flex items-center justify-between gap-2 md:gap-3 min-w-0">
           <div className="min-w-0 flex-1 flex flex-col">
             <div className="flex flex-col md:flex-row md:items-baseline md:gap-2 min-w-0">
-              <span className="text-lg md:text-3xl font-black text-deep-espresso tracking-tighter whitespace-nowrap">
+              <span className="text-[16px] md:text-3xl font-black text-deep-espresso tracking-tighter whitespace-nowrap">
                 ₹{displayPriceString}
               </span>
               {originalPrice > displayPrice && (
@@ -89,7 +89,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
           {quantity === 0 ? (
             <button 
               onClick={(e) => { e.preventDefault(); addToCart(product); }}
-              className="bg-[#922724] text-white px-5 md:px-7 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[11px] md:text-sm font-bold shadow-md hover:bg-[#722F37] transition-all active:scale-95 whitespace-nowrap"
+              className="bg-[#922724] text-white px-3 md:px-7 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[10px] md:text-sm font-black shadow-md hover:bg-[#722F37] transition-all active:scale-95 whitespace-nowrap"
             >
               Add
             </button>
