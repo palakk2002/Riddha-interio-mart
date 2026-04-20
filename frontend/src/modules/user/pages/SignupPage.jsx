@@ -97,13 +97,13 @@ const SignupPage = () => {
         payload.shopAddress = formData.shopAddress;
         payload.phone = formData.phone;
       }
-      
+
       if (role === 'delivery') {
         payload.phone = formData.phone;
         payload.vehicleType = formData.vehicleType;
         payload.vehicleNumber = formData.vehicleNumber;
       }
-      
+
       const response = await api.post(`/auth/${role}/register`, payload);
 
       if (response.data.success) {
@@ -124,9 +124,9 @@ const SignupPage = () => {
     <div className="relative min-h-screen bg-deep-espresso overflow-hidden selection:bg-warm-sand selection:text-white">
       {/* Background Section */}
       <div className="fixed inset-0 z-0">
-        <img 
-          src={LOGIN_BG} 
-          alt="Luxury Interior" 
+        <img
+          src={LOGIN_BG}
+          alt="Luxury Interior"
           className="w-full h-full object-cover opacity-40 md:opacity-100"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-deep-espresso via-deep-espresso/40 to-transparent md:bg-black/40"></div>
@@ -135,7 +135,7 @@ const SignupPage = () => {
       <div className="relative z-10 flex min-h-screen">
         {/* Left Side: Brand Story (Desktop only) */}
         <div className="hidden lg:flex flex-col justify-between w-1/2 p-20 text-white">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center gap-4 group cursor-pointer"

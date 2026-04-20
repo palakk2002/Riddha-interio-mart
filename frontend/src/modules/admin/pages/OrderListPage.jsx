@@ -132,7 +132,7 @@ const OrderListPage = ({ specificStatus }) => {
     return orders.filter((order) => {
       const customerName = order.user?.fullName || "Guest";
       const orderId = order._id || "";
-      
+
       const matchesSearch =
         customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         orderId.toLowerCase().includes(searchTerm.toLowerCase());
@@ -147,7 +147,7 @@ const OrderListPage = ({ specificStatus }) => {
         order.status?.toLowerCase() === currentStatus?.toLowerCase()
       );
     });
-  }, [searchTerm, currentStatus, orders]);
+  }, [searchTerm, currentStatus]);
 
   return (
     <PageWrapper>
@@ -215,8 +215,8 @@ const OrderListPage = ({ specificStatus }) => {
                 {loading ? (
                   <tr>
                     <td colSpan="7" className="px-6 py-12 text-center">
-                       <div className="w-10 h-10 border-4 border-soft-oatmeal border-t-red-800 rounded-full animate-spin mx-auto" />
-                       <p className="text-[10px] font-black text-warm-sand mt-3 uppercase tracking-widest">Accessing Pipeline...</p>
+                      <div className="w-10 h-10 border-4 border-soft-oatmeal border-t-red-800 rounded-full animate-spin mx-auto" />
+                      <p className="text-[10px] font-black text-warm-sand mt-3 uppercase tracking-widest">Accessing Pipeline...</p>
                     </td>
                   </tr>
                 ) : filteredOrders.length > 0 ? (
@@ -257,7 +257,7 @@ const OrderListPage = ({ specificStatus }) => {
                           {new Date(order.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button 
+                          <button
                             onClick={() => navigate(`/admin/orders/view/${order._id}`)}
                             className="p-2 text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-colors"
                           >

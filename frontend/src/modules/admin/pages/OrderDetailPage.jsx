@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { motion } from 'framer-motion';
-import { 
-  LuArrowLeft, 
-  LuPackage, 
-  LuTruck, 
-  LuClock, 
-  LuMapPin, 
-  LuUser, 
-  LuMail, 
+import {
+  LuArrowLeft,
+  LuPackage,
+  LuTruck,
+  LuClock,
+  LuMapPin,
+  LuUser,
+  LuMail,
   LuPhone,
   LuCreditCard,
   LuPrinter,
@@ -91,7 +91,7 @@ const OrderDetailPage = () => {
   const handleStatusUpdate = async (newStatus) => {
     // Update locally first
     setOrder(prev => ({ ...prev, status: newStatus }));
-    
+
     try {
       const { data } = await api.put(`/orders/${id}/status`, { status: newStatus });
       if (data.success) {
@@ -133,8 +133,8 @@ const OrderDetailPage = () => {
     return (
       <PageWrapper>
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
-           <div className="w-12 h-12 border-4 border-gray-100 border-t-red-800 rounded-full animate-spin mb-4" />
-           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Decrypting Transaction...</p>
+          <div className="w-12 h-12 border-4 border-gray-100 border-t-red-800 rounded-full animate-spin mb-4" />
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Decrypting Transaction...</p>
         </div>
       </PageWrapper>
     );
@@ -186,14 +186,14 @@ const OrderDetailPage = () => {
           </div>
           <div className="flex flex-wrap gap-2">
             <div className="relative" ref={dropdownRef}>
-              <button 
+              <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold hover:shadow-lg transition-all text-xs uppercase tracking-widest"
               >
                 Order Status
                 <LuChevronDown size={16} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
               </button>
-              
+
               {dropdownOpen && (
                 <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-soft-oatmeal rounded-xl shadow-lg z-50">
                   <div className="p-2">
@@ -204,11 +204,10 @@ const OrderDetailPage = () => {
                           handleStatusUpdate(status);
                           setDropdownOpen(false);
                         }}
-                        className={`w-full text-left px-4 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all mb-1 ${
-                          order.status === status
+                        className={`w-full text-left px-4 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all mb-1 ${order.status === status
                             ? 'bg-purple-100 text-purple-700'
                             : 'text-deep-espresso hover:bg-soft-oatmeal/20'
-                        }`}
+                          }`}
                       >
                         {status}
                       </button>
@@ -276,8 +275,8 @@ const OrderDetailPage = () => {
                   {order.paymentMethod} Payment
                 </p>
                 <div className="flex items-center gap-2">
-                   <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                   <span className="text-xs font-bold text-green-600 uppercase tracking-widest">{order.isPaid ? 'Paid' : 'Pending'}</span>
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  <span className="text-xs font-bold text-green-600 uppercase tracking-widest">{order.isPaid ? 'Paid' : 'Pending'}</span>
                 </div>
               </div>
 
@@ -287,7 +286,7 @@ const OrderDetailPage = () => {
                   <h3 className="font-bold">Shipping Address</h3>
                 </div>
                 <p className="text-sm text-deep-espresso leading-relaxed italic uppercase font-medium">
-                  {order.shippingAddress? (
+                  {order.shippingAddress ? (
                     <>
                       {order.shippingAddress.fullAddress}, {order.shippingAddress.landmark && `${order.shippingAddress.landmark}, `}
                       {order.shippingAddress.city} - {order.shippingAddress.pincode}
@@ -353,11 +352,11 @@ const OrderDetailPage = () => {
                 {timeline.map((step, idx) => (
                   <div key={idx} className="relative pl-10">
                     <div className={`absolute left-0 top-1 w-7 h-7 rounded-full border-4 border-white flex items-center justify-center z-10 ${step.active ? 'bg-red-800 text-white shadow-lg shadow-red-800/20' : 'bg-soft-oatmeal text-warm-sand'}`}>
-                       {step.active && idx === timeline.filter(t => t.active).length - 1 ? (
-                         <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
-                       ) : (
-                         <FiCheckCircle size={12} />
-                       )}
+                      {step.active && idx === timeline.filter(t => t.active).length - 1 ? (
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
+                      ) : (
+                        <FiCheckCircle size={12} />
+                      )}
                     </div>
                     <div>
                       <p className={`text-sm font-bold ${step.active ? 'text-deep-espresso' : 'text-warm-sand'}`}>{step.status}</p>

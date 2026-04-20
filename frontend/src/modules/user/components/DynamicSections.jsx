@@ -59,9 +59,9 @@ const ProductTile = ({ product }) => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-deep-espresso/45 via-transparent to-transparent" />
       </div>
-      <div className="space-y-2 p-4">
+      <div className="space-y-1 p-2 md:p-4">
         <div className="space-y-1">
-          <p className="line-clamp-1 text-sm font-bold text-deep-espresso">
+          <p className="line-clamp-1 text-[13px] font-bold text-deep-espresso">
             {product?.name}
           </p>
           <p className="line-clamp-1 text-[10px] font-black uppercase tracking-[0.24em] text-warm-sand">
@@ -94,18 +94,18 @@ const SectionShell = ({ section, children, action }) => {
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-12 md:py-20"
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-1 md:py-20"
     >
-      <div className="mx-auto mb-10 max-w-5xl text-center space-y-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-soft-oatmeal/40 border border-soft-oatmeal/60 text-[10px] font-black uppercase tracking-[0.35em] text-warm-sand mb-2">
+      <div className="mx-auto mb-1 md:mb-10 max-w-5xl text-center space-y-1 md:space-y-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-soft-oatmeal/40 border border-soft-oatmeal/60 text-[10px] font-black uppercase tracking-[0.35em] text-warm-sand">
           Curated Collection
         </div>
 
-        <h2 className="text-4xl md:text-6xl font-display font-bold tracking-tight text-deep-espresso">
+        <h2 className="text-2xl md:text-6xl font-display font-bold tracking-tight text-deep-espresso">
           {section.title}
         </h2>
 
-        <div className="flex items-center justify-center gap-5 py-2">
+        <div className="flex items-center justify-center gap-3 py-0.5 md:py-1">
           <div className="h-[1.5px] w-12 bg-soft-oatmeal shadow-sm" />
           <div className="w-2.5 h-2.5 rounded-full border border-warm-sand/40" />
           <div className="h-[1.5px] w-12 bg-soft-oatmeal shadow-sm" />
@@ -118,7 +118,7 @@ const SectionShell = ({ section, children, action }) => {
         )}
 
         {action && (
-          <div className="pt-4 flex justify-center">
+          <div className="pt-1 flex justify-center">
             {action}
           </div>
         )}
@@ -205,20 +205,20 @@ const DynamicSections = () => {
               action={
                 <Link
                   to="/products"
-                  className="inline-flex items-center gap-2 rounded-full border border-soft-oatmeal bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-[0.22em] text-deep-espresso transition-all hover:border-[var(--color-header-red)] hover:text-[var(--color-header-red)]"
+                  className="inline-flex items-center gap-2 rounded-full border border-soft-oatmeal bg-white px-3 md:px-4 py-1 md:py-1.5 text-xs font-bold uppercase tracking-[0.22em] text-deep-espresso transition-all hover:border-[var(--color-header-red)] hover:text-[var(--color-header-red)]"
                 >
                   View all products
-                  <LuChevronRight size={14} />
+                  <LuChevronRight size={13} />
                 </Link>
               }
             >
-              <div className="space-y-4">
+              <div className="space-y-1 md:space-y-4">
                 {categories.length > 0 && (
                   <div className="flex flex-wrap justify-center gap-2">
                     {categories.map((category) => (
                       <span
                         key={getId(category)}
-                        className="rounded-full border border-soft-oatmeal bg-white px-3 py-1 text-[11px] font-bold text-deep-espresso/70"
+                        className="rounded-full border border-soft-oatmeal bg-white px-2 md:px-3 py-0.5 md:py-1 text-[11px] font-bold text-deep-espresso/70"
                       >
                         {category?.name}
                       </span>
@@ -249,7 +249,7 @@ const DynamicSections = () => {
             action={null}
           >
             {banners.length > 0 ? (
-              <div className="overflow-hidden rounded-[2rem] border border-soft-oatmeal bg-white shadow-lg">
+            <div className="overflow-hidden rounded-none border-y border-soft-oatmeal bg-white shadow-lg -mx-4 sm:mx-0">
                 <Banner banners={banners} />
               </div>
             ) : (

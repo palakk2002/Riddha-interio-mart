@@ -77,7 +77,7 @@ const Orders = () => {
     try {
       // In a real app, we'd have a PUT /api/orders/:id/status
       // For now, let's just update local state and simulate backend
-      setOrders(prev => prev.map(order => 
+      setOrders(prev => prev.map(order =>
         order._id === orderId ? { ...order, status: newStatus } : order
       ));
 
@@ -173,15 +173,15 @@ const Orders = () => {
                   {loading ? (
                     <tr>
                       <td colSpan="5" className="px-8 py-20 text-center">
-                         <div className="w-10 h-10 border-4 border-gray-100 border-t-red-800 rounded-full animate-spin mx-auto mb-4" />
-                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Synchronizing Encrypted Data...</p>
+                        <div className="w-10 h-10 border-4 border-gray-100 border-t-red-800 rounded-full animate-spin mx-auto mb-4" />
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Synchronizing Encrypted Data...</p>
                       </td>
                     </tr>
                   ) : filteredOrders.length === 0 ? (
                     <tr>
                       <td colSpan="5" className="px-8 py-20 text-center">
-                         <LuPackage size={48} className="text-gray-100 mx-auto mb-4" />
-                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No matching transactions found</p>
+                        <LuPackage size={48} className="text-gray-100 mx-auto mb-4" />
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No matching transactions found</p>
                       </td>
                     </tr>
                   ) : filteredOrders.map((order) => (
@@ -193,26 +193,26 @@ const Orders = () => {
                     >
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-3">
-                           <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-white transition-colors">
-                              <LuClock size={16} />
-                           </div>
-                           <div>
-                              <p className="text-xs font-black text-gray-900 tracking-tighter uppercase">#{order._id.slice(-8).toUpperCase()}</p>
-                              <p className="text-[9px] text-gray-400 font-bold mt-1 uppercase tracking-widest">{new Date(order.createdAt).toLocaleDateString()}</p>
-                           </div>
+                          <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-white transition-colors">
+                            <LuClock size={16} />
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-gray-900 tracking-tighter uppercase">#{order._id.slice(-8).toUpperCase()}</p>
+                            <p className="text-[9px] text-gray-400 font-bold mt-1 uppercase tracking-widest">{new Date(order.createdAt).toLocaleDateString()}</p>
+                          </div>
                         </div>
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-800 font-black text-[10px]">
-                              {String(order.shippingAddress?.fullName || "G").charAt(0)}
-                           </div>
-                           <div>
-                              <p className="text-xs font-black text-gray-900 uppercase tracking-tighter">{String(order.shippingAddress?.fullName || "Guest")}</p>
-                              <p className="text-[9px] text-gray-400 font-bold flex items-center gap-1 uppercase tracking-widest">
-                                <FiMapPin size={8} /> {String(order.shippingAddress?.city || "Unknown")}
-                              </p>
-                           </div>
+                          <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-800 font-black text-[10px]">
+                            {String(order.shippingAddress?.fullName || "G").charAt(0)}
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-gray-900 uppercase tracking-tighter">{String(order.shippingAddress?.fullName || "Guest")}</p>
+                            <p className="text-[9px] text-gray-400 font-bold flex items-center gap-1 uppercase tracking-widest">
+                              <FiMapPin size={8} /> {String(order.shippingAddress?.city || "Unknown")}
+                            </p>
+                          </div>
                         </div>
                       </td>
                       <td className="px-8 py-6">
@@ -221,8 +221,7 @@ const Orders = () => {
                       </td>
                       <td className="px-8 py-6">
                         <span
-                          className={`text-[9px] font-black uppercase tracking-[0.15em] px-4 py-2 rounded-xl border-2 inline-flex items-center gap-2 ${
-                            order.status === "Pending" 
+                          className={`text-[9px] font-black uppercase tracking-[0.15em] px-4 py-2 rounded-xl border-2 inline-flex items-center gap-2 ${order.status === "Pending"
                               ? "text-amber-600 bg-amber-50 border-amber-100"
                               : order.status === "Processing"
                                 ? "text-blue-600 bg-blue-50 border-blue-100"
@@ -231,35 +230,34 @@ const Orders = () => {
                                   : order.status === "Delivered"
                                     ? "text-green-600 bg-green-50 border-green-100"
                                     : "text-red-600 bg-red-50 border-red-100"
-                          }`}
+                            }`}
                         >
-                          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-                            order.status === "Pending" ? "bg-amber-600" : 
-                            order.status === "Processing" ? "bg-blue-600" :
-                            order.status === "Shipped" ? "bg-purple-600" : "bg-green-600"
-                          }`} />
+                          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${order.status === "Pending" ? "bg-amber-600" :
+                              order.status === "Processing" ? "bg-blue-600" :
+                                order.status === "Shipped" ? "bg-purple-600" : "bg-green-600"
+                            }`} />
                           {order.status}
                         </span>
                       </td>
                       <td className="px-8 py-6 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button 
+                          <button
                             onClick={() => navigate(`/seller/order/${order._id}`)}
                             className="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-900 hover:border-gray-900 transition-all shadow-sm"
                           >
                             <LuEye size={18} />
                           </button>
-                          
+
                           {order.status === 'Processing' && (
-                            <button 
+                            <button
                               onClick={() => handleStatusUpdate(order._id, 'Shipped')}
                               className="w-10 h-10 bg-gray-900 text-white rounded-xl flex items-center justify-center hover:bg-black transition-all shadow-lg shadow-black/10"
                             >
-                               <FiTruck size={18} />
+                              <FiTruck size={18} />
                             </button>
                           )}
                           <button className="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all">
-                             <FiMoreHorizontal size={18} />
+                            <FiMoreHorizontal size={18} />
                           </button>
                         </div>
                       </td>

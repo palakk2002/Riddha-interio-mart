@@ -1,62 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
 import PageWrapper from '../components/PageWrapper';
 import OrderCard from '../components/OrderCard';
 import { initialAvailableOrders, initialMyOrders } from '../data/deliveryData';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DeliveryHistory = () => {
-  const location = useLocation();
   const [activeTab, setActiveTab] = useState('available');
-
-  const [allOrders, setAllOrders] = useState(() => {
-    const saved = localStorage.getItem('riddha_full_orders');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const availableOrders = allOrders.filter(o => o.status === 'Ready for Pickup');
-  const myOrders = allOrders.filter(o => o.status === 'Out For Delivery' || o.status === 'Delivered');
-
-  useEffect(() => {
-    if (location.pathname.includes('/catalog')) setActiveTab('available');
-    else if (location.pathname.includes('/orders')) setActiveTab('my');
-  }, [location.pathname]);
+  const [availableOrders, setAvailableOrders] = useState(initialAvailableOrders);
+  const [myOrders, setMyOrders] = useState(initialMyOrders);
 
   const handleAcceptOrder = (orderId) => {
-    const updated = allOrders.map(order => {
-      if (order.id === orderId) {
-        const updatedTimeline = order.timeline.map(t => {
-          if (t.status === "Out for Delivery") return { ...t, date: new Date().toLocaleString(), active: true };
-          if (t.status === "Ready for Pickup") return { ...t, active: false };
-          return t;
-        });
-        return { ...order, status: 'Out For Delivery', timeline: updatedTimeline };
-      }
-      return order;
-    });
-    setAllOrders(updated);
-    localStorage.setItem('riddha_full_orders', JSON.stringify(updated));
-    alert('Order accepted! You can now view it in My Orders.');
+    const orderToAccept = availableOrders.find(o => o.id === orderId);
+    if (orderToAccept) {
+      setAvailableOrders(availableOrders.filter(o => o.id !== orderId));
+      setMyOrders([...myOrders, { ...orderToAccept, status: 'Accepted' }]);
+    }
   };
 
   const handleRejectOrder = (orderId) => {
-    // For now, just a placeholder as requested
-    console.log('Order rejected:', orderId);
+    setAvailableOrders(availableOrders.filter(o => o.id !== orderId));
   };
 
   const handleUpdateStatus = (orderId, newStatus) => {
-    const updated = allOrders.map(order => {
-      if (order.id === orderId) {
-        const updatedTimeline = order.timeline.map(t => {
-          if (t.status === newStatus) return { ...t, date: new Date().toLocaleString(), active: true };
-          return t;
-        });
-        return { ...order, status: newStatus, timeline: updatedTimeline };
-      }
-      return order;
-    });
-    setAllOrders(updated);
-    localStorage.setItem('riddha_full_orders', JSON.stringify(updated));
+    setMyOrders(myOrders.map(order => 
+      order.id === orderId ? { ...order, status: newStatus } : order
+    ));
   };
 
   return (

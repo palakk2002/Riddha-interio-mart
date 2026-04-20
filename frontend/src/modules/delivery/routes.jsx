@@ -21,8 +21,6 @@ const DeliveryRoutes = () => {
         <Route index element={<Dashboard />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/delivery-history" element={<DeliveryHistory />} />
-        <Route path="/orders" element={<DeliveryHistory />} />
-        <Route path="/catalog" element={<DeliveryHistory />} />
         <Route path="/earnings" element={<Earnings />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/wallet" element={<Wallet />} />

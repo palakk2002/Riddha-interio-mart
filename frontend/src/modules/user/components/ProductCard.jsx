@@ -28,14 +28,14 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
 
   return (
     <div 
-      className={`group bg-white ${isMinimal ? 'rounded-xl' : 'rounded-3xl border border-soft-oatmeal/10'} shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden ${
+      className={`group bg-white ${isMinimal ? 'rounded-xl' : 'rounded-2xl md:rounded-3xl border border-soft-oatmeal/10'} shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden ${
         isList ? 'flex flex-row md:flex-col' : 'flex flex-col'
       }`}
     >
       <Link 
         to={`/products/${productId}`} 
         className={`relative block overflow-hidden shrink-0 ${
-          isList ? 'w-[45%] md:w-full aspect-square md:aspect-auto md:h-80' : 'aspect-square md:aspect-auto md:h-80 w-full'
+          isList ? 'w-[45%] md:w-full aspect-square md:aspect-auto md:h-80' : 'aspect-[4/3.2] md:aspect-auto md:h-80 w-full'
         }`}
       >
         <img
@@ -45,38 +45,38 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
         />
         
         {/* Heart Icon */}
-        <div className="absolute top-4 right-4">
-          <button className="h-10 w-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition-all active:scale-90 border-none outline-none">
-            <FiHeart className="h-5 w-5" />
+        <div className="absolute top-3 right-3 md:top-4 md:right-4">
+          <button className="h-8 w-8 md:h-10 md:w-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition-all active:scale-90 border-none outline-none">
+            <FiHeart className="h-4 w-4 md:h-5 md:w-5" />
           </button>
         </div>
 
         {/* Top Choice Badge */}
-        <div className="absolute top-4 left-4">
-          <span className="bg-pink-100/90 backdrop-blur-md text-[#8B2323] text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-sm">
+        <div className="absolute top-3 left-3 md:top-4 md:left-4">
+          <span className="bg-pink-100/90 backdrop-blur-md text-[#8B2323] text-[8px] md:text-[10px] font-black px-2 py-1 md:px-3 md:py-1.5 rounded-lg uppercase tracking-widest shadow-sm">
             Top Choice
           </span>
         </div>
       </Link>
 
-      <div className="p-5 md:p-8 space-y-4">
-        <div className="space-y-1">
-          <h3 className="text-lg md:text-2xl font-bold text-[#8B2323] leading-tight">
+      <div className="p-2 md:p-8 space-y-1.5 md:space-y-4">
+        <div className="space-y-0 md:space-y-1">
+          <h3 className="text-[15px] md:text-2xl font-bold text-[#8B2323] leading-tight line-clamp-1 md:line-clamp-none">
             {product.name}
           </h3>
-          <h4 className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-gray-400">
+          <h4 className="text-[8px] md:text-xs uppercase tracking-[0.2em] font-black text-gray-400">
             {product.category}
           </h4>
         </div>
 
-        <div className="flex items-center justify-between gap-3 min-w-0">
+        <div className="flex items-center justify-between gap-2 md:gap-3 min-w-0">
           <div className="min-w-0 flex-1 flex flex-col">
-            <div className="flex items-baseline gap-2 min-w-0">
-              <span className="text-xl md:text-3xl font-black text-deep-espresso tracking-tighter whitespace-nowrap">
+            <div className="flex flex-col md:flex-row md:items-baseline md:gap-2 min-w-0">
+              <span className="text-lg md:text-3xl font-black text-deep-espresso tracking-tighter whitespace-nowrap">
                 ₹{displayPriceString}
               </span>
               {originalPrice > displayPrice && (
-                <span className="text-xs md:text-sm text-gray-300 line-through font-medium whitespace-nowrap">
+                <span className="text-[10px] md:text-sm text-gray-300 line-through font-medium whitespace-nowrap">
                   ₹{originalPriceString}
                 </span>
               )}
@@ -86,23 +86,32 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
             </span>
           </div>
 
-          <div className="flex items-center gap-1 bg-soft-oatmeal/5 rounded-2xl p-1 border border-soft-oatmeal/10 shadow-inner flex-shrink-0 max-w-[130px] md:max-w-[150px]">
-            <button 
-              onClick={(e) => { e.preventDefault(); updateQuantity(productId, quantity - 1); }}
-              className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center text-gray-400 hover:text-deep-espresso transition-all active:scale-90 rounded-2xl border border-transparent outline-none"
-            >
-              <FiMinus size={16} />
-            </button>
-            <span className="min-w-[24px] md:min-w-[32px] text-center text-xs md:text-lg font-black text-deep-espresso">
-              {quantity}
-            </span>
+          {quantity === 0 ? (
             <button 
               onClick={(e) => { e.preventDefault(); addToCart(product); }}
-              className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center text-gray-400 hover:text-deep-espresso transition-all active:scale-90 rounded-2xl border border-transparent outline-none"
+              className="bg-[#922724] text-white px-5 md:px-7 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[11px] md:text-sm font-bold shadow-md hover:bg-[#722F37] transition-all active:scale-95 whitespace-nowrap"
             >
-              <FiPlus size={16} />
+              Add
             </button>
-          </div>
+          ) : (
+            <div className="flex items-center gap-1 bg-soft-oatmeal/5 rounded-xl md:rounded-2xl p-0.5 md:p-1 border border-soft-oatmeal/10 shadow-inner flex-shrink-0 max-w-[100px] md:max-w-[150px]">
+              <button 
+                onClick={(e) => { e.preventDefault(); updateQuantity(productId, quantity - 1); }}
+                className="w-7 h-7 md:w-10 md:h-10 flex items-center justify-center text-gray-400 hover:text-deep-espresso transition-all active:scale-90 rounded-lg md:rounded-2xl border border-transparent outline-none"
+              >
+                <FiMinus className="w-3 h-3 md:w-4 md:h-4" />
+              </button>
+              <span className="min-w-[16px] md:min-w-[32px] text-center text-[10px] md:text-lg font-black text-deep-espresso">
+                {quantity}
+              </span>
+              <button 
+                onClick={(e) => { e.preventDefault(); addToCart(product); }}
+                className="w-7 h-7 md:w-10 md:h-10 flex items-center justify-center text-gray-400 hover:text-deep-espresso transition-all active:scale-90 rounded-lg md:rounded-2xl border border-transparent outline-none"
+              >
+                <FiPlus className="w-3 h-3 md:w-4 md:h-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

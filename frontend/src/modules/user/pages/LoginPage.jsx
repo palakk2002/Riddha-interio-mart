@@ -40,7 +40,7 @@ const LoginPage = () => {
 
     try {
       const role = getRole();
-      
+
       const response = await api.post(`/auth/${role}/login`, {
         email: identifier,
         password: password,

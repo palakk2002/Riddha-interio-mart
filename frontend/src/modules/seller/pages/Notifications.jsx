@@ -23,7 +23,7 @@ const Notifications = () => {
     const checkNewOrders = () => {
       const orders = JSON.parse(localStorage.getItem('riddha_full_orders') || '[]');
       const pendingOrders = orders.filter(o => o.status === 'Pending Seller');
-      
+
       const newNotifs = [];
       pendingOrders.forEach(order => {
         // Check if we already notified about this order ID
@@ -69,8 +69,8 @@ const Notifications = () => {
 
   const getIcon = (type) => {
     switch (type) {
-      case 'success': return <LuCircleCheck className="text-green-500" size={20} />;
-      case 'warning': return <LuCircleAlert className="text-amber-500" size={20} />;
+      case 'success': return <LuCheckCircle2 className="text-green-500" size={20} />;
+      case 'warning': return <LuAlertCircle className="text-amber-500" size={20} />;
       default: return <LuInfo className="text-blue-500" size={20} />;
     }
   };
@@ -90,15 +90,14 @@ const Notifications = () => {
                 setSound(next);
                 setSoundEnabled(next);
               }}
-              className={`px-6 py-3 rounded-2xl font-bold transition-all text-sm shadow-sm border ${
-                sound
+              className={`px-6 py-3 rounded-2xl font-bold transition-all text-sm shadow-sm border ${sound
                   ? 'bg-deep-espresso text-white border-deep-espresso'
                   : 'bg-white text-deep-espresso border-soft-oatmeal hover:bg-soft-oatmeal/20'
-              }`}
+                }`}
             >
               Sound: {sound ? 'On' : 'Off'}
             </button>
-            <button 
+            <button
               onClick={markAllAsRead}
               className="flex items-center justify-center gap-2 bg-white border border-soft-oatmeal text-deep-espresso px-6 py-3 rounded-2xl font-bold hover:bg-soft-oatmeal/20 transition-all text-sm shadow-sm"
             >
@@ -109,13 +108,13 @@ const Notifications = () => {
         </div>
 
         <div className="flex gap-2 p-1 bg-soft-oatmeal/20 rounded-xl w-fit">
-          <button 
+          <button
             onClick={() => setActiveFilter('all')}
             className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeFilter === 'all' ? 'bg-white text-deep-espresso shadow-sm' : 'text-warm-sand hover:text-deep-espresso'}`}
           >
             All Notifications
           </button>
-          <button 
+          <button
             onClick={() => setActiveFilter('unread')}
             className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeFilter === 'unread' ? 'bg-white text-deep-espresso shadow-sm' : 'text-warm-sand hover:text-deep-espresso'}`}
           >
@@ -126,7 +125,7 @@ const Notifications = () => {
         <div className="space-y-3">
           {filteredNotifications.length > 0 ? (
             filteredNotifications.map((notification) => (
-              <div 
+              <div
                 key={notification.id}
                 onClick={() => markAsRead(notification.id)}
                 className={`group bg-white p-6 rounded-3xl border transition-all cursor-pointer ${notification.status === 'unread' ? 'border-warm-sand/30 shadow-md ring-1 ring-warm-sand/5' : 'border-soft-oatmeal hover:border-warm-sand/20 shadow-sm'}`}
@@ -145,7 +144,7 @@ const Notifications = () => {
                           <LuClock size={12} />
                           {notification.time}
                         </span>
-                        <button 
+                        <button
                           onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
                           className="opacity-0 group-hover:opacity-100 p-2 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                         >

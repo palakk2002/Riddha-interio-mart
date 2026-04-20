@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import SellerSidebar from './SellerSidebar';
 import SellerBottomNavbar from './SellerBottomNavbar';
-import VerificationPending from './VerificationPending';
 import { useUser } from '../../user/data/UserContext';
 import { LuMenu, LuBell, LuUser, LuLogOut, LuChevronDown } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -317,15 +316,11 @@ const SellerLayout = () => {
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto p-6 md:p-8 pb-32 lg:pb-8 custom-scrollbar bg-white">
-          {user?.status === 'pending' ? (
-            <VerificationPending />
-          ) : (
-            <Outlet />
-          )}
+          <Outlet />
         </main>
         
         {/* Mobile Bottom Navigation */}
-        {!isSidebarOpen && user?.status !== 'pending' && <SellerBottomNavbar />}
+        <SellerBottomNavbar />
       </div>
     </div>
   );

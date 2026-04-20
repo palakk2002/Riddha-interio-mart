@@ -89,8 +89,8 @@ const SellerSidebar = ({ isOpen, onClose }) => {
               onClick={() => { if (window.innerWidth < 1024) onClose(); }}
               className={({ isActive }) => `
                 flex items-center justify-between p-3 rounded-xl transition-all duration-300 group border border-white/5 mb-2
-                ${isActive 
-                  ? 'bg-red-800 text-white shadow-xl shadow-red-900/20 border-white/10 scale-[1.02]' 
+                ${isActive
+                  ? 'bg-red-800 text-white shadow-xl shadow-red-900/20 border-white/10 scale-[1.02]'
                   : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10'}
               `}
             >
@@ -105,7 +105,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
 
         {/* Footer info and logout */}
         <div className="relative z-10 p-6 border-t border-white/10 mt-auto backdrop-blur-sm bg-deep-espresso/20">
-          <button 
+          <button
             onClick={handleLogout}
             className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors group mb-4"
           >
