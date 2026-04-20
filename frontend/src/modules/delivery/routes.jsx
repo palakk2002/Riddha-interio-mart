@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import DeliveryLayout from './components/DeliveryLayout';
 import Dashboard from './pages/Dashboard';
+import Orders from './pages/Orders';
 import DeliveryHistory from './pages/DeliveryHistory';
 import Earnings from './pages/Earnings';
 import Profile from './pages/Profile';
@@ -20,6 +21,7 @@ const DeliveryRoutes = () => {
       <Route element={<DeliveryLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/orders" element={<Orders />} />
         <Route path="/delivery-history" element={<DeliveryHistory />} />
         <Route path="/earnings" element={<Earnings />} />
         <Route path="/profile" element={<Profile />} />

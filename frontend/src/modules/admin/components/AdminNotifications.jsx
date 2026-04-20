@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuPackage, LuX, LuArrowRight } from 'react-icons/lu';
+import { LuPackage, LuX, LuArrowRight, LuTruck } from 'react-icons/lu';
 import { connectSocket, disconnectSocket } from '../../../shared/utils/socket';
 import { useNavigate } from 'react-router-dom';
 
@@ -40,6 +40,12 @@ const AdminNotifications = ({ token }) => {
       setActiveNotification({ ...payload, type: 'product' });
     });
 
+    socket.on('delivery:new_registration', (payload) => {
+      console.log('DELIVERY:NEW_REGISTRATION received in Admin panel:', payload);
+      playSound();
+      setActiveNotification({ ...payload, type: 'delivery' });
+    });
+
     socket.on('connect_error', (err) => {
       console.error('Admin socket connection error:', err.message);
     });
@@ -48,10 +54,23 @@ const AdminNotifications = ({ token }) => {
       console.log('Cleaning up Admin socket listeners...');
       socket.off('order:new');
       socket.off('product:new_request');
+      socket.off('delivery:new_registration');
       socket.off('connect');
       socket.off('connect_error');
     };
   }, [token, playSound]);
+
+  const getIcon = () => {
+     if (activeNotification.type === 'product') return <LuPackage size={28} className="animate-bounce" />;
+     if (activeNotification.type === 'delivery') return <LuTruck size={28} className="animate-bounce" />;
+     return <LuPackage size={28} className="animate-bounce" />;
+  };
+
+  const getTheme = () => {
+     if (activeNotification.type === 'product') return 'bg-amber-50 text-amber-600';
+     if (activeNotification.type === 'delivery') return 'bg-blue-50 text-blue-600';
+     return 'bg-red-50 text-red-800';
+  };
 
   return (
     <AnimatePresence mode="wait">
@@ -63,18 +82,24 @@ const AdminNotifications = ({ token }) => {
           className="fixed bottom-10 left-1/2 z-[9999] w-[90%] max-w-md bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-soft-oatmeal p-6 flex items-start gap-4 overflow-hidden group"
         >
             {/* Top accent bar */}
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-800 to-deep-espresso" />
+            <div className={`absolute top-0 left-0 w-full h-1.5 ${
+              activeNotification.type === 'delivery' ? 'bg-blue-600' :
+              activeNotification.type === 'product' ? 'bg-amber-500' : 
+              'bg-gradient-to-r from-red-800 to-deep-espresso'
+            }`} />
 
             {/* Icon Wrapper */}
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${activeNotification.type === 'product' ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-800'}`}>
-               <LuPackage size={28} className="animate-bounce" />
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${getTheme()}`}>
+               {getIcon()}
             </div>
 
             {/* Content */}
             <div className="flex-1 space-y-1">
                <div className="flex items-center justify-between">
                   <h3 className="text-sm font-black uppercase tracking-widest text-deep-espresso">
-                    {activeNotification.type === 'product' ? 'Product Approval' : 'Incoming Order'}
+                    {activeNotification.type === 'product' ? 'Product Approval' : 
+                     activeNotification.type === 'delivery' ? 'New Fleet Request' :
+                     'Incoming Order'}
                   </h3>
                   <button 
                     onClick={() => setActiveNotification(null)}
@@ -84,20 +109,26 @@ const AdminNotifications = ({ token }) => {
                   </button>
                </div>
                <p className="text-xl font-display font-bold text-deep-espresso leading-tight">
-                  {activeNotification.type === 'product' 
-                    ? activeNotification.message 
-                    : `₹${activeNotification.totalPrice?.toLocaleString()} Order Received`}
+                  {activeNotification.type === 'product' ? activeNotification.message :
+                   activeNotification.type === 'delivery' ? `${activeNotification.fullName} wants to join` :
+                   `₹${activeNotification.totalPrice?.toLocaleString()} Order Received`}
                </p>
                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-warm-sand font-medium mt-2">
                   <span className="flex items-center gap-1">
-                     <span className={`w-1.5 h-1.5 rounded-full ${activeNotification.type === 'product' ? 'bg-amber-500' : 'bg-green-500'}`}></span>
-                     {activeNotification.type === 'product' 
-                       ? activeNotification.sellerName 
-                       : (activeNotification.customerName || 'Premium Client')}
+                     <span className={`w-1.5 h-1.5 rounded-full ${
+                       activeNotification.type === 'product' ? 'bg-amber-500' : 
+                       activeNotification.type === 'delivery' ? 'bg-blue-500' :
+                       'bg-green-500'
+                     }`}></span>
+                     {activeNotification.type === 'product' ? activeNotification.sellerName :
+                      activeNotification.type === 'delivery' ? activeNotification.vehicleType :
+                      (activeNotification.customerName || 'Premium Client')}
                   </span>
                   <span className="opacity-30">•</span>
-                  <span>{activeNotification.type === 'product' ? 'Draft Product' : (activeNotification.shippingCity || 'Global')}</span>
-                  {activeNotification.type !== 'product' && (
+                  <span>{activeNotification.type === 'product' ? 'Draft Product' : 
+                         activeNotification.type === 'delivery' ? activeNotification.phone :
+                         (activeNotification.shippingCity || 'Global')}</span>
+                  {activeNotification.type === 'order' && (
                     <>
                       <span className="opacity-30">•</span>
                       <span>{activeNotification.itemsCount} Items</span>
@@ -109,19 +140,23 @@ const AdminNotifications = ({ token }) => {
                   <button 
                     onClick={() => {
                         if (activeNotification.type === 'product') {
-                          navigate(`/admin/inventory`); // Navigate to product list where we'll show pending items
+                          navigate(`/admin/inventory`);
+                        } else if (activeNotification.type === 'delivery') {
+                          navigate(`/admin/delivery/pending`);
                         } else {
                           navigate(`/admin/orders/view/${activeNotification.orderId}`);
                         }
                         setActiveNotification(null);
                     }}
                     className={`flex-1 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl transition-all flex items-center justify-center gap-2 ${
-                      activeNotification.type === 'product' 
-                      ? 'bg-amber-600 text-white hover:bg-amber-700' 
-                      : 'bg-deep-espresso text-white hover:bg-red-900'
+                      activeNotification.type === 'product' ? 'bg-amber-600 text-white hover:bg-amber-700' :
+                      activeNotification.type === 'delivery' ? 'bg-blue-600 text-white hover:bg-blue-700' :
+                      'bg-deep-espresso text-white hover:bg-red-900'
                     }`}
                   >
-                    {activeNotification.type === 'product' ? 'Review Product' : 'Process Now'} <LuArrowRight size={14} />
+                    {activeNotification.type === 'product' ? 'Review Product' : 
+                     activeNotification.type === 'delivery' ? 'Review Partner' :
+                     'Process Now'} <LuArrowRight size={14} />
                   </button>
                   <button 
                     onClick={() => setActiveNotification(null)}

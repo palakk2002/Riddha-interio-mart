@@ -55,6 +55,7 @@ app.use('/api/auth/admin', adminRoutes);
 app.use('/api/auth/seller', sellerRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/auth/delivery', deliveryRoutes);
+app.use('/api/delivery', deliveryRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/address', addressRoutes);

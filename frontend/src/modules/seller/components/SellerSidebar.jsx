@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../user/data/UserContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LuLayoutDashboard,
   LuSearch,
@@ -10,21 +10,47 @@ import {
   LuPackage,
   LuX,
   LuChevronRight,
-  LuLogOut
+  LuTruck,
+  LuLogOut,
+  LuNavigation2
 } from 'react-icons/lu';
 import sidebarBg from '../../../assets/seller_sidebar_bg.png';
 
 const menuItems = [
   { path: '/seller', icon: LuLayoutDashboard, label: 'Dashboard' },
   { path: '/seller/orders', icon: LuPackage, label: 'Manage Orders' },
+  { path: '/seller/orders/track', icon: LuNavigation2, label: 'Order Tracking' },
+  { path: '/seller/assign-delivery', icon: LuTruck, label: 'Assign Delivery' },
   { path: '/seller/catalog', icon: LuSearch, label: 'Browse Catalog' },
-  { path: '/seller/add-product', icon: LuPlus, label: 'Add Product' },
-  { path: '/seller/my-products', icon: LuPackage, label: 'My Products' },
+  { 
+    label: 'Product Management', 
+    icon: LuPackage, 
+    path: '/seller/my-products',
+    children: [
+      { path: '/seller/add-product', icon: LuPlus, label: 'Add New Product' },
+      { path: '/seller/my-products', icon: LuPackage, label: 'All Products' },
+    ]
+  },
 ];
 
 const SellerSidebar = ({ isOpen, onClose }) => {
   const { logout } = useUser();
   const navigate = useNavigate();
+  const [openMenus, setOpenMenus] = React.useState({});
+  const location = useLocation();
+
+  React.useEffect(() => {
+    const activeMenu = menuItems.find(item => 
+      item.children?.some(child => location.pathname.startsWith(child.path))
+    );
+    if (activeMenu) {
+      setOpenMenus(prev => ({ ...prev, [activeMenu.label]: true }));
+    }
+  }, [location.pathname]);
+
+  const toggleMenu = (label) => {
+    setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }));
+  };
 
   const handleLogout = () => {
     logout();
@@ -81,26 +107,75 @@ const SellerSidebar = ({ isOpen, onClose }) => {
 
         {/* Navigation */}
         <nav className="relative z-10 flex-1 p-4 mt-4 space-y-2 overflow-y-auto no-scrollbar">
-          {menuItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/seller'}
-              onClick={() => { if (window.innerWidth < 1024) onClose(); }}
-              className={({ isActive }) => `
-                flex items-center justify-between p-3 rounded-xl transition-all duration-300 group border border-white/5 mb-2
-                ${isActive
-                  ? 'bg-red-800 text-white shadow-xl shadow-red-900/20 border-white/10 scale-[1.02]'
-                  : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10'}
-              `}
-            >
-              <div className="flex items-center gap-4">
-                <item.icon size={20} className="transition-transform duration-300" />
-                <span className="font-medium text-white">{item.label}</span>
-              </div>
-              <LuChevronRight size={16} className="transition-transform duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 text-white/60" />
-            </NavLink>
-          ))}
+          {menuItems.map((item) => {
+            if (item.children) {
+              const isMenuOpen = openMenus[item.label];
+              return (
+                <div key={item.label} className="space-y-1">
+                  <button
+                    onClick={() => toggleMenu(item.label)}
+                    className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-all border border-white/5"
+                  >
+                    <div className="flex items-center gap-4">
+                      <item.icon size={20} />
+                      <span className="font-medium">{item.label}</span>
+                    </div>
+                    <LuChevronRight 
+                      size={16} 
+                      className={`transition-transform duration-300 ${isMenuOpen ? 'rotate-90' : ''}`} 
+                    />
+                  </button>
+                  
+                  <AnimatePresence>
+                    {isMenuOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden bg-white/5 rounded-xl ml-4 mt-1 border-l border-white/10"
+                      >
+                        {item.children.map((child) => (
+                          <NavLink
+                            key={child.path}
+                            to={child.path}
+                            onClick={() => { if (window.innerWidth < 1024) onClose(); }}
+                            className={({ isActive }) => `
+                              flex items-center gap-3 p-3 text-xs font-bold uppercase tracking-widest transition-all
+                              ${isActive ? 'text-warm-sand bg-white/5' : 'text-white/40 hover:text-white hover:bg-white/5'}
+                            `}
+                          >
+                            <child.icon size={14} />
+                            {child.label}
+                          </NavLink>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            }
+
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.path === '/seller'}
+                onClick={() => { if (window.innerWidth < 1024) onClose(); }}
+                className={({ isActive }) => `
+                  flex items-center justify-between p-3 rounded-xl transition-all duration-300 group border border-white/5 mb-2
+                  ${isActive
+                    ? 'bg-red-800 text-white shadow-xl shadow-red-900/20 border-white/10 scale-[1.02]'
+                    : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10'}
+                `}
+              >
+                <div className="flex items-center gap-4">
+                  <item.icon size={20} className="transition-transform duration-300" />
+                  <span className="font-medium text-white">{item.label}</span>
+                </div>
+                <LuChevronRight size={16} className="transition-transform duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 text-white/60" />
+              </NavLink>
+            );
+          })}
         </nav>
 
         {/* Footer info and logout */}

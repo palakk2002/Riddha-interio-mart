@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import DeliverySidebar from './DeliverySidebar';
 import DeliveryBottomNavbar from './DeliveryBottomNavbar';
-import { LuMenu, LuBell, LuUser, LuChevronDown } from 'react-icons/lu';
+import { LuMenu, LuBell, LuUser, LuChevronDown, LuTruck, LuCheck, LuX } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUser } from '../../user/data/UserContext';
+import { connectSocket } from '../../../shared/utils/socket';
+import { playNewOrderChime, primeNotificationAudio, isSoundEnabled } from '../../seller/utils/notificationSound';
+import api from '../../../shared/utils/api';
 
 const notifications = [
   { id: 1, title: 'New Order Available', message: 'Pick up from Raja Park, Jaipur.', time: 'Just now', status: 'unread' },
@@ -12,9 +16,82 @@ const notifications = [
 ];
 
 const DeliveryLayout = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [showNotifications, setShowNotifications] = React.useState(false);
+  const [showUserMenu, setShowUserMenu] = React.useState(false);
+  const [assignmentRequest, setAssignmentRequest] = React.useState(null);
+  const [approvalNotification, setApprovalNotification] = React.useState(null);
+  const { user, setUser } = useUser();
+  const [updatingStatus, setUpdatingStatus] = React.useState(false);
+
+  const status = user?.status || 'Offline';
+
+  // Sync status if user profile changes - Removed redundant useEffect as we use status variable now
+
+  // Prime audio
+  React.useEffect(() => {
+    const onFirstGesture = () => {
+      primeNotificationAudio();
+      window.removeEventListener('pointerdown', onFirstGesture);
+    };
+    window.addEventListener('pointerdown', onFirstGesture);
+    return () => window.removeEventListener('pointerdown', onFirstGesture);
+  }, []);
+
+  // Socket setup
+  React.useEffect(() => {
+    if (!user?.token || user?.role !== 'delivery') return;
+
+    const socket = connectSocket({ token: user.token });
+
+    const onAssigned = (payload) => {
+      setAssignmentRequest(payload);
+      if (isSoundEnabled()) playNewOrderChime();
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    };
+
+    const onApprovalUpdate = (payload) => {
+      setApprovalNotification(payload);
+      if (payload.status === 'Approved') {
+        // Sync the global user context immediately
+        setUser(prev => ({ ...prev, approvalStatus: 'Approved' }));
+      }
+      if (isSoundEnabled()) playNewOrderChime();
+    };
+
+    socket.on('delivery:assigned', onAssigned);
+    socket.on('delivery:approval_update', onApprovalUpdate);
+
+    return () => {
+      socket.off('delivery:assigned', onAssigned);
+      socket.off('delivery:approval_update', onApprovalUpdate);
+    };
+  }, [user?.token, user?.role]);
+
+  const handleResponse = async (responseStatus) => {
+    try {
+      await api.put(`/orders/${assignmentRequest.orderId}/delivery-response`, { status: responseStatus });
+      setAssignmentRequest(null);
+    } catch (err) {
+      console.error('Response failed:', err);
+    }
+  };
+
+  const toggleStatus = async () => {
+    if (user?.approvalStatus !== 'Approved') return;
+    setUpdatingStatus(true);
+    try {
+      const newStatus = status === 'Available' ? 'Offline' : 'Available';
+      const { data } = await api.put('/delivery/status', { status: newStatus });
+      if (data.success) {
+        setUser({ ...user, status: data.data.status });
+      }
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   return (
     <div 
@@ -24,7 +101,114 @@ const DeliveryLayout = () => {
         setShowUserMenu(false);
       }}
     >
-      <DeliverySidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        {/* Assignment Request Modal */}
+        <AnimatePresence>
+          {assignmentRequest && (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-deep-espresso/60 backdrop-blur-xl"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 30 }}
+                className="relative w-full max-w-md bg-white rounded-[3rem] shadow-2xl overflow-hidden"
+              >
+                <div className="bg-red-800 p-8 text-white text-center flex flex-col items-center relative overflow-hidden">
+                   <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-50" />
+                   <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-lg border border-white/20">
+                      <LuTruck size={32} />
+                   </div>
+                   <h3 className="text-2xl font-display font-black uppercase tracking-tight italic">New Order <span className="text-warm-sand">Request</span></h3>
+                   <p className="text-white/60 text-[10px] font-bold uppercase tracking-[0.2em] mt-2">Incoming Dispatch Task</p>
+                </div>
+
+                <div className="p-8 space-y-6 text-center">
+                   <div>
+                      <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest mb-1">Potential Earnings</p>
+                      <p className="text-3xl font-black text-deep-espresso tracking-tighter">₹{Number(assignmentRequest.totalPrice || 0).toLocaleString()}</p>
+                   </div>
+
+                   <div className="bg-soft-oatmeal/20 rounded-2xl p-4 text-left">
+                      <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest mb-3 border-b border-soft-oatmeal pb-2">Destiantion Profile</p>
+                      <p className="text-sm font-black text-deep-espresso uppercase">{assignmentRequest.customerName}</p>
+                      <p className="text-xs text-dusty-cocoa font-medium mt-1 leading-relaxed">
+                        {assignmentRequest.shippingAddress?.fullAddress}, {assignmentRequest.shippingAddress?.city}
+                      </p>
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-4 pt-4">
+                      <button 
+                        onClick={() => handleResponse('Rejected')}
+                        className="bg-white border-2 border-soft-oatmeal text-deep-espresso py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-soft-oatmeal/20 transition-all"
+                      >
+                         Decline
+                      </button>
+                      <button 
+                        onClick={() => handleResponse('Accepted')}
+                        className="bg-deep-espresso text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-deep-espresso/20 flex items-center justify-center gap-2"
+                      >
+                         <LuCheck size={16} />
+                         Accept Task
+                      </button>
+                   </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Approval Status Modal */}
+        <AnimatePresence>
+          {approvalNotification && (
+            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-deep-espresso/40 backdrop-blur-md"
+                onClick={() => setApprovalNotification(null)}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl p-8 text-center overflow-hidden"
+              >
+                <div className={`w-20 h-20 mx-auto mb-6 rounded-3xl flex items-center justify-center ${
+                  approvalNotification.status === 'Approved' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
+                }`}>
+                  {approvalNotification.status === 'Approved' ? <LuCheck size={40} /> : <LuX size={40} />}
+                </div>
+                
+                <h3 className="text-2xl font-display font-black text-deep-espresso italic mb-2">
+                  {approvalNotification.status === 'Approved' ? 'Account Approved!' : 'Account Rejected'}
+                </h3>
+                <p className="text-warm-sand font-bold text-xs uppercase tracking-widest mb-6">
+                  {approvalNotification.status === 'Approved' ? 'You are now an active partner' : 'Moderation complete'}
+                </p>
+                
+                <div className="bg-soft-oatmeal/20 rounded-2xl p-4 mb-8">
+                  <p className="text-xs text-dusty-cocoa font-medium italic leading-relaxed">
+                    "{approvalNotification.message}"
+                  </p>
+                </div>
+
+                <button 
+                  onClick={() => setApprovalNotification(null)}
+                  className="w-full py-4 rounded-2xl bg-deep-espresso text-white font-black text-xs uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-deep-espresso/10"
+                >
+                   Continue
+                </button>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        <DeliverySidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
         {/* Header */}
@@ -42,6 +226,24 @@ const DeliveryLayout = () => {
           </div>
 
           <div className="flex items-center gap-4">
+            {/* Status Toggle */}
+            {user?.approvalStatus === 'Approved' && (
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleStatus(); }}
+                disabled={updatingStatus}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-all group ${
+                  status === 'Available' 
+                    ? 'bg-emerald-50 border-emerald-100 text-emerald-600 shadow-sm shadow-emerald-500/10' 
+                    : 'bg-soft-oatmeal/20 border-soft-oatmeal/40 text-warm-sand grayscale'
+                }`}
+              >
+                <div className={`w-2 h-2 rounded-full ${status === 'Available' ? 'bg-emerald-500 animate-pulse' : 'bg-warm-sand'}`} />
+                <span className="text-[10px] font-black uppercase tracking-widest">
+                  {updatingStatus ? 'Syncing...' : status === 'Available' ? 'Online' : 'Offline'}
+                </span>
+              </button>
+            )}
+
             <div className="relative">
               <button 
                 onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); }}
@@ -85,8 +287,10 @@ const DeliveryLayout = () => {
                 className="flex items-center gap-3 cursor-pointer group"
               >
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-bold leading-tight">Vikram Singh</p>
-                  <p className="text-xs text-warm-sand font-medium uppercase tracking-tighter">Gold Partner</p>
+                  <p className="text-sm font-bold leading-tight">{user?.fullName || 'Partner'}</p>
+                  <p className="text-xs text-warm-sand font-medium uppercase tracking-tighter">
+                    {user?.approvalStatus === 'Approved' ? 'Verified Partner' : 'Pending Verification'}
+                  </p>
                 </div>
                 <div className={`w-10 h-10 rounded-full bg-warm-sand/20 flex items-center justify-center text-warm-sand ring-2 shadow-sm transition-all ${showUserMenu ? 'ring-warm-sand' : 'ring-white group-hover:ring-soft-oatmeal'}`}>
                   <LuUser size={20} />

@@ -3,7 +3,7 @@ import { Outlet, useNavigate, Link } from 'react-router-dom';
 import SellerSidebar from './SellerSidebar';
 import SellerBottomNavbar from './SellerBottomNavbar';
 import { useUser } from '../../user/data/UserContext';
-import { LuMenu, LuBell, LuUser, LuLogOut, LuChevronDown } from 'react-icons/lu';
+import { LuMenu, LuBell, LuUser, LuLogOut, LuChevronDown, LuCheck, LuX } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 import { connectSocket, disconnectSocket } from '../../../shared/utils/socket';
 import { playNewOrderChime, primeNotificationAudio, isSoundEnabled } from '../utils/notificationSound';
@@ -126,12 +126,46 @@ const SellerLayout = () => {
       window.dispatchEvent(new CustomEvent('seller:product-approval', { detail: payload }));
     };
 
+    const onDeliveryResponse = async (payload) => {
+      const status = payload?.status; // 'Accepted' or 'Rejected'
+      const orderId = String(payload?.orderId || '').slice(-8).toUpperCase();
+      const partner = payload?.deliveryBoyName || 'Delivery Partner';
+
+      const message = status === 'Accepted' 
+        ? `${partner} has accepted the delivery for order #${orderId}.`
+        : `${partner} has rejected the delivery for order #${orderId}. Please assign another partner.`;
+
+      setToast({
+        orderId: payload?.orderId,
+        title: status === 'Accepted' ? 'Delivery Accepted' : 'Delivery Rejected',
+        message,
+        type: status === 'Accepted' ? 'success' : 'danger'
+      });
+
+      prependSellerNotification({
+        id: Date.now() + Math.random(),
+        title: status === 'Accepted' ? 'Delivery Accepted' : 'Delivery Rejected',
+        message,
+        time: 'Just now',
+        status: 'unread',
+        type: status === 'Accepted' ? 'success' : 'danger'
+      });
+
+      if (isSoundEnabled()) {
+        await playNewOrderChime();
+      }
+
+      window.dispatchEvent(new CustomEvent('delivery:response_received', { detail: payload }));
+    };
+
     socket.on('order:new', onNewOrder);
     socket.on('product:approval_update', onProductApprovalUpdate);
+    socket.on('delivery:response', onDeliveryResponse);
 
     return () => {
       socket.off('order:new', onNewOrder);
       socket.off('product:approval_update', onProductApprovalUpdate);
+      socket.off('delivery:response', onDeliveryResponse);
     };
   }, [user?.token, user?.role]);
 

@@ -1,7 +1,13 @@
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
-const { notifySellerNewOrder, notifyAdminNewOrder } = require('../socket');
+const { 
+  notifySellerNewOrder, 
+  notifyAdminNewOrder, 
+  notifyDeliveryAssignment, 
+  notifySellerDeliveryResponse,
+  notifyAdminDeliveryResponse 
+} = require('../socket');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -185,11 +191,19 @@ exports.updateOrderStatus = async (req, res) => {
     const order = await Order.findById(req.params.id);
 
     if (order) {
-      order.status = req.body.status || order.status;
+      const newStatus = req.body.status;
+      order.status = newStatus || order.status;
       
-      if (req.body.status === 'Delivered') {
+      // Auto-sync deliveryStatus for tracking
+      const deliveryTrackingStatuses = ['Picked', 'Out for Delivery', 'Delivered'];
+      if (deliveryTrackingStatuses.includes(newStatus)) {
+        order.deliveryStatus = newStatus;
+      }
+
+      if (newStatus === 'Delivered') {
         order.isDelivered = true;
         order.deliveredAt = Date.now();
+        order.deliveryStatus = 'Delivered';
       }
 
       const updatedOrder = await order.save();
@@ -200,6 +214,75 @@ exports.updateOrderStatus = async (req, res) => {
     } else {
       res.status(404).json({ success: false, message: 'Order not found' });
     }
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Assign order to delivery boy
+// @route   PUT /api/orders/:id/assign-delivery
+// @access  Private/Seller
+exports.assignOrderToDeliveryBoy = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    const { deliveryBoyId } = req.body;
+    order.deliveryBoy = deliveryBoyId;
+    order.deliveryStatus = 'Pending';
+    order.deliveryAssignmentTime = Date.now();
+
+    await order.save();
+
+    // Notify delivery boy
+    notifyDeliveryAssignment(deliveryBoyId, {
+      orderId: order._id,
+      totalPrice: order.totalPrice,
+      shippingAddress: order.shippingAddress,
+      customerName: req.user.fullName
+    });
+
+    res.status(200).json({ success: true, data: order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Respond to delivery assignment
+// @route   PUT /api/orders/:id/delivery-response
+// @access  Private/Delivery
+exports.respondToDeliveryAssignment = async (req, res) => {
+  try {
+    const { status } = req.body; // 'Accepted' or 'Rejected'
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    order.deliveryStatus = status;
+    if (status === 'Accepted') {
+      order.status = 'Shipped';
+    } else {
+      // If rejected, clear deliveryBoy so someone else can be assigned
+      order.deliveryBoy = undefined;
+    }
+
+    await order.save();
+    
+    // Notify corresponding owner (Seller or Admin)
+    if (order.sellerType === 'Admin') {
+      notifyAdminDeliveryResponse(order.seller, {
+        orderId: order._id,
+        status: status,
+        deliveryBoyName: req.user.fullName
+      });
+    } else {
+      notifySellerDeliveryResponse(order.seller, {
+        orderId: order._id,
+        status: status,
+        deliveryBoyName: req.user.fullName
+      });
+    }
+
+    res.status(200).json({ success: true, data: order });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

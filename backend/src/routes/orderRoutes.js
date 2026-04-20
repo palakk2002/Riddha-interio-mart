@@ -5,7 +5,9 @@ const {
   getOrderById,
   getMyOrders,
   getOrders,
-  updateOrderStatus
+  updateOrderStatus,
+  assignOrderToDeliveryBoy,
+  respondToDeliveryAssignment
 } = require('../controllers/orderController');
 const { protect } = require('../middleware/auth');
 
@@ -19,6 +21,12 @@ router.route('/my-orders').get(getMyOrders);
 
 router.route('/:id/status')
   .put(updateOrderStatus);
+
+router.route('/:id/assign-delivery')
+  .put(assignOrderToDeliveryBoy);
+
+router.route('/:id/delivery-response')
+  .put(respondToDeliveryAssignment);
 
 router.route('/:id').get(getOrderById);
 

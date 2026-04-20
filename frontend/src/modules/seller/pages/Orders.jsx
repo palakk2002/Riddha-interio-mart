@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import PageWrapper from "../components/PageWrapper";
-import { LuSearch, LuFilter, LuEye, LuClock, LuPackage } from "react-icons/lu";
+import { LuSearch, LuFilter, LuEye, LuClock, LuPackage, LuTruck, LuUser, LuX } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import { FiCheckCircle, FiXCircle, FiTruck, FiBox, FiMapPin, FiMoreHorizontal } from "react-icons/fi";
 import api from "../../../shared/utils/api";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Orders = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [orders, setOrders] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [deliveryBoys, setDeliveryBoys] = React.useState([]);
+  const [showAssignModal, setShowAssignModal] = React.useState(false);
+  const [selectedOrderForAssign, setSelectedOrderForAssign] = React.useState(null);
+  const [assigning, setAssigning] = React.useState(false);
   const navigate = useNavigate();
 
   const playNotificationSound = () => {
@@ -66,12 +70,52 @@ const Orders = () => {
     }
   };
 
-  useEffect(() => {
+  const fetchAvailableDeliveryBoys = async () => {
+    try {
+      const { data } = await api.get('/delivery/available');
+      if (data.success) {
+        setDeliveryBoys(data.data || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch partners:', err);
+    }
+  };
+
+  React.useEffect(() => {
     fetchOrders();
+    fetchAvailableDeliveryBoys();
     const onNewOrder = () => fetchOrders();
+    const onResponse = () => fetchOrders();
     window.addEventListener('seller:new-order', onNewOrder);
-    return () => window.removeEventListener('seller:new-order', onNewOrder);
+    window.addEventListener('delivery:response_received', onResponse);
+    return () => {
+      window.removeEventListener('seller:new-order', onNewOrder);
+      window.removeEventListener('delivery:response_received', onResponse);
+    };
   }, []);
+
+  const handleAssignInit = (order) => {
+    setSelectedOrderForAssign(order);
+    setShowAssignModal(true);
+  };
+
+  const handleAssignProcess = async (dbId) => {
+    setAssigning(true);
+    try {
+      const { data } = await api.put(`/orders/${selectedOrderForAssign._id}/assign-delivery`, {
+        deliveryBoyId: dbId
+      });
+
+      if (data.success) {
+        setShowAssignModal(false);
+        fetchOrders();
+      }
+    } catch (err) {
+      console.error('Assignment failed:', err);
+    } finally {
+      setAssigning(false);
+    }
+  };
 
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
@@ -250,7 +294,7 @@ const Orders = () => {
 
                           {order.status === 'Processing' && (
                             <button
-                              onClick={() => handleStatusUpdate(order._id, 'Shipped')}
+                              onClick={() => handleAssignInit(order)}
                               className="w-10 h-10 bg-gray-900 text-white rounded-xl flex items-center justify-center hover:bg-black transition-all shadow-lg shadow-black/10"
                             >
                               <FiTruck size={18} />
@@ -268,6 +312,74 @@ const Orders = () => {
             </table>
           </div>
         </div>
+        {/* Assignment Modal Overlay */}
+        <AnimatePresence>
+          {showAssignModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowAssignModal(false)}
+                className="absolute inset-0 bg-black/60 backdrop-blur-md"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="p-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+                  <div>
+                    <h3 className="text-xl font-display font-black text-gray-900 uppercase italic">Select <span className="text-red-800">Partner</span></h3>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Ready for dispatch: #{selectedOrderForAssign?._id.slice(-8).toUpperCase()}</p>
+                  </div>
+                  <button onClick={() => setShowAssignModal(false)} className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center hover:bg-white transition-all">
+                    <LuX size={20} />
+                  </button>
+                </div>
+
+                <div className="p-8 max-h-[60vh] overflow-y-auto no-scrollbar space-y-4">
+                  {deliveryBoys.length === 0 ? (
+                    <div className="text-center py-10">
+                       <p className="text-sm font-bold text-gray-400">No active delivery boys found online.</p>
+                    </div>
+                  ) : deliveryBoys.map((boy) => (
+                    <div 
+                      key={boy._id}
+                      className="p-5 rounded-2xl border border-gray-100 hover:border-red-800/30 transition-all flex items-center justify-between group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-gray-900 flex items-center justify-center text-white relative">
+                          <LuUser size={20} />
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-gray-900 uppercase tracking-tight">{boy.fullName}</p>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1 flex items-center gap-2">
+                             <LuTruck size={12} /> {boy.vehicleType} • {boy.phone}
+                          </p>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => handleAssignProcess(boy._id)}
+                        disabled={assigning}
+                        className="bg-red-800 text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-red-900/20 disabled:opacity-50"
+                      >
+                        {assigning ? 'Assigning...' : 'Assign'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-6 bg-gray-50/50 border-t border-gray-50 text-center">
+                   <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Partner selection is based on real-time availability and region proximity.</p>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </PageWrapper>
   );
