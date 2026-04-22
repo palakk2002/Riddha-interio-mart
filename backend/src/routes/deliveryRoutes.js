@@ -3,6 +3,7 @@ const {
   registerDelivery, 
   loginDelivery, 
   getDeliveryMe, 
+  updateDeliveryProfile,
   getAvailableDeliveryBoys, 
   updateDeliveryStatus,
   getAllDeliveryPartners,
@@ -15,6 +16,7 @@ const router = express.Router();
 router.post('/register', registerDelivery);
 router.post('/login', loginDelivery);
 router.get('/me', protect, getDeliveryMe);
+router.put('/profile', protect, updateDeliveryProfile);
 router.get('/available', protect, getAvailableDeliveryBoys);
 router.put('/status', protect, updateDeliveryStatus);
 

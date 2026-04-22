@@ -26,6 +26,18 @@ const SellerSchema = new mongoose.Schema({
   phone: {
     type: String
   },
+  gstNumber: {
+    type: String,
+    default: ""
+  },
+  panNumber: {
+    type: String,
+    default: ""
+  },
+  avatar: {
+    type: String,
+    default: ""
+  },
   role: {
     type: String,
     default: 'seller'

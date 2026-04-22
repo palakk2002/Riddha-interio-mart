@@ -198,8 +198,13 @@ const EditInventoryPage = () => {
                     <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
                        <LuTags size={12} /> Brand
                     </label>
-                    <select value={formData.brand} onChange={(e) => setFormData({...formData, brand: e.target.value})} className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none">
-                       {brands.map(brand => <option key={brand._id} value={brand.name}>{brand.name}</option>)}
+                    <select 
+                      value={formData.brand} 
+                      onChange={(e) => setFormData({...formData, brand: e.target.value})} 
+                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none"
+                    >
+                       <option value="">Select Brand</option>
+                       {brands.map(brand => <option key={brand._id} value={brand._id}>{brand.name}</option>)}
                     </select>
                   </div>
                 </div>

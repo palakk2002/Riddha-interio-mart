@@ -50,7 +50,7 @@ const AddProductPage = () => {
         setFormData(prev => ({
           ...prev,
           category: fetchedCategories?.[0]?.name || '',
-          brand: fetchedBrands?.[0]?.name || ''
+          brand: fetchedBrands?.[0]?._id || ''
         }));
       } catch (err) {
         console.error('Failed to fetch initialization data:', err);
@@ -237,7 +237,7 @@ const AddProductPage = () => {
                       >
                          <option value="">{brands.length > 0 ? 'Select associated brand' : 'No brands found'}</option>
                          {brands.map(b => (
-                           <option key={b._id} value={b.name}>{b.name}</option>
+                           <option key={b._id} value={b._id}>{b.name}</option>
                          ))}
                       </select>
                       {brands.length === 0 && (

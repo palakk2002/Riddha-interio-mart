@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { LuBell, LuUser, LuShieldCheck, LuGlobe, LuMoon, LuSun, LuChevronRight, LuMapPin, LuPhone, LuMail } from 'react-icons/lu';
 import { motion } from 'framer-motion';
 
 const Settings = () => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState({
     orderAlerts: true,
     paymentAlerts: true,
@@ -82,7 +84,10 @@ const Settings = () => {
               {section.items.map((item, index) => (
                 <div
                   key={index}
-                  className="p-6 flex items-center justify-between hover:bg-soft-oatmeal/20 transition-colors"
+                  onClick={() => {
+                    if (item.action === 'edit' || item.action === 'vehicle') navigate('/delivery/profile');
+                  }}
+                  className={`p-6 flex items-center justify-between hover:bg-soft-oatmeal/20 transition-colors ${item.action ? 'cursor-pointer' : ''}`}
                 >
                   <div className="flex-1">
                     <p className="font-bold text-deep-espresso">{item.label}</p>

@@ -49,6 +49,7 @@ const isPublicRequest = (config) => {
       url.startsWith('/sections') ||
       url.startsWith('/products') ||
       url.startsWith('/categories') ||
+      url.startsWith('/brands') ||
       url.startsWith('/catalog'))
   ) {
     return true;

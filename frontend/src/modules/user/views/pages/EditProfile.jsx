@@ -3,19 +3,60 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiCamera, FiCheck, FiUser, FiMail, FiPhone } from 'react-icons/fi';
 import Button from '../../../../views/shared/Button';
+import { useUser } from '../../data/UserContext';
+import api from '../../../../shared/utils/api';
+import { uploadImage } from '../../../../shared/utils/upload';
 
 const EditProfile = () => {
   const navigate = useNavigate();
+  const { user: currentUser, setUser } = useUser();
+  const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+91 98765 43210"
+    name: currentUser?.fullName || "",
+    email: currentUser?.email || "",
+    phone: currentUser?.phone || "",
+    avatar: currentUser?.avatar || ""
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate save
-    navigate('/profile');
+    try {
+      setLoading(true);
+      const { data } = await api.put('/auth/profile', {
+        fullName: profile.name,
+        email: profile.email,
+        phone: profile.phone,
+        avatar: profile.avatar
+      });
+      if (data.success && data.data) {
+        setUser({ 
+          ...currentUser, 
+          fullName: data.data.fullName, 
+          email: data.data.email, 
+          phone: data.data.phone, 
+          avatar: data.data.avatar 
+        });
+        navigate('/profile');
+      }
+    } catch (err) {
+      console.error('Update failed:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const url = await uploadImage(file);
+      setProfile({ ...profile, avatar: url });
+      // Update backend immediately
+      await api.put('/auth/profile', { avatar: url });
+      setUser({ ...currentUser, avatar: url });
+    } catch (err) {
+      console.error('Upload failed:', err);
+    }
   };
 
   return (
@@ -37,11 +78,16 @@ const EditProfile = () => {
         <div className="flex flex-col items-center gap-4">
           <div className="relative group">
             <div className="h-24 w-24 md:h-32 md:w-32 rounded-full bg-soft-oatmeal/10 flex items-center justify-center border-4 border-warm-sand/10 overflow-hidden shadow-xl">
-              <FiUser className="h-12 w-12 md:h-16 md:w-16 text-deep-espresso/20" />
+              {profile.avatar ? (
+                <img src={profile.avatar} alt="Me" className="w-full h-full object-cover" />
+              ) : (
+                <FiUser className="h-12 w-12 md:h-16 md:w-16 text-deep-espresso/20" />
+              )}
             </div>
-            <button className="absolute bottom-1 right-1 h-8 w-8 md:h-10 md:w-10 bg-warm-sand text-white rounded-full flex items-center justify-center shadow-lg border-2 md:border-4 border-white">
+            <label className="absolute bottom-1 right-1 h-8 w-8 md:h-10 md:w-10 bg-warm-sand text-white rounded-full flex items-center justify-center shadow-lg border-2 md:border-4 border-white cursor-pointer">
               <FiCamera className="h-3 w-3 md:h-4 md:w-4" />
-            </button>
+              <input type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
+            </label>
           </div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Update Profile Picture</p>
         </div>

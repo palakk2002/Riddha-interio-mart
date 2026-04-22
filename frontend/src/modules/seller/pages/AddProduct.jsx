@@ -8,6 +8,7 @@ import api from '../../../shared/utils/api';
 const AddProduct = () => {
   const [selection, setSelection] = useState(null); // 'new' or 'catalog'
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,15 +37,19 @@ const AddProduct = () => {
   });
 
   useEffect(() => {
-    fetchCategories();
+    fetchInitialData();
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchInitialData = async () => {
     try {
-      const res = await api.get('/categories');
-      setCategories(res.data.data);
+      const [catRes, brandRes] = await Promise.all([
+        api.get('/categories'),
+        api.get('/brands')
+      ]);
+      setCategories(catRes.data.data);
+      setBrands(brandRes.data.data);
     } catch (err) {
-      console.error('Failed to fetch categories:', err);
+      console.error('Failed to fetch initial data:', err);
     } finally {
       setLoading(false);
     }
@@ -240,11 +245,16 @@ const AddProduct = () => {
 
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Brand / Manufacturer</label>
-                  <input 
-                    required type="text" placeholder="e.g. Riddha Mart"
+                  <select 
+                    required
                     value={formData.brand} onChange={(e) => setFormData({...formData, brand: e.target.value})}
                     className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
-                  />
+                  >
+                    <option value="">Select Brand</option>
+                    {brands.map(brand => (
+                      <option key={brand._id} value={brand._id}>{brand.name}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-3 md:col-span-2">

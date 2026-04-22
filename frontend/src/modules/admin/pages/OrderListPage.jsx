@@ -10,8 +10,11 @@ import {
   LuTruck,
   LuClock,
   LuClipboardList,
+  LuUser,
+  LuChevronRight,
+  LuX
 } from "react-icons/lu";
-import { FiCheckCircle, FiXCircle, FiFlag } from "react-icons/fi";
+import { FiCheckCircle, FiXCircle, FiFlag, FiSearch, FiFilter } from "react-icons/fi";
 
 const initialOrders = [
   {
@@ -93,8 +96,13 @@ const OrderListPage = ({ specificStatus }) => {
   const { status: urlStatus } = useParams();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [deliveryBoys, setDeliveryBoys] = useState([]);
+  const [assignLoading, setAssignLoading] = useState(false);
 
   const fetchOrders = async () => {
     try {
@@ -110,9 +118,44 @@ const OrderListPage = ({ specificStatus }) => {
     }
   };
 
+  const fetchDeliveryBoys = async () => {
+    try {
+      const { data } = await api.get('/delivery/available');
+      if (data.success) {
+        setDeliveryBoys(data.data || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch delivery boys:', err);
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
+    fetchDeliveryBoys();
   }, []);
+
+  const handleAssignClick = (order) => {
+    setSelectedOrder(order);
+    setIsAssignModalOpen(true);
+  };
+
+  const assignDeliveryBoy = async (deliveryBoyId) => {
+    if (!selectedOrder) return;
+    try {
+      setAssignLoading(true);
+      const { data } = await api.put(`/orders/${selectedOrder._id}/assign-delivery`, { deliveryBoyId });
+      if (data.success) {
+        setIsAssignModalOpen(false);
+        fetchOrders(); // Refresh list to see updated status if needed
+        alert('Delivery boy assigned successfully');
+      }
+    } catch (err) {
+      console.error('Failed to assign delivery boy:', err);
+      alert(err.response?.data?.error || 'Failed to assign delivery boy');
+    } finally {
+      setAssignLoading(false);
+    }
+  };
 
   // Normalize status for display
   const currentStatus =
@@ -126,10 +169,19 @@ const OrderListPage = ({ specificStatus }) => {
     return orders.filter((order) => {
       const customerName = order.user?.fullName || "Guest";
       const orderId = order._id || "";
+      const sellerName = order.seller?.shopName || order.seller?.fullName || "";
 
       const matchesSearch =
         customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        orderId.toLowerCase().includes(searchTerm.toLowerCase());
+        orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        sellerName.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesTab = 
+        activeTab === 'all' || 
+        (activeTab === 'direct' && order.sellerType === 'Admin') ||
+        (activeTab === 'marketplace' && order.sellerType !== 'Admin');
+
+      if (!matchesTab) return false;
 
       // If viewing "All Orders" page or no specific status required
       if (currentStatus?.toLowerCase().includes('all') || !currentStatus) {
@@ -141,11 +193,31 @@ const OrderListPage = ({ specificStatus }) => {
         order.status?.toLowerCase() === currentStatus?.toLowerCase()
       );
     });
-  }, [searchTerm, currentStatus]);
+  }, [searchTerm, currentStatus, activeTab, orders]);
 
   return (
     <PageWrapper>
       <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex border-b border-soft-oatmeal overflow-x-auto bg-white p-2 rounded-t-2xl shadow-sm">
+          {[
+            { id: 'all', label: 'All Orders' },
+            { id: 'direct', label: 'Riddha Mart (Direct)' },
+            { id: 'marketplace', label: 'Marketplace' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-6 py-3.5 text-xs font-black uppercase tracking-widest border-b-2 transition-all whitespace-nowrap ${
+                activeTab === tab.id 
+                ? 'border-red-800 text-red-800 font-bold' 
+                : 'border-transparent text-warm-sand hover:text-deep-espresso hover:bg-soft-oatmeal/10'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso">
@@ -236,7 +308,9 @@ const OrderListPage = ({ specificStatus }) => {
                         </td>
                         <td className="px-6 py-4 text-sm font-medium text-deep-espresso">
                           <div className="flex flex-col">
-                            <span className="font-bold">{order.seller?.shopName || order.seller?.fullName || "Mart Direct"}</span>
+                            <span className="font-bold text-xs">
+                              {order.sellerType === 'Admin' ? 'Riddha Mart' : (order.seller?.shopName || order.seller?.fullName || "Mart Direct")}
+                            </span>
                             {order.sellerType === 'Admin' && <span className="text-[9px] text-red-800 font-black uppercase tracking-tighter">Admin Fulfilled</span>}
                           </div>
                         </td>
@@ -255,12 +329,26 @@ const OrderListPage = ({ specificStatus }) => {
                           {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Just now'}
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={() => order._id && navigate(`/admin/orders/view/${order._id}`)}
-                            className="p-2 text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-colors"
-                          >
-                            <LuEye size={18} />
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                             <button
+                               onClick={() => handleAssignClick(order)}
+                               disabled={order.deliveryBoy || order.deliveryStatus !== 'None'}
+                               title={order.deliveryBoy ? "Already Assigned" : "Assign Delivery"}
+                               className={`p-2 rounded-lg transition-colors ${
+                                 order.deliveryBoy || order.deliveryStatus !== 'None'
+                                   ? "text-gray-300 cursor-not-allowed"
+                                   : "text-blue-600 hover:bg-blue-50"
+                               }`}
+                             >
+                               <LuTruck size={18} />
+                             </button>
+                             <button
+                               onClick={() => order._id && navigate(`/admin/orders/view/${order._id}`)}
+                               className="p-2 text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-colors"
+                             >
+                               <LuEye size={18} />
+                             </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -288,6 +376,79 @@ const OrderListPage = ({ specificStatus }) => {
           </div>
         </div>
       </div>
+
+      {/* Assignment Modal */}
+      {isAssignModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-deep-espresso/40 backdrop-blur-sm">
+          <div className="bg-white rounded-[32px] w-full max-w-lg shadow-2xl border border-soft-oatmeal overflow-hidden">
+            <div className="p-8 border-b border-soft-oatmeal flex justify-between items-center bg-soft-oatmeal/5">
+              <div>
+                <h3 className="text-2xl font-display font-bold text-deep-espresso">Assign Delivery Partner</h3>
+                <p className="text-xs text-warm-sand font-bold uppercase tracking-widest mt-1">Select available personnel for order assignment</p>
+              </div>
+              <button 
+                onClick={() => setIsAssignModalOpen(false)}
+                className="p-3 hover:bg-soft-oatmeal/20 rounded-full transition-all"
+              >
+                <LuX size={24} className="text-warm-sand" />
+              </button>
+            </div>
+
+            <div className="p-8 max-h-[60vh] overflow-y-auto">
+              {selectedOrder && (
+                <div className="mb-8 p-6 bg-red-800/5 rounded-2xl border border-red-800/10 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-red-800/10 rounded-full flex items-center justify-center text-red-800">
+                    <LuPackage size={24} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-red-800 uppercase tracking-widest">Selected Order</p>
+                    <p className="text-lg font-bold text-deep-espresso">{selectedOrder.orderId || `ORD-${selectedOrder._id?.slice(-6).toUpperCase()}`}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-black text-warm-sand uppercase tracking-widest pl-1">Available Delivery Partners</h4>
+                {deliveryBoys.length === 0 ? (
+                  <div className="py-12 text-center border-2 border-dashed border-soft-oatmeal rounded-2xl">
+                    <LuUser size={40} className="mx-auto text-soft-oatmeal mb-3" />
+                    <p className="text-sm text-warm-sand font-bold">No available partners found at the moment.</p>
+                  </div>
+                ) : (
+                  deliveryBoys.map(boy => (
+                    <button
+                      key={boy._id}
+                      disabled={assignLoading}
+                      onClick={() => assignDeliveryBoy(boy._id)}
+                      className="w-full flex items-center justify-between p-5 bg-white border border-soft-oatmeal rounded-2xl hover:border-red-800 hover:shadow-lg hover:shadow-red-800/5 transition-all group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-soft-oatmeal/20 rounded-xl flex items-center justify-center text-warm-sand group-hover:bg-red-800/10 group-hover:text-red-800 transition-colors">
+                          <LuUser size={24} />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-sm font-bold text-deep-espresso">{boy.fullName}</p>
+                          <p className="text-[10px] text-warm-sand font-bold uppercase tracking-wider">{boy.vehicleType} • {boy.phone}</p>
+                        </div>
+                      </div>
+                      <LuChevronRight size={20} className="text-soft-oatmeal group-hover:text-red-800 transition-colors group-hover:translate-x-1" />
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="p-8 bg-soft-oatmeal/5 border-t border-soft-oatmeal">
+              <button 
+                onClick={() => setIsAssignModalOpen(false)}
+                className="w-full py-4 rounded-xl text-xs font-black uppercase tracking-widest text-warm-sand hover:text-deep-espresso transition-colors font-bold"
+              >
+                Close & Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </PageWrapper>
   );
 };

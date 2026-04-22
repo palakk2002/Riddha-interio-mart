@@ -20,6 +20,10 @@ const DeliverySchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add a phone number']
   },
+  avatar: {
+    type: String,
+    default: ""
+  },
   vehicleType: {
     type: String,
     enum: ['Bike', 'Van', 'Truck'],

@@ -86,3 +86,25 @@ exports.deleteSeller = async (req, res, next) => {
     next(err);
   }
 };
+
+// @desc    Update Admin Profile
+exports.updateAdminProfile = async (req, res, next) => {
+  try {
+    const fieldsToUpdate = {
+      fullName: req.body.fullName,
+      email: req.body.email,
+      phone: req.body.phone,
+      department: req.body.department,
+      avatar: req.body.avatar
+    };
+
+    const admin = await Admin.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({ success: true, data: admin });
+  } catch (err) {
+    next(err);
+  }
+};

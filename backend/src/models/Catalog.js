@@ -13,8 +13,9 @@ const CatalogSchema = new mongoose.Schema({
     trim: true
   },
   brand: {
-    type: String,
-    required: [true, 'Please add a brand partner']
+    type: mongoose.Schema.ObjectId,
+    ref: 'Brand',
+    required: [true, 'Please select a brand']
   },
   category: {
     type: String,

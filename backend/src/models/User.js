@@ -20,6 +20,14 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: 'user'
   },
+  phone: {
+    type: String,
+    default: ""
+  },
+  avatar: {
+    type: String,
+    default: ""
+  },
   password: {
     type: String,
     required: [true, 'Please add a password'],

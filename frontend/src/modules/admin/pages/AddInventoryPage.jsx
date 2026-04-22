@@ -61,7 +61,7 @@ const AddInventoryPage = () => {
         } else {
           // Set defaults if available
           if (catRes.data.data?.length > 0) setFormData(prev => ({ ...prev, category: catRes.data.data[0].name }));
-          if (brandRes.data.data?.length > 0) setFormData(prev => ({ ...prev, brand: brandRes.data.data[0].name }));
+          if (brandRes.data.data?.length > 0) setFormData(prev => ({ ...prev, brand: brandRes.data.data[0]._id }));
         }
       } catch (err) {
         console.error('Failed to fetch initialization data:', err);
@@ -253,7 +253,7 @@ const AddInventoryPage = () => {
                       className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none appearance-none cursor-pointer"
                     >
                       <option value="">Select Brand</option>
-                      {brands.map(brand => <option key={brand._id} value={brand.name}>{brand.name}</option>)}
+                      {brands.map(brand => <option key={brand._id} value={brand._id}>{brand.name}</option>)}
                       {!brands.length && <option value="Generic">Generic</option>}
                     </select>
                   </div>

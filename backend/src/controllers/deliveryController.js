@@ -51,12 +51,46 @@ exports.loginDelivery = async (req, res, next) => {
 };
 
 // @desc    Get current logged in Delivery Partner
-// @route   GET /api/auth/delivery/me
-// @access  Private
 exports.getDeliveryMe = async (req, res, next) => {
   try {
     const delivery = await Delivery.findById(req.user.id);
     res.status(200).json({ success: true, data: delivery });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Update Delivery Profile
+exports.updateDeliveryProfile = async (req, res, next) => {
+  try {
+    const { fullName, email, phone, vehicleType, vehicleNumber, avatar } = req.body;
+    
+    const delivery = await Delivery.findById(req.user.id);
+    if (!delivery) return res.status(404).json({ success: false, error: 'Partner not found' });
+
+    // Check if email is being changed and if new email is already taken
+    if (email && email !== delivery.email) {
+      const emailExists = await checkEmailExists(email);
+      if (emailExists) {
+        return res.status(400).json({ success: false, error: 'Email already in use by another account' });
+      }
+    }
+
+    const fieldsToUpdate = {
+      fullName: fullName || delivery.fullName,
+      email: email || delivery.email,
+      phone: phone || delivery.phone,
+      vehicleType: vehicleType || delivery.vehicleType,
+      vehicleNumber: vehicleNumber || delivery.vehicleNumber,
+      avatar: avatar || delivery.avatar
+    };
+
+    const updatedDelivery = await Delivery.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({ success: true, data: updatedDelivery });
   } catch (err) {
     next(err);
   }

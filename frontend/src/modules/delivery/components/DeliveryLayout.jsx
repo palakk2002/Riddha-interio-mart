@@ -292,8 +292,12 @@ const DeliveryLayout = () => {
                     {user?.approvalStatus === 'Approved' ? 'Verified Partner' : 'Pending Verification'}
                   </p>
                 </div>
-                <div className={`w-10 h-10 rounded-full bg-warm-sand/20 flex items-center justify-center text-warm-sand ring-2 shadow-sm transition-all ${showUserMenu ? 'ring-warm-sand' : 'ring-white group-hover:ring-soft-oatmeal'}`}>
-                  <LuUser size={20} />
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ring-2 shadow-sm transition-all overflow-hidden ${showUserMenu ? 'ring-warm-sand bg-teal-800' : 'ring-white group-hover:ring-soft-oatmeal bg-warm-sand/20'}`}>
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <LuUser size={20} className="text-warm-sand" />
+                  )}
                 </div>
                 <LuChevronDown size={14} className={`text-dusty-cocoa transition-transform duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
               </div>

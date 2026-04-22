@@ -3,6 +3,7 @@ const {
   registerAdmin, 
   loginAdmin, 
   getAdminMe,
+  updateAdminProfile,
   getPendingSellers,
   getActiveSellers,
   approveSeller,
@@ -15,6 +16,7 @@ const router = express.Router();
 router.post('/register', registerAdmin);
 router.post('/login', loginAdmin);
 router.get('/me', protect, getAdminMe);
+router.put('/profile', protect, updateAdminProfile);
 
 // Seller Management routes (Admin only)
 router.get('/sellers/pending', protect, authorize('admin'), getPendingSellers);

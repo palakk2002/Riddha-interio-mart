@@ -40,12 +40,44 @@ exports.loginUser = async (req, res, next) => {
 };
 
 // @desc    Get current logged in User
-// @route   GET /api/auth/me
-// @access  Private
 exports.getUserMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
     res.status(200).json({ success: true, data: user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Update User Profile
+exports.updateUserProfile = async (req, res, next) => {
+  try {
+    const { fullName, email, phone, avatar } = req.body;
+    
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+
+    // Check if email is being changed and if new email is already taken
+    if (email && email !== user.email) {
+      const emailExists = await checkEmailExists(email);
+      if (emailExists) {
+        return res.status(400).json({ success: false, error: 'Email already in use by another account' });
+      }
+    }
+
+    const fieldsToUpdate = {
+      fullName: fullName || user.fullName,
+      email: email || user.email,
+      phone: phone || user.phone,
+      avatar: avatar || user.avatar
+    };
+
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({ success: true, data: updatedUser });
   } catch (err) {
     next(err);
   }

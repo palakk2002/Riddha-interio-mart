@@ -3,36 +3,74 @@ import { useParams, Link } from 'react-router-dom';
 import { LuChevronRight, LuChevronLeft } from 'react-icons/lu';
 import { brandData as staticBrandData } from '../data/brandData';
 import { AnimatePresence, motion } from 'framer-motion';
+import api from '../../../shared/utils/api';
+import ProductCard from '../components/ProductCard';
 
 const BrandPage = () => {
   const { brandName } = useParams();
   const [brand, setBrand] = useState(null);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
-    setLoading(true);
-    const saved = localStorage.getItem('admin_brands');
-    let foundBrand = null;
+    const fetchBrandData = async () => {
+      setLoading(true);
+      let foundBrand = null;
 
-    if (saved) {
-      const brands = JSON.parse(saved);
-      // Try to find by slug or name
-      foundBrand = brands.find(b => 
-        (b.slug && b.slug.toLowerCase() === brandName?.toLowerCase()) || 
-        (b.name && b.name.toLowerCase() === brandName?.toLowerCase())
-      );
-    }
+      // 1. Try fetching from Backend API
+      try {
+        const { data } = await api.get('/brands');
+        const brands = data.data || [];
+        foundBrand = brands.find(b => 
+          (b.slug && b.slug.toLowerCase() === brandName?.toLowerCase()) || 
+          (b.name && b.name.toLowerCase() === brandName?.toLowerCase())
+        );
+      } catch (err) {
+        console.error('Failed to fetch brands from API:', err);
+      }
 
-    if (!foundBrand) {
-      // Fallback to static data
-      foundBrand = staticBrandData[brandName?.toLowerCase()];
-    }
+      // 2. Try Local Storage (Legacy/Admin)
+      if (!foundBrand) {
+        const saved = localStorage.getItem('admin_brands');
+        if (saved) {
+          const brands = JSON.parse(saved);
+          foundBrand = brands.find(b => 
+            (b.slug && b.slug.toLowerCase() === brandName?.toLowerCase()) || 
+            (b.name && b.name.toLowerCase() === brandName?.toLowerCase())
+          );
+        }
+      }
 
-    setBrand(foundBrand);
-    setLoading(false);
-    setCurrentSlide(0);
-    window.scrollTo(0, 0);
+      // 3. Fallback to static data
+      if (!foundBrand) {
+        foundBrand = staticBrandData[brandName?.toLowerCase()];
+      }
+
+      setBrand(foundBrand);
+      setLoading(false);
+      setCurrentSlide(0);
+      window.scrollTo(0, 0);
+
+      if (foundBrand?._id) {
+        fetchBrandProducts(foundBrand._id);
+      }
+    };
+
+    const fetchBrandProducts = async (brandId) => {
+      try {
+        setLoadingProducts(true);
+        const { data } = await api.get(`/products?brand=${brandId}`);
+        setProducts(data.data || []);
+      } catch (err) {
+        console.error('Failed to fetch brand products:', err);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    fetchBrandData();
   }, [brandName]);
 
   // Auto-scroll carousel
@@ -145,6 +183,36 @@ const BrandPage = () => {
             </Link>
           ))}
         </div>
+      </section>
+
+      {/* Brand Products Section */}
+      <section className="max-w-7xl mx-auto py-12 md:py-20 bg-soft-oatmeal/5">
+        <div className="px-4 md:px-12 flex items-center justify-between mb-8 md:mb-12">
+          <div className="space-y-1">
+            <h2 className="text-xl md:text-4xl font-display font-bold text-gray-900 tracking-tight">
+              {brand.name} Collection
+            </h2>
+            <p className="text-warm-sand font-medium text-xs md:text-sm uppercase tracking-widest">
+              {products.length} Premium Pieces
+            </p>
+          </div>
+        </div>
+
+        {loadingProducts ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="h-10 w-10 border-4 border-red-800/20 border-t-red-800 rounded-full animate-spin"></div>
+          </div>
+        ) : products.length > 0 ? (
+          <div className="px-4 md:px-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
+            {products.map((product, index) => (
+              <ProductCard key={product._id} product={product} index={index} />
+            ))}
+          </div>
+        ) : (
+          <div className="px-4 md:px-12 py-20 text-center bg-white rounded-3xl mx-4 md:mx-12">
+            <p className="text-warm-sand font-bold text-lg">No products found for this brand yet.</p>
+          </div>
+        )}
       </section>
 
       {/* Brand Highlight Promo */}

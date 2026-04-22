@@ -242,7 +242,7 @@ const EditProductPage = () => {
                       >
                          <option value="">{brands.length > 0 ? 'Select associated brand' : 'No brands found'}</option>
                          {brands.map(b => (
-                           <option key={b._id} value={b.name}>{b.name}</option>
+                           <option key={b._id} value={b._id}>{b.name}</option>
                          ))}
                       </select>
                    </div>

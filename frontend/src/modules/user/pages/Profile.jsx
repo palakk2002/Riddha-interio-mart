@@ -1,17 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiUser, FiPackage, FiMapPin, FiHeart, FiSettings, FiLogOut, FiChevronRight, FiEdit2 } from 'react-icons/fi';
+import { FiUser, FiPackage, FiMapPin, FiSettings, FiLogOut, FiChevronRight } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from '../data/UserContext';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+91 98765 43210",
-    memberSince: "March 2024",
-    avatar: null // Placeholder for profile image
-  };
+  const { user, logout } = useUser();
 
   const menuItems = [
     { icon: <FiUser />, title: "My Profile", subtitle: "View and edit your personal details", link: "/profile/edit" },
@@ -21,9 +16,25 @@ const Profile = () => {
   ];
 
   const handleLogout = () => {
-    // Clear user session/token here if needed
+    logout();
     navigate('/login');
   };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white p-4">
+        <div className="text-center space-y-4">
+          <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Please sign in to view your profile</p>
+          <button 
+            onClick={() => navigate('/login')}
+            className="px-8 py-3 bg-deep-espresso text-white font-black uppercase tracking-widest text-xs"
+          >
+            Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div 
@@ -35,20 +46,27 @@ const Profile = () => {
       <div className="bg-white border-b border-soft-oatmeal/10 pt-4 pb-4 md:pt-16 md:pb-12 px-4 md:px-12">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-4 md:gap-12">
           <div className="relative group">
-            <div className="h-20 w-20 md:h-36 md:w-36 rounded-full bg-soft-oatmeal/10 flex items-center justify-center border-2 md:border-4 border-warm-sand/5 overflow-hidden shadow-xl md:shadow-2xl">
-              <FiUser className="h-10 w-10 md:h-20 md:w-20 text-deep-espresso/20" />
+            <div className="h-24 w-24 md:h-36 md:w-36 rounded-full bg-soft-oatmeal/10 flex items-center justify-center border-2 md:border-4 border-warm-sand/5 overflow-hidden shadow-xl md:shadow-2xl">
+              {user.avatar ? (
+                <img src={user.avatar} alt="Me" className="h-full w-full object-cover" />
+              ) : (
+                <FiUser className="h-10 w-10 md:h-20 md:w-20 text-deep-espresso/20" />
+              )}
             </div>
+            <Link to="/profile/edit" className="absolute bottom-1 right-1 bg-white p-2 rounded-full shadow-lg border border-soft-oatmeal/20 md:hidden">
+               <FiSettings className="h-4 w-4 text-warm-sand" />
+            </Link>
           </div>
 
           <div className="text-center md:text-left space-y-0.5 md:space-y-3">
-            <h1 className="text-2xl md:text-5xl font-black text-deep-espresso tracking-tighter uppercase">{user.name}</h1>
+            <h1 className="text-2xl md:text-5xl font-black text-deep-espresso tracking-tighter uppercase">{user.fullName || user.name}</h1>
             <p className="text-[10px] md:text-sm text-gray-400 font-bold uppercase tracking-[0.2em]">{user.email}</p>
             <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-2 md:pt-4">
               <span className="text-[10px] uppercase tracking-[0.2em] font-black bg-warm-sand/10 text-warm-sand px-4 py-1.5 rounded-full border border-warm-sand/10">
-                Premium Member
+                Member of Riddha
               </span>
               <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-300 pt-1.5">
-                Member Since {user.memberSince}
+                Member Since {new Date(user.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </span>
             </div>
           </div>

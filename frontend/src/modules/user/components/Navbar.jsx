@@ -10,10 +10,12 @@ import {
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../data/CartContext";
+import { useUser } from "../data/UserContext";
 import SearchBar from "./SearchBar";
 import api from '../../../shared/utils/api';
 
 const Navbar = () => {
+  const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [policiesOpen, setPoliciesOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
@@ -97,8 +99,16 @@ const Navbar = () => {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-center">Contact us</span>
               </Link>
               <Link to="/profile" className="flex flex-col items-center text-white/90 hover:text-white transition-colors group px-2 border-l border-white/20">
-                <FiUser className="h-6 w-6 mb-1 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Login/Signup</span>
+                <div className="h-6 w-6 mb-1 group-hover:scale-110 transition-transform flex items-center justify-center overflow-hidden rounded-full font-bold text-[8px]">
+                   {user?.avatar ? (
+                     <img src={user.avatar} className="w-full h-full object-cover" />
+                   ) : (
+                     <FiUser className="h-full w-full" />
+                   )}
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider truncate max-w-[60px]">
+                  {user ? (user.fullName?.split(' ')[0] || 'Profile') : 'Login'}
+                </span>
               </Link>
               <Link to="/cart" className="flex flex-col items-center text-white/90 hover:text-white transition-colors group relative px-2 border-l border-white/20">
                 <div className="relative">

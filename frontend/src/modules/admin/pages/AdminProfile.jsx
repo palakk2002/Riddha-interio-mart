@@ -2,34 +2,95 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiUser, FiPackage, FiMapPin, FiHeart, FiSettings, FiLogOut, FiChevronRight, FiEdit2, FiShield, FiMail, FiPhone } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
+import api from '../../../shared/utils/api';
+import { uploadImage } from '../../../shared/utils/upload';
 import { useUser } from '../../user/data/UserContext';
 
 const AdminProfile = () => {
   const navigate = useNavigate();
   const { logout, user: currentUser } = useUser();
   const [isEditing, setIsEditing] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
   const [profileData, setProfileData] = React.useState({
-    name: currentUser?.name || "Alex Johnson",
-    email: currentUser?.email || "admin@riddhainterio.com",
-    phone: "+91 99887 76655",
-    role: "Super Admin",
-    department: "Executive Management",
-    assignedSince: "January 2024"
+    name: "",
+    email: "",
+    phone: "",
+    role: "Administrator",
+    department: "Operations",
+    assignedSince: "N/A",
+    avatar: ""
   });
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/auth/admin/me');
+      if (data.success) {
+        setProfileData({
+          name: data.data.fullName || "Admin",
+          email: data.data.email || "",
+          phone: data.data.phone || "Not Provided",
+          role: data.data.role === 'admin' ? 'Super Admin' : 'Admin',
+          department: data.data.department || "Executive Management",
+          assignedSince: data.data.createdAt ? new Date(data.data.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "N/A",
+          avatar: data.data.avatar || ""
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch admin profile:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchProfile();
+  }, []);
   
   const handleLogout = () => {
     logout();
     navigate('/admin/login');
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setIsEditing(false);
-    // In a real app, we'd send an API call here.
+    try {
+      const { data } = await api.put('/auth/admin/profile', {
+        fullName: profileData.name,
+        email: profileData.email,
+        phone: profileData.phone,
+        avatar: profileData.avatar
+      });
+      if (data.success) {
+        setIsEditing(false);
+        // Update local context as well
+        setUser({ ...currentUser, fullName: data.data.fullName, avatar: data.data.avatar });
+        alert('Profile updated successfully');
+      }
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      alert('Error updating profile');
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const url = await uploadImage(file);
+      setProfileData({ ...profileData, avatar: url });
+      // Also update backend immediately or wait for save? 
+      // User said "connect to backend", I'll update it now to make it feel "proper functional"
+      await api.put('/auth/admin/profile', { avatar: url });
+    } catch (err) {
+      console.error('Avatar upload failed:', err);
+      alert('Failed to upload image');
+    }
   };
 
   return (
@@ -44,12 +105,15 @@ const AdminProfile = () => {
         
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
           <div className="h-24 w-24 md:h-28 md:w-28 rounded-2xl bg-dusty-cocoa/10 flex items-center justify-center border-2 border-soft-oatmeal group relative overflow-hidden flex-shrink-0">
-             <FiUser className="h-10 w-10 text-dusty-cocoa/30" />
-             {!isEditing && (
-               <div onClick={() => setIsEditing(true)} className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                 <FiEdit2 className="text-white h-6 w-6" />
-               </div>
+             {profileData.avatar ? (
+               <img src={profileData.avatar} alt="Profile" className="w-full h-full object-cover" />
+             ) : (
+               <FiUser className="h-10 w-10 text-dusty-cocoa/30" />
              )}
+             <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+               <FiEdit2 className="text-white h-6 w-6" />
+               <input type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
+             </label>
           </div>
 
           <div className="text-center md:text-left flex-1">
@@ -141,10 +205,9 @@ const AdminProfile = () => {
               <span className="w-1.5 h-6 bg-dusty-cocoa rounded-full"></span>
               Quick Actions
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               {[
                 { label: 'Edit Info', icon: <FiEdit2 />, color: 'bg-warm-sand', action: () => setIsEditing(true) },
-                { label: 'Settings', icon: <FiSettings />, color: 'bg-deep-espresso', action: () => navigate('/admin/settings') },
                 { label: 'Logout', icon: <FiLogOut />, color: 'bg-red-500', action: handleLogout },
               ].map((btn, i) => (
                 <button 

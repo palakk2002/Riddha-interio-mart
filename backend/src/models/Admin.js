@@ -20,6 +20,18 @@ const AdminSchema = new mongoose.Schema({
     type: String,
     default: 'admin'
   },
+  phone: {
+    type: String,
+    default: ""
+  },
+  department: {
+    type: String,
+    default: "Executive Management"
+  },
+  avatar: {
+    type: String,
+    default: ""
+  },
   password: {
     type: String,
     required: [true, 'Please add a password'],

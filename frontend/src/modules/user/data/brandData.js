@@ -116,5 +116,17 @@ export const brandData = {
       { id: 1, name: 'Hand Tools', image: 'https://images.unsplash.com/photo-1581147036324-c17ac41dfa6c?q=80&w=400', slug: 'hand-tools' },
       { id: 2, name: 'Tool Sets', image: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?q=80&w=400', slug: 'tool-sets' },
     ]
+  },
+  kohler: {
+    name: 'Kohler',
+    banners: [
+      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1200',
+      'https://images.unsplash.com/photo-1620626011761-9963d7521476?q=80&w=1200'
+    ],
+    categories: [
+      { id: 1, name: 'Sanitaryware', image: 'https://images.unsplash.com/photo-1600566752355-3979ff69a3ec?q=80&w=400', slug: 'sanitaryware' },
+      { id: 2, name: 'Faucets', image: tapCat, slug: 'faucets' },
+      { id: 3, name: 'Showers', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=400', slug: 'showers' },
+    ]
   }
 };

@@ -11,9 +11,12 @@ const OrderTracking = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await api.get('/orders/all');
-        // Filter only active orders (Shipped or Out for Delivery)
-        setOrders(res.data.data.filter(o => ['Shipped', 'Out for Delivery', 'Processing'].includes(o.status)));
+        const res = await api.get('/orders');
+        // Filter active orders or orders with an assigned delivery boy
+        setOrders(res.data.data.filter(o => 
+          ['Shipped', 'Out for Delivery', 'Processing'].includes(o.status) || 
+          (o.deliveryBoy && o.deliveryStatus !== 'None' && o.status !== 'Delivered')
+        ));
       } catch (err) {
         console.error('Failed to fetch orders for tracking:', err);
       } finally {
@@ -25,7 +28,8 @@ const OrderTracking = () => {
 
   const filteredOrders = orders.filter(o => 
     o.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    o.user?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    o._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    o.user?.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -84,11 +88,11 @@ const OrderTracking = () => {
                 <div className="grid grid-cols-2 gap-8 mb-8 border-y border-soft-oatmeal/10 py-8">
                   <div className="space-y-2">
                     <p className="text-[10px] font-black uppercase tracking-widest text-warm-sand/60">Customer</p>
-                    <p className="font-bold text-deep-espresso">{order.user?.name || 'Guest User'}</p>
+                    <p className="font-bold text-deep-espresso">{order.user?.fullName || 'Guest User'}</p>
                   </div>
                   <div className="space-y-2">
                     <p className="text-[10px] font-black uppercase tracking-widest text-warm-sand/60">Delivery Partner</p>
-                    <p className="font-bold text-deep-espresso">{order.deliveryBoy?.name || 'Not Assigned'}</p>
+                    <p className="font-bold text-deep-espresso">{order.deliveryBoy?.fullName || 'Not Assigned'}</p>
                   </div>
                 </div>
 

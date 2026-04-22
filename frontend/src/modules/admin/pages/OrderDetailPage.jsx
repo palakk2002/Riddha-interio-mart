@@ -229,6 +229,11 @@ const OrderDetailPage = () => {
                     <div className="flex-grow">
                       <h4 className="font-bold text-deep-espresso">{item.name}</h4>
                       <p className="text-sm text-warm-sand">Quantity: {item.quantity}</p>
+                      {item.sellerType === 'Admin' && (
+                        <span className="inline-block mt-2 px-2 py-0.5 bg-red-800/10 text-red-800 text-[8px] font-black uppercase tracking-widest rounded border border-red-800/20">
+                          Direct Inventory
+                        </span>
+                      )}
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-deep-espresso">₹{(item.price * item.quantity).toLocaleString()}</p>
@@ -326,7 +331,7 @@ const OrderDetailPage = () => {
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-bold text-deep-espresso">
-                    {order.seller.shopName || order.seller.fullName || "Admin Merchant"}
+                    {order.sellerType === 'Admin' ? 'Riddha Mart (Admin)' : (order.seller.shopName || order.seller.fullName || "Official Store")}
                   </p>
                   {order.sellerType === 'Admin' && (
                     <span className="inline-block px-2 py-0.5 bg-red-800/10 text-red-800 text-[9px] font-black uppercase tracking-widest rounded border border-red-800/20">

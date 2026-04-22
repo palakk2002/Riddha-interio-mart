@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiUser, FiPackage, FiMapPin, FiHeart, FiSettings, FiLogOut, FiChevronRight, FiEdit2 } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from '../../data/UserContext';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { user: currentUser } = useUser();
+  
   const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+91 98765 43210",
-    memberSince: "March 2024",
-    avatar: null // Placeholder for profile image
+    name: currentUser?.fullName || "User",
+    email: currentUser?.email || "",
+    phone: currentUser?.phone || "",
+    memberSince: currentUser?.createdAt ? new Date(currentUser.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "N/A",
+    avatar: currentUser?.avatar || null
   };
 
   const menuItems = [
@@ -36,7 +39,11 @@ const Profile = () => {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-4 md:gap-12">
           <div className="relative group">
             <div className="h-20 w-20 md:h-36 md:w-36 rounded-full bg-soft-oatmeal/10 flex items-center justify-center border-2 md:border-4 border-warm-sand/5 overflow-hidden shadow-xl md:shadow-2xl">
-              <FiUser className="h-10 w-10 md:h-20 md:w-20 text-deep-espresso/20" />
+              {user.avatar ? (
+                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                <FiUser className="h-10 w-10 md:h-20 md:w-20 text-deep-espresso/20" />
+              )}
             </div>
           </div>
 

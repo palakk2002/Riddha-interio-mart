@@ -48,7 +48,8 @@ exports.getProducts = async (req, res, next) => {
     const sortBy = req.query.sort || '-createdAt';
     const products = await Product.find(filter)
       .sort(sortBy)
-      .populate('seller', 'fullName shopName');
+      .populate('seller', 'fullName shopName')
+      .populate('brand', 'name logo');
 
     res.status(200).json({ success: true, count: products.length, data: products });
   } catch (error) {
@@ -138,7 +139,9 @@ exports.updateApprovalStatus = async (req, res, next) => {
 // @desc    Get single product details
 exports.getProduct = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id).populate('seller', 'fullName shopName isVerified');
+    const product = await Product.findById(req.params.id)
+      .populate('seller', 'fullName shopName isVerified')
+      .populate('brand', 'name logo');
     
     if (!product) {
       return res.status(404).json({ success: false, error: 'Product not found' });

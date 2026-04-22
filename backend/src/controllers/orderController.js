@@ -1,6 +1,8 @@
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
+const Admin = require('../models/Admin');
+const Seller = require('../models/Seller');
 const { 
   notifySellerNewOrder, 
   notifyAdminNewOrder, 
@@ -36,7 +38,7 @@ exports.addOrderItems = async (req, res) => {
         return {
           ...item,
           seller: product ? product.seller : (item.seller || item.productSeller),
-          sellerType: product ? (product.sellerType || sType) : (item.sellerType || 'Seller')
+          sellerType: product ? (product.sellerType || 'Seller') : (item.sellerType || 'Seller')
         };
       }));
 
@@ -160,21 +162,31 @@ exports.getMyOrders = async (req, res) => {
 exports.getOrders = async (req, res) => {
   try {
     const query = {};
-    const isAdmin = req.user && req.user.role === 'admin';
+    const userRole = req.user.role ? req.user.role.toLowerCase() : '';
+    const isAdmin = userRole === 'admin';
+    const isSeller = userRole === 'seller';
     
     // If user is seller, only show orders belonging to them or containing their products
-    if (req.user.role === 'seller') {
-      const sellerId = req.user.id;
+    if (isSeller) {
       query.$or = [
-        { seller: sellerId },
-        { "orderItems.seller": sellerId }
+        { seller: req.user.id },
+        { 'orderItems.seller': req.user.id }
       ];
     }
     // Admin sees everything by default (query stays empty)
 
     const orders = await Order.find(query)
       .populate('user', 'fullName email')
-      .populate('seller', 'fullName shopName email')
+      .populate({
+        path: 'seller',
+        select: 'shopName fullName email',
+        transform: (doc, id) => {
+          if (!doc && id) return { _id: id, shopName: 'Riddha Mart (Admin)', fullName: 'Riddha Mart' };
+          if (doc && !doc.shopName) return { ...doc.toObject(), shopName: 'Riddha Mart (Official)' };
+          return doc;
+        }
+      })
+      .populate('deliveryBoy', 'fullName email phone')
       .sort('-createdAt');
 
     res.status(200).json({
