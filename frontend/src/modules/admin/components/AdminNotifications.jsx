@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuPackage, LuX, LuArrowRight, LuTruck } from 'react-icons/lu';
+import { FiPackage, FiX, FiArrowRight, FiTruck } from 'react-icons/fi';
 import { connectSocket, disconnectSocket } from '../../../shared/utils/socket';
 import { useNavigate } from 'react-router-dom';
 
@@ -43,7 +43,13 @@ const AdminNotifications = ({ token }) => {
     socket.on('delivery:new_registration', (payload) => {
       console.log('DELIVERY:NEW_REGISTRATION received in Admin panel:', payload);
       playSound();
-      setActiveNotification({ ...payload, type: 'delivery' });
+      setActiveNotification({ ...payload, type: 'delivery_reg' });
+    });
+
+    socket.on('delivery:response', (payload) => {
+      console.log('DELIVERY:RESPONSE received in Admin panel:', payload);
+      playSound();
+      setActiveNotification({ ...payload, type: 'delivery_resp' });
     });
 
     socket.on('connect_error', (err) => {
@@ -55,27 +61,30 @@ const AdminNotifications = ({ token }) => {
       socket.off('order:new');
       socket.off('product:new_request');
       socket.off('delivery:new_registration');
+      socket.off('delivery:response');
       socket.off('connect');
       socket.off('connect_error');
     };
   }, [token, playSound]);
 
   const getIcon = () => {
-     if (activeNotification.type === 'product') return <LuPackage size={28} className="animate-bounce" />;
-     if (activeNotification.type === 'delivery') return <LuTruck size={28} className="animate-bounce" />;
-     return <LuPackage size={28} className="animate-bounce" />;
+     if (activeNotification.type === 'product') return <FiPackage size={28} className="animate-bounce" />;
+     if (activeNotification.type === 'delivery_reg' || activeNotification.type === 'delivery_resp') return <FiTruck size={28} className="animate-bounce" />;
+     return <FiPackage size={28} className="animate-bounce" />;
   };
 
   const getTheme = () => {
      if (activeNotification.type === 'product') return 'bg-amber-50 text-amber-600';
-     if (activeNotification.type === 'delivery') return 'bg-blue-50 text-blue-600';
+     if (activeNotification.type === 'delivery_reg') return 'bg-blue-50 text-blue-600';
+     if (activeNotification.type === 'delivery_resp') return activeNotification.status === 'Accepted' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600';
      return 'bg-red-50 text-red-800';
   };
 
   return (
     <AnimatePresence mode="wait">
-      {activeNotification && (
+      {activeNotification ? (
         <motion.div
+          key={activeNotification.type + (activeNotification.orderId || activeNotification.id || '')}
           initial={{ opacity: 0, scale: 0.8, y: 50, x: '-50%' }}
           animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
           exit={{ opacity: 0, scale: 0.8, y: 20, x: '-50%' }}
@@ -83,7 +92,8 @@ const AdminNotifications = ({ token }) => {
         >
             {/* Top accent bar */}
             <div className={`absolute top-0 left-0 w-full h-1.5 ${
-              activeNotification.type === 'delivery' ? 'bg-blue-600' :
+              activeNotification.type === 'delivery_reg' ? 'bg-blue-600' :
+              activeNotification.type === 'delivery_resp' ? (activeNotification.status === 'Accepted' ? 'bg-emerald-500' : 'bg-rose-500') :
               activeNotification.type === 'product' ? 'bg-amber-500' : 
               'bg-gradient-to-r from-red-800 to-deep-espresso'
             }`} />
@@ -98,35 +108,40 @@ const AdminNotifications = ({ token }) => {
                <div className="flex items-center justify-between">
                   <h3 className="text-sm font-black uppercase tracking-widest text-deep-espresso">
                     {activeNotification.type === 'product' ? 'Product Approval' : 
-                     activeNotification.type === 'delivery' ? 'New Fleet Request' :
+                     activeNotification.type === 'delivery_reg' ? 'New Fleet Request' :
+                     activeNotification.type === 'delivery_resp' ? 'Delivery Response' :
                      'Incoming Order'}
                   </h3>
                   <button 
                     onClick={() => setActiveNotification(null)}
                     className="p-1 hover:bg-soft-oatmeal rounded-full transition-colors text-warm-sand"
                   >
-                    <LuX size={18} />
+                    <FiX size={18} />
                   </button>
                </div>
                <p className="text-xl font-display font-bold text-deep-espresso leading-tight">
                   {activeNotification.type === 'product' ? activeNotification.message :
-                   activeNotification.type === 'delivery' ? `${activeNotification.fullName} wants to join` :
+                   activeNotification.type === 'delivery_reg' ? `${activeNotification.fullName} wants to join` :
+                   activeNotification.type === 'delivery_resp' ? `Order ${activeNotification.status}` :
                    `₹${activeNotification.totalPrice?.toLocaleString()} Order Received`}
                </p>
                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-warm-sand font-medium mt-2">
                   <span className="flex items-center gap-1">
                      <span className={`w-1.5 h-1.5 rounded-full ${
                        activeNotification.type === 'product' ? 'bg-amber-500' : 
-                       activeNotification.type === 'delivery' ? 'bg-blue-500' :
+                       activeNotification.type === 'delivery_reg' ? 'bg-blue-500' :
+                       activeNotification.type === 'delivery_resp' ? (activeNotification.status === 'Accepted' ? 'bg-emerald-500' : 'bg-rose-500') :
                        'bg-green-500'
                      }`}></span>
                      {activeNotification.type === 'product' ? activeNotification.sellerName :
-                      activeNotification.type === 'delivery' ? activeNotification.vehicleType :
+                      activeNotification.type === 'delivery_reg' ? activeNotification.vehicleType :
+                      activeNotification.type === 'delivery_resp' ? activeNotification.deliveryBoyName :
                       (activeNotification.customerName || 'Premium Client')}
                   </span>
                   <span className="opacity-30">•</span>
                   <span>{activeNotification.type === 'product' ? 'Draft Product' : 
-                         activeNotification.type === 'delivery' ? activeNotification.phone :
+                         activeNotification.type === 'delivery_reg' ? activeNotification.phone :
+                         activeNotification.type === 'delivery_resp' ? `Order ID: ...${activeNotification.orderId?.slice(-6)}` :
                          (activeNotification.shippingCity || 'Global')}</span>
                   {activeNotification.type === 'order' && (
                     <>
@@ -141,7 +156,7 @@ const AdminNotifications = ({ token }) => {
                     onClick={() => {
                         if (activeNotification.type === 'product') {
                           navigate(`/admin/inventory`);
-                        } else if (activeNotification.type === 'delivery') {
+                        } else if (activeNotification.type === 'delivery_reg') {
                           navigate(`/admin/delivery/pending`);
                         } else {
                           navigate(`/admin/orders/view/${activeNotification.orderId}`);
@@ -150,13 +165,15 @@ const AdminNotifications = ({ token }) => {
                     }}
                     className={`flex-1 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl transition-all flex items-center justify-center gap-2 ${
                       activeNotification.type === 'product' ? 'bg-amber-600 text-white hover:bg-amber-700' :
-                      activeNotification.type === 'delivery' ? 'bg-blue-600 text-white hover:bg-blue-700' :
+                      activeNotification.type === 'delivery_reg' ? 'bg-blue-600 text-white hover:bg-blue-700' :
+                      activeNotification.type === 'delivery_resp' ? (activeNotification.status === 'Accepted' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white') :
                       'bg-deep-espresso text-white hover:bg-red-900'
                     }`}
                   >
                     {activeNotification.type === 'product' ? 'Review Product' : 
-                     activeNotification.type === 'delivery' ? 'Review Partner' :
-                     'Process Now'} <LuArrowRight size={14} />
+                     activeNotification.type === 'delivery_reg' ? 'Review Partner' :
+                     activeNotification.type === 'delivery_resp' ? 'View Order' :
+                     'Process Now'} <FiArrowRight size={14} />
                   </button>
                   <button 
                     onClick={() => setActiveNotification(null)}
@@ -167,7 +184,7 @@ const AdminNotifications = ({ token }) => {
                </div>
             </div>
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   );
 };

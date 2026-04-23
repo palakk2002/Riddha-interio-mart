@@ -14,6 +14,10 @@ const EditInventoryPage = () => {
   const [imgFile, setImgFile] = useState(null);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  
+  // Custom Dropdown State
+  const [isCatOpen, setIsCatOpen] = useState(false);
+  const [catSearch, setCatSearch] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
@@ -63,6 +67,10 @@ const EditInventoryPage = () => {
     fetchData();
   }, [id]);
 
+  const filteredCategories = categories.filter(cat => 
+    cat.name.toLowerCase().includes(catSearch.toLowerCase())
+  );
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -77,6 +85,7 @@ const EditInventoryPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.brand) return alert('Please select a brand partner');
     try {
       setSaving(true);
 
@@ -183,16 +192,61 @@ const EditInventoryPage = () => {
                     <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
                        <LuGrid2X2 size={12} /> Category
                     </label>
-                    <input 
-                      list="cat-list"
-                      required
-                      value={formData.category}
-                      onChange={(e) => setFormData({...formData, category: e.target.value})}
-                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none"
-                    />
-                    <datalist id="cat-list">
-                      {categories.map(cat => <option key={cat._id} value={cat.name} />)}
-                    </datalist>
+                    <div className="relative group">
+                       <input 
+                         type="text"
+                         placeholder={formData.category || "Search or select category..."}
+                         value={catSearch}
+                         onChange={(e) => {
+                            setCatSearch(e.target.value);
+                            setIsCatOpen(true);
+                         }}
+                         onFocus={() => setIsCatOpen(true)}
+                         className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                       />
+                       <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-warm-sand">
+                          <LuGrid2X2 size={14} className={isCatOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
+                       </div>
+
+                       {isCatOpen && (
+                         <>
+                            <div 
+                              className="fixed inset-0 z-[40]" 
+                              onClick={() => {
+                                 setIsCatOpen(false);
+                                 setCatSearch('');
+                              }}
+                            />
+                            <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-soft-oatmeal rounded-2xl shadow-2xl z-[50] overflow-hidden max-h-64 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                               {filteredCategories.length > 0 ? (
+                                 filteredCategories.map(cat => (
+                                   <button
+                                     key={cat._id}
+                                     type="button"
+                                     onClick={() => {
+                                       setFormData({...formData, category: cat.name});
+                                       setCatSearch('');
+                                       setIsCatOpen(false);
+                                     }}
+                                     className="w-full text-left px-5 py-3.5 text-sm font-medium hover:bg-soft-oatmeal/30 transition-colors border-b border-soft-oatmeal/10 last:border-0 flex items-center justify-between group"
+                                   >
+                                     <span className={formData.category === cat.name ? "text-red-800 font-bold" : "text-deep-espresso"}>
+                                       {cat.name}
+                                     </span>
+                                     {formData.category === cat.name && (
+                                       <div className="w-1.5 h-1.5 bg-red-800 rounded-full" />
+                                     )}
+                                   </button>
+                                 ))
+                               ) : (
+                                 <div className="px-5 py-4 text-xs font-bold text-warm-sand uppercase tracking-widest text-center italic">
+                                   No categories found
+                                 </div>
+                               )}
+                            </div>
+                         </>
+                       )}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
@@ -206,6 +260,11 @@ const EditInventoryPage = () => {
                        <option value="">Select Brand</option>
                        {brands.map(brand => <option key={brand._id} value={brand._id}>{brand.name}</option>)}
                     </select>
+                    {!brands.length && (
+                       <p className="text-[9px] text-red-500 font-bold mt-1 uppercase tracking-tight flex items-center gap-1">
+                          <LuInfo size={10} /> No brands found. Please add a brand first.
+                       </p>
+                    )}
                   </div>
                 </div>
 

@@ -165,6 +165,7 @@ exports.getOrders = async (req, res) => {
     const userRole = req.user.role ? req.user.role.toLowerCase() : '';
     const isAdmin = userRole === 'admin';
     const isSeller = userRole === 'seller';
+    const isDelivery = userRole === 'delivery';
     
     // If user is seller, only show orders belonging to them or containing their products
     if (isSeller) {
@@ -173,7 +174,15 @@ exports.getOrders = async (req, res) => {
         { 'orderItems.seller': req.user.id }
       ];
     }
-    // Admin sees everything by default (query stays empty)
+
+    // If user is delivery partner, show orders assigned to them or available in pool
+    if (isDelivery) {
+      query.$or = [
+        { deliveryBoy: req.user.id },
+        { deliveryStatus: { $in: ['None', 'Rejected'] } }
+      ];
+      query.status = { $in: ['Processing', 'Shipped', 'Delivered'] };
+    }
 
     const orders = await Order.find(query)
       .populate('user', 'fullName email')
@@ -274,26 +283,25 @@ exports.respondToDeliveryAssignment = async (req, res) => {
     order.deliveryStatus = status;
     if (status === 'Accepted') {
       order.status = 'Shipped';
+      order.deliveryBoy = req.user.id; // Ensure the delivery boy who accepted it is recorded
     } else {
-      // If rejected, clear deliveryBoy so someone else can be assigned
+      // If rejected, clear deliveryBoy so someone else can be assigned or it goes back to pool
       order.deliveryBoy = undefined;
     }
 
     await order.save();
     
     // Notify corresponding owner (Seller or Admin)
+    const notificationPayload = {
+      orderId: order._id,
+      status: status,
+      deliveryBoyName: req.user.fullName
+    };
+
     if (order.sellerType === 'Admin') {
-      notifyAdminDeliveryResponse(order.seller, {
-        orderId: order._id,
-        status: status,
-        deliveryBoyName: req.user.fullName
-      });
+      notifyAdminDeliveryResponse(null, notificationPayload);
     } else {
-      notifySellerDeliveryResponse(order.seller, {
-        orderId: order._id,
-        status: status,
-        deliveryBoyName: req.user.fullName
-      });
+      notifySellerDeliveryResponse(order.seller, notificationPayload);
     }
 
     res.status(200).json({ success: true, data: order });

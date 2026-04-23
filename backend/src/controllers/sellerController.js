@@ -86,3 +86,23 @@ exports.updateSellerProfile = async (req, res, next) => {
     next(err);
   }
 };
+
+// @desc    Get seller's stock management report
+// @route   GET /api/auth/seller/stock-status
+// @access  Private/Seller
+exports.getSellerStockStatus = async (req, res, next) => {
+  try {
+    const Product = require('../models/Product');
+    const products = await Product.find({ seller: req.user.id })
+      .populate('brand', 'name')
+      .sort('countInStock');
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      data: products
+    });
+  } catch (err) {
+    next(err);
+  }
+};

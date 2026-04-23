@@ -3,7 +3,7 @@ import { LuMapPin, LuPhone, LuPackage, LuClock, LuCheck, LuX } from 'react-icons
 import StatusBadge from './StatusBadge';
 
 const OrderCard = ({ order, onAccept, onReject, onUpdateStatus }) => {
-  const isAvailable = order.status === 'Pending';
+  const isAvailable = ['None', 'Pending', 'Rejected'].includes(order.status);
   
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-soft-oatmeal overflow-hidden hover:shadow-md transition-shadow">

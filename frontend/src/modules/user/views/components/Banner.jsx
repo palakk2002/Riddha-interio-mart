@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 // Assets
 import heroMinimal from '../../../assets/hero-minimal.png';
@@ -79,10 +79,10 @@ const Banner = () => {
       {/* Manual Controls */}
       <div className="absolute inset-0 flex items-center justify-between px-4 md:px-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
          <button onClick={prevSlide} className="p-2 md:p-5 rounded-full bg-white/20 backdrop-blur-xl text-white hover:bg-white/40 border border-white/20 transition-all active:scale-90 shadow-2xl">
-            <LuChevronLeft className="w-6 h-6 md:w-10 md:h-10" />
+            <FiChevronLeft className="w-6 h-6 md:w-10 md:h-10" />
          </button>
          <button onClick={nextSlide} className="p-2 md:p-5 rounded-full bg-white/20 backdrop-blur-xl text-white hover:bg-white/40 border border-white/20 transition-all active:scale-90 shadow-2xl">
-            <LuChevronRight className="w-6 h-6 md:w-10 md:h-10" />
+            <FiChevronRight className="w-6 h-6 md:w-10 md:h-10" />
          </button>
       </div>
 

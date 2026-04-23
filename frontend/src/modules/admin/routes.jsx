@@ -36,6 +36,7 @@ import EditInventoryPage from './pages/EditInventoryPage';
 import ManageDeliveries from './pages/ManageDeliveries';
 import AssignDeliveryPage from './pages/DeliveryAssignment';
 import AddProductFlowPage from './pages/AddProductFlowPage';
+import StockManagement from './pages/StockManagement';
 
 const AdminRoutes = () => {
   return (
@@ -52,6 +53,7 @@ const AdminRoutes = () => {
         <Route path="/inventory/add-flow" element={<AddProductFlowPage />} />
         <Route path="/inventory/add" element={<AddInventoryPage />} />
         <Route path="/inventory/edit/:id" element={<EditInventoryPage />} />
+        <Route path="/stock-management" element={<StockManagement />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/manage-categories" element={<ManageCategories />} />
         <Route path="/manage-categories/add" element={<AddCategoryPage />} />

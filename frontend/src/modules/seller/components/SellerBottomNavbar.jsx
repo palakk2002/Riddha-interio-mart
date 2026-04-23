@@ -1,21 +1,21 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  LuLayoutDashboard, 
-  LuSearch, 
-  LuPlus, 
-  LuPackage, 
-  LuUser 
-} from 'react-icons/lu';
+  FiLayout, 
+  FiSearch, 
+  FiPlus, 
+  FiPackage, 
+  FiUser 
+} from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SellerBottomNavbar = () => {
   const navItems = [
-    { name: 'Home', path: '/seller', icon: LuLayoutDashboard },
-    { name: 'Catalog', path: '/seller/catalog', icon: LuSearch },
-    { name: 'Add', path: '/seller/add-product', icon: LuPlus },
-    { name: 'My Prods', path: '/seller/my-products', icon: LuPackage },
-    { name: 'Profile', path: '/seller/profile', icon: LuUser },
+    { name: 'Home', path: '/seller', icon: FiLayout },
+    { name: 'Catalog', path: '/seller/catalog', icon: FiSearch },
+    { name: 'Add', path: '/seller/add-product', icon: FiPlus },
+    { name: 'My Prods', path: '/seller/my-products', icon: FiPackage },
+    { name: 'Profile', path: '/seller/profile', icon: FiUser },
   ];
 
   return (

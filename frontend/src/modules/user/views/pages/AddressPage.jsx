@@ -9,10 +9,10 @@ const AddressPage = () => {
   const navigate = useNavigate();
   const { saveAddress } = useUser();
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
+    fullName: '',
+    mobileNumber: '',
     pincode: '560001',
-    address: '',
+    fullAddress: '',
     landmark: '',
     city: 'Bengaluru',
     state: 'Karnataka',
@@ -21,7 +21,7 @@ const AddressPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (formData.name && formData.phone && formData.address && formData.pincode) {
+    if (formData.fullName && formData.mobileNumber && formData.fullAddress && formData.pincode) {
       saveAddress(formData);
       navigate('/cart');
     }
@@ -61,8 +61,8 @@ const AddressPage = () => {
                 type="text" 
                 placeholder="Enter your full name" 
                 className="w-full px-4 py-3 md:px-6 md:py-4 rounded-xl md:rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all shadow-sm text-sm"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                value={formData.fullName}
+                onChange={(e) => setFormData({...formData, fullName: e.target.value})}
               />
             </div>
             <div className="space-y-1 md:space-y-2">
@@ -75,8 +75,8 @@ const AddressPage = () => {
                   pattern="[0-9]{10}"
                   placeholder="10-digit number" 
                   className="w-full pl-12 md:pl-16 pr-4 md:pr-6 py-3 md:py-4 rounded-xl md:rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all shadow-sm text-sm"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})}
+                  value={formData.mobileNumber}
+                  onChange={(e) => setFormData({...formData, mobileNumber: e.target.value.replace(/\D/g, '').slice(0, 10)})}
                 />
               </div>
             </div>
@@ -120,8 +120,8 @@ const AddressPage = () => {
                 required
                 placeholder="Flat, House no., Building, Apartment" 
                 className="w-full px-4 py-3 md:px-6 md:py-4 rounded-xl md:rounded-2xl border-2 border-gray-100 bg-white focus:border-warm-sand focus:outline-none font-medium transition-all min-h-[80px] md:min-h-[120px] shadow-sm shadow-inner text-sm"
-                value={formData.address}
-                onChange={(e) => setFormData({...formData, address: e.target.value})}
+                value={formData.fullAddress}
+                onChange={(e) => setFormData({...formData, fullAddress: e.target.value})}
               />
             </div>
             <div className="space-y-1 md:space-y-2">

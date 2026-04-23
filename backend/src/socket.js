@@ -46,10 +46,14 @@ function initSocket(httpServer) {
 
   io.on('connection', (socket) => {
     const { id, role } = socket.user || {};
+    console.log(`[Socket] New connection: ${role}:${id}`);
+    
     socket.join(`${role}:${id}`);
+    console.log(`[Socket] Joined room: ${role}:${id}`);
     
     // Also join a generic role room for broadcasting to all admins or sellers
     socket.join(`role:${role}`);
+    console.log(`[Socket] Joined generic role room: role:${role}`);
     
     socket.emit('socket:ready', { role, id });
   });
@@ -100,7 +104,11 @@ function notifySellerDeliveryResponse(sellerId, payload) {
 
 function notifyAdminDeliveryResponse(adminId, payload) {
   if (!io) return;
-  io.to(`admin:${adminId}`).emit('delivery:response', payload);
+  if (adminId) {
+    io.to(`admin:${adminId}`).emit('delivery:response', payload);
+  } else {
+    io.to('role:admin').emit('delivery:response', payload);
+  }
 }
 
 function notifyAdminNewDelivery(payload) {

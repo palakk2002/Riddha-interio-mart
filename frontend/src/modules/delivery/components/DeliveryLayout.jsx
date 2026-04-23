@@ -1,28 +1,46 @@
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useNavigate } from 'react-router-dom';
 import DeliverySidebar from './DeliverySidebar';
 import DeliveryBottomNavbar from './DeliveryBottomNavbar';
 import { LuMenu, LuBell, LuUser, LuChevronDown, LuTruck, LuCheck, LuX } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../user/data/UserContext';
-import { connectSocket } from '../../../shared/utils/socket';
+import { connectSocket, disconnectSocket } from '../../../shared/utils/socket';
 import { playNewOrderChime, primeNotificationAudio, isSoundEnabled } from '../../seller/utils/notificationSound';
+import { getDeliveryNotifications, setDeliveryNotifications, prependDeliveryNotification } from '../utils/deliveryNotifications';
 import api from '../../../shared/utils/api';
 
 const notifications = [
-  { id: 1, title: 'New Order Available', message: 'Pick up from Raja Park, Jaipur.', time: 'Just now', status: 'unread' },
-  { id: 2, title: 'Payment Received', message: 'Earnings for ORD-5541 credited.', time: '2h ago', status: 'read' },
-  { id: 3, title: 'Profile Updated', message: 'Your vehicle details have been verified.', time: '1d ago', status: 'read' },
+  { id: 1, title: 'New Order Available', message: 'Pick up from Raja Park, Jaipur.', time: 'Just now', status: 'unread', link: '/delivery/orders' },
+  { id: 2, title: 'Payment Received', message: 'Earnings for ORD-5541 credited.', time: '2h ago', status: 'read', link: '/delivery/earnings' },
+  { id: 3, title: 'Profile Updated', message: 'Your vehicle details have been verified.', time: '1d ago', status: 'read', link: '/delivery/profile' },
 ];
 
 const DeliveryLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [showNotifications, setShowNotifications] = React.useState(false);
+  const [notifications, setNotifications] = React.useState(() => getDeliveryNotifications());
   const [showUserMenu, setShowUserMenu] = React.useState(false);
   const [assignmentRequest, setAssignmentRequest] = React.useState(null);
   const [approvalNotification, setApprovalNotification] = React.useState(null);
-  const { user, setUser } = useUser();
+  const [toast, setToast] = React.useState(null);
+  const { user, setUser, logout } = useUser();
   const [updatingStatus, setUpdatingStatus] = React.useState(false);
+  const navigate = useNavigate();
+
+  const unreadCount = notifications.filter(n => n.status === 'unread').length;
+
+  const markAsRead = (id) => {
+    const updated = notifications.map(n => n.id === id ? { ...n, status: 'read' } : n);
+    setNotifications(updated);
+    setDeliveryNotifications(updated);
+  };
+
+  React.useEffect(() => {
+    const sync = () => setNotifications(getDeliveryNotifications());
+    window.addEventListener('delivery_notifications_updated', sync);
+    return () => window.removeEventListener('delivery_notifications_updated', sync);
+  }, []);
 
   const status = user?.status || 'Offline';
 
@@ -46,6 +64,8 @@ const DeliveryLayout = () => {
 
     const onAssigned = (payload) => {
       setAssignmentRequest(payload);
+      setToast({ title: 'New Task', message: 'A new order is available for pickup!', type: 'info' });
+      prependDeliveryNotification({ title: 'Order Assigned', message: 'New order task received.', time: 'Just now', status: 'unread', link: '/delivery/orders' });
       if (isSoundEnabled()) playNewOrderChime();
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
     };
@@ -53,9 +73,10 @@ const DeliveryLayout = () => {
     const onApprovalUpdate = (payload) => {
       setApprovalNotification(payload);
       if (payload.status === 'Approved') {
-        // Sync the global user context immediately
         setUser(prev => ({ ...prev, approvalStatus: 'Approved' }));
       }
+      setToast({ title: 'Account Status', message: payload.message, type: payload.status === 'Approved' ? 'success' : 'danger' });
+      prependDeliveryNotification({ title: 'Approval Update', message: payload.message, time: 'Just now', status: 'unread', link: '/delivery/profile' });
       if (isSoundEnabled()) playNewOrderChime();
     };
 
@@ -67,6 +88,13 @@ const DeliveryLayout = () => {
       socket.off('delivery:approval_update', onApprovalUpdate);
     };
   }, [user?.token, user?.role]);
+
+  React.useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const handleResponse = async (responseStatus) => {
     try {
@@ -101,6 +129,47 @@ const DeliveryLayout = () => {
         setShowUserMenu(false);
       }}
     >
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            onClick={() => setToast(null)}
+            className="fixed top-6 right-6 z-[130] w-[380px] max-w-[calc(100vw-3rem)] cursor-pointer"
+          >
+            <div className="bg-white rounded-[32px] shadow-2xl border border-soft-oatmeal overflow-hidden">
+              <div className="p-6 flex items-start gap-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                  toast.type === 'success' ? 'bg-emerald-100 text-emerald-600' :
+                  toast.type === 'danger' ? 'bg-red-100 text-red-600' :
+                  'bg-teal-100 text-teal-600'
+                }`}>
+                  {toast.type === 'success' ? <LuCheck size={24} /> :
+                   toast.type === 'danger' ? <LuX size={24} /> : <LuTruck size={24} />}
+                </div>
+                <div className="flex-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">Partner Update</p>
+                  <h4 className="text-base font-black text-deep-espresso mt-1">{toast.title}</h4>
+                  <p className="text-sm text-dusty-cocoa mt-1 line-clamp-2 leading-relaxed italic">"{toast.message}"</p>
+                </div>
+              </div>
+              <div className="h-1.5 w-full bg-soft-oatmeal/20">
+                <motion.div 
+                  initial={{ width: "100%" }}
+                  animate={{ width: "0%" }}
+                  transition={{ duration: 6, ease: "linear" }}
+                  className={`h-full ${
+                    toast.type === 'success' ? 'bg-emerald-500' :
+                    toast.type === 'danger' ? 'bg-red-500' :
+                    'bg-teal-500'
+                  }`}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
         {/* Assignment Request Modal */}
         <AnimatePresence>
           {assignmentRequest && (
@@ -250,7 +319,9 @@ const DeliveryLayout = () => {
                 className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-soft-oatmeal text-deep-espresso' : 'text-dusty-cocoa hover:bg-soft-oatmeal'}`}
               >
                 <LuBell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-warm-sand rounded-full border-2 border-white"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                )}
               </button>
 
               <AnimatePresence>
@@ -263,11 +334,22 @@ const DeliveryLayout = () => {
                   >
                     <div className="p-4 border-b border-soft-oatmeal flex items-center justify-between bg-soft-oatmeal/10">
                       <h3 className="font-bold text-sm">Notifications</h3>
-                      <span className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">3 New</span>
+                      <span className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">{unreadCount} New</span>
                     </div>
                     <div className="max-h-96 overflow-y-auto custom-scrollbar">
                       {notifications.map((n) => (
-                        <div key={n.id} className={`p-4 border-b border-soft-oatmeal/50 hover:bg-soft-oatmeal/20 transition-colors cursor-pointer group ${n.status === 'unread' ? 'bg-warm-sand/5' : ''}`}>
+                        <div 
+                          key={n.id} 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            markAsRead(n.id);
+                            if (n.link) {
+                              navigate(n.link);
+                              setShowNotifications(false);
+                            }
+                          }}
+                          className={`p-4 border-b border-soft-oatmeal/50 hover:bg-soft-oatmeal/20 transition-colors cursor-pointer group ${n.status === 'unread' ? 'bg-warm-sand/5' : ''}`}
+                        >
                           <div className="flex justify-between items-start mb-1">
                             <h4 className="text-sm font-bold text-deep-espresso">{n.title}</h4>
                             <span className="text-[10px] text-warm-sand uppercase font-medium">{n.time}</span>

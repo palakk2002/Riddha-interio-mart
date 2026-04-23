@@ -169,7 +169,7 @@ const CategoryDetailPage = () => {
 
              {/* Products Grid */}
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-12">
-                <AnimatePresence mode="wait">
+                <AnimatePresence>
                   {products.length > 0 ? (
                     products.map((product, index) => (
                       <motion.div

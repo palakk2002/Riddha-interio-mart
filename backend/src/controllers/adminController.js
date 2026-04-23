@@ -108,3 +108,69 @@ exports.updateAdminProfile = async (req, res, next) => {
     next(err);
   }
 };
+
+// @desc    Get dashboard statistics
+// @route   GET /api/auth/admin/dashboard-stats
+// @access  Private/Admin
+exports.getDashboardStats = async (req, res, next) => {
+  try {
+    const Catalog = require('../models/Catalog');
+    const Category = require('../models/Category');
+    const Seller = require('../models/Seller');
+    const Order = require('../models/Order');
+
+    const [productsCount, categoriesCount, sellersCount, movingOrders, allRecentOrders] = await Promise.all([
+      Catalog.countDocuments({ isActive: true }),
+      Category.countDocuments(),
+      Seller.countDocuments({ isVerified: true }),
+      Order.countDocuments({ status: { $in: ['Shipped', 'Out for Delivery'] } }),
+      Order.find()
+        .populate('user', 'fullName')
+        .sort('-createdAt')
+        .limit(5)
+    ]);
+
+    // Process recent activity from all recent orders
+    const recentActivity = allRecentOrders.map(o => ({
+      id: o._id,
+      action: o.status === 'Processing' ? 'New Order Placed' : `Order ${o.status}`,
+      target: `#${o.orderId || o._id.toString().slice(-8).toUpperCase()}`,
+      user: o.user?.fullName || 'Customer',
+      time: o.createdAt
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        products: productsCount,
+        categories: categoriesCount,
+        sellers: sellersCount,
+        activeDeliveries: movingOrders,
+        recentActivity
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get stock management report
+// @route   GET /api/auth/admin/stock-status
+// @access  Private/Admin
+exports.getStockStatus = async (req, res, next) => {
+  try {
+    const Product = require('../models/Product');
+    const products = await Product.find()
+      .populate('seller', 'shopName fullName')
+      .populate('brand', 'name')
+      .sort('countInStock');
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      data: products
+    });
+  } catch (err) {
+    next(err);
+  }
+};

@@ -2,62 +2,61 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LuLayoutDashboard,
-  LuSearch,
-  LuPlus,
-  LuPackage,
-  LuX,
-  LuChevronRight,
-  LuShoppingCart,
-  LuReceipt,
-  LuLayoutGrid,
-  LuBoxes,
-  LuWallet,
-  LuUndo2,
-  LuTrendingUp,
-} from "react-icons/lu";
-import { FiBarChart2 } from "react-icons/fi";
+  FiLayout,
+  FiSearch,
+  FiPlus,
+  FiPackage,
+  FiX,
+  FiChevronRight,
+  FiShoppingCart,
+  FiFileText,
+  FiGrid,
+  FiLayers,
+  FiCreditCard,
+  FiRotateCcw,
+  FiTrendingUp,
+} from "react-icons/fi";
 import { useLocation } from "react-router-dom";
 import { useUser } from "../../../user/models/UserContext";
 import sidebarBg from "../../../assets/seller_sidebar_bg.png";
 
 const menuItems = [
-  { path: "/seller", icon: LuLayoutDashboard, label: "Dashboard" },
-  { path: "/seller/orders", icon: LuShoppingCart, label: "Orders" },
+  { path: "/seller", icon: FiLayout, label: "Dashboard" },
+  { path: "/seller/orders", icon: FiShoppingCart, label: "Orders" },
   {
     label: "Product",
-    icon: LuPackage,
+    icon: FiPackage,
     path: "/seller/product",
     children: [
-      { path: "/seller/product/add", icon: LuPlus, label: "Add Product" },
-      { path: "/seller/product/taxes", icon: LuReceipt, label: "Taxes" },
+      { path: "/seller/product/add", icon: FiPlus, label: "Add Product" },
+      { path: "/seller/product/taxes", icon: FiFileText, label: "Taxes" },
       {
         path: "/seller/product/list",
-        icon: LuLayoutGrid,
+        icon: FiGrid,
         label: "Product List",
       },
       {
         path: "/seller/product/stock",
-        icon: LuBoxes,
+        icon: FiLayers,
         label: "Stock Management",
       },
     ],
   },
-  { path: "/seller/wallet", icon: LuWallet, label: "Wallet" },
+  { path: "/seller/wallet", icon: FiCreditCard, label: "Wallet" },
   {
     label: "Reports",
-    icon: FiBarChart2,
+    icon: FiTrendingUp,
     path: "/seller/reports",
     children: [
       {
         path: "/seller/reports/sales",
-        icon: LuTrendingUp,
+        icon: FiTrendingUp,
         label: "Sales Report",
       },
     ],
   },
-  { path: "/seller/return", icon: LuUndo2, label: "Return" },
-  { path: "/seller/catalog", icon: LuSearch, label: "Browse Catalog" },
+  { path: "/seller/return", icon: FiRotateCcw, label: "Return" },
+  { path: "/seller/catalog", icon: FiSearch, label: "Browse Catalog" },
 ];
 
 const NavItem = ({ item, isOpen, onClose, expanded, onToggle, disabled }) => {
@@ -115,7 +114,7 @@ const NavItem = ({ item, isOpen, onClose, expanded, onToggle, disabled }) => {
             animate={{ rotate: expanded ? 90 : 0 }}
             transition={{ duration: 0.2 }}
           >
-            <LuChevronRight size={16} className="text-white/40" />
+            <FiChevronRight size={16} className="text-white/40" />
           </motion.div>
         )}
       </div>
@@ -218,7 +217,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
             className="lg:hidden text-white/60 hover:text-white"
           >
-            <LuX size={24} />
+            <FiX size={24} />
           </button>
         </div>
 

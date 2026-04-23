@@ -180,6 +180,7 @@ const ProductListingPage = () => {
                 </motion.div>
               ) : (
               <motion.div 
+                key="empty"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center justify-center py-32 text-center"
