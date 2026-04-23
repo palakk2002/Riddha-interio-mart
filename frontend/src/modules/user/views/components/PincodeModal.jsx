@@ -131,8 +131,9 @@ const PincodeModal = ({ onComplete }) => {
                 </div>
 
                 <AnimatePresence mode="wait">
-                    {error && (
+                    {error ? (
                         <motion.div 
+                            key="error"
                             initial={{ opacity: 0, y: -5 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -5 }}
@@ -140,19 +141,19 @@ const PincodeModal = ({ onComplete }) => {
                         >
                             <p className="text-[12px] font-bold text-red-500 mb-2">{error}</p>
                         </motion.div>
-                    )}
-
-                    {isServiceable && (
+                    ) : isServiceable ? (
                         <motion.div 
+                            key="serviceable"
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 5 }}
                             className="text-center py-1"
                         >
                             <p className="text-[12px] font-black text-green-600 flex items-center justify-center gap-2">
                                 <FiTruck className="w-4 h-4 animate-bounce" /> FAST DELIVERY AVAILABLE
                             </p>
                         </motion.div>
-                    )}
+                    ) : null}
                 </AnimatePresence>
 
                 <div className="text-center">

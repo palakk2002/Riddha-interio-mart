@@ -16,7 +16,7 @@ const StockManagement = () => {
   const fetchStockData = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/auth/seller/stock-status');
+      const response = await api.get('/auth/admin/stock-status');
       setProducts(response.data.data || []);
     } catch (err) {
       console.error('Failed to fetch stock data:', err);
@@ -46,8 +46,8 @@ const StockManagement = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">Inventory Health</h1>
-            <p className="text-warm-sand mt-1 font-medium">Manage your product stock levels and replenishment needs.</p>
+            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">Stock Management</h1>
+            <p className="text-warm-sand mt-1 font-medium">Monitor and manage inventory levels across all sellers.</p>
           </div>
           
           <div className="flex items-center gap-3">
@@ -81,7 +81,7 @@ const StockManagement = () => {
               <FiPackage size={28} />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand mb-1">My Products</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand mb-1">Total Catalog Items</p>
               <h3 className="text-3xl font-display font-bold text-deep-espresso">{stats.totalItems}</h3>
             </div>
           </div>
@@ -115,7 +115,7 @@ const StockManagement = () => {
               <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-warm-sand" size={20} />
               <input 
                 type="text"
-                placeholder="Search my inventory..."
+                placeholder="Search products by name or SKU..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-white border border-soft-oatmeal rounded-2xl pl-14 pr-6 py-4 text-sm focus:outline-none focus:ring-4 focus:ring-warm-sand/10 transition-all font-medium"
@@ -129,7 +129,7 @@ const StockManagement = () => {
               <thead>
                 <tr className="bg-soft-oatmeal/20">
                   <th className="px-8 py-5 text-[10px] font-black text-warm-sand uppercase tracking-widest border-b border-soft-oatmeal">Product Details</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-warm-sand uppercase tracking-widest border-b border-soft-oatmeal">Category</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-warm-sand uppercase tracking-widest border-b border-soft-oatmeal">Seller / Partner</th>
                   <th className="px-8 py-5 text-[10px] font-black text-warm-sand uppercase tracking-widest border-b border-soft-oatmeal text-center">Status</th>
                   <th className="px-8 py-5 text-[10px] font-black text-warm-sand uppercase tracking-widest border-b border-soft-oatmeal text-right">Current Stock</th>
                 </tr>
@@ -179,7 +179,15 @@ const StockManagement = () => {
                           </div>
                         </td>
                         <td className="px-8 py-6">
-                          <span className="text-xs font-bold text-warm-sand uppercase tracking-widest">{product.category}</span>
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-soft-oatmeal/20 flex items-center justify-center text-deep-espresso">
+                              <FiShoppingCart size={14} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-deep-espresso">{product.seller?.shopName || 'Admin'}</p>
+                              <p className="text-[10px] text-warm-sand font-medium">{product.sellerType || 'Seller'}</p>
+                            </div>
+                          </div>
                         </td>
                         <td className="px-8 py-6 text-center">
                           {isOut ? (
@@ -190,12 +198,12 @@ const StockManagement = () => {
                           ) : isLow ? (
                             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100">
                               <div className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse" />
-                              Low Stock
+                              Critical Low
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100">
                               <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-                              Available
+                              Healthy
                             </span>
                           )}
                         </td>
@@ -204,8 +212,8 @@ const StockManagement = () => {
                             {product.countInStock}
                             <span className="text-[10px] font-black text-warm-sand ml-2 uppercase tracking-widest opacity-40 italic">Units</span>
                           </div>
-                          {isLow && <p className="text-[10px] font-bold text-amber-600/70 mt-1 uppercase tracking-tighter">Replenish Soon</p>}
-                          {isOut && <p className="text-[10px] font-bold text-red-600/70 mt-1 uppercase tracking-tighter">Immediate Action Required</p>}
+                          {isLow && <p className="text-[10px] font-bold text-amber-600/70 mt-1 uppercase tracking-tighter">Needs Restock Soon</p>}
+                          {isOut && <p className="text-[10px] font-bold text-red-600/70 mt-1 uppercase tracking-tighter">Inventory Depleted</p>}
                         </td>
                       </tr>
                     );
@@ -215,7 +223,7 @@ const StockManagement = () => {
                     <td colSpan="4" className="px-8 py-32 text-center">
                       <div className="flex flex-col items-center gap-4 text-warm-sand opacity-40">
                         <FiPackage size={64} strokeWidth={1} />
-                        <p className="font-display font-medium text-lg italic">No products found in your inventory.</p>
+                        <p className="font-display font-medium text-lg italic">No products found matching your filters.</p>
                       </div>
                     </td>
                   </tr>
@@ -227,13 +235,13 @@ const StockManagement = () => {
           {/* Footer */}
           <div className="p-6 bg-soft-oatmeal/5 border-t border-soft-oatmeal flex flex-col sm:flex-row items-center justify-between gap-4">
              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">
-               Managing {products.length} Inventory Records
+               Showing {filteredProducts.length} of {products.length} cataloged products
              </p>
              <button 
                onClick={fetchStockData}
                className="text-[10px] font-black uppercase tracking-[0.2em] text-deep-espresso hover:text-warm-sand transition-colors flex items-center gap-2"
              >
-               Refresh Data <FiArrowUp size={14} />
+               Refresh Live Inventory <FiArrowUp size={14} />
              </button>
           </div>
         </div>

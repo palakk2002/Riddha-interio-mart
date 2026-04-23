@@ -21,30 +21,23 @@ const DashboardPage = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const [productsRes, categoriesRes, sellersRes, ordersRes] = await Promise.all([
-          api.get('/catalog'),
-          api.get('/categories'),
-          api.get('/auth/admin/sellers/active'),
-          api.get('/orders/all')
-        ]);
+        const { data: res } = await api.get('/auth/admin/dashboard-stats');
+        
+        if (res.success) {
+          setStats({
+            products: res.data.products || 0,
+            categories: res.data.categories || 0,
+            sellers: res.data.sellers || 0,
+            activeDeliveries: res.data.activeDeliveries || 0
+          });
 
-        setStats({
-          products: productsRes.data.data.length,
-          categories: categoriesRes.data.data.length,
-          sellers: sellersRes.data.data.length,
-          activeDeliveries: ordersRes.data.data.filter(o => ['Shipped', 'Out for Delivery'].includes(o.status)).length
-        });
-
-        // Mocking recent activity from orders for now
-        const activity = ordersRes.data.data.slice(0, 5).map(o => ({
-          id: o._id,
-          action: 'New Order Placed',
-          target: `#${o.orderId || o._id.slice(-8).toUpperCase()}`,
-          user: o.user?.name || 'Customer',
-          time: new Date(o.createdAt).toLocaleTimeString()
-        }));
-        setRecentActivity(activity);
-
+          // Process recent activity from backend
+          const activity = (res.data.recentActivity || []).map(item => ({
+            ...item,
+            time: new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }));
+          setRecentActivity(activity);
+        }
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
       } finally {

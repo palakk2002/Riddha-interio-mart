@@ -4,127 +4,127 @@ import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
 import { 
-  LuLayoutDashboard, 
-  LuBox, 
-  LuTags, 
-  LuSettings, 
-  LuX, 
-  LuChevronRight,
-  LuGrid2X2,
-  LuStar,
-  LuImage,
-  LuBadgePercent,
-  LuLayoutGrid,
-  LuTrendingUp,
-  LuPlus,
-  LuLogOut,
-  LuUsers,
-  LuClipboardList,
-  LuClock,
-  LuPackage,
-  LuTruck,
-  LuMapPin
-} from 'react-icons/lu';
+  FiLayout, 
+  FiBox, 
+  FiTag, 
+  FiSettings, 
+  FiX, 
+  FiChevronRight,
+  FiGrid,
+  FiStar,
+  FiImage,
+  FiPercent,
+  FiTrendingUp,
+  FiPlus,
+  FiLogOut,
+  FiUsers,
+  FiClipboard,
+  FiClock,
+  FiPackage,
+  FiTruck,
+  FiMapPin
+} from 'react-icons/fi';
 import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import sidebarBg from '../../../assets/seller_sidebar_bg.png';
 
 const menuItems = [
-  { path: '/admin', icon: LuLayoutDashboard, label: 'Dashboard' },
-  { path: '/admin/orders/tracking', icon: LuMapPin, label: 'Order Tracking' },
-  { path: '/admin/delivery/assign', icon: LuTruck, label: 'Assign Delivery' },
+  { path: '/admin', icon: FiLayout, label: 'Dashboard' },
+  { path: '/admin/orders/tracking', icon: FiMapPin, label: 'Order Tracking' },
+  { path: '/admin/delivery/assign', icon: FiTruck, label: 'Assign Delivery' },
   { 
     label: 'Create Listing', 
-    icon: LuPlus, 
+    icon: FiPlus, 
     path: '/admin/inventory/add-flow',
     children: [
-      { path: '/admin/inventory/add', icon: LuPlus, label: 'Create Order' },
-      { path: '/admin/catalog', icon: LuPackage, label: 'Select from Catalog' },
+      { path: '/admin/inventory/add', icon: FiPlus, label: 'Create Order' },
+      { path: '/admin/catalog', icon: FiPackage, label: 'Select from Catalog' },
     ]
   },
   { 
     label: 'Product Management', 
-    icon: LuPackage, 
+    icon: FiPackage, 
     path: '/admin/inventory',
     children: [
-      { path: '/admin/inventory', icon: LuLayoutGrid, label: 'All Inventory' },
-      { path: '/admin/inventory/pending', icon: LuClock, label: 'Pending Approval', showBadge: true, badgeType: 'product' },
+      { path: '/admin/inventory', icon: FiGrid, label: 'All Inventory' },
+      { path: '/admin/inventory/pending', icon: FiClock, label: 'Pending Approval', showBadge: true, badgeType: 'product' },
     ]
   },
+  { path: '/admin/stock-management', icon: FiTrendingUp, label: 'Stock Management' },
   { 
     label: 'Order Management', 
-    icon: LuClipboardList, 
+    icon: FiClipboard, 
     path: '/admin/orders/all',
     children: [
-      { path: '/admin/orders/all', icon: LuLayoutGrid, label: 'All Orders' },
-      { path: '/admin/orders/pending', icon: LuClock, label: 'Pending Orders' },
+      { path: '/admin/orders/all', icon: FiGrid, label: 'All Orders' },
+      { path: '/admin/orders/pending', icon: FiClock, label: 'Pending Orders' },
     ]
   },
   { 
     label: 'Product Catalog', 
-    icon: LuBox, 
+    icon: FiBox, 
     path: '/admin/catalog',
     children: [
-      { path: '/admin/catalog', icon: LuLayoutGrid, label: 'Master Catalog' },
-      { path: '/admin/catalog/add', icon: LuPlus, label: 'New Master Item' },
+      { path: '/admin/catalog', icon: FiGrid, label: 'Master Catalog' },
+      { path: '/admin/catalog/add', icon: FiPlus, label: 'New Master Item' },
     ]
   },
   { 
     label: 'Manage Categories', 
-    icon: LuGrid2X2, 
+    icon: FiGrid, 
     path: '/admin/manage-categories',
     children: [
-      { path: '/admin/manage-categories', icon: LuLayoutGrid, label: 'All Categories' },
-      { path: '/admin/manage-categories/add', icon: LuPlus, label: 'Add Category' },
+      { path: '/admin/manage-categories', icon: FiGrid, label: 'All Categories' },
+      { path: '/admin/manage-categories/add', icon: FiPlus, label: 'Add Category' },
     ]
   },
   { 
     label: 'Seller Management', 
-    icon: LuUsers, 
+    icon: FiUsers, 
     path: '/admin/sellers',
     children: [
-      { path: '/admin/sellers/pending', icon: LuLayoutGrid, label: 'Pending Sellers', showBadge: true },
-      { path: '/admin/sellers/active', icon: LuLayoutGrid, label: 'Active Sellers' },
+      { path: '/admin/sellers/pending', icon: FiGrid, label: 'Pending Sellers', showBadge: true },
+      { path: '/admin/sellers/active', icon: FiGrid, label: 'Active Sellers' },
     ]
   },
-  { path: '/admin/manage-hero', icon: LuImage, label: 'Home Banner' },
-  { path: '/admin/manage-promo', icon: LuBadgePercent, label: 'Promo Banner' },
+  { path: '/admin/manage-hero', icon: FiImage, label: 'Home Banner' },
+  { path: '/admin/manage-promo', icon: FiPercent, label: 'Promo Banner' },
   { 
     label: 'Section', 
-    icon: LuLayoutGrid, 
+    icon: FiGrid, 
     path: '/admin/manage-section',
     children: [
-      { path: '/admin/manage-section', icon: LuLayoutGrid, label: 'All Section' },
-      { path: '/admin/manage-section/create', icon: LuPlus, label: 'Create Section' },
+      { path: '/admin/manage-section', icon: FiGrid, label: 'All Section' },
+      { path: '/admin/manage-section/create', icon: FiPlus, label: 'Create Section' },
     ]
   },
   {
     label: 'Favourite Section',
-    icon: LuStar,
+    icon: FiStar,
     path: '/admin/manage-favourites',
     children: [
-      { path: '/admin/manage-favourites', icon: LuLayoutGrid, label: 'All Favourite Sections' },
-      { path: '/admin/manage-favourites/create', icon: LuPlus, label: 'Create Favourite Section' },
+      { path: '/admin/manage-favourites', icon: FiGrid, label: 'All Favourite Sections' },
+      { path: '/admin/manage-favourites/create', icon: FiPlus, label: 'Create Favourite Section' },
     ]
   },
   { 
     label: 'Top Brands', 
-    icon: LuTags, 
+    icon: FiTag, 
     path: '/admin/manage-brands',
     children: [
-      { path: '/admin/manage-brands', icon: LuLayoutGrid, label: 'All Brands' },
-      { path: '/admin/manage-brands/add', icon: LuPlus, label: 'Add Brand' },
+      { path: '/admin/manage-brands', icon: FiGrid, label: 'All Brands' },
+      { path: '/admin/manage-brands/add', icon: FiPlus, label: 'Add Brand' },
     ]
   },
   { 
     label: 'Featured Highlights', 
-    icon: LuStar, 
+    icon: FiStar, 
     path: '/admin/manage-featured',
     children: [
-      { path: '/admin/manage-featured', icon: LuLayoutGrid, label: 'All Featured' },
-      { path: '/admin/manage-featured/add', icon: LuPlus, label: 'Add Featured Product' },
+      { path: '/admin/manage-featured', icon: FiGrid, label: 'All Featured' },
+      { path: '/admin/manage-featured/add', icon: FiPlus, label: 'Add Featured Product' },
     ]
   },
-  { path: '/admin/settings', icon: LuSettings, label: 'Settings' },
+  { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
 ];
 
 const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCount, productCount }) => {
@@ -171,10 +171,10 @@ const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCoun
               onToggle(item.label);
             }}
           >
-            <LuChevronRight size={16} className={`drop-shadow-md transition-colors ${isActive ? 'text-white' : 'text-white/60'}`} />
+            <FiChevronRight size={16} className={`drop-shadow-md transition-colors ${isActive ? 'text-white' : 'text-white/60'}`} />
           </Motion.div>
         )}
-        {!hasChildren && <LuChevronRight size={16} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-white/60" />}
+        {!hasChildren && <FiChevronRight size={16} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-white/60" />}
       </div>
 
       <AnimatePresence>
@@ -322,7 +322,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             </span>
           </div>
           <button onClick={onClose} className="lg:hidden text-white/60 hover:text-white">
-            <LuX size={24} />
+            <FiX size={24} />
           </button>
         </div>
 
@@ -348,7 +348,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={handleLogout}
             className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors group mb-4"
           >
-            <LuLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
+            <FiLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
             Sign Out
           </button>
           <p className="font-medium text-white/80 drop-shadow-md">© 2026 Riddha Interio Mart</p>

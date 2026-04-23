@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PageWrapper from '../components/PageWrapper';
-import { FiUser, FiShoppingBag, FiStar, FiSettings, FiLogOut, FiEdit2, FiMail, FiPhone, FiCheckCircle, FiTrash2, FiSave, FiMapPin, FiCreditCard } from 'react-icons/fi';
+import { FiUser, FiShoppingBag, FiStar, FiSettings, FiLogOut, FiEdit2, FiMail, FiPhone, FiCheckCircle, FiTrash2, FiSave, FiMapPin, FiCreditCard, FiCamera } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
@@ -14,11 +14,11 @@ const SellerProfile = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    businessName: "",
-    fullName: "",
-    email: "",
-    phone: "",
-    avatar: "",
+    shopName: currentUser?.shopName || "",
+    fullName: currentUser?.fullName || "",
+    email: currentUser?.email || "",
+    phone: currentUser?.phone || "",
+    avatar: currentUser?.avatar || "",
     shopAddress: "",
     gstNumber: "",
     panNumber: "",
@@ -31,19 +31,21 @@ const SellerProfile = () => {
     try {
       setLoading(true);
       const { data } = await api.get('/auth/seller/me');
+      console.log('Profile fetch response:', data);
       if (data.success && data.data) {
+        const s = data.data;
         setProfileData({
-          businessName: data.data.shopName || "New Store",
-          fullName: data.data.fullName || "Seller",
-          email: data.data.email || "",
-          phone: data.data.phone || "",
-          avatar: data.data.avatar || "",
-          shopAddress: data.data.shopAddress || "",
-          gstNumber: data.data.gstNumber || "",
-          panNumber: data.data.panNumber || "",
-          tier: data.data.isVerified ? "Premium Seller" : "Standard Seller",
+          shopName: s.shopName || "",
+          fullName: s.fullName || "",
+          email: s.email || "",
+          phone: s.phone || "",
+          avatar: s.avatar || "",
+          shopAddress: s.shopAddress || "",
+          gstNumber: s.gstNumber || "",
+          panNumber: s.panNumber || "",
+          tier: s.isVerified ? "Premium Seller" : "Standard Seller",
           rating: 4.8, 
-          joinDate: data.data.createdAt ? new Date(data.data.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "N/A"
+          joinDate: s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "N/A"
         });
       }
     } catch (err) {
@@ -64,7 +66,7 @@ const SellerProfile = () => {
       const { data } = await api.put('/auth/seller/profile', {
         fullName: profileData.fullName,
         email: profileData.email,
-        shopName: profileData.businessName,
+        shopName: profileData.shopName,
         shopAddress: profileData.shopAddress,
         phone: profileData.phone,
         avatar: profileData.avatar,
@@ -164,7 +166,7 @@ const SellerProfile = () => {
                   <FiStar size={12} fill="currentColor" /> {profileData.rating} Rating
                 </span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-display font-black text-deep-espresso tracking-tight">{profileData.businessName}</h1>
+              <h1 className="text-4xl md:text-6xl font-display font-black text-deep-espresso tracking-tight">{profileData.shopName}</h1>
               <p className="text-red-800 font-bold text-sm mt-2 uppercase tracking-[0.3em] flex items-center justify-center md:justify-start gap-3">
                 <FiUser size={14} /> {profileData.fullName}
               </p>
@@ -200,8 +202,8 @@ const SellerProfile = () => {
                          <label className="text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Shop Essence</label>
                          <input 
                            type="text" 
-                           value={profileData.businessName}
-                           onChange={(e) => setProfileData({...profileData, businessName: e.target.value})}
+                           value={profileData.shopName}
+                           onChange={(e) => setProfileData({...profileData, shopName: e.target.value})}
                            placeholder="Ex: Golden Threads"
                            className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-2xl px-6 py-4 font-bold text-deep-espresso transition-all outline-none"
                          />
@@ -350,19 +352,24 @@ const SellerProfile = () => {
           {/* Quick Actions Sidebar */}
           <div className="space-y-8">
             <div className="bg-white p-10 rounded-[40px] border border-soft-oatmeal shadow-sm">
-               <h3 className="text-xl font-bold text-deep-espresso mb-8">Evolution Actions</h3>
+               <h3 className="text-xl font-bold text-deep-espresso mb-8">Quick Actions</h3>
                <div className="space-y-4">
-                  <button onClick={() => setIsEditing(true)} className="w-full flex items-center justify-between p-5 rounded-2xl bg-soft-oatmeal/10 hover:bg-red-800 hover:text-white transition-all font-bold group">
+                  <button 
+                    onClick={() => setIsEditing(!isEditing)} 
+                    className={`w-full flex items-center justify-between p-5 rounded-2xl transition-all font-bold group ${isEditing ? 'bg-red-800 text-white' : 'bg-soft-oatmeal/10 hover:bg-soft-oatmeal/30 text-deep-espresso'}`}
+                  >
                      <div className="flex items-center gap-4">
-                        <FiSettings className="group-hover:rotate-90 transition-transform" />
-                        <span className="text-sm uppercase tracking-widest font-black">Meta Settings</span>
+                        <FiEdit2 className={isEditing ? 'text-white' : 'text-red-800'} />
+                        <span className="text-sm uppercase tracking-widest font-black">
+                          {isEditing ? 'Stop Editing' : 'Edit Profile'}
+                        </span>
                      </div>
                   </button>
                   <button 
                     onClick={handleLogout}
                     className="w-full flex items-center justify-center gap-4 p-6 rounded-[24px] bg-red-50 text-red-900 hover:bg-red-900 hover:text-white transition-all font-black text-[10px] uppercase tracking-[0.3em] mt-8 shadow-xl shadow-red-900/5"
                   >
-                     <FiLogOut /> Abandon Store Session
+                     <FiLogOut /> Logout
                   </button>
                </div>
             </div>

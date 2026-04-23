@@ -1,12 +1,12 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { 
-  LuLayoutDashboard, 
-  LuPackage, 
-  LuWallet, 
-  LuUser,
-  LuLogOut
-} from 'react-icons/lu';
+  FiLayout, 
+  FiPackage, 
+  FiCreditCard, 
+  FiUser,
+  FiLogOut
+} from 'react-icons/fi';
 
 import { useUser } from '../../user/data/UserContext';
 import { useNavigate } from 'react-router-dom';
@@ -21,10 +21,10 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
   };
 
   const navItems = [
-    { name: 'Dashboard', path: '/delivery/dashboard', icon: LuLayoutDashboard },
-    { name: 'Orders', path: '/delivery/orders', icon: LuPackage },
-    { name: 'Earnings', path: '/delivery/earnings', icon: LuWallet },
-    { name: 'Profile', path: '/delivery/profile', icon: LuUser },
+    { name: 'Dashboard', path: '/delivery/dashboard', icon: FiLayout },
+    { name: 'Orders', path: '/delivery/orders', icon: FiPackage },
+    { name: 'Earnings', path: '/delivery/earnings', icon: FiCreditCard },
+    { name: 'Profile', path: '/delivery/profile', icon: FiUser },
   ];
 
   return (
@@ -48,7 +48,7 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
           <div className="h-20 px-8 flex items-center border-b border-white/5">
             <Link to="/delivery/dashboard" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-warm-sand rounded-lg flex items-center justify-center text-white">
-                <LuPackage size={20} />
+                <FiPackage size={20} />
               </div>
               <span className="font-display font-bold text-xl tracking-tight text-white">Riddha<span className="text-warm-sand">Delivery</span></span>
             </Link>
@@ -84,7 +84,7 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
               onClick={handleLogout}
               className="w-full flex items-center gap-4 px-6 py-4 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors group"
             >
-              <LuLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
+              <FiLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
               Sign Out
             </button>
           </div>

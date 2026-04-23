@@ -4,33 +4,35 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../user/data/UserContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LuLayoutDashboard,
-  LuSearch,
-  LuPlus,
-  LuPackage,
-  LuX,
-  LuChevronRight,
-  LuTruck,
-  LuLogOut,
-  LuNavigation2
-} from 'react-icons/lu';
+  FiLayout,
+  FiSearch,
+  FiPlus,
+  FiPackage,
+  FiX,
+  FiChevronRight,
+  FiTruck,
+  FiLogOut,
+  FiNavigation,
+  FiTrendingUp
+} from 'react-icons/fi';
 import sidebarBg from '../../../assets/seller_sidebar_bg.png';
 
 const menuItems = [
-  { path: '/seller', icon: LuLayoutDashboard, label: 'Dashboard' },
-  { path: '/seller/orders', icon: LuPackage, label: 'Manage Orders' },
-  { path: '/seller/orders/track', icon: LuNavigation2, label: 'Order Tracking' },
-  { path: '/seller/assign-delivery', icon: LuTruck, label: 'Assign Delivery' },
-  { path: '/seller/catalog', icon: LuSearch, label: 'Browse Catalog' },
+  { path: '/seller', icon: FiLayout, label: 'Dashboard' },
+  { path: '/seller/orders', icon: FiPackage, label: 'Manage Orders' },
+  { path: '/seller/orders/track', icon: FiNavigation, label: 'Order Tracking' },
+  { path: '/seller/assign-delivery', icon: FiTruck, label: 'Assign Delivery' },
+  { path: '/seller/catalog', icon: FiSearch, label: 'Browse Catalog' },
   { 
     label: 'Product Management', 
-    icon: LuPackage, 
+    icon: FiPackage, 
     path: '/seller/my-products',
     children: [
-      { path: '/seller/add-product', icon: LuPlus, label: 'Add New Product' },
-      { path: '/seller/my-products', icon: LuPackage, label: 'All Products' },
+      { path: '/seller/add-product', icon: FiPlus, label: 'Add New Product' },
+      { path: '/seller/my-products', icon: FiPackage, label: 'All Products' },
     ]
   },
+  { path: '/seller/stock-management', icon: FiTrendingUp, label: 'Stock Management' },
 ];
 
 const SellerSidebar = ({ isOpen, onClose }) => {
@@ -101,7 +103,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
             </span>
           </div>
           <button onClick={onClose} className="lg:hidden text-white/60 hover:text-white">
-            <LuX size={24} />
+            <FiX size={24} />
           </button>
         </div>
 
@@ -120,7 +122,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
                       <item.icon size={20} />
                       <span className="font-medium">{item.label}</span>
                     </div>
-                    <LuChevronRight 
+                    <FiChevronRight 
                       size={16} 
                       className={`transition-transform duration-300 ${isMenuOpen ? 'rotate-90' : ''}`} 
                     />
@@ -172,7 +174,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
                   <item.icon size={20} className="transition-transform duration-300" />
                   <span className="font-medium text-white">{item.label}</span>
                 </div>
-                <LuChevronRight size={16} className="transition-transform duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 text-white/60" />
+                <FiChevronRight size={16} className="transition-transform duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 text-white/60" />
               </NavLink>
             );
           })}
@@ -184,7 +186,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
             onClick={handleLogout}
             className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors group mb-4"
           >
-            <LuLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
+            <FiLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
             Sign Out
           </button>
           <p className="font-medium text-white/80">© 2026 Riddha Interio Mart</p>

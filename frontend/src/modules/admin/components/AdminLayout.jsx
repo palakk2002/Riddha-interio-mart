@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useUser } from '../../user/data/UserContext';
-import { LuMenu, LuBell, LuUser, LuLogOut, LuChevronDown } from 'react-icons/lu';
+import { FiMenu, FiBell, FiUser, FiLogOut, FiChevronDown } from 'react-icons/fi';
+import AdminNotifications from './AdminNotifications';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -36,6 +37,7 @@ const AdminLayout = () => {
       }}
     >
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <AdminNotifications token={user?.token} />
       
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
         {/* Header */}
@@ -45,7 +47,7 @@ const AdminLayout = () => {
               onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(true); }}
               className="lg:hidden p-2 hover:bg-soft-oatmeal rounded-lg"
             >
-              <LuMenu size={24} />
+              <FiMenu size={24} />
             </button>
             <h2 className="text-sm font-medium text-warm-sand hidden sm:block">
               Welcome back, <span className="font-bold text-deep-espresso">Admin!</span>
@@ -58,7 +60,7 @@ const AdminLayout = () => {
                 onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); }}
                 className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-soft-oatmeal text-deep-espresso' : 'text-dusty-cocoa hover:bg-soft-oatmeal'}`}
               >
-                <LuBell size={20} />
+                <FiBell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-800 rounded-full border-2 border-white"></span>
               </button>
 
@@ -87,10 +89,10 @@ const AdminLayout = () => {
                   {user?.avatar ? (
                     <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <LuUser size={20} />
+                    <FiUser size={20} />
                   )}
                 </div>
-                <LuChevronDown size={14} className={`text-dusty-cocoa transition-transform duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
+                <FiChevronDown size={14} className={`text-dusty-cocoa transition-transform duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
               </button>
 
               {showUserMenu && (
@@ -100,7 +102,7 @@ const AdminLayout = () => {
                     className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-deep-espresso hover:bg-soft-oatmeal/30 transition-colors"
                     onClick={() => setShowUserMenu(false)}
                   >
-                    <LuUser size={18} className="text-warm-sand" />
+                    <FiUser size={18} className="text-warm-sand" />
                     View Profile
                   </Link>
                   <div className="h-[1px] bg-soft-oatmeal my-1"></div>
@@ -108,7 +110,7 @@ const AdminLayout = () => {
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-colors"
                   >
-                    <LuLogOut size={18} />
+                    <FiLogOut size={18} />
                     Sign Out
                   </button>
                 </div>

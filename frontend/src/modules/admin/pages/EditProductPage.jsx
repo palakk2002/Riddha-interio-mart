@@ -14,6 +14,10 @@ const EditProductPage = () => {
   const [statusMessage, setStatusMessage] = useState('');
   const [imgFile, setImgFile] = useState(null);
 
+  // Custom Dropdown State
+  const [isCatOpen, setIsCatOpen] = useState(false);
+  const [catSearch, setCatSearch] = useState('');
+
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
@@ -66,6 +70,10 @@ const EditProductPage = () => {
     };
     fetchData();
   }, [id]);
+
+  const filteredCategories = categories.filter(cat => 
+    cat.name.toLowerCase().includes(catSearch.toLowerCase())
+  );
 
   const fileInputRef = React.useRef(null);
 
@@ -154,7 +162,7 @@ const EditProductPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8 pb-12">
-          <div className="bg-white rounded-[32px] border border-soft-oatmeal shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-3">
+          <div className="bg-white rounded-[32px] border border-soft-oatmeal shadow-xl grid grid-cols-1 lg:grid-cols-3 relative">
              {/* Left: Image Preview Area */}
              <div className="p-8 bg-soft-oatmeal/10 border-r border-soft-oatmeal flex flex-col items-center justify-center space-y-4">
                 <input 
@@ -246,20 +254,64 @@ const EditProductPage = () => {
                          ))}
                       </select>
                    </div>
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Category</label>
-                      <select 
-                        required
-                        value={formData.category}
-                        onChange={(e) => setFormData({...formData, category: e.target.value})}
-                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all cursor-pointer"
-                      >
-                         <option value="">{categories.length > 0 ? 'Select category' : 'No categories found'}</option>
-                         {categories.map(cat => (
-                           <option key={cat._id} value={cat.name}>{cat.name}</option>
-                         ))}
-                      </select>
-                   </div>
+                    <div className="space-y-2 relative">
+                       <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Category</label>
+                       <div className="relative group">
+                          <input 
+                            type="text"
+                            placeholder={formData.category || "Search or select category..."}
+                            value={catSearch}
+                            onChange={(e) => {
+                               setCatSearch(e.target.value);
+                               setIsCatOpen(true);
+                            }}
+                            onFocus={() => setIsCatOpen(true)}
+                            className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                          />
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-warm-sand">
+                             <FiTag size={14} className={isCatOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
+                          </div>
+
+                          {isCatOpen && (
+                            <>
+                               <div 
+                                 className="fixed inset-0 z-[40]" 
+                                 onClick={() => {
+                                    setIsCatOpen(false);
+                                    setCatSearch('');
+                                 }}
+                               />
+                               <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-soft-oatmeal rounded-2xl shadow-2xl z-[50] overflow-hidden max-h-64 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                                  {filteredCategories.length > 0 ? (
+                                    filteredCategories.map(cat => (
+                                      <button
+                                        key={cat._id}
+                                        type="button"
+                                        onClick={() => {
+                                          setFormData({...formData, category: cat.name});
+                                          setCatSearch('');
+                                          setIsCatOpen(false);
+                                        }}
+                                        className="w-full text-left px-5 py-3.5 text-sm font-medium hover:bg-soft-oatmeal/30 transition-colors border-b border-soft-oatmeal/10 last:border-0 flex items-center justify-between group"
+                                      >
+                                        <span className={formData.category === cat.name ? "text-red-800 font-bold" : "text-deep-espresso"}>
+                                          {cat.name}
+                                        </span>
+                                        {formData.category === cat.name && (
+                                          <div className="w-1.5 h-1.5 bg-red-800 rounded-full" />
+                                        )}
+                                      </button>
+                                    ))
+                                  ) : (
+                                    <div className="px-5 py-4 text-xs font-bold text-warm-sand uppercase tracking-widest text-center italic">
+                                      No categories found
+                                    </div>
+                                  )}
+                               </div>
+                            </>
+                          )}
+                       </div>
+                    </div>
                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">

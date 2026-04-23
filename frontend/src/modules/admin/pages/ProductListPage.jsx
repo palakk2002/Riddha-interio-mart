@@ -142,15 +142,12 @@ const ProductListPage = () => {
                           {product.sku || 'NO-SKU'}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 text-center">
                         <span className="text-[10px] font-bold text-red-800 uppercase tracking-widest bg-red-800/5 px-2.5 py-1 rounded-full border border-red-800/10">
                           {product.category}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-black text-deep-espresso">
-                        ₹{product.price?.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 text-center">
                         <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${
                           product.approvalStatus === 'approved' 
                           ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
@@ -161,7 +158,7 @@ const ProductListPage = () => {
                           {product.approvalStatus || 'Pending'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-black text-deep-espresso">
+                      <td className="px-6 py-4 font-black text-deep-espresso text-right">
                         ₹{product.price?.toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-right">

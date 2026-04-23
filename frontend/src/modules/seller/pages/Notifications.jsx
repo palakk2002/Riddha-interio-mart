@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import PageWrapper from '../components/PageWrapper';
 import { LuBell, LuCheckCheck, LuTrash2, LuClock, LuCircleAlert, LuInfo, LuCircleCheck } from 'react-icons/lu';
 import { getSellerNotifications, setSellerNotifications } from '../utils/sellerNotifications';
 import { isSoundEnabled, setSoundEnabled } from '../utils/notificationSound';
 
 const Notifications = () => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState(() => {
     return getSellerNotifications();
   });
 
   const [activeFilter, setActiveFilter] = useState('all');
+  const [selectedNotification, setSelectedNotification] = useState(null);
   const [sound, setSound] = useState(() => isSoundEnabled());
 
   useEffect(() => {
@@ -69,8 +73,8 @@ const Notifications = () => {
 
   const getIcon = (type) => {
     switch (type) {
-      case 'success': return <LuCheckCircle2 className="text-green-500" size={20} />;
-      case 'warning': return <LuAlertCircle className="text-amber-500" size={20} />;
+      case 'success': return <LuCircleCheck className="text-green-500" size={20} />;
+      case 'warning': return <LuCircleAlert className="text-amber-500" size={20} />;
       default: return <LuInfo className="text-blue-500" size={20} />;
     }
   };
@@ -127,7 +131,10 @@ const Notifications = () => {
             filteredNotifications.map((notification) => (
               <div
                 key={notification.id}
-                onClick={() => markAsRead(notification.id)}
+                onClick={() => {
+                  markAsRead(notification.id);
+                  setSelectedNotification(notification);
+                }}
                 className={`group bg-white p-6 rounded-3xl border transition-all cursor-pointer ${notification.status === 'unread' ? 'border-warm-sand/30 shadow-md ring-1 ring-warm-sand/5' : 'border-soft-oatmeal hover:border-warm-sand/20 shadow-sm'}`}
               >
                 <div className="flex gap-4">
@@ -170,6 +177,73 @@ const Notifications = () => {
           )}
         </div>
       </div>
+
+      {/* Notification Detail Modal */}
+      <AnimatePresence>
+        {selectedNotification && (
+          <div 
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setSelectedNotification(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white w-full max-w-lg rounded-[32px] overflow-hidden shadow-2xl border border-soft-oatmeal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-8 space-y-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">System Notification</p>
+                    <h2 className="text-2xl font-black text-deep-espresso italic tracking-tighter uppercase">{selectedNotification.title}</h2>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedNotification(null)}
+                    className="p-2 hover:bg-soft-oatmeal rounded-xl transition-colors"
+                  >
+                    <LuTrash2 size={24} className="text-warm-sand" />
+                  </button>
+                </div>
+
+                <div className="bg-soft-oatmeal/5 border border-soft-oatmeal/30 rounded-2xl p-6">
+                  <p className="text-sm text-dusty-cocoa leading-relaxed font-medium italic">
+                    "{selectedNotification.message}"
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center gap-2 text-warm-sand">
+                    <div className="w-8 h-8 rounded-lg bg-soft-oatmeal/20 flex items-center justify-center">
+                      <LuBell size={14} />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">{selectedNotification.time}</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={() => setSelectedNotification(null)}
+                      className="px-6 py-3 rounded-2xl bg-soft-oatmeal/30 text-deep-espresso text-[10px] font-black uppercase tracking-widest hover:bg-soft-oatmeal/50 transition-colors"
+                    >
+                      Dismiss
+                    </button>
+                    {selectedNotification.link && (
+                      <button 
+                        onClick={() => {
+                          navigate(selectedNotification.link);
+                          setSelectedNotification(null);
+                        }}
+                        className="px-6 py-3 rounded-2xl bg-deep-espresso text-white text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-black/10"
+                      >
+                        View Details
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </PageWrapper>
   );
 };

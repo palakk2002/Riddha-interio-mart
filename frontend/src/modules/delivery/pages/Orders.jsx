@@ -3,18 +3,18 @@ import PageWrapper from '../components/PageWrapper';
 import OrderCard from '../components/OrderCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LuPackage, LuRefreshCw } from 'react-icons/lu';
+import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
 
 const Orders = () => {
   const [activeTab, setActiveTab] = React.useState('my'); // Default to my accepted orders
   const [orders, setOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const { user } = useUser();
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      // In a real app, we'd have a specific endpoint for delivery boy orders
-      // For now, let's fetch all orders and filter them on frontend (though backend filtering is better)
       const { data } = await api.get('/orders');
       if (data.success) {
         setOrders(data.data || []);
@@ -37,9 +37,6 @@ const Orders = () => {
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
-      // Simple status update for the delivery boy
-      // For 'Accepted' or 'Rejected', the user uses the Modal in Layout.
-      // Here we handle transitions like 'On Path', 'Delivered'.
       const { data } = await api.put(`/orders/${orderId}/status`, { status: newStatus });
       if (data.success) {
         fetchOrders();
@@ -49,11 +46,26 @@ const Orders = () => {
     }
   };
 
+  const handleDeliveryResponse = async (orderId, status) => {
+    try {
+      const { data } = await api.put(`/orders/${orderId}/delivery-response`, { status });
+      if (data.success) {
+        fetchOrders();
+      }
+    } catch (err) {
+      console.error('Failed to respond to assignment:', err);
+    }
+  };
+
   // Filter orders for the delivery boy
-  // 1. Available: Processing and deliveryStatus is 'None' or 'Rejected' (if we had a pool system)
-  // 2. My Orders: deliveryStatus is 'Accepted' or 'On Path'
-  const myOrders = orders.filter(o => o.deliveryStatus === 'Accepted' || o.deliveryStatus === 'On Path' || o.deliveryStatus === 'Delivered');
-  const availableOrders = orders.filter(o => o.status === 'Processing' && (o.deliveryStatus === 'None' || o.deliveryStatus === 'Rejected'));
+  // 1. Pool: Orders with deliveryStatus 'None' or 'Rejected' (Available to anyone)
+  const availableOrders = orders.filter(o => 
+    (o.deliveryStatus === 'None' || o.deliveryStatus === 'Rejected') && 
+    o.status === 'Processing'
+  );
+
+  // 2. Assigned: Orders where deliveryBoy is current user
+  const myOrders = orders.filter(o => o.deliveryBoy?._id === user?._id || o.deliveryBoy === user?._id);
 
   const displayedOrders = activeTab === 'available' ? availableOrders : myOrders;
 
@@ -119,11 +131,11 @@ const Orders = () => {
                     order={{
                       id: order._id,
                       customerName: order.shippingAddress.fullName,
-                      status: order.deliveryStatus || 'Pending',
+                      status: order.deliveryStatus || 'None',
                       dateTime: new Date(order.createdAt).toLocaleString(),
-                      address: `${order.shippingAddress.fullAddress}, ${order.shippingAddress.city}`,
+                      address: `${order.shippingAddress.fullAddress}, ${order.shippingAddress.city} - ${order.shippingAddress.pincode}${order.shippingAddress.landmark ? ` (Landmark: ${order.shippingAddress.landmark})` : ''}`,
                       phone: order.shippingAddress.mobileNumber,
-                      sellerLocation: "Main Warehouse", // Backend doesn't have seller location yet in order items directly easy to get
+                      sellerLocation: "Main Warehouse",
                       items: order.orderItems.map(item => ({
                          name: item.name,
                          quantity: item.quantity,
@@ -132,6 +144,8 @@ const Orders = () => {
                       totalBill: order.totalPrice,
                       paymentMode: order.paymentMethod
                     }} 
+                    onAccept={(id) => handleDeliveryResponse(id, 'Accepted')}
+                    onReject={(id) => handleDeliveryResponse(id, 'Rejected')}
                     onUpdateStatus={(id, status) => handleUpdateStatus(id, status)} 
                   />
                 </motion.div>

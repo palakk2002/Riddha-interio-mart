@@ -3,7 +3,7 @@ import { Outlet, useNavigate, Link } from 'react-router-dom';
 import SellerSidebar from './SellerSidebar';
 import SellerBottomNavbar from './SellerBottomNavbar';
 import { useUser } from '../../user/data/UserContext';
-import { LuMenu, LuBell, LuUser, LuLogOut, LuChevronDown, LuCheck, LuX } from 'react-icons/lu';
+import { FiMenu, FiBell, FiUser, FiLogOut, FiChevronDown, FiCheck, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { connectSocket, disconnectSocket } from '../../../shared/utils/socket';
 import { playNewOrderChime, primeNotificationAudio, isSoundEnabled } from '../utils/notificationSound';
@@ -12,6 +12,7 @@ import { getSellerNotifications, setSellerNotifications, prependSellerNotificati
 const SellerLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState(null);
   const [notifications, setNotifications] = useState(() => {
     return getSellerNotifications();
   });
@@ -87,7 +88,8 @@ const SellerLayout = () => {
         message,
         time: 'Just now',
         status: 'unread',
-        type: 'warning'
+        type: 'warning',
+        link: payload?.orderId ? `/seller/order/${payload.orderId}` : '/seller/orders'
       });
 
       if (isSoundEnabled()) {
@@ -116,7 +118,8 @@ const SellerLayout = () => {
         message,
         time: 'Just now',
         status: 'unread',
-        type: payload.status === 'approved' ? 'success' : 'danger'
+        type: payload.status === 'approved' ? 'success' : 'danger',
+        link: '/seller/my-products'
       });
 
       if (isSoundEnabled()) {
@@ -148,7 +151,8 @@ const SellerLayout = () => {
         message,
         time: 'Just now',
         status: 'unread',
-        type: status === 'Accepted' ? 'success' : 'danger'
+        type: status === 'Accepted' ? 'success' : 'danger',
+        link: payload?.orderId ? `/seller/order/${payload.orderId}` : '/seller/orders'
       });
 
       if (isSoundEnabled()) {
@@ -199,8 +203,8 @@ const SellerLayout = () => {
                   toast.type === 'danger' ? 'bg-red-100 text-red-600' : 
                   'bg-warm-sand/15 text-warm-sand'
                 }`}>
-                  {toast.type === 'success' ? <LuCheck size={20} /> : 
-                   toast.type === 'danger' ? <LuX size={20} /> : '₹'}
+                  {toast.type === 'success' ? <FiCheck size={20} /> : 
+                   toast.type === 'danger' ? <FiX size={20} /> : '₹'}
                 </div>
                 <div className="flex-1">
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-warm-sand">Realtime Notification</p>
@@ -244,7 +248,7 @@ const SellerLayout = () => {
               onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(true); }}
               className="lg:hidden p-2 hover:bg-soft-oatmeal rounded-lg transition-colors"
             >
-              <LuMenu size={24} />
+              <FiMenu size={24} />
             </button>
             <h2 className="text-sm font-medium text-warm-sand hidden sm:block">
               Welcome back, <span className="font-bold text-deep-espresso">Seller!</span>
@@ -257,7 +261,7 @@ const SellerLayout = () => {
                 onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); }}
                 className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-soft-oatmeal text-deep-espresso' : 'text-dusty-cocoa hover:bg-soft-oatmeal'}`}
               >
-                <LuBell size={20} />
+                <FiBell size={20} />
                 {unreadCount > 0 && (
                   <span className="absolute top-1 right-1 w-2 h-2 bg-warm-sand rounded-full border-2 border-white animate-pulse"></span>
                 )}
@@ -279,7 +283,12 @@ const SellerLayout = () => {
                       {notifications.slice(0, 4).map((n) => (
                         <div 
                           key={n.id} 
-                          onClick={(e) => { e.stopPropagation(); markAsRead(n.id); }}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            markAsRead(n.id);
+                            setShowNotifications(false);
+                            setSelectedNotification(n);
+                          }}
                           className={`p-4 border-b border-soft-oatmeal/50 hover:bg-soft-oatmeal/20 transition-colors cursor-pointer group ${n.status === 'unread' ? 'bg-warm-sand/5' : ''}`}
                         >
                           <div className="flex justify-between items-start mb-1">
@@ -316,10 +325,10 @@ const SellerLayout = () => {
                   {user?.avatar ? (
                     <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <LuUser size={20} className="text-warm-sand" />
+                    <FiUser size={20} className="text-warm-sand" />
                   )}
                 </div>
-                <LuChevronDown size={14} className={`text-dusty-cocoa transition-transform duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
+                <FiChevronDown size={14} className={`text-dusty-cocoa transition-transform duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
               </div>
 
               <AnimatePresence>
@@ -334,7 +343,7 @@ const SellerLayout = () => {
                       to="/seller/profile"
                       className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-deep-espresso hover:bg-soft-oatmeal/30 transition-colors group"
                     >
-                      <LuUser size={18} className="text-warm-sand group-hover:scale-110 transition-transform" />
+                      <FiUser size={18} className="text-warm-sand group-hover:scale-110 transition-transform" />
                       View Profile
                     </Link>
                     <div className="h-[1px] bg-soft-oatmeal my-1"></div>
@@ -342,7 +351,7 @@ const SellerLayout = () => {
                       onClick={handleLogout}
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-colors group"
                     >
-                      <LuLogOut size={18} className="group-hover:translate-x-1 transition-transform" />
+                      <FiLogOut size={18} className="group-hover:translate-x-1 transition-transform" />
                       Sign Out
                     </button>
                   </motion.div>
@@ -359,6 +368,73 @@ const SellerLayout = () => {
         
         {/* Mobile Bottom Navigation */}
         <SellerBottomNavbar />
+
+        {/* Notification Detail Modal */}
+        <AnimatePresence>
+          {selectedNotification && (
+            <div 
+              className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+              onClick={() => setSelectedNotification(null)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="bg-white w-full max-w-lg rounded-[32px] overflow-hidden shadow-2xl border border-soft-oatmeal"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-8 space-y-6">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">System Notification</p>
+                      <h2 className="text-2xl font-black text-deep-espresso italic tracking-tighter uppercase">{selectedNotification.title}</h2>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedNotification(null)}
+                      className="p-2 hover:bg-soft-oatmeal rounded-xl transition-colors"
+                    >
+                      <FiX size={24} className="text-warm-sand" />
+                    </button>
+                  </div>
+
+                  <div className="bg-soft-oatmeal/5 border border-soft-oatmeal/30 rounded-2xl p-6">
+                    <p className="text-sm text-dusty-cocoa leading-relaxed font-medium italic">
+                      "{selectedNotification.message}"
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center gap-2 text-warm-sand">
+                      <div className="w-8 h-8 rounded-lg bg-soft-oatmeal/20 flex items-center justify-center">
+                        <FiBell size={14} />
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-widest">{selectedNotification.time}</span>
+                    </div>
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={() => setSelectedNotification(null)}
+                        className="px-6 py-3 rounded-2xl bg-soft-oatmeal/30 text-deep-espresso text-[10px] font-black uppercase tracking-widest hover:bg-soft-oatmeal/50 transition-colors"
+                      >
+                        Dismiss
+                      </button>
+                      {selectedNotification.link && (
+                        <button 
+                          onClick={() => {
+                            navigate(selectedNotification.link);
+                            setSelectedNotification(null);
+                          }}
+                          className="px-6 py-3 rounded-2xl bg-deep-espresso text-white text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-black/10"
+                        >
+                          View Details
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

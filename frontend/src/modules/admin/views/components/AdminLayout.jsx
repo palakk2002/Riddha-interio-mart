@@ -1,25 +1,110 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useUser } from '../../../user/models/UserContext';
-import { LuMenu, LuBell, LuUser, LuLogOut, LuChevronDown } from 'react-icons/lu';
+import { LuMenu, LuBell, LuUser, LuLogOut, LuChevronDown, LuCheck, LuX } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const notifications = [
-  { id: 1, title: 'New Seller Request', message: 'Elite Interiors requested store approval.', time: '1h ago', status: 'unread' },
-  { id: 2, title: 'Catalog Updated', message: 'Admin added 5 items to "Living Room".', time: '3h ago', status: 'read' },
-  { id: 3, title: 'Security Alert', message: 'Login attempt from unknown IP address.', time: '1d ago', status: 'read' },
-];
+import { connectSocket, disconnectSocket } from '../../../../shared/utils/socket';
+import { playNewOrderChime, primeNotificationAudio, isSoundEnabled } from '../../seller/utils/notificationSound';
+import { getAdminNotifications, setAdminNotifications, prependAdminNotification } from '../utils/adminNotifications';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState(() => getAdminNotifications());
+  const [toast, setToast] = useState(null);
   const { logout, user } = useUser();
   const navigate = useNavigate();
 
+  const unreadCount = notifications.filter(n => n.status === 'unread').length;
+
+  const markAsRead = (id) => {
+    const updated = notifications.map(n => n.id === id ? { ...n, status: 'read' } : n);
+    setNotifications(updated);
+    setAdminNotifications(updated);
+  };
+
+  useEffect(() => {
+    const sync = () => setNotifications(getAdminNotifications());
+    window.addEventListener('admin_notifications_updated', sync);
+    return () => window.removeEventListener('admin_notifications_updated', sync);
+  }, []);
+
+  // Prime audio
+  useEffect(() => {
+    const onFirstGesture = () => {
+      primeNotificationAudio();
+      window.removeEventListener('pointerdown', onFirstGesture);
+      window.removeEventListener('keydown', onFirstGesture);
+    };
+    window.addEventListener('pointerdown', onFirstGesture);
+    window.addEventListener('keydown', onFirstGesture);
+    return () => {
+      window.removeEventListener('pointerdown', onFirstGesture);
+      window.removeEventListener('keydown', onFirstGesture);
+    };
+  }, []);
+
+  // Socket setup
+  useEffect(() => {
+    if (!user?.token || user?.role !== 'admin') return;
+
+    const socket = connectSocket({ token: user.token });
+
+    const onOrderNew = async (payload) => {
+      const shortId = String(payload?.orderId || '').slice(-8).toUpperCase();
+      const message = `New order #${shortId} received for ₹${Number(payload?.totalPrice || 0).toLocaleString()}.`;
+      
+      setToast({ title: 'New Order', message, type: 'success', link: `/admin/orders` });
+      prependAdminNotification({ title: 'New Order', message, time: 'Just now', status: 'unread', link: '/admin/orders' });
+      if (isSoundEnabled()) await playNewOrderChime();
+    };
+
+    const onProductNewRequest = async (payload) => {
+      const message = payload.message || 'A new product requires your approval.';
+      setToast({ title: 'Product Request', message, type: 'warning', link: '/admin/products' });
+      prependAdminNotification({ title: 'Product Request', message, time: 'Just now', status: 'unread', link: '/admin/products' });
+      if (isSoundEnabled()) await playNewOrderChime();
+    };
+
+    const onDeliveryNewRegistration = async (payload) => {
+      const message = `New delivery partner registration: ${payload.fullName}.`;
+      setToast({ title: 'New Registration', message, type: 'info', link: '/admin/delivery' });
+      prependAdminNotification({ title: 'New Registration', message, time: 'Just now', status: 'unread', link: '/admin/delivery' });
+      if (isSoundEnabled()) await playNewOrderChime();
+    };
+
+    const onDeliveryResponse = async (payload) => {
+      const message = `Delivery ${payload.status} for order #${String(payload.orderId).slice(-8).toUpperCase()} by ${payload.deliveryBoyName}.`;
+      setToast({ title: 'Delivery Update', message, type: payload.status === 'Accepted' ? 'success' : 'danger', link: '/admin/orders' });
+      prependAdminNotification({ title: 'Delivery Update', message, time: 'Just now', status: 'unread', link: '/admin/orders' });
+      if (isSoundEnabled()) await playNewOrderChime();
+    };
+
+    socket.on('order:new', onOrderNew);
+    socket.on('product:new_request', onProductNewRequest);
+    socket.on('delivery:new_registration', onDeliveryNewRegistration);
+    socket.on('delivery:response', onDeliveryResponse);
+
+    return () => {
+      socket.off('order:new', onOrderNew);
+      socket.off('product:new_request', onProductNewRequest);
+      socket.off('delivery:new_registration', onDeliveryNewRegistration);
+      socket.off('delivery:response', onDeliveryResponse);
+    };
+  }, [user?.token, user?.role]);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const handleLogout = () => {
     logout();
+    disconnectSocket();
     navigate('/admin/login');
   };
 
@@ -31,6 +116,49 @@ const AdminLayout = () => {
         setShowNotifications(false);
       }}
     >
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            onClick={() => { if (toast.link) navigate(toast.link); setToast(null); }}
+            className="fixed top-6 right-6 z-[100] w-[380px] max-w-[calc(100vw-3rem)] cursor-pointer"
+          >
+            <div className="bg-white rounded-[32px] shadow-2xl border border-soft-oatmeal overflow-hidden">
+              <div className="p-6 flex items-start gap-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                  toast.type === 'success' ? 'bg-emerald-100 text-emerald-600' :
+                  toast.type === 'warning' ? 'bg-amber-100 text-amber-600' :
+                  toast.type === 'danger' ? 'bg-red-100 text-red-600' :
+                  'bg-blue-100 text-blue-600'
+                }`}>
+                  {toast.type === 'success' ? <LuCheck size={24} /> :
+                   toast.type === 'danger' ? <LuX size={24} /> : <LuBell size={24} />}
+                </div>
+                <div className="flex-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">System Alert</p>
+                  <h4 className="text-base font-black text-deep-espresso mt-1">{toast.title}</h4>
+                  <p className="text-sm text-dusty-cocoa mt-1 line-clamp-2 leading-relaxed italic">"{toast.message}"</p>
+                </div>
+              </div>
+              <div className="h-1.5 w-full bg-soft-oatmeal/20">
+                <motion.div 
+                  initial={{ width: "100%" }}
+                  animate={{ width: "0%" }}
+                  transition={{ duration: 6, ease: "linear" }}
+                  className={`h-full ${
+                    toast.type === 'success' ? 'bg-emerald-500' :
+                    toast.type === 'warning' ? 'bg-amber-500' :
+                    toast.type === 'danger' ? 'bg-red-500' :
+                    'bg-blue-500'
+                  }`}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
@@ -55,7 +183,9 @@ const AdminLayout = () => {
                 className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-soft-oatmeal text-deep-espresso' : 'text-dusty-cocoa hover:bg-soft-oatmeal'}`}
               >
                 <LuBell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--color-header-red)] rounded-full border-2 border-white"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                )}
               </button>
 
               <AnimatePresence>
@@ -68,11 +198,20 @@ const AdminLayout = () => {
                   >
                     <div className="p-4 border-b border-soft-oatmeal flex items-center justify-between bg-soft-oatmeal/10">
                       <h3 className="font-bold text-sm">Admin Alerts</h3>
-                      <span className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">NEW</span>
+                      <span className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">{unreadCount} NEW</span>
                     </div>
                     <div className="max-h-96 overflow-y-auto custom-scrollbar">
                       {notifications.map((n) => (
-                        <div key={n.id} className={`p-4 border-b border-soft-oatmeal/50 hover:bg-soft-oatmeal/20 transition-colors cursor-pointer group ${n.status === 'unread' ? 'bg-warm-sand/5' : ''}`}>
+                        <div 
+                          key={n.id} 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            markAsRead(n.id);
+                            setShowNotifications(false);
+                            if (n.link) navigate(n.link);
+                          }}
+                          className={`p-4 border-b border-soft-oatmeal/50 hover:bg-soft-oatmeal/20 transition-colors cursor-pointer group ${n.status === 'unread' ? 'bg-warm-sand/5' : ''}`}
+                        >
                           <div className="flex justify-between items-start mb-1">
                             <h4 className="text-sm font-bold text-deep-espresso">{n.title}</h4>
                             <span className="text-[10px] text-warm-sand uppercase font-medium">{n.time}</span>

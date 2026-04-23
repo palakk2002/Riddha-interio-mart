@@ -39,7 +39,10 @@ const isPublicRequest = (config) => {
   const method = (config.method || 'get').toLowerCase();
   const url = String(config.url || '');
 
-  if (url.startsWith('/auth/')) return true;
+  const isAuth = url.startsWith('/auth/');
+  const isMeOrProfile = url.includes('/me') || url.includes('/profile');
+
+  if (isAuth && !isMeOrProfile) return true;
 
   if (
     method === 'get' &&

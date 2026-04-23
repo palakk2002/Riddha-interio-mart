@@ -15,6 +15,12 @@ const AddProduct = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [imgFiles, setImgFiles] = useState([]);
+  
+  // Custom Dropdown State
+  const [isCatOpen, setIsCatOpen] = useState(false);
+  const [isSubOpen, setIsSubOpen] = useState(false);
+  const [catSearch, setCatSearch] = useState('');
+  const [subSearch, setSubSearch] = useState('');
 
   const fileInputRef = useRef(null);
 
@@ -39,6 +45,14 @@ const AddProduct = () => {
   useEffect(() => {
     fetchInitialData();
   }, []);
+
+  const filteredCategories = categories.filter(cat => 
+    cat.name.toLowerCase().includes(catSearch.toLowerCase())
+  );
+
+  const filteredSubcategories = subcategories.filter(sub => 
+    sub.name.toLowerCase().includes(subSearch.toLowerCase())
+  );
 
   const fetchInitialData = async () => {
     try {
@@ -278,26 +292,90 @@ const AddProduct = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                 <div className="space-y-3">
+                 <div className="space-y-3 relative">
                     <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Category</label>
-                    <select 
-                      required value={formData.category} onChange={handleCategoryChange}
-                      className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
-                    >
-                       <option value="">Select Category</option>
-                       {categories.map(cat => <option key={cat._id} value={cat.name}>{cat.name}</option>)}
-                    </select>
+                    <div className="relative group">
+                       <input 
+                         type="text"
+                         placeholder={formData.category || "Search or select..."}
+                         value={catSearch}
+                         onChange={(e) => {
+                            setCatSearch(e.target.value);
+                            setIsCatOpen(true);
+                         }}
+                         onFocus={() => setIsCatOpen(true)}
+                         className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                       />
+                       {isCatOpen && (
+                         <>
+                            <div className="fixed inset-0 z-[40]" onClick={() => { setIsCatOpen(false); setCatSearch(''); }} />
+                            <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-soft-oatmeal rounded-2xl shadow-2xl z-[50] overflow-hidden max-h-64 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                               {filteredCategories.length > 0 ? (
+                                 filteredCategories.map(cat => (
+                                   <button
+                                     key={cat._id}
+                                     type="button"
+                                     onClick={() => {
+                                       const selectedCat = categories.find(c => c.name === cat.name);
+                                       setFormData({ ...formData, category: cat.name, subcategory: '' });
+                                       setSubcategories(selectedCat ? selectedCat.subcategories : []);
+                                       setCatSearch('');
+                                       setIsCatOpen(false);
+                                     }}
+                                     className="w-full text-left px-5 py-3.5 text-sm font-medium hover:bg-soft-oatmeal/30 transition-colors border-b border-soft-oatmeal/10 last:border-0"
+                                   >
+                                     {cat.name}
+                                   </button>
+                                 ))
+                               ) : (
+                                 <div className="px-5 py-4 text-xs font-bold text-warm-sand uppercase text-center italic">No categories</div>
+                               )}
+                            </div>
+                         </>
+                       )}
+                    </div>
                  </div>
-                 <div className="space-y-3">
+                 <div className="space-y-3 relative">
                     <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Subcategory</label>
-                    <select 
-                      value={formData.subcategory} onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
-                      disabled={!formData.category}
-                      className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm disabled:opacity-30"
-                    >
-                       <option value="">Select Subcategory</option>
-                       {subcategories.map(sub => <option key={sub._id} value={sub.name}>{sub.name}</option>)}
-                    </select>
+                    <div className="relative group">
+                       <input 
+                         type="text"
+                         disabled={!formData.category}
+                         placeholder={formData.subcategory || "Search or select..."}
+                         value={subSearch}
+                         onChange={(e) => {
+                            setSubSearch(e.target.value);
+                            setIsSubOpen(true);
+                         }}
+                         onFocus={() => setIsSubOpen(true)}
+                         className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm disabled:opacity-30"
+                       />
+                       {isSubOpen && !(!formData.category) && (
+                         <>
+                            <div className="fixed inset-0 z-[40]" onClick={() => { setIsSubOpen(false); setSubSearch(''); }} />
+                            <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-soft-oatmeal rounded-2xl shadow-2xl z-[50] overflow-hidden max-h-64 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                               {filteredSubcategories.length > 0 ? (
+                                 filteredSubcategories.map(sub => (
+                                   <button
+                                     key={sub._id || sub.name}
+                                     type="button"
+                                     onClick={() => {
+                                       setFormData({...formData, subcategory: sub.name});
+                                       setSubSearch('');
+                                       setIsSubOpen(false);
+                                     }}
+                                     className="w-full text-left px-5 py-3.5 text-sm font-medium hover:bg-soft-oatmeal/30 transition-colors border-b border-soft-oatmeal/10 last:border-0"
+                                   >
+                                     {sub.name}
+                                   </button>
+                                 ))
+                               ) : (
+                                 <div className="px-5 py-4 text-xs font-bold text-warm-sand uppercase text-center italic">No subcategories</div>
+                               )}
+                            </div>
+                         </>
+                       )}
+                    </div>
                  </div>
                  <div className="space-y-3">
                     <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Material</label>
