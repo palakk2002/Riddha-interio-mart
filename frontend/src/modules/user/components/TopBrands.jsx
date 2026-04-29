@@ -27,7 +27,7 @@ const TopBrands = ({ title }) => {
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-12 py-6">
       <div className="flex items-center justify-between mb-4 px-2">
-        <h2 className="text-xl md:text-2xl font-bold text-[var(--color-header-red)] tracking-tight">
+        <h2 className="text-xl md:text-2xl font-bold text-black tracking-tight">
           {title || "Explore Top Brands"}
         </h2>
         <Link to="/brands" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-deep-espresso transition-colors">

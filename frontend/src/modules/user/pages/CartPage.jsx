@@ -44,12 +44,12 @@ const CartPage = () => {
   return (
     <div className="bg-soft-oatmeal/5 min-h-screen pb-40">
       {/* Header with Title & Stepper */}
-      <div className="bg-[#189D91] text-white px-6 py-4 md:py-8">
-        <h1 className="text-lg md:text-2xl font-display font-bold text-white">Cart: {cart.length} items</h1>
+      <div className="bg-[#189D91] text-white px-6 py-3 md:py-8">
+        <h1 className="text-base md:text-2xl font-display font-bold text-white">Cart: {cart.length} items</h1>
       </div>
 
       {/* Main Content Area */}
-      <div className="max-w-xl mx-auto mt-2 md:-mt-4 space-y-3 md:space-y-4 px-4">
+      <div className="max-w-xl mx-auto mt-1 md:-mt-4 space-y-2 md:space-y-4 px-4">
         {/* Delivery Info Card */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-soft-oatmeal/10">
           <div className="flex items-center justify-between mb-4">
@@ -102,9 +102,9 @@ const CartPage = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="bg-white rounded-2xl p-3 shadow-sm border border-soft-oatmeal/10 flex gap-4 group"
+                className="bg-white rounded-2xl p-2 md:p-3 shadow-sm border border-soft-oatmeal/10 flex gap-3 md:gap-4 group"
               >
-                <div className="w-24 h-24 bg-soft-oatmeal/5 rounded-xl overflow-hidden flex-shrink-0">
+                <div className="w-20 h-20 md:w-24 md:h-24 bg-soft-oatmeal/5 rounded-xl overflow-hidden flex-shrink-0">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 py-1 flex flex-col justify-between">
@@ -143,7 +143,7 @@ const CartPage = () => {
         </div>
 
         {/* Referral Code */}
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-soft-oatmeal/10 space-y-4">
+        <div className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-soft-oatmeal/10 space-y-3 md:space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#189D91]/5 rounded-xl flex items-center justify-center text-[#189D91]">
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 12V8H6a2 2 0 01-2-2V5a1 1 0 011-1h15a1 1 0 011 1v2M20 12v4a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h14z" /></svg>
@@ -162,10 +162,10 @@ const CartPage = () => {
 
         {/* Price Summary */}
         <div className="bg-white rounded-2xl shadow-sm border border-soft-oatmeal/10 overflow-hidden">
-          <div className="px-6 py-4 bg-soft-oatmeal/5 border-b border-soft-oatmeal/10">
+          <div className="px-6 py-3 md:py-4 bg-soft-oatmeal/5 border-b border-soft-oatmeal/10">
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] italic">PRICE DETAILS</h4>
           </div>
-          <div className="p-6 space-y-5">
+          <div className="p-4 md:p-6 space-y-3 md:space-y-5">
             <div className="flex justify-between items-center text-sm font-medium">
               <span className="text-gray-500">MRP Value</span>
               <span className="text-deep-espresso font-black">₹{mrpValue}</span>
@@ -192,7 +192,7 @@ const CartPage = () => {
       </div>
 
       {/* Sticky Bottom Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-soft-oatmeal/10 px-4 md:px-6 py-4 md:py-6 flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40 max-w-xl mx-auto rounded-t-[2.5rem]">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-soft-oatmeal/10 px-4 md:px-6 py-3 md:py-6 flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40 max-w-xl mx-auto rounded-t-[2.5rem]">
         <div className="space-y-0.5">
           <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Total Price</p>
           <div className="flex items-center gap-2">
@@ -203,7 +203,7 @@ const CartPage = () => {
         <motion.button
           whileTap={{ scale: 0.96 }}
           onClick={handleAction}
-          className="bg-[#189D91] text-white px-6 md:px-10 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[11px] md:text-[12px] uppercase tracking-[0.15em] shadow-2xl shadow-[#189D91]/30 flex items-center gap-3"
+          className="bg-[#E91E8B] text-white px-6 md:px-10 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[11px] md:text-[12px] uppercase tracking-[0.15em] shadow-2xl shadow-[#E91E8B]/30 flex items-center gap-3"
         >
           {address ? 'CHECKOUT' : 'ADD ADDRESS'}
           <div className="bg-white/20 p-1 rounded-lg">

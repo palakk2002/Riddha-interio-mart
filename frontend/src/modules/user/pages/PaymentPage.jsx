@@ -75,8 +75,8 @@ const PaymentPage = () => {
     >
 
 
-      <div className="max-w-xl mx-auto p-4 space-y-6">
-        <div className="flex items-center gap-4 py-4">
+      <div className="max-w-xl mx-auto p-3 md:p-4 space-y-4 md:space-y-6">
+        <div className="flex items-center gap-4 py-2 md:py-4">
           <button onClick={() => navigate(-1)} className="p-1">
             <FiArrowLeft className="h-6 w-6 text-gray-800" />
           </button>
@@ -86,7 +86,7 @@ const PaymentPage = () => {
         {/* Delivering To Section */}
         <div className="space-y-4">
           <p className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">DELIVERING TO</p>
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-2xl p-4 md:p-6 border border-gray-100 shadow-sm">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-black text-gray-900 uppercase tracking-wide">{address?.fullName || user?.fullName || 'USER'}</p>
@@ -101,7 +101,7 @@ const PaymentPage = () => {
         </div>
 
         {/* Amount Summary */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center justify-between">
+        <div className="bg-white rounded-2xl p-4 md:p-6 border border-gray-100 shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-sm font-black text-gray-800">{cartCount} {cartCount === 1 ? 'item' : 'items'}</span>
             <FiChevronDown className="text-gray-400" />
@@ -121,7 +121,7 @@ const PaymentPage = () => {
             <div className="border-b border-gray-50">
               <button
                 onClick={() => setSelectedSection(selectedSection === 'upi' ? null : 'upi')}
-                className="w-full flex items-center justify-between p-5"
+                className="w-full flex items-center justify-between p-4 md:p-5"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-10 rounded-lg bg-[#189D91]/10 flex items-center justify-center border border-[#189D91]/20">
@@ -141,12 +141,12 @@ const PaymentPage = () => {
                     initial={{ height: 0 }}
                     animate={{ height: 'auto' }}
                     exit={{ height: 0 }}
-                    className="overflow-hidden bg-gray-50/30 px-5 pb-5 space-y-3"
+                    className="overflow-hidden bg-gray-50/30 px-4 md:px-5 pb-4 md:pb-5 space-y-2 md:space-y-3"
                   >
                     {/* Google Pay */}
                     <div
                       onClick={() => setSelectedMethod('gpay')}
-                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'gpay' ? 'border-[#189D91] bg-white' : 'border-transparent bg-transparent'}`}
+                      className={`flex items-center justify-between p-3 md:p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'gpay' ? 'border-[#189D91] bg-white' : 'border-transparent bg-transparent'}`}
                     >
                       <div className="flex items-center gap-4">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Google_Pay_%28GPay%29_Logo.svg" alt="GPay" className="w-6 h-6" />
@@ -191,7 +191,7 @@ const PaymentPage = () => {
             <div className="border-b border-gray-50">
               <button
                 onClick={() => setSelectedSection(selectedSection === 'netbanking' ? null : 'netbanking')}
-                className="w-full flex items-center justify-between p-5"
+                className="w-full flex items-center justify-between p-4 md:p-5"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-10 rounded-lg bg-blue-50 flex items-center justify-center border border-blue-100">
@@ -211,14 +211,14 @@ const PaymentPage = () => {
                     initial={{ height: 0 }}
                     animate={{ height: 'auto' }}
                     exit={{ height: 0 }}
-                    className="overflow-hidden bg-gray-50/30 px-5 pb-5 space-y-3"
+                    className="overflow-hidden bg-gray-50/30 px-4 md:px-5 pb-4 md:pb-5 space-y-2 md:space-y-3"
                   >
                     <div className="grid grid-cols-2 gap-3">
                       {['SBI', 'HDFC', 'ICICI', 'AXIS', 'PNB', 'KOTAK'].map((bank) => (
                         <div
                           key={bank}
                           onClick={() => setSelectedMethod(bank.toLowerCase())}
-                          className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === bank.toLowerCase() ? 'border-[#189D91] bg-white' : 'border-transparent bg-transparent'}`}
+                          className={`flex items-center justify-between p-2.5 md:p-3 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === bank.toLowerCase() ? 'border-[#189D91] bg-white' : 'border-transparent bg-transparent'}`}
                         >
                           <span className="text-[11px] font-black text-gray-800">{bank}</span>
                           <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedMethod === bank.toLowerCase() ? 'border-[#189D91] bg-[#189D91]' : 'border-gray-200'}`}>
@@ -236,7 +236,7 @@ const PaymentPage = () => {
             <div>
               <button
                 onClick={() => setSelectedSection(selectedSection === 'card' ? null : 'card')}
-                className="w-full flex items-center justify-between p-5"
+                className="w-full flex items-center justify-between p-4 md:p-5"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-10 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
@@ -255,14 +255,14 @@ const PaymentPage = () => {
       </div>
 
       {/* Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-6 flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 md:p-6 flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40">
         <div>
           <span className="text-xl font-black text-gray-900 block leading-none">₹{cartTotal.toLocaleString()}</span>
           <button className="text-[9px] font-black text-[#189D91] uppercase tracking-widest mt-2 border-b border-[#189D91]/20">VIEW PRICE SUMMARY</button>
         </div>
         <button
           onClick={handlePayNow}
-          className="bg-[#189D91] text-white px-10 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-[#127F75] transition-all"
+          className="bg-[#702D8B] text-white px-10 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:opacity-90 transition-all"
         >
           PAY NOW
         </button>

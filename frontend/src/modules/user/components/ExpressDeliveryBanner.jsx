@@ -38,7 +38,7 @@ const ExpressDeliveryBanner = () => {
             <div className="bg-[#189D91] p-1.5 rounded-lg text-white shadow-md shadow-[#189D91]/10 text-sm md:text-lg">
               <FiZap />
             </div>
-            <h2 className="text-[15px] md:text-3xl font-display font-bold text-[#189D91] tracking-tight leading-none">
+            <h2 className="text-[15px] md:text-3xl font-display font-bold text-black tracking-tight leading-none">
               Express Delivery in <span className="underline decoration-wavy decoration-[#D4A017]/40 underline-offset-4 text-[#D4A017]">{estimate.time}</span>
             </h2>
           </div>

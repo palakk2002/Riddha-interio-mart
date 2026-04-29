@@ -59,7 +59,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
 
       <div className="flex-1 min-w-0 p-2 md:p-8 flex flex-col justify-between space-y-1.5 md:space-y-4">
         <div className="space-y-0 md:space-y-1">
-          <h3 className="text-[14px] md:text-2xl font-display font-semibold text-[#189D91] leading-tight line-clamp-1 md:line-clamp-none">
+          <h3 className="text-[14px] md:text-2xl font-display font-semibold text-black leading-tight line-clamp-1 md:line-clamp-none">
             {product.name}
           </h3>
           <h4 className="text-[10px] md:text-xs font-medium text-gray-400">
@@ -89,7 +89,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
           {quantity === 0 ? (
             <button
               onClick={(e) => { e.preventDefault(); addToCart(product); }}
-              className="bg-[#189D91] text-white px-4 md:px-8 py-2 md:py-3 rounded-lg md:rounded-xl text-[11px] md:text-sm font-semibold shadow-md hover:bg-[#127F75] transition-all active:scale-95 whitespace-nowrap"
+              className="bg-[#702D8B] text-white px-4 md:px-8 py-2 md:py-3 rounded-lg md:rounded-xl text-[11px] md:text-sm font-semibold shadow-md hover:bg-[#5d2574] transition-all active:scale-95 whitespace-nowrap"
             >
               Add
             </button>

@@ -87,7 +87,7 @@ const Banner = ({ banners = [] }) => {
             className="h-full w-full object-cover"
           />
           {/* Enhanced Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#189D91]/40 via-[#189D91]/10 to-transparent flex items-center px-4 md:px-20">
+          <div className="absolute inset-0 flex items-center px-4 md:px-20">
             <div className="max-w-xl space-y-1.5 md:space-y-6">
               <Motion.h2
                 initial={{ opacity: 0, y: 30 }}

@@ -104,19 +104,19 @@ const ProductDetailsPage = () => {
     <motion.div
       initial="hidden"
       animate="visible"
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-6 md:py-16 pb-32 md:pb-16"
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-1 md:py-16 pb-32 md:pb-16"
     >
       <motion.div variants={fadeInUp}>
-        <Link to="/products" className="inline-flex items-center text-deep-espresso/40 hover:text-warm-sand mb-4 md:mb-16 group font-black uppercase tracking-[0.2em] text-[10px] transition-all">
+        <Link to="/products" className="inline-flex items-center text-deep-espresso/40 hover:text-warm-sand mb-2 md:mb-16 group font-black uppercase tracking-[0.2em] text-[10px] transition-all">
           <FiArrowLeft className="mr-3 text-lg transform group-hover:-translate-x-2 transition-transform" />
           Back to Collection
         </Link>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-20 mb-10 md:mb-32">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-20 mb-6 md:mb-32">
         {/* Gallery */}
-        <motion.div variants={fadeInUp} className="space-y-4 md:space-y-6">
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl md:rounded-[3rem] bg-white border border-soft-oatmeal/10 shadow-lg group">
+        <motion.div variants={fadeInUp} className="space-y-2 md:space-y-6">
+          <div className="relative aspect-[4/3.2] md:aspect-square w-full overflow-hidden rounded-2xl md:rounded-[3rem] bg-white border border-soft-oatmeal/10 shadow-lg group">
             {/* Discount Badge */}
             <div className="absolute top-3 left-3 z-10 h-12 w-12 md:h-16 md:w-16 bg-[#189D91] rounded-full flex flex-col items-center justify-center text-white font-black shadow-lg ring-4 ring-white/20">
               <span className="text-[10px] md:text-sm leading-none">{Math.round((1 - product.price / product.originalPrice) * 100)}%</span>
@@ -139,16 +139,16 @@ const ProductDetailsPage = () => {
               >
                 {allMedia[activeMediaIndex]?.type === 'video' ? (
                   <div className="h-full w-full flex items-center justify-center bg-black relative">
-                     <iframe 
-                       src={allMedia[activeMediaIndex].url.includes('youtube.com') 
-                         ? allMedia[activeMediaIndex].url.replace('watch?v=', 'embed/').split('&')[0]
-                         : allMedia[activeMediaIndex].url.includes('youtu.be')
-                         ? allMedia[activeMediaIndex].url.replace('youtu.be/', 'youtube.com/embed/')
-                         : allMedia[activeMediaIndex].url}
-                       className="w-full h-full"
-                       allowFullScreen
-                       title="Product Video"
-                     />
+                    <iframe
+                      src={allMedia[activeMediaIndex].url.includes('youtube.com')
+                        ? allMedia[activeMediaIndex].url.replace('watch?v=', 'embed/').split('&')[0]
+                        : allMedia[activeMediaIndex].url.includes('youtu.be')
+                          ? allMedia[activeMediaIndex].url.replace('youtu.be/', 'youtube.com/embed/')
+                          : allMedia[activeMediaIndex].url}
+                      className="w-full h-full"
+                      allowFullScreen
+                      title="Product Video"
+                    />
                   </div>
                 ) : (
                   <img
@@ -156,7 +156,7 @@ const ProductDetailsPage = () => {
                       ? 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80'
                       : (allMedia[activeMediaIndex] || 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80')}
                     alt={product.name}
-                    className="h-full w-full object-contain p-2 md:p-8"
+                    className="h-full w-full object-contain p-1 md:p-8"
                   />
                 )}
               </motion.div>
@@ -164,16 +164,16 @@ const ProductDetailsPage = () => {
           </div>
 
           {/* Carousel Dots / Thumbnails */}
-          <div className="flex justify-center items-center gap-2 md:gap-3 py-2 flex-wrap">
+          <div className="flex justify-center items-center gap-1.5 md:gap-3 py-1 flex-wrap">
             {allMedia.map((media, i) => (
               <button
                 key={i}
                 onClick={() => setActiveMediaIndex(i)}
-                className={`h-12 w-12 md:h-16 md:w-16 rounded-xl border-2 transition-all overflow-hidden bg-white ${activeMediaIndex === i ? 'border-[#189D91] scale-110 shadow-md' : 'border-soft-oatmeal/20 opacity-60 hover:opacity-100'}`}
+                className={`h-10 w-10 md:h-16 md:w-16 rounded-lg md:rounded-xl border-2 transition-all overflow-hidden bg-white ${activeMediaIndex === i ? 'border-[#189D91] scale-110 shadow-md' : 'border-soft-oatmeal/20 opacity-60 hover:opacity-100'}`}
               >
                 {media?.type === 'video' ? (
                   <div className="h-full w-full flex items-center justify-center bg-soft-oatmeal/20">
-                     <FiPlay className="text-[#189D91]" size={20} />
+                    <FiPlay className="text-[#189D91]" size={20} />
                   </div>
                 ) : (
                   <img src={media} className="h-full w-full object-cover" alt="" />
@@ -185,19 +185,19 @@ const ProductDetailsPage = () => {
 
         {/* Info */}
         <motion.div variants={stagger} className="flex flex-col h-full py-0">
-          <motion.div variants={fadeInUp} className="mb-2 md:mb-8 space-y-1 md:space-y-4">
-            <div className="text-[#189D91] font-bold text-[10px] md:text-base tracking-tight mb-1 md:mb-2">
+          <motion.div variants={fadeInUp} className="mb-0 md:mb-8 space-y-0.5 md:space-y-4">
+            <div className="text-[#189D91] font-bold text-[10px] md:text-base tracking-tight mb-0.5 md:mb-2">
               Brand: {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
             </div>
 
-            <h1 className="text-xl md:text-4xl font-black leading-tight text-deep-espresso">{product.name}</h1>
+            <h1 className="text-xl md:text-4xl font-semibold leading-tight text-black">{product.name}</h1>
 
             <hr className="border-soft-oatmeal/20" />
 
             <div className="space-y-0.5 md:space-y-1">
               <div className="flex items-baseline space-x-2 md:space-x-3">
-                <span className="text-3xl md:text-5xl font-black text-deep-espresso tracking-tighter">₹{product.price}</span>
-                <span className="text-[10px] md:text-sm font-medium text-gray-400 italic">Incl. GST</span>
+                <span className="text-2xl md:text-5xl font-black text-deep-espresso tracking-tighter">₹{product.price}</span>
+                <span className="text-[9px] md:text-sm font-medium text-gray-400 italic">Incl. GST</span>
               </div>
 
               <div className="flex items-center space-x-2 text-[10px] md:text-sm">
@@ -211,12 +211,12 @@ const ProductDetailsPage = () => {
             </div>
 
             {product.unit && (
-              <div className="text-gray-500 font-bold text-[10px] md:text-xs pt-1 uppercase tracking-wider">
+              <div className="text-gray-500 font-bold text-[9px] md:text-xs pt-0.5 md:pt-1 uppercase tracking-wider">
                 {product.unitValue || '1'} {product.unit.toUpperCase()} per unit
               </div>
             )}
 
-            <p className="text-deep-espresso/60 text-sm md:text-lg font-light leading-relaxed max-w-xl">
+            <p className="text-deep-espresso/60 text-[13px] md:text-lg font-light leading-relaxed max-w-xl py-1 md:py-0">
               {product.description}
             </p>
 
@@ -285,7 +285,7 @@ const ProductDetailsPage = () => {
             {currentQuantity === 0 ? (
               <Button
                 size="lg"
-                className="w-full h-16 rounded-2xl bg-[var(--color-header-red)] text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-[var(--color-header-red)]/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+                className="w-full h-16 rounded-2xl bg-[#E91E8B] text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-[#E91E8B]/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
                 onClick={() => addToCart(product, 1)}
               >
                 <FiShoppingCart className="h-5 w-5" />
@@ -382,23 +382,23 @@ const ProductDetailsPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Mobile Action Bar (Fixed above Bottom Navbar) */}
-      <div className="md:hidden fixed bottom-[72px] left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-soft-oatmeal/10 px-4 py-2.5 pb-4 shadow-[0_-12px_30px_rgba(0,0,0,0.08)]">
+      {/* Mobile Action Bar (Fixed at the very bottom) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-soft-oatmeal/10 px-4 py-2.5 pb-6 shadow-[0_-12px_30px_rgba(0,0,0,0.08)]">
         <div className="flex gap-4 px-1">
           {currentQuantity === 0 ? (
             <motion.button
               whileTap={{ scale: 0.96 }}
               onClick={() => addToCart(product, 1)}
-              className="flex-1 py-3 bg-white border-2 border-[var(--color-header-red)] text-[var(--color-header-red)] rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all shadow-sm"
+              className="flex-1 py-3 bg-[#E91E8B] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all shadow-lg shadow-[#E91E8B]/20"
             >
               Add To Cart
             </motion.button>
           ) : (
-            <div className="flex-1 flex items-center justify-between bg-white border-2 border-[var(--color-header-red)] text-[var(--color-header-red)] rounded-2xl px-4 h-[46px] shadow-sm">
+            <div className="flex-1 flex items-center justify-between bg-white border-2 border-[#E91E8B] text-[#E91E8B] rounded-2xl px-4 h-[46px] shadow-sm">
               <motion.button
                 whileTap={{ scale: 0.8 }}
                 onClick={() => updateQuantity(product._id || product.id, currentQuantity - 1)}
-                className="h-8 w-8 flex items-center justify-center text-[var(--color-header-red)] bg-[var(--color-header-red)]/10 rounded-lg"
+                className="h-8 w-8 flex items-center justify-center text-[#E91E8B] bg-[#E91E8B]/10 rounded-lg"
               >
                 <FiMinus className="h-4 w-4" />
               </motion.button>
@@ -409,7 +409,7 @@ const ProductDetailsPage = () => {
               <motion.button
                 whileTap={{ scale: 0.8 }}
                 onClick={() => updateQuantity(product._id || product.id, currentQuantity + 1)}
-                className="h-8 w-8 flex items-center justify-center text-[var(--color-header-red)] bg-[var(--color-header-red)]/10 rounded-lg"
+                className="h-8 w-8 flex items-center justify-center text-[#E91E8B] bg-[#E91E8B]/10 rounded-lg"
               >
                 <FiPlus className="h-4 w-4" />
               </motion.button>
@@ -427,7 +427,7 @@ const ProductDetailsPage = () => {
           >
             <motion.button
               whileTap={{ scale: 0.96 }}
-              className="w-full py-3 bg-[var(--color-header-red)] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-[var(--color-header-red)]/20 transition-all border-2 border-[var(--color-header-red)]"
+              className="w-full py-3 bg-[#702D8B] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-[#702D8B]/20 transition-all border-2 border-[#702D8B]"
             >
               Buy Now
             </motion.button>
@@ -476,7 +476,7 @@ const SpecificationSection = ({ specifications }) => {
                     {key}
                   </div>
                   <div className="flex-1 font-bold text-deep-espresso/80">
-                    {value}
+                    {typeof value === 'object' && value !== null ? (value.name || JSON.stringify(value)) : value}
                   </div>
                 </div>
               ))}

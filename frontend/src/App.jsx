@@ -21,7 +21,7 @@ function App() {
                       location.pathname.endsWith('/login') || location.pathname.endsWith('/signup') ||
                       location.pathname === '/search';
   const isDashboardLayout = isAdminPath || isSellerPath || isDeliveryPath || isAuthPath;
-  const isProductPage = location.pathname.startsWith('/product/');
+  const isProductPage = location.pathname.startsWith('/product/') || location.pathname.startsWith('/products/');
   const isCheckoutPath = ['/cart', '/address', '/payment'].includes(location.pathname);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col user-theme bg-white border-deep-espresso/5 ${(!isDashboardLayout && !isCheckoutPath) ? 'pb-24 md:pb-0' : ''}`}>
+    <div className={`min-h-screen flex flex-col user-theme bg-white border-deep-espresso/5 ${(!isDashboardLayout && !isCheckoutPath && !isProductPage) ? 'pb-24 md:pb-0' : ''}`}>
       {/* <Toaster position="top-center" reverseOrder={false} /> */}
       {showPincodeModal && <PincodeModal onComplete={handlePincodeComplete} />}
       
@@ -51,7 +51,7 @@ function App() {
               <DeliveryBar />
             </>
           ) : (
-            <div className={`sticky top-0 z-50 shadow-sm ${location.pathname === '/cart' ? 'hidden md:block' : ''}`}>
+            <div className={`sticky top-0 z-50 shadow-sm ${['/cart', '/address', '/payment', '/profile/edit'].includes(location.pathname) ? 'hidden md:block' : ''}`}>
               <Navbar />
               <DeliveryBar />
             </div>
@@ -68,7 +68,7 @@ function App() {
         </Routes>
       </main>
       {!isDashboardLayout && <Footer />}
-      {!isDashboardLayout && <BottomNavbar />}
+      {!isDashboardLayout && !isProductPage && <BottomNavbar />}
     </div>
   );
 }

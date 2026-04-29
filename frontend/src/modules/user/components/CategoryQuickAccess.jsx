@@ -113,7 +113,7 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
       <div className="max-w-[1440px] mx-auto px-4 md:px-8">
         {/* Horizontal Category Tabs */}
         {!isScrollable && (
-          <div className="flex overflow-x-auto pb-4 mb-1 md:mb-10 gap-6 md:gap-8 no-scrollbar items-center border-b border-soft-oatmeal/20 whitespace-nowrap px-4 md:px-0 -mx-4 md:mx-0">
+          <div className="flex overflow-x-auto pb-1 mb-0 md:mb-4 gap-6 md:gap-8 no-scrollbar items-center border-b border-soft-oatmeal/20 whitespace-nowrap px-4 md:px-0 -mx-4 md:mx-0">
             {tabs.map((tab) => (
               <button
                 key={tab}
@@ -134,13 +134,13 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
         )}
 
         {/* Categories Grid/Scroll Area */}
-        <div className="overflow-x-auto no-scrollbar snap-x snap-mandatory px-0 py-2 -mx-4 md:mx-0">
+        <div className="overflow-x-auto no-scrollbar snap-x snap-mandatory px-0 pt-0 pb-2 -mx-4 md:mx-0">
           <div className="flex flex-nowrap md:grid md:grid-cols-5 lg:grid-cols-6 gap-4 md:gap-12 px-4 md:px-0">
             {categories.slice(0, showAll ? categories.length : 6).map((category, index) => {
               const bg = CATEGORY_COLORS[index % CATEGORY_COLORS.length];
               const IconComponent = getCategoryIcon(category.name);
               return (
-                <div key={category._id} className="snap-start shrink-0">
+                <div key={category._id} className={`snap-start shrink-0 ${index === 0 ? 'pl-5' : ''}`}>
                   <Link
                     to={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
                     className="group flex flex-col items-center gap-1.5 md:gap-4 w-14 md:w-40"
