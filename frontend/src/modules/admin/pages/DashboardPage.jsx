@@ -60,16 +60,16 @@ const DashboardPage = () => {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-1">
-            <h1 className="text-3xl md:text-5xl font-display font-bold text-deep-espresso">Admin <span className="text-warm-sand">Overview</span></h1>
-            <p className="text-warm-sand/60 text-sm md:text-base font-medium uppercase tracking-[0.2em]">Real-time system performance & logistics</p>
+            <h1 className="text-3xl md:text-5xl font-display font-extrabold text-[#240046] tracking-tight leading-none">Admin <span className="text-[#240046]">Overview</span></h1>
+            <p className="subtitle mt-2">Real-time system performance & logistics</p>
           </div>
           
           {/* Quick Track Section */}
           <div className="w-full md:w-auto">
              <form onSubmit={handleTrack} className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-red-800 to-warm-sand rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-brand-purple to-brand-teal rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
                 <div className="relative flex items-center bg-white rounded-2xl p-1 shadow-xl border border-soft-oatmeal">
-                   <LuSearch className="ml-4 text-warm-sand" size={20} />
+                   <LuSearch className="ml-4 text-brand-teal" size={20} />
                    <input 
                       type="text" 
                       placeholder="Track my product order..." 
@@ -79,7 +79,7 @@ const DashboardPage = () => {
                    />
                    <button 
                      type="submit"
-                     className="bg-red-800 text-white px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-deep-espresso transition-all active:scale-95"
+                     className="bg-brand-purple text-white px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-deep-espresso transition-all active:scale-95"
                    >
                       Track <LuArrowRight size={14} />
                    </button>
@@ -94,19 +94,19 @@ const DashboardPage = () => {
             label="Live Catalog" 
             value={loading ? '...' : stats.products} 
             icon={LuPackage} 
-            color="bg-red-800" 
+            color="bg-brand-purple" 
           />
           <StatCard 
             label="Collections" 
             value={loading ? '...' : stats.categories} 
             icon={LuTags} 
-            color="bg-red-800" 
+            color="bg-brand-purple" 
           />
           <StatCard 
             label="Active Sellers" 
             value={loading ? '...' : stats.sellers} 
             icon={LuUsers} 
-            color="bg-red-800" 
+            color="bg-brand-purple" 
           />
           <StatCard 
             label="Moving Now" 
@@ -122,13 +122,13 @@ const DashboardPage = () => {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h3 className="text-xl font-display font-bold flex items-center gap-3 text-deep-espresso">
-                  <LuClock className="text-warm-sand" /> Activity Pulse
+                  <LuClock className="text-brand-teal" /> Activity Pulse
                 </h3>
-                <p className="text-xs text-warm-sand tracking-widest uppercase mt-1">Latest system events</p>
+                <p className="text-xs text-brand-teal tracking-widest uppercase mt-1">Latest system events</p>
               </div>
               <button 
                 onClick={() => navigate('/admin/activity')}
-                className="px-4 py-2 border border-soft-oatmeal rounded-xl text-[10px] font-black uppercase tracking-widest text-warm-sand hover:bg-soft-oatmeal/20 transition-all"
+                className="px-4 py-2 border border-soft-oatmeal rounded-xl text-[10px] font-black uppercase tracking-widest text-brand-teal hover:bg-soft-oatmeal/20 transition-all"
               >
                 Full Log
               </button>
@@ -148,14 +148,14 @@ const DashboardPage = () => {
               ) : recentActivity.length > 0 ? (
                 recentActivity.map((item) => (
                   <div key={item.id} className="flex gap-6 items-start group">
-                    <div className="w-3 h-3 rounded-full bg-red-800 mt-2 shadow-[0_0_10px_rgba(153,27,27,0.3)] group-hover:scale-150 transition-transform"></div>
+                    <div className="w-3 h-3 rounded-full bg-brand-purple mt-2 shadow-[0_0_10px_rgba(153,27,27,0.3)] group-hover:scale-150 transition-transform"></div>
                     <div className="flex-1 pb-6 border-b border-soft-oatmeal/30 last:border-0">
                       <p className="text-sm font-medium text-deep-espresso/60">
                         <span className="font-black text-deep-espresso text-base">{item.action}</span> 
                         <span className="mx-2">for</span> 
-                        <span className="text-red-800 font-black">{item.target}</span>
+                        <span className="text-[#240046] font-black">{item.target}</span>
                       </p>
-                      <div className="flex items-center gap-3 mt-2 text-[10px] font-bold text-warm-sand uppercase tracking-widest">
+                      <div className="flex items-center gap-3 mt-2 text-[10px] font-bold text-brand-teal uppercase tracking-widest">
                         <span>Initiated by {item.user}</span>
                         <span className="w-1 h-1 rounded-full bg-soft-oatmeal"></span>
                         <span>{item.time}</span>
@@ -164,7 +164,7 @@ const DashboardPage = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-center py-10 text-warm-sand font-medium">No recent activity detected.</p>
+                <p className="text-center py-10 text-brand-teal font-medium">No recent activity detected.</p>
               )}
             </div>
           </div>
@@ -186,28 +186,28 @@ const DashboardPage = () => {
               
               <button 
                 onClick={() => navigate('/admin/orders/tracking')}
-                className="relative z-10 bg-white text-deep-espresso font-black text-[10px] uppercase tracking-[0.2em] py-5 px-8 rounded-2xl w-full transition-all hover:bg-warm-sand hover:scale-[1.02] active:scale-95 shadow-xl"
+                className="relative z-10 bg-white text-deep-espresso font-black text-[10px] uppercase tracking-[0.2em] py-5 px-8 rounded-2xl w-full transition-all hover:bg-brand-teal hover:scale-[1.02] active:scale-95 shadow-xl"
               >
                 Go to Monitoring Portal
               </button>
 
-              <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-red-800/20 rounded-full blur-[100px]"></div>
+              <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-brand-purple/20 rounded-full blur-[100px]"></div>
             </div>
 
             {/* Quick Actions */}
             <div className="bg-white rounded-[2rem] border border-soft-oatmeal p-8 shadow-sm">
-               <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-warm-sand mb-6">Quick Infrastructure</h4>
+               <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-teal mb-6">Quick Infrastructure</h4>
                <div className="grid grid-cols-2 gap-4">
                   <button 
                     onClick={() => navigate('/admin/catalog/add')}
-                    className="p-4 bg-soft-oatmeal/20 rounded-[1.5rem] flex flex-col items-center gap-2 hover:bg-red-800 hover:text-white transition-all group"
+                    className="p-4 bg-soft-oatmeal/20 rounded-[1.5rem] flex flex-col items-center gap-2 hover:bg-brand-purple hover:text-white transition-all group"
                   >
                      <LuPackage size={20} className="group-hover:scale-110 transition-transform" />
                      <span className="text-[9px] font-black uppercase tracking-widest">New Catalog</span>
                   </button>
                   <button 
                     onClick={() => navigate('/admin/delivery/assign')}
-                    className="p-4 bg-soft-oatmeal/20 rounded-[1.5rem] flex flex-col items-center gap-2 hover:bg-red-800 hover:text-white transition-all group"
+                    className="p-4 bg-soft-oatmeal/20 rounded-[1.5rem] flex flex-col items-center gap-2 hover:bg-brand-purple hover:text-white transition-all group"
                   >
                      <LuTruck size={20} className="group-hover:scale-110 transition-transform" />
                      <span className="text-[9px] font-black uppercase tracking-widest">Assign Order</span>

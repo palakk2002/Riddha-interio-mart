@@ -90,7 +90,7 @@ const Wallet = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                        transaction.type === 'credit' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                        transaction.type === 'credit' ? 'bg-green-100 text-green-600' : 'bg-[#001B4E]/10 text-[#001B4E]'
                       }`}>
                         {transaction.type === 'credit' ? <LuArrowDownLeft size={24} /> : <LuArrowUpRight size={24} />}
                       </div>
@@ -100,7 +100,7 @@ const Wallet = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={`font-bold ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className={`font-bold ${transaction.type === 'credit' ? 'text-green-600' : 'text-[#001B4E]'}`}>
                         {transaction.type === 'credit' ? '+' : '-'}₹{transaction.amount.toLocaleString()}
                       </p>
                       <div className="flex items-center justify-end gap-1 mt-1">

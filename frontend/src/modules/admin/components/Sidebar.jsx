@@ -149,7 +149,7 @@ const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCoun
         className={`
           flex items-center justify-between p-3 rounded-xl transition-all duration-300 group border border-white/5
           ${isActive 
-            ? 'bg-red-800 text-white shadow-xl shadow-red-900/20 border-white/10 scale-[1.02]' 
+            ? 'bg-gradient-to-r from-purple-600/20 to-transparent border-l-4 border-purple-500 text-white shadow-lg shadow-purple-900/10 scale-[1.02]' 
             : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10'}
         `}
       >
@@ -212,7 +212,7 @@ const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCoun
                         <child.icon size={16} className={`transition-transform duration-300 group-hover:scale-110 ${isCurrentChildActive ? 'text-white' : 'text-white/50'}`} />
                         <span className="text-sm tracking-wide text-white">{child.label}</span>
                         {child.showBadge && count > 0 && (
-                          <span className="ml-auto w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/40">
+                          <span className="ml-auto w-5 h-5 bg-[#a855f7] text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-purple-500/40">
                             {count}
                           </span>
                         )}
@@ -298,7 +298,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Sidebar Content */}
       <aside
         className={`
-          fixed lg:static top-0 left-0 h-screen w-72 lg:shrink-0 bg-deep-espresso text-white z-50 flex flex-col shadow-2xl lg:shadow-none overflow-hidden
+          fixed lg:static top-0 left-0 h-screen w-72 lg:shrink-0 bg-[#240046] text-white z-50 flex flex-col shadow-2xl lg:shadow-none overflow-hidden
           transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
@@ -310,13 +310,13 @@ const Sidebar = ({ isOpen, onClose }) => {
             alt="Interior Decorative Lighting" 
             className="w-full h-full object-cover opacity-10 grayscale"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-deep-espresso via-deep-espresso/95 to-deep-espresso"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#240046] via-[#240046]/95 to-[#240046]"></div>
         </div>
 
         {/* Header */}
         <div className="relative z-10 p-6 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-warm-sand rounded-lg flex items-center justify-center text-deep-espresso font-bold text-xl">
+            <div className="w-10 h-10 bg-warm-sand rounded-lg flex items-center justify-center text-[#240046] font-bold text-xl">
               R
             </div>
             <span className="font-display font-bold text-xl tracking-wide uppercase text-white">
@@ -345,10 +345,10 @@ const Sidebar = ({ isOpen, onClose }) => {
         </nav>
 
         {/* Footer info and logout */}
-        <div className="relative z-10 p-6 border-t border-white/10 mt-auto backdrop-blur-sm bg-deep-espresso/20">
+        <div className="relative z-10 p-6 border-t border-white/10 mt-auto backdrop-blur-sm bg-[#240046]/20">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors group mb-4"
+            className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold text-purple-300 hover:bg-white/5 transition-colors group mb-4"
           >
             <FiLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
             Sign Out

@@ -215,10 +215,10 @@ const ManageHeroBanner = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">
+            <h1 className="text-3xl md:text-5xl font-display font-extrabold text-[#240046] tracking-tight leading-none">
               Home Banner
             </h1>
-            <p className="text-warm-sand mt-1 text-sm md:text-base">
+            <p className="subtitle mt-2">
               Create, edit and manage multiple homepage banners.
             </p>
           </div>
@@ -286,7 +286,7 @@ const ManageHeroBanner = () => {
 
               <form onSubmit={handleSaveBanner} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Title</label>
+                  <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Title</label>
                   <input
                     type="text"
                     value={bannerForm.title}
@@ -297,7 +297,7 @@ const ManageHeroBanner = () => {
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Subtitle / Description</label>
+                  <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Subtitle / Description</label>
                   <textarea
                     rows={3}
                     value={bannerForm.subtitle}
@@ -309,7 +309,7 @@ const ManageHeroBanner = () => {
 
                 <div className="space-y-2 md:col-span-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Background Image</label>
+                    <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Background Image</label>
                     <button
                       type="button"
                       onClick={() => fileInputRef.current.click()}
@@ -335,7 +335,7 @@ const ManageHeroBanner = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Image Alt Text</label>
+                  <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Image Alt Text</label>
                   <input
                     type="text"
                     value={bannerForm.bgImage?.alt || ''}
@@ -346,7 +346,7 @@ const ManageHeroBanner = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Image Caption</label>
+                  <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Image Caption</label>
                   <input
                     type="text"
                     value={bannerForm.bgImage?.caption || ''}
@@ -357,7 +357,7 @@ const ManageHeroBanner = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Primary Button Text</label>
+                  <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Primary Button Text</label>
                   <input
                     type="text"
                     value={bannerForm.primaryBtnText}
@@ -368,7 +368,7 @@ const ManageHeroBanner = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Primary Button Link</label>
+                  <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Primary Button Link</label>
                   <input
                     type="text"
                     value={bannerForm.primaryBtnLink}
@@ -379,7 +379,7 @@ const ManageHeroBanner = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Secondary Button Text</label>
+                  <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Secondary Button Text</label>
                   <input
                     type="text"
                     value={bannerForm.secondaryBtnText}
@@ -390,7 +390,7 @@ const ManageHeroBanner = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-warm-sand uppercase tracking-wider">Secondary Button Link</label>
+                  <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Secondary Button Link</label>
                   <input
                     type="text"
                     value={bannerForm.secondaryBtnLink}
@@ -404,7 +404,7 @@ const ManageHeroBanner = () => {
 
             <div className="flex items-center gap-3">
               <div className="h-px flex-1 bg-soft-oatmeal/40" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-warm-sand">
+              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-brand-teal">
                 Live Preview
               </span>
               <div className="h-px flex-1 bg-soft-oatmeal/40" />
@@ -418,7 +418,7 @@ const ManageHeroBanner = () => {
                   className="absolute inset-0 h-full w-full object-cover"
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-warm-sand">
+                <div className="absolute inset-0 flex items-center justify-center text-brand-teal">
                   No image selected
                 </div>
               )}
@@ -426,7 +426,7 @@ const ManageHeroBanner = () => {
               <div className="absolute inset-0 bg-gradient-to-b from-[#3B2F2F]/80 via-[#3B2F2F]/40 to-[#3B2F2F]/80 md:bg-gradient-to-r md:from-[#3B2F2F]/80 md:via-[#3B2F2F]/30 md:to-transparent flex items-center justify-center md:justify-start">
                 <div className="max-w-7xl mx-auto px-6 md:px-10 w-full flex flex-col items-center md:items-start text-center md:text-left">
                   <div className="w-full max-w-xl space-y-4 md:space-y-6 flex flex-col items-center md:items-start">
-                    <span className="inline-block px-4 py-1.5 bg-[#BFA38A]/20 backdrop-blur-md border border-[#BFA38A]/30 text-[#BFA38A] rounded-full text-[10px] md:text-xs font-bold tracking-widest uppercase">
+                    <span className="inline-block px-4 py-1.5 bg-brand-teal/20 backdrop-blur-md border border-brand-teal/30 text-brand-teal rounded-full text-[10px] md:text-xs font-bold tracking-widest uppercase">
                       Preview
                     </span>
 
@@ -439,7 +439,7 @@ const ManageHeroBanner = () => {
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2 w-full sm:w-auto">
-                      <span className="px-8 py-3 bg-[#BFA38A] text-[#3B2F2F] rounded-full font-bold text-sm shadow-2xl text-center cursor-default">
+                      <span className="px-8 py-3 bg-brand-teal text-white rounded-full font-bold text-sm shadow-2xl text-center cursor-default">
                         {bannerForm.primaryBtnText || 'Primary Button'}
                       </span>
                       <span className="px-8 py-3 border-2 border-white text-white rounded-full font-bold text-sm text-center cursor-default">
@@ -456,13 +456,13 @@ const ManageHeroBanner = () => {
         {activeTab === 'all' && (
           <div className="space-y-6">
             {loading ? (
-              <div className="bg-white p-10 rounded-2xl border border-soft-oatmeal text-center text-warm-sand">
+              <div className="bg-white p-10 rounded-2xl border border-soft-oatmeal text-center text-brand-teal">
                 Loading banners...
               </div>
             ) : banners.length === 0 ? (
               <div className="bg-white p-10 rounded-2xl border border-soft-oatmeal text-center">
                 <p className="text-deep-espresso font-semibold">No banners yet.</p>
-                <p className="text-warm-sand text-sm mt-1">Create a banner and it will appear here.</p>
+                <p className="text-brand-teal text-sm mt-1">Create a banner and it will appear here.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -479,7 +479,7 @@ const ManageHeroBanner = () => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-warm-sand text-sm">
+                        <div className="w-full h-full flex items-center justify-center text-brand-teal text-sm">
                           No image
                         </div>
                       )}
@@ -487,7 +487,7 @@ const ManageHeroBanner = () => {
 
                     <div className="p-4 space-y-3">
                       <h3 className="font-bold text-deep-espresso line-clamp-1">{item.title}</h3>
-                      <p className="text-sm text-warm-sand line-clamp-2 min-h-10">{item.subtitle}</p>
+                      <p className="text-sm text-brand-teal line-clamp-2 min-h-10">{item.subtitle}</p>
 
                       <div className="flex flex-wrap gap-2 text-xs">
                         <span className="px-2 py-1 rounded-full bg-soft-oatmeal/30 text-deep-espresso">
@@ -509,7 +509,7 @@ const ManageHeroBanner = () => {
                         <button
                           onClick={() => handleDelete(item)}
                           disabled={deletingId === item._id}
-                          className="flex-1 flex items-center justify-center gap-2 text-sm font-semibold px-3 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-all disabled:opacity-60"
+                          className="flex-1 flex items-center justify-center gap-2 text-sm font-semibold px-3 py-2 rounded-xl bg-[#240046]/5 text-[#240046] hover:bg-[#240046]/10 transition-all disabled:opacity-60"
                         >
                           {deletingId === item._id ? <LuLoader className="animate-spin" size={15} /> : <LuTrash2 size={15} />}
                           Delete

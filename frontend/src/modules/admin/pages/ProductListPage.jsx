@@ -65,11 +65,11 @@ const ProductListPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso">Product List</h1>
-            <p className="text-warm-sand text-sm md:text-base">Comprehensive view of all your inventory.</p>
+            <p className="text-brand-teal text-sm md:text-base">Comprehensive view of all your inventory.</p>
           </div>
           <button 
             onClick={() => navigate('/admin/inventory/add')}
-            className="flex items-center justify-center gap-2 bg-red-800 text-white px-6 py-3.5 rounded-2xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20 active:scale-95 text-sm"
+            className="flex items-center justify-center gap-2 bg-brand-purple text-white px-6 py-3.5 rounded-2xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20 active:scale-95 text-sm"
           >
             <LuPlus size={18} />
             Add New Product
@@ -79,7 +79,7 @@ const ProductListPage = () => {
         {/* Toolbar */}
         <div className="bg-white p-3 md:p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex flex-col md:flex-row gap-3 md:gap-4">
           <div className="relative flex-grow">
-            <LuSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand" size={18} />
+            <LuSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-teal" size={18} />
             <input 
               type="text" 
               placeholder="Search by name or code..." 
@@ -99,28 +99,28 @@ const ProductListPage = () => {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-32 space-y-4">
               <div className="w-12 h-12 border-4 border-soft-oatmeal border-t-red-800 rounded-full animate-spin" />
-              <p className="text-xs font-black uppercase tracking-widest text-warm-sand">Fetching Inventory...</p>
+              <p className="text-xs font-black uppercase tracking-widest text-brand-teal">Fetching Inventory...</p>
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-32 space-y-4 text-center px-6">
-               <div className="w-20 h-20 bg-soft-oatmeal/20 rounded-[40px] flex items-center justify-center text-warm-sand/30 mb-2">
+               <div className="w-20 h-20 bg-soft-oatmeal/20 rounded-[40px] flex items-center justify-center text-brand-teal/30 mb-2">
                  <LuPackage size={40} />
                </div>
                <h3 className="text-xl font-display font-bold text-deep-espresso">No Products Found</h3>
-               <p className="text-sm text-warm-sand max-w-xs">{searchTerm ? "No products match your current search criteria." : "Start by adding your first product to the catalog."}</p>
+               <p className="text-sm text-brand-teal max-w-xs">{searchTerm ? "No products match your current search criteria." : "Start by adding your first product to the catalog."}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead className="bg-soft-oatmeal/20 border-b border-soft-oatmeal">
                   <tr>
-                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Image</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Product Name</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">SKU</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Category</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Status</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Price</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest text-right">Actions</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Image</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Product Name</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">SKU</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Category</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Status</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Price</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-soft-oatmeal/50">
@@ -135,7 +135,7 @@ const ProductListPage = () => {
                       </td>
                       <td className="px-6 py-4">
                         <p className="font-bold text-deep-espresso">{product.name}</p>
-                        <p className="text-[10px] text-warm-sand uppercase tracking-wider mt-0.5">{product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}</p>
+                        <p className="text-[10px] text-brand-teal uppercase tracking-wider mt-0.5">{product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}</p>
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-[10px] font-black text-deep-espresso/60 bg-soft-oatmeal/30 px-2 py-1 rounded border border-soft-oatmeal">
@@ -143,7 +143,7 @@ const ProductListPage = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="text-[10px] font-bold text-red-800 uppercase tracking-widest bg-red-800/5 px-2.5 py-1 rounded-full border border-red-800/10">
+                        <span className="text-[10px] font-bold text-red-800 uppercase tracking-widest bg-brand-purple/5 px-2.5 py-1 rounded-full border border-red-800/10">
                           {product.category}
                         </span>
                       </td>
@@ -152,7 +152,7 @@ const ProductListPage = () => {
                           product.approvalStatus === 'approved' 
                           ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
                           : product.approvalStatus === 'rejected'
-                          ? 'bg-red-50 text-red-600 border-red-100'
+                          ? 'bg-brand-pink/5 text-red-600 border-red-100'
                           : 'bg-amber-50 text-amber-600 border-amber-100'
                         }`}>
                           {product.approvalStatus || 'Pending'}
@@ -187,7 +187,7 @@ const ProductListPage = () => {
                           </button>
                           <button 
                             onClick={() => setDeleteId(product._id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-red-600 hover:bg-brand-pink/5 rounded-lg transition-colors"
                           >
                             <LuTrash2 size={16} />
                           </button>
@@ -207,7 +207,7 @@ const ProductListPage = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-deep-espresso/20 backdrop-blur-sm">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-soft-oatmeal">
             <h3 className="text-xl font-display font-bold text-deep-espresso mb-2">Delete Product?</h3>
-            <p className="text-warm-sand mb-6">Are you sure you want to remove this product from your list? This action cannot be undone.</p>
+            <p className="text-brand-teal mb-6">Are you sure you want to remove this product from your list? This action cannot be undone.</p>
             <div className="flex gap-3">
               <button 
                 onClick={() => setDeleteId(null)}
@@ -217,7 +217,7 @@ const ProductListPage = () => {
               </button>
               <button 
                 onClick={() => handleDelete(deleteId)}
-                className="flex-1 px-6 py-3 rounded-xl font-bold text-white bg-red-800 hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20"
+                className="flex-1 px-6 py-3 rounded-xl font-bold text-white bg-brand-purple hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20"
               >
                 Delete
               </button>

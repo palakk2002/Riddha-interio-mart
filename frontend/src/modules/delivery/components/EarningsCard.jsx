@@ -12,7 +12,7 @@ const EarningsCard = ({ label, value, subtext, icon: Icon, trend }) => {
           <Icon size={24} />
         </div>
         {trend && (
-          <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${trend > 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+          <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${trend > 0 ? 'bg-green-100 text-green-600' : 'bg-[#001B4E]/10 text-[#001B4E]'}`}>
             {trend > 0 ? '+' : ''}{trend}% vs last week
           </span>
         )}

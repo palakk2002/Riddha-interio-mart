@@ -12,9 +12,20 @@ import {
   FiActivity,
   FiZap
 } from 'react-icons/fi';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const AnalyticsPage = () => {
   const [timeRange, setTimeRange] = useState('This Month');
+
+  const chartData = [
+    { day: 'Mon', current: 2400, previous: 1400 },
+    { day: 'Tue', current: 4398, previous: 3000 },
+    { day: 'Wed', current: 9800, previous: 6000 },
+    { day: 'Thu', current: 3908, previous: 2780 },
+    { day: 'Fri', current: 8800, previous: 4890 },
+    { day: 'Sat', current: 3800, previous: 2390 },
+    { day: 'Sun', current: 4300, previous: 3490 },
+  ];
 
   // Mock Data for Frontend Display
   const stats = [
@@ -91,7 +102,7 @@ const AnalyticsPage = () => {
                </div>
                <div className="flex items-center gap-4">
                  <div className="flex items-center gap-2">
-                   <div className="w-3 h-3 rounded-full bg-warm-sand" />
+                   <div className="w-3 h-3 rounded-full bg-[#240046]" />
                    <span className="text-[10px] font-black uppercase text-gray-400">Current</span>
                  </div>
                  <div className="flex items-center gap-2">
@@ -101,28 +112,42 @@ const AnalyticsPage = () => {
                </div>
              </div>
 
-             {/* Mock Chart SVG */}
-             <div className="h-64 w-full relative group cursor-crosshair">
-                <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
-                  <path d="M0,80 Q10,75 20,40 T40,60 T60,20 T80,45 T100,10" fill="none" stroke="#8B2323" strokeWidth="4" className="drop-shadow-2xl" />
-                  <path d="M0,80 Q10,75 20,40 T40,60 T60,20 T80,45 T100,10 L100,100 L0,100 Z" fill="url(#chartGradient)" className="opacity-10" />
-                  <defs>
-                    <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#8B2323" />
-                      <stop offset="100%" stopColor="transparent" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                {/* Horizontal Guide Lines */}
-                <div className="absolute inset-0 flex flex-col justify-between opacity-5 pointer-events-none">
-                  {[...Array(5)].map((_, i) => <div key={i} className="h-px bg-black w-full" />)}
-                </div>
-             </div>
-
-             <div className="flex justify-between mt-8">
-               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-                 <span key={day} className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{day}</span>
-               ))}
+             {/* Recharts Area Chart */}
+             <div className="h-72 w-full mt-4">
+               <ResponsiveContainer width="100%" height="100%">
+                 <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                   <defs>
+                     <linearGradient id="colorCurrent" x1="0" y1="0" x2="0" y2="1">
+                       <stop offset="5%" stopColor="#240046" stopOpacity={0.3}/>
+                       <stop offset="95%" stopColor="#240046" stopOpacity={0}/>
+                     </linearGradient>
+                     <linearGradient id="colorPrevious" x1="0" y1="0" x2="0" y2="1">
+                       <stop offset="5%" stopColor="#f5f3ff" stopOpacity={0.8}/>
+                       <stop offset="95%" stopColor="#f5f3ff" stopOpacity={0}/>
+                     </linearGradient>
+                   </defs>
+                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                   <XAxis 
+                     dataKey="day" 
+                     axisLine={false} 
+                     tickLine={false} 
+                     tick={{ fontSize: 10, fontWeight: 800, fill: '#9ca3af' }} 
+                     dy={15}
+                   />
+                   <YAxis 
+                     axisLine={false} 
+                     tickLine={false} 
+                     tick={{ fontSize: 10, fontWeight: 800, fill: '#9ca3af' }}
+                   />
+                   <Tooltip 
+                     contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
+                     itemStyle={{ fontWeight: 900, color: '#240046' }}
+                     cursor={{ stroke: '#240046', strokeWidth: 1, strokeDasharray: '5 5' }}
+                   />
+                   <Area type="monotone" dataKey="previous" stroke="#e5e7eb" strokeWidth={3} fillOpacity={1} fill="url(#colorPrevious)" />
+                   <Area type="monotone" dataKey="current" stroke="#240046" strokeWidth={5} fillOpacity={1} fill="url(#colorCurrent)" activeDot={{ r: 8, strokeWidth: 0, fill: '#240046' }} />
+                 </AreaChart>
+               </ResponsiveContainer>
              </div>
           </div>
 

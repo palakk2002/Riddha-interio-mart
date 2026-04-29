@@ -133,14 +133,14 @@ const Settings = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-red-50 rounded-2xl border border-red-100 p-6"
+          className="bg-[#001B4E]/5 rounded-2xl border border-[#001B4E]/20 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-red-600">Delete Account</h3>
-              <p className="text-sm text-red-400">Permanently delete your account and all data</p>
+              <h3 className="font-bold text-[#001B4E]">Delete Account</h3>
+              <p className="text-sm text-[#001B4E]/60">Permanently delete your account and all data</p>
             </div>
-            <button className="px-6 py-2 border border-red-200 text-red-600 rounded-xl font-bold hover:bg-red-600 hover:text-white transition-colors">
+            <button className="px-6 py-2 border border-[#001B4E]/30 text-[#001B4E] rounded-xl font-bold hover:bg-[#001B4E] hover:text-white transition-colors">
               Delete
             </button>
           </div>

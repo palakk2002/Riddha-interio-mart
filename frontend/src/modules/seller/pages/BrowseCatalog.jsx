@@ -81,27 +81,27 @@ const BrowseCatalog = () => {
     <PageWrapper>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso">Browse Catalog</h1>
-            <p className="text-warm-sand text-sm md:text-base">Select items from the admin catalog to add to your shop.</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 md:px-0">
+          <div className="space-y-1 text-center md:text-left">
+            <h1 className="text-2xl md:text-4xl font-display font-bold text-deep-espresso">Browse Catalog</h1>
+            <p className="text-warm-sand text-[10px] md:text-sm font-bold uppercase tracking-widest">Select items from the master catalog to add to your shop.</p>
           </div>
         </div>
 
         {/* Toolbar */}
-        <div className="bg-white p-3 md:p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex flex-col md:flex-row gap-3 md:gap-4">
+        <div className="bg-white p-3 rounded-2xl border border-soft-oatmeal shadow-sm flex flex-col md:flex-row gap-3 mx-4 md:mx-0">
           <div className="relative flex-grow">
-            <LuSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand" size={18} />
+            <LuSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand" size={16} />
             <input
               type="text"
               placeholder="Search by name or code..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all text-sm"
+              className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl pl-10 pr-4 py-2.5 md:py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all text-sm"
             />
           </div>
-          <button className="flex items-center justify-center gap-2 border border-soft-oatmeal text-deep-espresso px-6 py-3 md:py-0 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-soft-oatmeal/20 transition-all">
-            <LuFilter size={16} />
+          <button className="flex items-center justify-center gap-2 border border-soft-oatmeal text-deep-espresso px-6 py-2.5 md:py-0 rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest hover:bg-soft-oatmeal/20 transition-all">
+            <LuFilter size={14} />
             Filters
           </button>
         </div>

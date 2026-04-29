@@ -28,12 +28,12 @@ const CategoriesPage = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-display font-bold text-deep-espresso">Categories</h1>
-            <p className="text-warm-sand mt-1">Organize your products into collections.</p>
+            <h1 className="text-3xl md:text-5xl font-display font-extrabold text-[#240046] tracking-tight leading-none">Categories</h1>
+            <p className="subtitle mt-2">Organize your products into collections.</p>
           </div>
           <button 
             onClick={() => setShowAddForm(!showAddForm)}
-            className="w-12 h-12 bg-dusty-cocoa text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-dusty-cocoa/40 transition-all active:scale-90"
+            className="w-12 h-12 bg-[#240046] text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-purple-900/40 transition-all active:scale-90"
           >
             {showAddForm ? <LuX size={24} /> : <LuPlus size={24} />}
           </button>
@@ -65,7 +65,7 @@ const CategoriesPage = () => {
                   placeholder="e.g. handmade-decor"
                 />
               </div>
-              <button type="submit" className="bg-deep-espresso text-white px-8 py-3 rounded-xl font-bold hover:bg-dusty-cocoa transition-all flex items-center gap-2">
+              <button type="submit" className="bg-[#240046] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#240046]/90 transition-all flex items-center gap-2">
                 <LuCheck size={20} /> Create Category
               </button>
             </form>
@@ -85,11 +85,11 @@ const CategoriesPage = () => {
                 </button>
               </div>
 
-              <div className="w-14 h-14 bg-soft-oatmeal/30 rounded-2xl flex items-center justify-center text-dusty-cocoa mb-6 group-hover:bg-dusty-cocoa group-hover:text-white transition-colors duration-300">
+              <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-[#240046] mb-6 group-hover:bg-[#240046] group-hover:text-white transition-colors duration-300">
                 <LuFolder size={28} />
               </div>
 
-              <h3 className="text-xl font-display font-bold text-deep-espresso group-hover:text-dusty-cocoa transition-colors">
+              <h3 className="text-xl font-display font-bold text-[#240046] group-hover:text-[#240046] transition-colors">
                 {cat.name}
               </h3>
               <div className="mt-4 flex items-center justify-between">
@@ -110,7 +110,7 @@ const CategoriesPage = () => {
           {!showAddForm && (
             <button 
               onClick={() => setShowAddForm(true)}
-              className="border-2 border-dashed border-soft-oatmeal rounded-2xl p-6 flex flex-col items-center justify-center gap-2 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white transition-all group min-h-[180px]"
+              className="border-2 border-dashed border-soft-oatmeal rounded-2xl p-6 flex flex-col items-center justify-center gap-2 text-[#240046] hover:border-[#240046] hover:text-[#240046] hover:bg-white transition-all group min-h-[180px]"
             >
               <LuPlus size={32} className="group-hover:scale-110 transition-transform" />
               <span className="font-bold text-sm uppercase">Add Category</span>

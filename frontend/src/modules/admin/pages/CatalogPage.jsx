@@ -60,12 +60,12 @@ const CatalogPage = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso">Product Catalog</h1>
-            <p className="text-warm-sand text-sm md:text-base">Manage your inventory and product codes.</p>
+            <h1 className="text-3xl md:text-5xl font-display font-extrabold text-[#240046] tracking-tight leading-none">Product Catalog</h1>
+            <p className="subtitle mt-2">Manage your inventory and product codes.</p>
           </div>
           <button 
             onClick={() => navigate('/admin/catalog/add')}
-            className="flex items-center justify-center gap-2 bg-red-800 text-white px-6 py-3.5 rounded-2xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20 active:scale-95 text-sm"
+            className="flex items-center justify-center gap-2 bg-[#240046] text-white px-6 py-3.5 rounded-2xl font-bold hover:bg-[#240046]/90 transition-all shadow-md shadow-purple-900/20 active:scale-95 text-sm"
           >
             <LuPlus size={18} />
             Add New Product
@@ -123,7 +123,7 @@ const CatalogPage = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-[10px] font-bold text-red-800 uppercase tracking-widest bg-red-800/5 px-2.5 py-1 rounded-full border border-red-800/10">
+                        <span className="text-[10px] font-bold text-[#240046] uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100">
                           {product.category}
                         </span>
                       </td>
@@ -145,7 +145,7 @@ const CatalogPage = () => {
                             </button>
                           )}
                           <button onClick={() => navigate(`/admin/catalog/edit/${product._id}`)} className="p-2 text-warm-sand hover:text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-all" title="Edit Catalog Item"><FiEdit3 size={18} /></button>
-                          <button onClick={() => setDeleteId(product._id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Remove from Catalog"><FiTrash2 size={18} /></button>
+                          <button onClick={() => setDeleteId(product._id)} className="p-2 text-[#240046]/60 hover:text-[#240046] hover:bg-[#240046]/5 rounded-lg transition-all" title="Remove from Catalog"><FiTrash2 size={18} /></button>
                         </div>
                       </td>
                     </tr>
@@ -183,7 +183,7 @@ const CatalogPage = () => {
                       </button>
                     )}
                     <button onClick={() => navigate(`/admin/catalog/edit/${product._id}`)} className="p-2.5 bg-soft-oatmeal/20 text-warm-sand rounded-xl"><FiEdit3 size={16} /></button>
-                    <button onClick={() => setDeleteId(product._id)} className="p-2.5 bg-red-50 text-red-400 rounded-xl"><FiTrash2 size={16} /></button>
+                    <button onClick={() => setDeleteId(product._id)} className="p-2.5 bg-[#240046]/5 text-[#240046] rounded-xl"><FiTrash2 size={16} /></button>
                   </div>
                 </div>
               ))
@@ -236,7 +236,7 @@ const CatalogPage = () => {
                 </button>
                 <button 
                   onClick={() => handleDelete(deleteId)}
-                  className="py-4 bg-red-800 rounded-2xl font-bold text-xs uppercase tracking-widest text-white hover:bg-deep-espresso transition-all shadow-lg shadow-red-900/20"
+                  className="py-4 bg-[#240046] rounded-2xl font-bold text-xs uppercase tracking-widest text-white hover:bg-[#240046]/90 transition-all shadow-lg shadow-purple-900/20"
                 >
                    Delete
                 </button>

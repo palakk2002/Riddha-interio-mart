@@ -121,27 +121,28 @@ const MyProducts = () => {
           </div>
         </div>
 
-        {view === 'grid' ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
-            {filteredProducts.map(product => (
-              <div key={product._id || product.id} className="bg-white rounded-2xl border border-soft-oatmeal overflow-hidden shadow-sm hover:shadow-md transition-all group">
-                <div className="relative h-24 sm:h-32 overflow-hidden">
-                  <img 
-                    src={(product.image || (product.images && product.images[0]))?.startsWith('C:') 
-                      ? 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80' 
-                      : (product.image || (product.images && product.images[0]) || 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80')} 
-                    alt={product.name} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  />
-                  <div className="absolute top-2 left-2">
-                    <StatusBadge status={product.status || (product.isActive ? 'approved' : 'pending')} />
+        <div className={`space-y-4 ${view === 'grid' ? 'mobile-full-bleed' : ''}`}>
+          {view === 'grid' ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-4">
+              {filteredProducts.map(product => (
+                <div key={product._id || product.id} className="app-card overflow-hidden group">
+                  <div className="relative h-24 sm:h-32 overflow-hidden">
+                    <img 
+                      src={(product.image || (product.images && product.images[0]))?.startsWith('C:') 
+                        ? 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80' 
+                        : (product.image || (product.images && product.images[0]) || 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80')} 
+                      alt={product.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    />
+                    <div className="absolute top-1.5 left-1.5">
+                      <StatusBadge status={product.status || (product.isActive ? 'approved' : 'pending')} />
+                    </div>
                   </div>
-                </div>
-                <div className="p-3 space-y-3">
-                  <div>
-                    <span className="text-[8px] font-black text-warm-sand uppercase tracking-widest">{product.category}</span>
-                    <h3 className="text-xs font-bold text-deep-espresso truncate leading-tight">{product.name}</h3>
-                  </div>
+                  <div className="p-2.5 space-y-2">
+                    <div className="min-h-[40px]">
+                      <span className="text-[7px] font-black text-warm-sand uppercase tracking-widest">{product.category}</span>
+                      <h3 className="text-[11px] font-bold text-deep-espresso line-clamp-2 leading-tight">{product.name}</h3>
+                    </div>
                     <div className="flex items-center justify-between border-t border-soft-oatmeal/50 pt-2 gap-2">
                       <span className="text-sm font-black text-deep-espresso">Rs. {product.price}</span>
                       <div className="flex items-center gap-1">
@@ -159,11 +160,11 @@ const MyProducts = () => {
                         </button>
                       </div>
                     </div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
+              ))}
+            </div>
+          ) : (
           <div className="bg-white rounded-2xl border border-soft-oatmeal overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -229,8 +230,9 @@ const MyProducts = () => {
             <p className="text-warm-sand mt-2">Adjust filters or add your first product to get started.</p>
           </div>
         )}
+      </div>
 
-        {/* Edit Modal */}
+      {/* Edit Modal */}
         {showEditModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-deep-espresso/20 backdrop-blur-sm">
             <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-soft-oatmeal">

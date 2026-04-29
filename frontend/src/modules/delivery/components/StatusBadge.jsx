@@ -6,7 +6,7 @@ const StatusBadge = ({ status }) => {
       case 'Pending':
         return 'bg-amber-100 text-amber-700 border-amber-200';
       case 'Accepted':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
+        return 'bg-[#001B4E]/10 text-[#001B4E] border-[#001B4E]/20';
       case 'Picked':
         return 'bg-purple-100 text-purple-700 border-purple-200';
       case 'Out for Delivery':
@@ -14,7 +14,7 @@ const StatusBadge = ({ status }) => {
       case 'Delivered':
         return 'bg-green-100 text-green-700 border-green-200';
       case 'Rejected':
-        return 'bg-red-100 text-red-700 border-red-200';
+        return 'bg-[#001B4E]/5 text-[#001B4E] border-[#001B4E]/20';
       default:
         return 'bg-gray-100 text-gray-700 border-gray-200';
     }

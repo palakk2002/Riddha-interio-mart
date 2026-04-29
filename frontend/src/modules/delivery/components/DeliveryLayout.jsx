@@ -123,7 +123,7 @@ const DeliveryLayout = () => {
 
   return (
     <div 
-      className="flex h-screen w-full bg-white text-deep-espresso overflow-hidden" 
+      className="flex h-screen w-full bg-white text-deep-espresso overflow-hidden delivery-theme" 
       onClick={() => {
         setShowNotifications(false);
         setShowUserMenu(false);
@@ -141,9 +141,9 @@ const DeliveryLayout = () => {
             <div className="bg-white rounded-[32px] shadow-2xl border border-soft-oatmeal overflow-hidden">
               <div className="p-6 flex items-start gap-4">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                  toast.type === 'success' ? 'bg-emerald-100 text-emerald-600' :
-                  toast.type === 'danger' ? 'bg-red-100 text-red-600' :
-                  'bg-teal-100 text-teal-600'
+                  toast.type === 'success' ? 'bg-[#001B4E]/10 text-[#001B4E]' :
+                  toast.type === 'danger' ? 'bg-[#001B4E]/10 text-[#001B4E]' :
+                  'bg-[#001B4E]/10 text-[#001B4E]'
                 }`}>
                   {toast.type === 'success' ? <LuCheck size={24} /> :
                    toast.type === 'danger' ? <LuX size={24} /> : <LuTruck size={24} />}
@@ -160,9 +160,9 @@ const DeliveryLayout = () => {
                   animate={{ width: "0%" }}
                   transition={{ duration: 6, ease: "linear" }}
                   className={`h-full ${
-                    toast.type === 'success' ? 'bg-emerald-500' :
-                    toast.type === 'danger' ? 'bg-red-500' :
-                    'bg-teal-500'
+                    toast.type === 'success' ? 'bg-[#001B4E]' :
+                    toast.type === 'danger' ? 'bg-[#001B4E]' :
+                    'bg-[#001B4E]'
                   }`}
                 />
               </div>
@@ -186,7 +186,7 @@ const DeliveryLayout = () => {
                 exit={{ opacity: 0, scale: 0.9, y: 30 }}
                 className="relative w-full max-w-md bg-white rounded-[3rem] shadow-2xl overflow-hidden"
               >
-                <div className="bg-red-800 p-8 text-white text-center flex flex-col items-center relative overflow-hidden">
+                <div className="bg-[#001B4E] p-8 text-white text-center flex flex-col items-center relative overflow-hidden">
                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-50" />
                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-lg border border-white/20">
                       <LuTruck size={32} />
@@ -248,7 +248,7 @@ const DeliveryLayout = () => {
                 className="relative w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl p-8 text-center overflow-hidden"
               >
                 <div className={`w-20 h-20 mx-auto mb-6 rounded-3xl flex items-center justify-center ${
-                  approvalNotification.status === 'Approved' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
+                  approvalNotification.status === 'Approved' ? 'bg-[#001B4E]/10 text-[#001B4E]' : 'bg-[#001B4E]/10 text-[#001B4E]'
                 }`}>
                   {approvalNotification.status === 'Approved' ? <LuCheck size={40} /> : <LuX size={40} />}
                 </div>
@@ -302,11 +302,11 @@ const DeliveryLayout = () => {
                 disabled={updatingStatus}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-all group ${
                   status === 'Available' 
-                    ? 'bg-emerald-50 border-emerald-100 text-emerald-600 shadow-sm shadow-emerald-500/10' 
+                    ? 'bg-[#001B4E]/5 border-[#001B4E]/10 text-[#001B4E] shadow-sm shadow-[#001B4E]/10' 
                     : 'bg-soft-oatmeal/20 border-soft-oatmeal/40 text-warm-sand grayscale'
                 }`}
               >
-                <div className={`w-2 h-2 rounded-full ${status === 'Available' ? 'bg-emerald-500 animate-pulse' : 'bg-warm-sand'}`} />
+                <div className={`w-2 h-2 rounded-full ${status === 'Available' ? 'bg-[#001B4E] animate-pulse' : 'bg-warm-sand'}`} />
                 <span className="text-[10px] font-black uppercase tracking-widest">
                   {updatingStatus ? 'Syncing...' : status === 'Available' ? 'Online' : 'Offline'}
                 </span>
@@ -320,7 +320,7 @@ const DeliveryLayout = () => {
               >
                 <LuBell size={20} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-[#001B4E] rounded-full border-2 border-white animate-pulse"></span>
                 )}
               </button>
 
@@ -374,7 +374,7 @@ const DeliveryLayout = () => {
                     {user?.approvalStatus === 'Approved' ? 'Verified Partner' : 'Pending Verification'}
                   </p>
                 </div>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ring-2 shadow-sm transition-all overflow-hidden ${showUserMenu ? 'ring-warm-sand bg-teal-800' : 'ring-white group-hover:ring-soft-oatmeal bg-warm-sand/20'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ring-2 shadow-sm transition-all overflow-hidden ${showUserMenu ? 'ring-warm-sand bg-[#001B4E]' : 'ring-white group-hover:ring-soft-oatmeal bg-warm-sand/20'}`}>
                   {user?.avatar ? (
                     <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (

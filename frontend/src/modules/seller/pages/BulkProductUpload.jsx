@@ -49,29 +49,29 @@ const BulkProductUpload = () => {
     <div className="min-h-screen bg-[#FDFCFB] p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-warm-sand/10 rounded-full text-[10px] font-black text-warm-sand uppercase tracking-widest mb-4">
+        <div className="mb-6 md:mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 px-4 md:px-0">
+          <div className="text-center md:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-warm-sand/10 rounded-full text-[9px] md:text-[10px] font-black text-warm-sand uppercase tracking-widest mb-3 md:mb-4">
               <FiShoppingBag /> Seller Dashboard
             </div>
-            <h1 className="text-4xl font-black text-deep-espresso tracking-tighter uppercase italic">
+            <h1 className="text-3xl md:text-4xl font-black text-deep-espresso tracking-tighter uppercase italic">
               Bulk <span className="text-warm-sand">Inventory</span>
             </h1>
-            <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mt-2">Scale your business by uploading your entire catalog at once.</p>
+            <p className="text-gray-400 font-bold uppercase tracking-widest text-[9px] md:text-[10px] mt-2 leading-relaxed">Scale your business by uploading your entire catalog at once.</p>
           </div>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex gap-4 mb-8">
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-8 px-4 md:px-0">
           <button
             onClick={() => setActiveTab('excel')}
-            className={`px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border-2 ${activeTab === 'excel' ? 'bg-deep-espresso text-white border-deep-espresso shadow-xl shadow-black/10' : 'bg-white text-gray-400 border-gray-100 hover:border-warm-sand'}`}
+            className={`w-full md:w-auto px-6 md:px-8 py-3.5 md:py-4 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all border-2 ${activeTab === 'excel' ? 'bg-deep-espresso text-white border-deep-espresso shadow-xl shadow-black/10' : 'bg-white text-gray-400 border-gray-100 hover:border-warm-sand'}`}
           >
             Import Spreadsheet
           </button>
           <button
             onClick={() => setActiveTab('manual')}
-            className={`px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border-2 ${activeTab === 'manual' ? 'bg-deep-espresso text-white border-deep-espresso shadow-xl shadow-black/10' : 'bg-white text-gray-400 border-gray-100 hover:border-warm-sand'}`}
+            className={`w-full md:w-auto px-6 md:px-8 py-3.5 md:py-4 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all border-2 ${activeTab === 'manual' ? 'bg-deep-espresso text-white border-deep-espresso shadow-xl shadow-black/10' : 'bg-white text-gray-400 border-gray-100 hover:border-warm-sand'}`}
           >
             Manual Batch Entry
           </button>
@@ -87,20 +87,20 @@ const BulkProductUpload = () => {
               className="bg-white rounded-[2rem] p-10 md:p-20 border border-gray-100 shadow-sm text-center"
             >
               <div className="max-w-md mx-auto">
-                <FiUploadCloud className="text-6xl text-gray-100 mx-auto mb-8" />
-                <h2 className="text-2xl font-black text-deep-espresso uppercase italic mb-4">Fast Import</h2>
-                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest leading-relaxed mb-12">
+                <FiUploadCloud className="text-5xl md:text-6xl text-gray-100 mx-auto mb-6 md:mb-8" />
+                <h2 className="text-xl md:text-2xl font-black text-deep-espresso uppercase italic mb-3 md:mb-4">Fast Import</h2>
+                <p className="text-gray-400 text-[10px] md:text-xs font-bold uppercase tracking-widest leading-relaxed mb-8 md:mb-12">
                   Upload your Excel or CSV file. We will automatically map your products to our premium catalog.
                 </p>
 
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                   <div className="relative group">
                     <input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-10" />
-                    <div className="w-full h-20 rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center font-black text-xs uppercase tracking-widest text-gray-400 group-hover:border-warm-sand group-hover:text-warm-sand transition-all">
+                    <div className="w-full h-16 md:h-20 rounded-xl md:rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center font-black text-[10px] md:text-xs uppercase tracking-widest text-gray-400 group-hover:border-warm-sand group-hover:text-warm-sand transition-all">
                       Drop File Here
                     </div>
                   </div>
-                  <button className="text-[10px] font-black text-warm-sand uppercase tracking-[0.2em] flex items-center justify-center gap-2 mx-auto hover:text-deep-espresso transition-colors">
+                  <button className="text-[9px] md:text-[10px] font-black text-warm-sand uppercase tracking-[0.2em] flex items-center justify-center gap-2 mx-auto hover:text-deep-espresso transition-colors">
                     <FiFileText /> Get Inventory Template
                   </button>
                 </div>
@@ -201,18 +201,18 @@ const BulkProductUpload = () => {
                 </table>
               </div>
 
-              <div className="mt-10 flex flex-col md:flex-row justify-between items-center gap-8 pt-8 border-t border-gray-50">
+              <div className="mt-8 md:mt-10 flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8 pt-6 md:pt-8 border-t border-gray-50">
                 <button
                   onClick={addRow}
-                  className="flex items-center gap-3 text-[10px] font-black text-warm-sand uppercase tracking-[0.2em] hover:text-deep-espresso transition-colors"
+                  className="flex items-center gap-3 text-[9px] md:text-[10px] font-black text-warm-sand uppercase tracking-[0.2em] hover:text-deep-espresso transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-warm-sand/10 flex items-center justify-center">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-warm-sand/10 flex items-center justify-center">
                     <FiPlus />
                   </div>
                   Add Product Row
                 </button>
 
-                <div className="flex items-center gap-6 w-full md:w-auto">
+                <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto">
                   <div className="text-right hidden md:block">
                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Batch Size</p>
                     <p className="text-xl font-black text-deep-espresso italic">{manualProducts.length} Items</p>
@@ -220,7 +220,7 @@ const BulkProductUpload = () => {
                   <Button
                     onClick={handleBulkSubmit}
                     disabled={isUploading}
-                    className="flex-1 md:flex-none h-16 px-16 rounded-2xl font-black uppercase tracking-widest shadow-2xl shadow-warm-sand/20 relative overflow-hidden"
+                    className="flex-1 md:flex-none h-14 md:h-16 px-10 md:px-16 rounded-xl md:rounded-2xl font-black uppercase tracking-widest shadow-2xl shadow-warm-sand/20 relative overflow-hidden text-[9px] md:text-[10px]"
                   >
                     {isUploading ? `Processing ${uploadProgress}%` : 'Submit Batch'}
                     {isUploading && (

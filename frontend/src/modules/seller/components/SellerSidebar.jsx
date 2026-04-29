@@ -15,7 +15,7 @@ import {
   FiNavigation,
   FiTrendingUp
 } from 'react-icons/fi';
-import sidebarBg from '../../../assets/seller_sidebar_bg.png';
+
 
 const menuItems = [
   { path: '/seller', icon: FiLayout, label: 'Dashboard' },
@@ -79,25 +79,18 @@ const SellerSidebar = ({ isOpen, onClose }) => {
       {/* Sidebar Content */}
       <aside
         className={`
-          fixed lg:static top-0 left-0 h-screen w-72 lg:shrink-0 bg-deep-espresso text-white z-50 flex flex-col shadow-2xl lg:shadow-none overflow-hidden
+          fixed lg:static top-0 left-0 h-screen w-72 lg:shrink-0 bg-[#bd3b64] text-white z-50 flex flex-col shadow-2xl lg:shadow-none overflow-hidden
           transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-        {/* Sidebar Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src={sidebarBg}
-            alt="Interior Mockup"
-            className="w-full h-full object-cover opacity-10 grayscale"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-deep-espresso via-deep-espresso/95 to-deep-espresso"></div>
-        </div>
+        {/* Sidebar Background (Solid) */}
+        <div className="absolute inset-0 z-0 bg-[#bd3b64]"></div>
 
         {/* Header */}
         <div className="relative z-10 p-6 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-warm-sand rounded-lg flex items-center justify-center text-deep-espresso font-bold text-xl">
+            <div className="w-10 h-10 bg-warm-sand rounded-lg flex items-center justify-center text-[#bd3b64] font-bold text-xl">
               S
             </div>
             <span className="font-display font-bold text-xl tracking-wide uppercase text-white">
@@ -145,7 +138,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
                             onClick={() => { if (window.innerWidth < 1024) onClose(); }}
                             className={({ isActive }) => `
                               flex items-center gap-3 p-3 text-xs font-bold uppercase tracking-widest transition-all
-                              ${isActive ? 'text-warm-sand bg-white/5' : 'text-white/40 hover:text-white hover:bg-white/5'}
+                              ${isActive ? 'text-white bg-white/10' : 'text-white/40 hover:text-white hover:bg-white/5'}
                             `}
                           >
                             <child.icon size={14} />
@@ -166,9 +159,9 @@ const SellerSidebar = ({ isOpen, onClose }) => {
                 end={item.path === '/seller'}
                 onClick={() => { if (window.innerWidth < 1024) onClose(); }}
                 className={({ isActive }) => `
-                  flex items-center justify-between p-3 rounded-xl transition-all duration-300 group border border-white/5 mb-2
+                  flex items-center justify-between p-3.5 rounded-xl transition-all duration-300 group border border-white/5 mb-2
                   ${isActive
-                    ? 'bg-red-800 text-white shadow-xl shadow-red-900/20 border-white/10 scale-[1.02]'
+                    ? 'bg-white/20 text-white shadow-lg border-white/20 scale-[1.02]'
                     : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10'}
                 `}
               >
@@ -183,12 +176,12 @@ const SellerSidebar = ({ isOpen, onClose }) => {
         </nav>
 
         {/* Footer info and logout */}
-        <div className="relative z-10 p-6 border-t border-white/10 mt-auto backdrop-blur-sm bg-deep-espresso/20">
+        <div className="relative z-10 p-6 border-t border-white/10 mt-auto">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors group mb-4"
+            className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-white/70 hover:bg-white/10 hover:text-white transition-all group mb-4 border border-white/5"
           >
-            <FiLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
+            <FiLogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
             Sign Out
           </button>
           <p className="font-medium text-white/80">© 2026 Riddha Interio Mart</p>

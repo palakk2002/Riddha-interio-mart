@@ -181,7 +181,7 @@ const SellerLayout = () => {
 
   return (
     <div 
-      className="flex h-screen w-full bg-white text-deep-espresso overflow-hidden" 
+      className="seller-theme flex h-screen w-full bg-white text-deep-espresso overflow-hidden" 
       onClick={() => {
         setShowNotifications(false);
         setShowUserMenu(false);
@@ -241,18 +241,24 @@ const SellerLayout = () => {
       <SellerSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
-        {/* Header */}
-        <header className="h-20 bg-white shadow-sm border-b border-soft-oatmeal px-6 flex items-center justify-between z-30">
-          <div className="flex items-center gap-4">
+        {/* App-like Header */}
+        <header className="h-16 md:h-20 bg-white shadow-sm border-b border-soft-oatmeal px-4 md:px-8 flex items-center justify-between z-30 pt-safe sticky top-0">
+          <div className="flex items-center gap-2 md:gap-4 flex-1">
             <button 
               onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(true); }}
-              className="lg:hidden p-2 hover:bg-soft-oatmeal rounded-lg transition-colors"
+              className="lg:hidden p-2 hover:bg-soft-oatmeal/50 rounded-xl transition-colors text-deep-espresso"
             >
-              <FiMenu size={24} />
+              <FiMenu size={22} />
             </button>
-            <h2 className="text-sm font-medium text-warm-sand hidden sm:block">
-              Welcome back, <span className="font-bold text-deep-espresso">Seller!</span>
+            <h2 className="text-sm font-bold text-deep-espresso hidden lg:block">
+              Welcome back, <span className="text-warm-sand">Seller!</span>
             </h2>
+          </div>
+
+          <div className="lg:hidden flex-1 flex justify-center">
+            <span className="font-display font-black text-xl tracking-tighter text-[#bd3b64] uppercase italic">
+              Riddha<span className="text-deep-espresso">Seller</span>
+            </span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -321,14 +327,14 @@ const SellerLayout = () => {
                   <p className="text-sm font-bold leading-tight">{user?.fullName || user?.shopName || 'Seller'}</p>
                   <p className="text-xs text-warm-sand font-medium uppercase tracking-tighter">Premium Seller</p>
                 </div>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ring-2 shadow-sm transition-all overflow-hidden ${showUserMenu ? 'ring-warm-sand bg-red-800' : 'ring-white group-hover:ring-soft-oatmeal bg-warm-sand/20'}`}>
+                <div className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-white ring-2 shadow-sm transition-all overflow-hidden ${showUserMenu ? 'ring-brand-pink bg-brand-pink' : 'ring-white group-hover:ring-soft-oatmeal bg-warm-sand/20'}`}>
                   {user?.avatar ? (
                     <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <FiUser size={20} className="text-warm-sand" />
+                    <FiUser size={18} className="text-warm-sand" />
                   )}
                 </div>
-                <FiChevronDown size={14} className={`text-dusty-cocoa transition-transform duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
+                <FiChevronDown size={12} className={`text-dusty-cocoa transition-transform duration-300 hidden sm:block ${showUserMenu ? 'rotate-180' : ''}`} />
               </div>
 
               <AnimatePresence>
@@ -362,7 +368,7 @@ const SellerLayout = () => {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 pb-32 lg:pb-8 custom-scrollbar bg-white">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-32 lg:pb-8 custom-scrollbar bg-white">
           <Outlet />
         </main>
         
