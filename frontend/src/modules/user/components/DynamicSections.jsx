@@ -64,7 +64,7 @@ const ProductTile = ({ product }) => {
           <p className="line-clamp-1 text-[13px] font-bold text-deep-espresso">
             {product?.name}
           </p>
-          <p className="line-clamp-1 text-[10px] font-black uppercase tracking-[0.24em] text-warm-sand">
+          <p className="line-clamp-1 text-[10px] font-black tracking-[0.24em] text-warm-sand">
             {product?.category}
           </p>
         </div>
@@ -249,7 +249,7 @@ const DynamicSections = () => {
             action={null}
           >
             {banners.length > 0 ? (
-            <div className="overflow-hidden rounded-none border-y border-soft-oatmeal bg-white shadow-lg -mx-4 sm:mx-0">
+              <div className="overflow-hidden rounded-none border-y border-soft-oatmeal bg-white shadow-lg -mx-4 sm:mx-0">
                 <Banner banners={banners} />
               </div>
             ) : (

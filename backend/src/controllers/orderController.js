@@ -21,7 +21,8 @@ exports.addOrderItems = async (req, res) => {
     paymentMethod,
     itemsPrice,
     shippingPrice,
-    totalPrice
+    totalPrice,
+    businessDetails
   } = req.body;
 
   if (orderItems && orderItems.length === 0) {
@@ -57,7 +58,8 @@ exports.addOrderItems = async (req, res) => {
         totalPrice,
         isPaid: true,
         paidAt: Date.now(),
-        status: 'Processing'
+        status: 'Processing',
+        businessDetails
       });
 
       const createdOrder = await order.save();

@@ -53,7 +53,7 @@ const TopBrands = ({ title }) => {
               <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-gray-300">
                 Partner
               </p>
-              <p className="text-[#922724] text-[9px] md:text-sm font-bold tracking-tight line-clamp-1">
+              <p className="text-[#189D91] text-[9px] md:text-sm font-bold tracking-tight line-clamp-1">
                 {brand.offer}
               </p>
             </div>

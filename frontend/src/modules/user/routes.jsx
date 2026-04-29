@@ -25,6 +25,8 @@ import OrderSuccessPage from './pages/OrderSuccessPage';
 import OrderTrackingPage from './pages/OrderTrackingPage';
 import EditProfile from './pages/EditProfile';
 import BrandPage from './pages/BrandPage';
+import SearchEntryPage from './pages/SearchEntryPage';
+import InvoicePage from './pages/InvoicePage';
 
 const UserRoutes = () => {
   return (
@@ -51,9 +53,11 @@ const UserRoutes = () => {
       <Route path="/address" element={<AddressPage />} />
       <Route path="/payment" element={<PaymentPage />} />
       <Route path="/order-success" element={<OrderSuccessPage />} />
-      <Route path="/order-tracking" element={<OrderTrackingPage />} />
+      <Route path="/track-order/:id" element={<OrderTrackingPage />} />
       <Route path="/profile/edit" element={<EditProfile />} />
       <Route path="/brand/:brandName" element={<BrandPage />} />
+      <Route path="/search" element={<SearchEntryPage />} />
+      <Route path="/order/invoice/:id" element={<InvoicePage />} />
     </Routes>
   );
 };

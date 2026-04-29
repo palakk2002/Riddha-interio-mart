@@ -51,7 +51,7 @@ const Banner = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-[#922724] font-black uppercase tracking-[0.3em] text-[10px] md:text-sm bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full inline-block border border-white/20"
+                  className="text-[#189D91] font-black uppercase tracking-[0.3em] text-[10px] md:text-sm bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full inline-block border border-white/20"
                 >
                   Premium Collection
                 </motion.span>

@@ -107,6 +107,11 @@ const OrderSchema = new mongoose.Schema({
   },
   deliveryAssignmentTime: {
     type: Date
+  },
+  businessDetails: {
+    shopName: String,
+    gstNumber: String,
+    taxationCode: String
   }
 }, {
   timestamps: true

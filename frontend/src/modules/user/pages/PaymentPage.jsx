@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../data/CartContext';
 import { useUser } from '../data/UserContext';
-import { FiArrowLeft, FiChevronDown, FiChevronUp, FiSmartphone, FiCreditCard, FiSearch, FiUser, FiShoppingCart, FiMenu, FiMapPin, FiCheck } from 'react-icons/fi';
+import { FiArrowLeft, FiChevronDown, FiChevronUp, FiSmartphone, FiCreditCard, FiSearch, FiUser, FiShoppingCart, FiMenu, FiMapPin, FiCheck, FiGlobe } from 'react-icons/fi';
 import Button from '../../../shared/components/Button';
 import api from '../../../shared/utils/api';
 
@@ -44,7 +44,8 @@ const PaymentPage = () => {
         paymentMethod: 'Online',
         itemsPrice: cartTotal,
         shippingPrice: 0,
-        totalPrice: cartTotal
+        totalPrice: cartTotal,
+        businessDetails: user?.businessDetails
       };
 
       const response = await api.post('/orders', orderData);
@@ -72,35 +73,7 @@ const PaymentPage = () => {
       animate={{ opacity: 1 }}
       className="min-h-screen bg-[#F8F8F8] pb-32"
     >
-      {/* Brand Header */}
-      <div className="bg-[#8B2323] text-white p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-display font-black tracking-tighter uppercase italic">RIDDHA INTERIO</h1>
-          <div className="flex items-center gap-5">
-            <FiUser size={20} />
-            <div className="relative">
-              <FiShoppingCart size={20} />
-              <span className="absolute -top-1.5 -right-1.5 bg-white text-[#8B2323] text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">{cartCount}</span>
-            </div>
-            <FiMenu size={20} />
-          </div>
-        </div>
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search products or brands..."
-            className="w-full bg-white rounded-lg py-3 px-12 text-sm text-gray-500 placeholder-gray-400 focus:outline-none"
-          />
-          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-        </div>
-      </div>
 
-      {/* Delivery Status */}
-      <div className="bg-white px-4 py-3 border-b border-gray-100 flex items-center gap-1">
-        <span className="text-[10px] font-bold text-gray-400">Delivery in</span>
-        <span className="text-[10px] font-black text-[#8B2323]">4 hours</span>
-        <span className="text-[10px] text-gray-400 ml-1 flex items-center gap-0.5">to {address?.pincode || '452018'} <FiMapPin size={8} /></span>
-      </div>
 
       <div className="max-w-xl mx-auto p-4 space-y-6">
         <div className="flex items-center gap-4 py-4">
@@ -122,7 +95,7 @@ const PaymentPage = () => {
                   {address?.city}, {address?.pincode}
                 </p>
               </div>
-              <button onClick={() => navigate('/address')} className="text-[10px] font-black text-[#8B2323] uppercase tracking-widest">EDIT</button>
+              <button onClick={() => navigate('/address')} className="text-[10px] font-black text-[#189D91] uppercase tracking-widest">EDIT</button>
             </div>
           </div>
         </div>
@@ -151,8 +124,8 @@ const PaymentPage = () => {
                 className="w-full flex items-center justify-between p-5"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-10 rounded-lg bg-red-50 flex items-center justify-center border border-red-100">
-                    <FiSmartphone className="text-[#8B2323]" />
+                  <div className="w-12 h-10 rounded-lg bg-[#189D91]/10 flex items-center justify-center border border-[#189D91]/20">
+                    <FiSmartphone className="text-[#189D91]" />
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-black text-gray-800 uppercase tracking-tighter">UPI</p>
@@ -173,41 +146,86 @@ const PaymentPage = () => {
                     {/* Google Pay */}
                     <div
                       onClick={() => setSelectedMethod('gpay')}
-                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'gpay' ? 'border-[#8B2323] bg-white' : 'border-transparent bg-transparent'}`}
+                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'gpay' ? 'border-[#189D91] bg-white' : 'border-transparent bg-transparent'}`}
                     >
                       <div className="flex items-center gap-4">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Google_Pay_%28GPay%29_Logo.svg" alt="GPay" className="w-6 h-6" />
                         <span className="text-xs font-black text-gray-800">Google Pay</span>
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'gpay' ? 'border-[#8B2323] bg-[#8B2323]' : 'border-gray-200'}`}>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'gpay' ? 'border-[#189D91] bg-[#189D91]' : 'border-gray-200'}`}>
                         {selectedMethod === 'gpay' && <div className="w-2 h-2 rounded-full bg-white" />}
                       </div>
                     </div>
                     {/* PhonePe */}
                     <div
                       onClick={() => setSelectedMethod('phonepe')}
-                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'phonepe' ? 'border-[#8B2323] bg-white' : 'border-transparent bg-transparent'}`}
+                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'phonepe' ? 'border-[#189D91] bg-white' : 'border-transparent bg-transparent'}`}
                     >
                       <div className="flex items-center gap-4">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/PhonePe_Logo.svg" alt="PhonePe" className="w-6 h-6" />
                         <span className="text-xs font-black text-gray-800">PhonePe</span>
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'phonepe' ? 'border-[#8B2323] bg-[#8B2323]' : 'border-gray-200'}`}>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'phonepe' ? 'border-[#189D91] bg-[#189D91]' : 'border-gray-200'}`}>
                         {selectedMethod === 'phonepe' && <div className="w-2 h-2 rounded-full bg-white" />}
                       </div>
                     </div>
                     {/* Paytm */}
                     <div
                       onClick={() => setSelectedMethod('paytm')}
-                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'paytm' ? 'border-[#8B2323] bg-white' : 'border-transparent bg-transparent'}`}
+                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'paytm' ? 'border-[#189D91] bg-white' : 'border-transparent bg-transparent'}`}
                     >
                       <div className="flex items-center gap-4">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm" className="w-6 h-6" />
                         <span className="text-xs font-black text-gray-800">Paytm</span>
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'paytm' ? 'border-[#8B2323] bg-[#8B2323]' : 'border-gray-200'}`}>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'paytm' ? 'border-[#189D91] bg-[#189D91]' : 'border-gray-200'}`}>
                         {selectedMethod === 'paytm' && <div className="w-2 h-2 rounded-full bg-white" />}
                       </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Net Banking Section */}
+            <div className="border-b border-gray-50">
+              <button
+                onClick={() => setSelectedSection(selectedSection === 'netbanking' ? null : 'netbanking')}
+                className="w-full flex items-center justify-between p-5"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-10 rounded-lg bg-blue-50 flex items-center justify-center border border-blue-100">
+                    <FiGlobe className="text-blue-600" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-black text-gray-800 uppercase tracking-tighter">NET BANKING</p>
+                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">SBI, HDFC, ICICI, AXIS</p>
+                  </div>
+                </div>
+                {selectedSection === 'netbanking' ? <FiChevronUp className="text-gray-400" /> : <FiChevronDown className="text-gray-400" />}
+              </button>
+
+              <AnimatePresence>
+                {selectedSection === 'netbanking' && (
+                  <motion.div
+                    initial={{ height: 0 }}
+                    animate={{ height: 'auto' }}
+                    exit={{ height: 0 }}
+                    className="overflow-hidden bg-gray-50/30 px-5 pb-5 space-y-3"
+                  >
+                    <div className="grid grid-cols-2 gap-3">
+                      {['SBI', 'HDFC', 'ICICI', 'AXIS', 'PNB', 'KOTAK'].map((bank) => (
+                        <div
+                          key={bank}
+                          onClick={() => setSelectedMethod(bank.toLowerCase())}
+                          className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === bank.toLowerCase() ? 'border-[#189D91] bg-white' : 'border-transparent bg-transparent'}`}
+                        >
+                          <span className="text-[11px] font-black text-gray-800">{bank}</span>
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedMethod === bank.toLowerCase() ? 'border-[#189D91] bg-[#189D91]' : 'border-gray-200'}`}>
+                            {selectedMethod === bank.toLowerCase() && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </motion.div>
                 )}
@@ -240,11 +258,11 @@ const PaymentPage = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-6 flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40">
         <div>
           <span className="text-xl font-black text-gray-900 block leading-none">₹{cartTotal.toLocaleString()}</span>
-          <button className="text-[9px] font-black text-[#8B2323] uppercase tracking-widest mt-2 border-b border-[#8B2323]/20">VIEW PRICE SUMMARY</button>
+          <button className="text-[9px] font-black text-[#189D91] uppercase tracking-widest mt-2 border-b border-[#189D91]/20">VIEW PRICE SUMMARY</button>
         </div>
         <button
           onClick={handlePayNow}
-          className="bg-black text-white px-10 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gray-900 transition-all"
+          className="bg-[#189D91] text-white px-10 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-[#127F75] transition-all"
         >
           PAY NOW
         </button>

@@ -20,6 +20,20 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: 'user'
   },
+  userType: {
+    type: String,
+    enum: ['customer', 'enterpriser'],
+    default: 'customer'
+  },
+  businessDetails: {
+    shopName: String,
+    gstNumber: String,
+    taxationCode: String,
+    isVerified: {
+      type: Boolean,
+      default: false
+    }
+  },
   phone: {
     type: String,
     default: ""

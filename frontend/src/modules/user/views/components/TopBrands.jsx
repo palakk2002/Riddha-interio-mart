@@ -57,7 +57,7 @@ const TopBrands = ({ title }) => {
                   className="relative flex flex-col items-center justify-end pb-4 md:pb-10 group/brand hover:bg-black/5 transition-colors cursor-pointer"
                 >
                   <span className="sr-only">{brand.name}</span>
-                  <p className="text-[#922724] text-[8px] md:text-lg font-bold text-center tracking-tight transition-transform group-hover/brand:scale-110">
+                  <p className="text-[#189D91] text-[8px] md:text-lg font-bold text-center tracking-tight transition-transform group-hover/brand:scale-110">
                     {brand.offer}
                   </p>
                 </Link>
@@ -84,7 +84,7 @@ const TopBrands = ({ title }) => {
                   <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-gray-400 opacity-0 group-hover/brand:opacity-100 transition-opacity">
                     Official Partner
                   </p>
-                  <p className="text-[#922724] text-[10px] md:text-lg font-bold tracking-tight">
+                  <p className="text-[#189D91] text-[10px] md:text-lg font-bold tracking-tight">
                     {brand.offer}
                   </p>
                 </div>

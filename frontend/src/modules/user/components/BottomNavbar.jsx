@@ -29,7 +29,7 @@ const BottomNavbar = () => {
             to={item.path}
             className={({ isActive }) =>
               `relative flex flex-col items-center gap-1.5 group transition-all duration-300 ${
-                isActive ? 'text-warm-sand' : 'text-deep-espresso/40 hover:text-deep-espresso/60'
+                isActive ? 'text-[#189D91]' : 'text-deep-espresso/40 hover:text-deep-espresso/60'
               }`
             }
           >
@@ -50,7 +50,7 @@ const BottomNavbar = () => {
                         initial={{ scale: 0, opacity: 0, y: 5 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0, opacity: 0, y: 5 }}
-                        className="absolute -top-2.5 -right-2.5 bg-warm-sand text-white text-[9px] font-black h-5 w-5 flex items-center justify-center rounded-full shadow-[0_4px_12px_rgba(114,47,55,0.4)] border-2 border-white"
+                        className="absolute -top-2.5 -right-2.5 bg-[#189D91] text-white text-[9px] font-black h-5 w-5 flex items-center justify-center rounded-full shadow-[0_4px_12px_rgba(24,157,145,0.4)] border-2 border-white"
                       >
                         {item.badge}
                       </motion.span>
@@ -59,7 +59,7 @@ const BottomNavbar = () => {
                 </div>
                 
                 <span className={`text-[8px] font-black uppercase tracking-[0.15em] transition-all duration-300 leading-none mt-1 ${
-                  isActive ? 'text-warm-sand translate-y-0.5' : 'text-deep-espresso/40 translate-y-0.5'
+                  isActive ? 'text-[#189D91] translate-y-0.5' : 'text-deep-espresso/40 translate-y-0.5'
                 }`}>
                   {item.name}
                 </span>
@@ -67,7 +67,7 @@ const BottomNavbar = () => {
                 {isActive && (
                   <motion.div
                     layoutId="active-nav-glow"
-                    className="absolute -bottom-2 w-8 h-1 bg-warm-sand/20 blur-md rounded-full"
+                    className="absolute -bottom-2 w-8 h-1 bg-[#189D91]/20 blur-md rounded-full"
                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   />
                 )}

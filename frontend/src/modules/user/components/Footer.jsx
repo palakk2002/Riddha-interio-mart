@@ -41,7 +41,7 @@ const Footer = () => {
               {[FiFacebook, FiInstagram, FiTwitter].map((Icon, i) => (
                 <motion.a 
                   key={i}
-                  whileHover={{ y: -5, color: '#BFA38A' }}
+                  whileHover={{ y: -5, color: '#189D91' }}
                   href="#" 
                   className="transition-colors text-soft-oatmeal/80"
                 >

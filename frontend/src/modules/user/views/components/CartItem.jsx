@@ -61,10 +61,10 @@ const CartItem = ({ item }) => {
 
       {/* Remove */}
       <motion.button 
-        whileHover={{ scale: 1.1, backgroundColor: '#FEF2F2' }}
+        whileHover={{ scale: 1.1, backgroundColor: '#F0F9F8' }}
         whileTap={{ scale: 0.9 }}
         onClick={() => removeFromCart(item.id)}
-        className="p-4 text-gray-300 hover:text-red-500 rounded-2xl transition-all"
+        className="p-4 text-gray-300 hover:text-[#189D91] rounded-2xl transition-all"
         title="Remove item"
       >
         <FiTrash2 className="h-6 w-6" />

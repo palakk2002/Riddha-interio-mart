@@ -103,7 +103,7 @@ const CatalogPage = () => {
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Product Name</th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Code</th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Category</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Price</th>
+
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest text-right">Actions</th>
                   </tr>
                 </thead>
@@ -127,9 +127,7 @@ const CatalogPage = () => {
                           {product.category}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-black text-deep-espresso">
-                        ₹{Number(product.price).toFixed(2)}
-                      </td>
+
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           {isProductInInventory(product.sku) ? (
@@ -169,7 +167,7 @@ const CatalogPage = () => {
                       <span className="text-[9px] font-black text-deep-espresso/40 bg-soft-oatmeal/30 px-1.5 py-0.5 rounded">{product.sku}</span>
                       <span className="text-[9px] font-bold text-dusty-cocoa uppercase tracking-tighter">{product.category}</span>
                     </div>
-                    <p className="font-black text-deep-espresso mt-1">₹{Number(product.price).toFixed(2)}</p>
+
                   </div>
                   <div className="flex flex-col gap-2">
                     {isProductInInventory(product.sku) ? (

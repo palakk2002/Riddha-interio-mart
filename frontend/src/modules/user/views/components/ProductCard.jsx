@@ -34,7 +34,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
         
         {/* Quick Action Icons - Desktop only for grid/list, always for minimal bottom-right */}
         <div className={`${isMinimal ? 'absolute bottom-2 right-2' : 'hidden md:flex absolute top-5 right-5 scale-90'} transform group-hover:translate-x-0 transition-all duration-400`}>
-          <button className={`${isMinimal ? 'h-8 w-8 text-deep-espresso/40 shadow-md' : 'h-11 w-11 text-deep-espresso shadow-xl'} bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center hover:text-red-500 transition-all`}>
+          <button className={`${isMinimal ? 'h-8 w-8 text-deep-espresso/40 shadow-md' : 'h-11 w-11 text-deep-espresso shadow-xl'} bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center hover:text-[#189D91] transition-all`}>
             <FiHeart className={`${isMinimal ? 'h-4 w-4' : 'h-5 w-5'}`} />
           </button>
         </div>
@@ -57,7 +57,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
             </h3>
           </Link>
           
-          <h4 className={`${isMinimal ? 'text-[9px] font-medium text-deep-espresso/40 opacity-80' : 'text-[8px] md:text-[10px] uppercase tracking-[0.15em] text-warm-sand font-black'}`}>
+          <h4 className={`${isMinimal ? 'text-[9px] font-medium text-deep-espresso/40 opacity-80' : 'text-[8px] md:text-[10px] tracking-[0.15em] text-warm-sand font-black'}`}>
             {isMinimal ? `By ${product.brand || 'Riddha Interio'}` : product.category}
           </h4>
         </div>

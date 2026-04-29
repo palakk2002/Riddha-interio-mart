@@ -29,6 +29,7 @@ import sidebarBg from '../../../assets/seller_sidebar_bg.png';
 
 const menuItems = [
   { path: '/admin', icon: FiLayout, label: 'Dashboard' },
+  { path: '/admin/analytics', icon: FiTrendingUp, label: 'Analytics' },
   { path: '/admin/orders/tracking', icon: FiMapPin, label: 'Order Tracking' },
   { path: '/admin/delivery/assign', icon: FiTruck, label: 'Assign Delivery' },
   { 
@@ -66,6 +67,7 @@ const menuItems = [
     children: [
       { path: '/admin/catalog', icon: FiGrid, label: 'Master Catalog' },
       { path: '/admin/catalog/add', icon: FiPlus, label: 'New Master Item' },
+      { path: '/admin/bulk-upload', icon: FiPlus, label: 'Bulk Upload' },
     ]
   },
   { 

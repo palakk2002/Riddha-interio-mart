@@ -7,7 +7,7 @@ export const products = [
   {
     id: 1,
     name: "Classic Marble Tile",
-    category: "tiles",
+    category: "Tiles",
     price: 120,
     originalPrice: 150,
     image: tapImg,
@@ -30,7 +30,7 @@ export const products = [
   {
     id: 2,
     name: "Dusty Rose Matte Paint",
-    category: "paints",
+    category: "Paints",
     price: 45,
     originalPrice: 55,
     image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&q=80",
@@ -53,7 +53,7 @@ export const products = [
   {
     id: 3,
     name: "Minimalist Pendant Light",
-    category: "electricals",
+    category: "Electricals",
     price: 89,
     originalPrice: 110,
     image: lightingImg,
@@ -76,7 +76,7 @@ export const products = [
   {
     id: 4,
     name: "Oak Wood Coffee Table",
-    category: "furniture",
+    category: "Furniture",
     price: 350,
     originalPrice: 420,
     image: furnitureImg,
@@ -315,7 +315,7 @@ export const products = [
   {
     id: 15,
     name: "Royal Velvet Wingback Bed",
-    category: "beds",
+    category: "Beds",
     price: 1250,
     originalPrice: 1500,
     image: "https://images.unsplash.com/photo-1505693419173-42b9258a6270?w=800&q=80",

@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 
 @theme {
-  --font-display: "Playfair Display", serif;
+  --font-display: "Outfit", sans-serif;
   --font-sans: "Inter", sans-serif;
 
   --color-dusty-cocoa: #8A6C5F;
@@ -17,27 +17,46 @@
 }
 
 .user-theme {
-  --color-warm-sand: #922724;     /* Uniform Brand Red */
-  --color-header-red: #922724;   /* Matches Send Message button */
-  --color-deep-espresso: #000000; /* True Black text */
-  --color-dusty-cocoa: #722F37;   /* Complementary Dark Red */
-  --color-soft-oatmeal: #FEF2F2;  /* Clean Red Wash */
-  --color-golden-glow: #FEE2E2;   /* Soft Highlight */
+  --color-warm-sand: #189D91;
+  /* Uniform Brand Teal */
+  --color-header-red: #189D91;
+  /* Matches Header background */
+  --color-deep-espresso: #1a1a1a;
+  /* Deep Dark text */
+  --color-dusty-cocoa: #127F75;
+  /* Complementary Dark Teal */
+  --color-soft-oatmeal: #F0F9F8;
+  /* Clean Teal Wash */
+  --color-golden-glow: #E2F2F1;
+  /* Soft Teal Highlight */
 }
 
 @layer base {
   body {
-    @apply font-sans bg-[#FDFBF9] text-deep-espresso antialiased;
+    font-family: var(--font-sans);
+    background-color: #FDFBF9;
+    color: var(--color-deep-espresso);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-display text-deep-espresso;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    color: var(--color-deep-espresso);
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/20;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */
@@ -47,8 +66,10 @@
 
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }
 

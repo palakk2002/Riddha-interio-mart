@@ -89,7 +89,7 @@ const BrandPage = () => {
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center bg-white">
         <h1 className="text-3xl font-bold text-deep-espresso uppercase tracking-tighter italic">Brand Not Found</h1>
         <p className="text-warm-sand mt-2">We are currently updating our brand directories.</p>
-        <Link to="/" className="mt-8 bg-[#922724] text-white px-10 py-3.5 rounded-full font-bold uppercase tracking-widest text-xs shadow-xl shadow-[#922724]/20 hover:scale-105 transition-all">Back to Home</Link>
+        <Link to="/" className="mt-8 bg-[#189D91] text-white px-10 py-3.5 rounded-full font-bold uppercase tracking-widest text-xs shadow-xl shadow-[#189D91]/20 hover:scale-105 transition-all">Back to Home</Link>
       </div>
     );
   }
@@ -154,7 +154,7 @@ const BrandPage = () => {
       <section className="max-w-7xl mx-auto py-12 md:py-20">
         <div className="px-4 md:px-12 flex items-center justify-between mb-8 md:mb-12">
           <h2 className="text-xl md:text-4xl font-display font-bold text-gray-900 tracking-tight">Shop By Category</h2>
-          <Link to="/categories" className="text-xs md:text-sm font-bold text-[#922724] flex items-center gap-1 hover:underline uppercase tracking-widest">
+          <Link to="/categories" className="text-xs md:text-sm font-bold text-[#189D91] flex items-center gap-1 hover:underline uppercase tracking-widest">
             View All <LuChevronRight />
           </Link>
         </div>
@@ -166,7 +166,7 @@ const BrandPage = () => {
               to={`/products?brand=${brand.name}&category=${cat.slug}`}
               className="flex flex-col flex-shrink-0 items-center gap-2 md:gap-4 w-24 md:w-56 snap-start group relative transition-all"
             >
-              <div className="relative aspect-square w-full bg-white border-[1px] md:border-2 border-[#922724] rounded-lg md:rounded-2xl overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300">
+              <div className="relative aspect-square w-full bg-white border-[1px] md:border-2 border-[#189D91] rounded-lg md:rounded-2xl overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300">
                 <div className="w-full h-full flex items-center justify-center p-2 md:p-4 bg-[#F9F9F9]">
                   <img 
                     src={cat.image} 
@@ -176,7 +176,7 @@ const BrandPage = () => {
                 </div>
               </div>
               <div className="text-center">
-                <span className="text-[9px] md:text-lg font-bold text-[#922724] group-hover:text-[#b1312d] transition-colors tracking-tight line-clamp-1 uppercase">
+                <span className="text-[9px] md:text-lg font-bold text-[#189D91] group-hover:text-[#127F75] transition-colors tracking-tight line-clamp-1 uppercase">
                   {cat.name}
                 </span>
               </div>
@@ -200,7 +200,7 @@ const BrandPage = () => {
 
         {loadingProducts ? (
           <div className="flex items-center justify-center py-20">
-            <div className="h-10 w-10 border-4 border-red-800/20 border-t-red-800 rounded-full animate-spin"></div>
+            <div className="h-10 w-10 border-4 border-[#189D91]/20 border-t-[#189D91] rounded-full animate-spin"></div>
           </div>
         ) : products.length > 0 ? (
           <div className="px-4 md:px-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
@@ -219,20 +219,20 @@ const BrandPage = () => {
       <section className="max-w-7xl mx-auto px-4 md:px-12 py-8">
          <div className="rounded-[40px] bg-[#F2F2F2] p-8 md:p-16 flex flex-col md:flex-row items-center gap-8 md:gap-16 border border-gray-100">
             <div className="flex-1 space-y-4 md:space-y-6 text-center md:text-left">
-               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#922724]">Official Brand Partner</span>
+               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#189D91]">Official Brand Partner</span>
                <h2 className="text-3xl md:text-5xl font-display font-bold text-deep-espresso leading-tight">
                   Authentic {brand.name} <br /> Products at Wholesale.
                </h2>
                <p className="text-sm md:text-lg text-warm-sand max-w-xl">
                   Get the best deals on {brand.name} electrical and interior solutions. Direct from warehouse with guaranteed quality and fast delivery.
                </p>
-               <button className="bg-deep-espresso text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs shadow-2xl transition-all hover:bg-[#922724] hover:scale-105 active:scale-95">
+               <button className="bg-deep-espresso text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs shadow-2xl transition-all hover:bg-[#189D91] hover:scale-105 active:scale-95">
                   Explore Catalog
                </button>
             </div>
             <div className="hidden md:block w-1/3 aspect-square bg-white rounded-full p-12 border-4 border-white shadow-2xl">
                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-4xl font-black italic tracking-tighter uppercase text-[#922724]/20">
+                  <span className="text-4xl font-black italic tracking-tighter uppercase text-[#189D91]/20">
                      {brand.name}
                   </span>
                </div>

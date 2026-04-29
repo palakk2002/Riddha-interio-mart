@@ -1,10 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { LuPlus, LuSearch, LuFilter, LuBox, LuCheck, LuClock } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../shared/utils/api';
 
 const BrowseCatalog = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -123,7 +125,7 @@ const BrowseCatalog = () => {
                         <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Product Name</th>
                         <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">SKU</th>
                         <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Category</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Price</th>
+
                         <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest text-right">Actions</th>
                       </tr>
                     </thead>
@@ -147,9 +149,7 @@ const BrowseCatalog = () => {
                               {product.category}
                             </span>
                           </td>
-                          <td className="px-6 py-4 font-black text-deep-espresso">
-                            ₹{product.price?.toLocaleString()}
-                          </td>
+
                           <td className="px-6 py-4 text-right">
                             {isProductInInventory(product._id) ? (
                               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 font-bold text-xs">
@@ -158,7 +158,7 @@ const BrowseCatalog = () => {
                               </div>
                             ) : (
                               <button
-                                onClick={() => handleAddToShop(product)}
+                                onClick={() => navigate(`/seller/product/add?catalogId=${product._id}`)}
                                 className="p-2.5 bg-warm-sand/5 text-warm-sand hover:bg-deep-espresso hover:text-white rounded-lg transition-all duration-300"
                                 title="Add to Shop"
                               >
@@ -184,7 +184,7 @@ const BrowseCatalog = () => {
                         <span className="text-[9px] font-black text-deep-espresso/40 bg-soft-oatmeal/30 px-1.5 py-0.5 rounded">{product.sku}</span>
                         <span className="text-[9px] font-bold text-dusty-cocoa uppercase tracking-tighter">{product.category}</span>
                       </div>
-                      <p className="font-black text-deep-espresso mt-1">₹{product.price?.toLocaleString()}</p>
+
                     </div>
                     {isProductInInventory(product._id) ? (
                       <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
@@ -192,7 +192,7 @@ const BrowseCatalog = () => {
                       </div>
                     ) : (
                       <button
-                        onClick={() => handleAddToShop(product)}
+                        onClick={() => navigate(`/seller/product/add?catalogId=${product._id}`)}
                         className="p-2.5 bg-soft-oatmeal/20 text-warm-sand rounded-xl hover:bg-deep-espresso hover:text-white transition-all shadow-sm active:scale-95"
                       >
                         <LuPlus size={18} />

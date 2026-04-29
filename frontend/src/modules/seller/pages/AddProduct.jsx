@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuPlus, LuBox, LuTags, LuCheck, LuClock, LuImage, LuX, LuTrash2 } from 'react-icons/lu';
+import { LuPlus, LuBox, LuTags, LuCheck, LuClock, LuImage, LuVideo, LuX, LuTrash2 } from 'react-icons/lu';
 import api from '../../../shared/utils/api';
 
 const AddProduct = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const catalogId = queryParams.get('catalogId');
   const [selection, setSelection] = useState(null); // 'new' or 'catalog'
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoUploading, setVideoUploading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -38,13 +44,53 @@ const AddProduct = () => {
     thickness: '',
     color: '',
     unit: 'piece',
+    unitValue: '1',
     countInStock: '',
-    images: [] // Array of base64
+    images: [], // Array of base64
+    videoUrl: ''
   });
 
   useEffect(() => {
     fetchInitialData();
-  }, []);
+    if (catalogId) {
+      fetchCatalogItem();
+    }
+  }, [catalogId]);
+
+  const fetchCatalogItem = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get(`/catalog/${catalogId}`);
+      const item = data.data;
+      
+      // Find brand ID if it's a name or object
+      let brandId = '';
+      if (item.brand) {
+        brandId = typeof item.brand === 'object' ? item.brand._id : item.brand;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        name: item.name || '',
+        sku: item.sku || '',
+        description: item.description || '',
+        category: item.category || '',
+        subcategory: item.subcategory || '',
+        brand: brandId,
+        material: item.material || '',
+        dimensions: item.dimensions || '',
+        thickness: item.thickness || '',
+        color: item.color || '',
+        images: item.images || [],
+      }));
+      setSelection('catalog');
+    } catch (err) {
+      console.error('Failed to fetch catalog item:', err);
+      setError('Failed to load catalog item details.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredCategories = categories.filter(cat => 
     cat.name.toLowerCase().includes(catSearch.toLowerCase())
@@ -110,6 +156,20 @@ const AddProduct = () => {
         throw new Error('Please upload at least one product image');
       }
 
+      let finalVideoUrl = formData.videoUrl;
+
+      // Upload video if selected
+      if (videoFile) {
+        setVideoUploading(true);
+        const uploadData = new FormData();
+        uploadData.append('image', videoFile);
+        const { data: uploadRes } = await api.post('/upload', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        finalVideoUrl = uploadRes.url;
+        setVideoUploading(false);
+      }
+
       // Upload images to Cloudinary
       const uploadedUrls = [];
       const existingUrls = formData.images.filter(img => img.startsWith('http'));
@@ -126,7 +186,11 @@ const AddProduct = () => {
 
       const res = await api.post('/products', { 
         ...formData, 
+        price: Number(formData.price),
+        discountPrice: formData.discountPrice ? Number(formData.discountPrice) : undefined,
+        countInStock: Number(formData.countInStock),
         images: uploadedUrls,
+        videoUrl: finalVideoUrl,
         source: selection 
       });
       if (res.data.success) {
@@ -135,9 +199,10 @@ const AddProduct = () => {
         setFormData({
           name: '', sku: '', description: '', price: '', discountPrice: '',
           category: '', subcategory: '', brand: '', material: '',
-          dimensions: '', thickness: '', color: '', unit: 'piece',
-          countInStock: '', images: []
+          dimensions: '', thickness: '', color: '', unit: 'piece', unitValue: '1',
+          countInStock: '', images: [], videoUrl: ''
         });
+        setVideoFile(null);
         setImgFiles([]);
         setTimeout(() => {
           setSuccess(false);
@@ -444,13 +509,27 @@ const AddProduct = () => {
                           value={formData.unit} onChange={(e) => setFormData({...formData, unit: e.target.value})}
                           className="w-full px-4 py-3.5 rounded-xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 transition-all text-xs font-bold"
                         >
-                           <option value="piece">Piece</option>
+                           <option value="piece">Piece (Pcs)</option>
+                           <option value="kg">Kilogram (Kg)</option>
+                           <option value="ltr">Litre (Ltr)</option>
+                           <option value="watt">Watt (W)</option>
+                           <option value="mtr">Meter (m)</option>
+                           <option value="ft">Feet (ft)</option>
                            <option value="sqft">Sq. Ft.</option>
                            <option value="box">Box</option>
                            <option value="bundle">Bundle</option>
+                           <option value="pack">Pack</option>
                         </select>
                       </div>
                       <div className="space-y-2">
+                        <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Unit Value (Qty)</label>
+                        <input 
+                          type="text" placeholder="e.g. 5 or 50"
+                          value={formData.unitValue} onChange={(e) => setFormData({...formData, unitValue: e.target.value})}
+                          className="w-full px-4 py-3.5 rounded-xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 transition-all text-sm font-bold"
+                        />
+                      </div>
+                      <div className="space-y-2 col-span-2">
                         <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Stock Qty</label>
                         <input 
                           required type="number" placeholder="0"
@@ -493,7 +572,36 @@ const AddProduct = () => {
                 </div>
                 <input type="file" multiple hidden ref={fileInputRef} onChange={handleImageUpload} accept="image/*" />
 
-                <div className="pt-4 space-y-4">
+                <div className="pt-4 space-y-6">
+                   <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                         <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand flex items-center gap-2">
+                            <LuVideo size={14} /> Product Video
+                         </label>
+                         <input 
+                           type="file" id="video-upload" hidden accept="video/*"
+                           onChange={(e) => setVideoFile(e.target.files[0])}
+                         />
+                         <label htmlFor="video-upload" className="text-[10px] font-black text-deep-espresso uppercase tracking-widest hover:underline cursor-pointer">
+                            {videoFile ? 'Change Video' : 'Upload Video File'}
+                         </label>
+                      </div>
+                      
+                      <input 
+                        type="url" placeholder="or Paste YouTube Link"
+                        value={formData.videoUrl} onChange={(e) => setFormData({...formData, videoUrl: e.target.value})}
+                        className="w-full px-5 py-4 rounded-xl bg-soft-oatmeal/5 border border-soft-oatmeal/30 focus:border-warm-sand focus:bg-white transition-all text-xs font-medium"
+                      />
+                      {videoFile && (
+                        <div className="flex items-center justify-between p-3 bg-green-50 border border-green-100 rounded-xl">
+                           <span className="text-[10px] font-bold text-green-700 truncate max-w-[200px]">{videoFile.name}</span>
+                           <button onClick={() => setVideoFile(null)} className="text-green-700 hover:text-red-500 transition-colors">
+                              <LuX size={14} />
+                           </button>
+                        </div>
+                      )}
+                   </div>
+
                    {error && (
                      <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 text-red-500">
                         <LuX className="shrink-0 mt-0.5" size={16} />
