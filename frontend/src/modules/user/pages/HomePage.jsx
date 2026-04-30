@@ -12,6 +12,8 @@ import Button from '../../../shared/components/Button';
 import { Link } from 'react-router-dom';
 import api from '../../../shared/utils/api';
 
+import WhatsAppFloat from '../components/WhatsAppFloat';
+
 const HomePage = () => {
   const [products, setProducts] = useState([]);
   const [banners, setBanners] = useState([]);
@@ -119,6 +121,9 @@ const HomePage = () => {
 
       {/* Top Brands Section */}
       <TopBrands />
+
+      {/* WhatsApp Floating Button */}
+      <WhatsAppFloat />
 
     </div>
   );
