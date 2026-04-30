@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   FiShoppingCart,
   FiMenu,
@@ -7,8 +7,19 @@ import {
   FiUser,
   FiChevronDown,
   FiChevronRight,
+  FiHome,
+  FiGrid,
+  FiShoppingBag,
+  FiMapPin,
+  FiInfo,
+  FiPhone,
+  FiRefreshCw,
+  FiShield,
+  FiLogOut,
+  FiXCircle
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import { LuWallet } from "react-icons/lu";
 import { useCart } from "../data/CartContext";
 import { useUser } from "../data/UserContext";
 import SearchBar from "./SearchBar";
@@ -21,9 +32,23 @@ const toTitleCase = (str) => {
   return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
+const SidebarLink = ({ to, icon: Icon, label, onClick }) => (
+  <Link
+    to={to}
+    onClick={onClick}
+    className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#189D91]/5 hover:text-[#189D91] transition-all group"
+  >
+    <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-[#189D91]/10 transition-colors">
+      <Icon size={18} />
+    </div>
+    <span className="text-sm font-bold tracking-tight">{label}</span>
+  </Link>
+);
+
 const Navbar = () => {
-  const { user } = useUser();
+  const { user, logout } = useUser();
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   const [policiesOpen, setPoliciesOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -51,6 +76,18 @@ const Navbar = () => {
     };
     fetchCategories();
   }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   const closeMobile = () => {
     setIsOpen(false);
@@ -272,48 +309,72 @@ const Navbar = () => {
                 </Link>
                 <button onClick={closeMobile} className="p-2.5 text-deep-espresso/40 hover:text-deep-espresso rounded-full"><FiX className="h-5 w-5" /></button>
               </div>
-              <div className="flex-1 overflow-y-auto px-6 pt-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Shop Categories</p>
-                    {categories.length > 6 && (
-                      <button
-                        onClick={() => setShowMoreCategories(!showMoreCategories)}
-                        className="text-[9px] font-black uppercase tracking-widest text-[#189D91]"
-                      >
-                        {showMoreCategories ? 'Show Less' : 'Show More'}
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    {categories.slice(0, showMoreCategories ? categories.length : 6).map((cat) => (
-                      <div key={cat._id}>
-                        <Link
-                          to={`/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`}
-                          onClick={closeMobile}
-                          className="block py-2 text-deep-espresso font-bold border-b border-soft-oatmeal/5"
-                        >
-                          {toTitleCase(cat.name)}
-                        </Link>
+              <div className="flex-1 overflow-y-auto no-scrollbar">
+                {/* User Profile Header (Mobile Sidebar) */}
+                <div className="px-6 py-6 bg-gray-50/50 border-b border-gray-100 mb-2">
+                  {user ? (
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-full bg-[#189D91]/10 flex items-center justify-center text-[#189D91] border-2 border-white shadow-sm overflow-hidden font-bold">
+                        {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : user.fullName?.charAt(0) || 'U'}
                       </div>
-                    ))}
-                  </div>
-
-                  {!showMoreCategories && categories.length > 6 && (
-                    <button
-                      onClick={() => setShowMoreCategories(true)}
-                      className="w-full py-4 text-center border-t border-soft-oatmeal/10"
-                    >
-                      <span className="text-[10px] font-black uppercase tracking-widest text-warm-sand flex items-center justify-center gap-2">
-                        +{categories.length - 6} More Collections <FiChevronRight />
-                      </span>
-                    </button>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-[#189D91]">Welcome back</p>
+                        <h4 className="text-base font-black text-gray-900 leading-tight">{user.fullName || 'User'}</h4>
+                      </div>
+                    </div>
+                  ) : (
+                    <Link to="/login" onClick={closeMobile} className="flex items-center gap-4 group">
+                      <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 border-2 border-white shadow-sm">
+                        <FiUser size={20} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Join the family</p>
+                        <h4 className="text-base font-black text-[#189D91] group-hover:underline">Login / Signup</h4>
+                      </div>
+                    </Link>
                   )}
                 </div>
+
+                <div className="px-4 py-2 space-y-1">
+                  {/* Primary Nav */}
+                  <div className="pb-4 mb-4 border-b border-gray-50">
+                    <SidebarLink to="/" icon={FiHome} label="Home" onClick={closeMobile} />
+                    <SidebarLink to="/categories" icon={FiGrid} label="Shop by Category" onClick={closeMobile} />
+                    <SidebarLink to="/referral-rewards" icon={LuWallet} label="Riddha Wallet" onClick={closeMobile} />
+                    <SidebarLink to="/orders" icon={FiShoppingBag} label="My Orders" onClick={closeMobile} />
+                    <SidebarLink to="/profile" icon={FiUser} label="My Account" onClick={closeMobile} />
+                  </div>
+
+                  {/* Information & Support */}
+                  <div className="pb-4 mb-4 border-b border-gray-50">
+                    <p className="px-4 mb-2 text-[10px] font-black uppercase tracking-widest text-gray-400/60">Support & Info</p>
+                    <SidebarLink to="/stores" icon={FiMapPin} label="Our Stores" onClick={closeMobile} />
+                    <SidebarLink to="/about" icon={FiInfo} label="About Us" onClick={closeMobile} />
+                    <SidebarLink to="/contact" icon={FiPhone} label="Contact Us" onClick={closeMobile} />
+                  </div>
+
+                  {/* Legal */}
+                  <div className="pb-4">
+                    <p className="px-4 mb-2 text-[10px] font-black uppercase tracking-widest text-gray-400/60">Policies</p>
+                    <SidebarLink to="/policies/returns" icon={FiRefreshCw} label="Returns & Refunds" onClick={closeMobile} />
+                    <SidebarLink to="/policies/cancellation" icon={FiXCircle} label="Cancellation" onClick={closeMobile} />
+                    <SidebarLink to="/terms" icon={FiShield} label="Terms & Conditions" onClick={closeMobile} />
+                  </div>
+                </div>
               </div>
-              <div className="px-8 py-6 border-t border-soft-oatmeal/15">
-                <p className="text-[10px] uppercase tracking-[0.25em] font-black text-deep-espresso/20 italic">© {new Date().getFullYear()} Riddha Interio Mart.</p>
+
+              {/* Logout Footer */}
+              <div className="p-6 border-t border-gray-100 bg-gray-50/30">
+                {user ? (
+                  <button 
+                    onClick={() => { logout(); navigate('/'); closeMobile(); }}
+                    className="w-full py-3 px-4 rounded-xl border-2 border-red-50 text-red-600 font-black text-sm flex items-center justify-center gap-3 hover:bg-red-50 transition-colors"
+                  >
+                    <FiLogOut size={18} /> Logout Account
+                  </button>
+                ) : (
+                  <p className="text-[10px] uppercase tracking-[0.25em] font-black text-gray-300 text-center italic">© {new Date().getFullYear()} Riddha Interio Mart.</p>
+                )}
               </div>
             </motion.div>
           </>

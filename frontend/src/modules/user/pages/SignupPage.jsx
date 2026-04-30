@@ -233,12 +233,30 @@ const SignupPage = () => {
                   </p>
                 </div>
 
-                <div className="mb-4 flex flex-col gap-3">
                   <div className="px-3 py-1 bg-warm-sand/10 border border-warm-sand/20 rounded-full inline-block self-start">
                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-warm-sand">
-                      Role: {getRole().toUpperCase()}
+                      Module: {getRole().toUpperCase()}
                     </span>
                   </div>
+
+                  {getRole() === 'admin' && (
+                    <div className="flex bg-blue-50/50 md:bg-white/5 p-1 rounded-xl border border-gray-100 md:border-white/10">
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, rbacRole: 'admin' })}
+                        className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${(formData.rbacRole || 'admin') === 'admin' ? 'bg-[#240046] md:bg-brand-purple text-white shadow-lg' : 'text-gray-400 md:text-white/40 hover:text-deep-espresso md:hover:text-white'}`}
+                      >
+                        Super Admin
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, rbacRole: 'assistant' })}
+                        className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${formData.rbacRole === 'assistant' ? 'bg-[#240046] md:bg-brand-purple text-white shadow-lg' : 'text-gray-400 md:text-white/40 hover:text-deep-espresso md:hover:text-white'}`}
+                      >
+                        Assistant
+                      </button>
+                    </div>
+                  )}
 
                   {getRole() === 'user' && (
                     <div className="flex bg-blue-50/50 md:bg-white/5 p-1 rounded-xl border border-gray-100 md:border-white/10">
@@ -258,7 +276,6 @@ const SignupPage = () => {
                       </button>
                     </div>
                   )}
-                </div>
 
                 {error && (
                   <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-[10px] font-bold text-center uppercase tracking-widest">

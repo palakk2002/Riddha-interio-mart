@@ -2,14 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useUser } from '../../user/data/UserContext';
-import { FiMenu, FiBell, FiUser, FiLogOut, FiChevronDown } from 'react-icons/fi';
+import { FiMenu, FiBell, FiUser, FiLogOut, FiChevronDown, FiShield } from 'react-icons/fi';
 import AdminNotifications from './AdminNotifications';
+import { RBACProvider, useRBAC } from '../data/RBACContext';
+import DemoRoleSwitcher from './DemoRoleSwitcher';
 
-const AdminLayout = () => {
+const AdminLayoutContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const { logout, user } = useUser();
+  const { role } = useRBAC();
   const navigate = useNavigate();
   const hasValidAdminSession = Boolean(user?.token) && user?.role === 'admin';
 
@@ -52,6 +55,11 @@ const AdminLayout = () => {
             <h2 className="text-sm font-medium text-warm-sand hidden sm:block">
               Welcome back, <span className="font-bold text-deep-espresso">Admin!</span>
             </h2>
+            
+            {/* Demo Mode Switcher */}
+            <div className="hidden lg:block ml-4">
+              <DemoRoleSwitcher />
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
@@ -83,7 +91,17 @@ const AdminLayout = () => {
               >
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-bold leading-tight group-hover:text-[#240046] transition-colors uppercase tracking-tight">{user?.fullName || user?.name || 'Admin'}</p>
-                  <p className="text-[10px] text-warm-sand font-black uppercase tracking-widest leading-none mt-0.5">Super Admin</p>
+                  <div className="flex items-center justify-end gap-1">
+                    {role === 'admin' ? (
+                      <span className="text-[10px] text-brand-purple font-black uppercase tracking-widest leading-none mt-0.5 flex items-center gap-1">
+                        <FiShield size={10} /> Super Admin
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-warm-sand font-black uppercase tracking-widest leading-none mt-0.5 flex items-center gap-1">
+                        Assistant
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ring-2 ring-white shadow-sm transition-all overflow-hidden ${showUserMenu ? 'bg-[#240046]' : 'bg-[#240046]/80'}`}>
                   {user?.avatar ? (
@@ -124,6 +142,14 @@ const AdminLayout = () => {
         </main>
       </div>
     </div>
+  );
+};
+
+const AdminLayout = () => {
+  return (
+    <RBACProvider>
+      <AdminLayoutContent />
+    </RBACProvider>
   );
 };
 

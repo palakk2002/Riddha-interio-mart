@@ -8,9 +8,12 @@ import Button from '../../../shared/components/Button';
 import LOGIN_BG from '../../../assets/login_bg_fretshop.png';
 import api from '../../../shared/utils/api';
 
+import { DEFAULT_ASSISTANT_PERMISSIONS } from '../../admin/data/permissionsMap';
+
 const LoginPage = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [rbacRole, setRbacRole] = useState('admin'); // 'admin' or 'assistant'
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
@@ -27,7 +30,7 @@ const LoginPage = () => {
 
   const getSignupPath = () => {
     const role = getRole();
-    if (role === 'admin') return '/admin/signup';
+    if (role === 'admin') return null; // No signup for admin
     if (role === 'seller') return '/seller/signup';
     if (role === 'delivery') return '/delivery/signup';
     return '/signup';
@@ -49,6 +52,17 @@ const LoginPage = () => {
 
       if (response.data.success) {
         const { token, user } = response.data;
+        
+        // Handle RBAC for Admin module
+        if (role === 'admin') {
+          localStorage.setItem('rbac_role', rbacRole);
+          if (rbacRole === 'assistant') {
+            localStorage.setItem('rbac_permissions', JSON.stringify(DEFAULT_ASSISTANT_PERMISSIONS));
+          } else {
+            localStorage.removeItem('rbac_permissions');
+          }
+        }
+
         login({ ...user, token });
 
         // Navigate based on role
@@ -139,12 +153,14 @@ const LoginPage = () => {
               transition={{ delay: 0.3 }}
               className="w-full max-w-[560px] md:max-w-md bg-white md:bg-white/10 md:backdrop-blur-3xl md:border md:border-white/20 py-5 px-8 md:p-12 rounded-[50px] md:rounded-[40px] shadow-2xl md:shadow-none relative mx-auto"
             >
-              {/* Login/Signup Toggle UI */}
+              {/* Login Header */}
               <div className="hidden md:flex justify-between items-center mb-10">
                 <h2 className="text-3xl font-display font-bold text-white">Log In</h2>
                 <div className="flex gap-2 text-[10px] font-black uppercase tracking-wider">
                   <span className="text-white border-b border-white pb-0.5 pointer-events-none">Log In</span>
-                  <span className="text-white/40 hover:text-white cursor-pointer transition-colors" onClick={() => navigate(getSignupPath())}>Sign Up</span>
+                  {getSignupPath() && (
+                    <span className="text-white/40 hover:text-white cursor-pointer transition-colors" onClick={() => navigate(getSignupPath())}>Sign Up</span>
+                  )}
                 </div>
               </div>
 
@@ -155,6 +171,29 @@ const LoginPage = () => {
                   Login to your account
                 </p>
               </div>
+
+              {/* Role Selection for Admin */}
+              {getRole() === 'admin' && (
+                <div className="mb-8">
+                  <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10">
+                    <button
+                      type="button"
+                      onClick={() => setRbacRole('admin')}
+                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${rbacRole === 'admin' ? 'bg-white text-deep-espresso shadow-lg' : 'text-white/40 hover:text-white'}`}
+                    >
+                      Super Admin
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRbacRole('assistant')}
+                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${rbacRole === 'assistant' ? 'bg-white text-deep-espresso shadow-lg' : 'text-white/40 hover:text-white'}`}
+                    >
+                      Assistant
+                    </button>
+                  </div>
+                  <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest text-center mt-3 italic">Select your workspace role to continue</p>
+                </div>
+              )}
 
               <AnimatePresence>
                 {error && (
@@ -226,29 +265,35 @@ const LoginPage = () => {
                 </div>
 
                 {/* Social Logins - Desktop Only */}
-                <div className="hidden md:block pt-10 border-t border-white/10">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="flex-1 h-[1px] bg-white/10"></div>
-                    <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">OR</span>
-                    <div className="flex-1 h-[1px] bg-white/10"></div>
+                {getRole() !== 'admin' && (
+                  <div className="hidden md:block pt-10 border-t border-white/10">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="flex-1 h-[1px] bg-white/10"></div>
+                      <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">OR</span>
+                      <div className="flex-1 h-[1px] bg-white/10"></div>
+                    </div>
+                    <div className="flex justify-center items-center gap-8">
+                      {[FaGoogle, FaFacebookF, FaXTwitter].map((Icon, idx) => (
+                        <button key={idx} type="button" className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-deep-espresso transition-all hover:scale-110 active:scale-90">
+                          <Icon size={20} />
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex justify-center items-center gap-8">
-                    {[FaGoogle, FaFacebookF, FaXTwitter].map((Icon, idx) => (
-                      <button key={idx} type="button" className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-deep-espresso transition-all hover:scale-110 active:scale-90">
-                        <Icon size={20} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                )}
 
-                <p className="hidden md:block text-center text-[10px] font-black text-white/50 uppercase tracking-widest mt-8">
-                  Don't have an account? <span onClick={() => navigate(getSignupPath())} className="text-white cursor-pointer border-b border-white/30 pb-0.5 hover:text-white/100 transition-colors">Sign up</span>
-                </p>
+                {getSignupPath() && (
+                  <p className="hidden md:block text-center text-[10px] font-black text-white/50 uppercase tracking-widest mt-8">
+                    Don't have an account? <span onClick={() => navigate(getSignupPath())} className="text-white cursor-pointer border-b border-white/30 pb-0.5 hover:text-white/100 transition-colors">Sign up</span>
+                  </p>
+                )}
 
                 {/* Mobile Sign Up Link */}
-                <p className="md:hidden text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-4">
-                  Don't have account? <span onClick={() => navigate(getSignupPath())} className="text-[#189D91] cursor-pointer font-black border-b border-[#189D91]/30 pb-0.5 ml-1">SIGN UP</span>
-                </p>
+                {getSignupPath() && (
+                  <p className="md:hidden text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-4">
+                    Don't have account? <span onClick={() => navigate(getSignupPath())} className="text-[#189D91] cursor-pointer font-black border-b border-[#189D91]/30 pb-0.5 ml-1">SIGN UP</span>
+                  </p>
+                )}
               </form>
             </motion.div>
           </div>

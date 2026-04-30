@@ -3,6 +3,8 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
+import { useRBAC } from '../data/RBACContext';
+import { permissionsMap } from '../data/permissionsMap';
 import { 
   FiLayout, 
   FiBox, 
@@ -23,7 +25,8 @@ import {
   FiPackage,
   FiTruck,
   FiMapPin,
-  FiGift
+  FiGift,
+  FiShield
 } from 'react-icons/fi';
 import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import sidebarBg from '../../../assets/seller_sidebar_bg.png';
@@ -130,14 +133,23 @@ const menuItems = [
   { path: '/admin/bulk-orders', icon: FiPackage, label: 'Bulk Orders' },
   { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
   { path: '/admin/referrals', icon: FiGift, label: 'Referral System' },
+  { path: '/admin/team', icon: FiShield, label: 'Team Management' },
 ];
 
 const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCount, productCount }) => {
+  const { hasPermission } = useRBAC();
+  const permissionKey = permissionsMap.menuMapping[item.label];
+  
+  if (permissionKey && !hasPermission(permissionKey)) {
+    return null;
+  }
+
   const hasChildren = item.children && item.children.length > 0;
   const location = useLocation();
   const isSelfActive = location.pathname === item.path;
   const isChildActive = hasChildren && item.children.some(child => location.pathname === child.path);
   const isActive = isSelfActive || isChildActive;
+
 
   const headerContent = (
     <div className="flex items-center gap-4 w-full text-left">
