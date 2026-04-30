@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { FiX, FiPackage, FiPhone, FiUser, FiMessageSquare, FiSend, FiChevronRight, FiPlus, FiTrash2, FiSearch, FiCheckCircle } from 'react-icons/fi';
+import { FiX, FiPackage, FiPhone, FiUser, FiMessageSquare, FiSend, FiChevronRight, FiPlus, FiTrash2, FiSearch, FiCheckCircle, FiMail } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../shared/utils/api';
 
 const BulkOrderModal = ({ isOpen, onClose }) => {
-  const [selectionMode, setSelectionMode] = useState('single'); // 'single' or 'multiple'
+  const [selectionMode, setSelectionMode] = useState('single');
   const [categories, setCategories] = useState([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
-  const [availableProducts, setAvailableProducts] = useState({}); // { catId: [products] }
-  const [orderItems, setOrderItems] = useState([]); // [{ id, name, qty, catId }]
+  const [availableProducts, setAvailableProducts] = useState({});
+  const [orderItems, setOrderItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ name: '', contact: '', message: '' });
+  const [formData, setFormData] = useState({ name: '', phone: '', email: '', message: '' });
   const [status, setStatus] = useState('idle');
 
   useEffect(() => {
@@ -45,7 +45,6 @@ const BulkOrderModal = ({ isOpen, onClose }) => {
     }
     setSelectedCategoryIds(newSelection);
 
-    // Fetch products for newly selected category if not already fetched
     if (newSelection.includes(catId) && !availableProducts[catId]) {
       try {
         setLoading(true);
@@ -60,9 +59,17 @@ const BulkOrderModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const addProductToOrder = (product) => {
+  const addProductToOrder = (product, catId) => {
     if (orderItems.find(item => item.id === product._id)) return;
-    setOrderItems([...orderItems, { id: product._id, name: product.name, qty: 1, price: product.price, image: product.images?.[0] }]);
+    const category = categories.find(c => c._id === catId)?.name || 'General';
+    setOrderItems([...orderItems, { 
+      id: product._id, 
+      name: product.name, 
+      qty: 1, 
+      price: product.price, 
+      image: product.images?.[0],
+      category: category
+    }]);
   };
 
   const removeOrderItem = (id) => {
@@ -74,20 +81,46 @@ const BulkOrderModal = ({ isOpen, onClose }) => {
     setOrderItems(orderItems.map(item => item.id === id ? { ...item, qty: parseInt(newQty) } : item));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (orderItems.length === 0) return alert('Please add at least one product');
+    
+    // Manual validation check (though required attribute handles most of it)
+    if (!formData.name || !formData.phone || !formData.email) {
+      return alert('Name, Phone, and Email are mandatory fields.');
+    }
+
     setStatus('sending');
-    setTimeout(() => {
+    
+    try {
+      const payload = {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        items: orderItems.map(item => ({
+          product: item.id,
+          name: item.name,
+          quantity: item.qty,
+          category: item.category
+        })),
+        message: formData.message
+      };
+
+      await api.post('/bulk-orders', payload);
+      
       setStatus('success');
       setTimeout(() => {
         onClose();
         setStatus('idle');
         setOrderItems([]);
         setSelectedCategoryIds([]);
-        setFormData({ name: '', contact: '', message: '' });
+        setFormData({ name: '', phone: '', email: '', message: '' });
       }, 3000);
-    }, 1500);
+    } catch (err) {
+      console.error('Failed to submit bulk order:', err);
+      alert('Failed to submit inquiry. Please try again.');
+      setStatus('idle');
+    }
   };
 
   return (
@@ -135,14 +168,39 @@ const BulkOrderModal = ({ isOpen, onClose }) => {
               ) : (
                 <form id="bulkForm" onSubmit={handleSubmit} className="space-y-6">
                   {/* Step 1: Info */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3">
                     <div className="relative">
                       <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
-                      <input required placeholder="Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 focus:border-[#189D91] focus:bg-white rounded-xl py-2.5 pl-10 pr-4 outline-none text-xs font-bold" />
+                      <input 
+                        required 
+                        placeholder="Full Name *" 
+                        value={formData.name} 
+                        onChange={e => setFormData({...formData, name: e.target.value})} 
+                        className="w-full bg-gray-50 border border-gray-100 focus:border-[#189D91] focus:bg-white rounded-xl py-3 pl-10 pr-4 outline-none text-xs font-bold transition-all" 
+                      />
                     </div>
-                    <div className="relative">
-                      <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
-                      <input required placeholder="Contact" value={formData.contact} onChange={e => setFormData({...formData, contact: e.target.value})} className="w-full bg-gray-50 border border-gray-100 focus:border-[#189D91] focus:bg-white rounded-xl py-2.5 pl-10 pr-4 outline-none text-xs font-bold" />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="relative">
+                        <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+                        <input 
+                          required 
+                          placeholder="Phone Number *" 
+                          value={formData.phone} 
+                          onChange={e => setFormData({...formData, phone: e.target.value})} 
+                          className="w-full bg-gray-50 border border-gray-100 focus:border-[#189D91] focus:bg-white rounded-xl py-3 pl-10 pr-4 outline-none text-xs font-bold transition-all" 
+                        />
+                      </div>
+                      <div className="relative">
+                        <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+                        <input 
+                          required 
+                          type="email"
+                          placeholder="Email Address *" 
+                          value={formData.email} 
+                          onChange={e => setFormData({...formData, email: e.target.value})} 
+                          className="w-full bg-gray-50 border border-gray-100 focus:border-[#189D91] focus:bg-white rounded-xl py-3 pl-10 pr-4 outline-none text-xs font-bold transition-all" 
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -187,7 +245,7 @@ const BulkOrderModal = ({ isOpen, onClose }) => {
                                   </div>
                                   <button
                                     type="button"
-                                    onClick={() => addProductToOrder(prod)}
+                                    onClick={() => addProductToOrder(prod, catId)}
                                     className={`p-1.5 rounded-lg transition-all ${orderItems.find(i => i.id === prod._id) ? 'bg-green-500 text-white' : 'bg-white text-[#189D91] shadow-sm hover:scale-110'}`}
                                   >
                                     {orderItems.find(i => i.id === prod._id) ? <FiCheckCircle /> : <FiPlus />}

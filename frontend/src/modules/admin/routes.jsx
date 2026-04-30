@@ -39,6 +39,7 @@ import AssignDeliveryPage from './pages/DeliveryAssignment';
 import AddProductFlowPage from './pages/AddProductFlowPage';
 import StockManagement from './pages/StockManagement';
 import BulkProductUpload from './pages/BulkProductUpload';
+import BulkOrdersPage from './pages/BulkOrdersPage';
 
 const AdminRoutes = () => {
   return (
@@ -87,6 +88,7 @@ const AdminRoutes = () => {
         <Route path="/profile" element={<AdminProfile />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/activity" element={<ActivityPage />} />
+        <Route path="/bulk-orders" element={<BulkOrdersPage />} />
       </Route>
     </Routes>
   );

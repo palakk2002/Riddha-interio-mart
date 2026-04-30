@@ -127,6 +127,7 @@ const menuItems = [
       { path: '/admin/manage-featured/add', icon: FiPlus, label: 'Add Featured Product' },
     ]
   },
+  { path: '/admin/bulk-orders', icon: FiPackage, label: 'Bulk Orders' },
   { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
   { path: '/admin/referrals', icon: FiGift, label: 'Referral System' },
 ];
