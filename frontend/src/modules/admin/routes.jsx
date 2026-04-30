@@ -19,6 +19,7 @@ import SignupPage from '../user/pages/SignupPage';
 import AdminProfile from './pages/AdminProfile';
 import AnalyticsPage from './pages/AnalyticsPage';
 import ActivityPage from './pages/ActivityPage';
+import ReferralManagement from './pages/ReferralManagement';
 import OrderTracking from './pages/OrderTracking';
 import AddProductPage from './pages/AddProductPage';
 import EditProductPage from './pages/EditProductPage';
@@ -47,6 +48,7 @@ const AdminRoutes = () => {
       <Route element={<AdminLayout />}>
         <Route index element={<DashboardPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/referrals" element={<ReferralManagement />} />
         <Route path="/catalog" element={<CatalogPage />} />
         <Route path="/bulk-upload" element={<BulkProductUpload />} />
         <Route path="/catalog/add" element={<AddProductPage />} />

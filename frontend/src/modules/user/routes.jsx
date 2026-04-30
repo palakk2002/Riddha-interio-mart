@@ -27,6 +27,7 @@ import EditProfile from './pages/EditProfile';
 import BrandPage from './pages/BrandPage';
 import SearchEntryPage from './pages/SearchEntryPage';
 import InvoicePage from './pages/InvoicePage';
+import ReferralRewardsPage from './pages/ReferralRewardsPage';
 
 const UserRoutes = () => {
   return (
@@ -38,6 +39,7 @@ const UserRoutes = () => {
       <Route path="/category/:slug" element={<CategoryDetailPage />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/referral-rewards" element={<ReferralRewardsPage />} />
       <Route path="/shop" element={<Shop />} />
       <Route path="/orders" element={<Orders />} />
       <Route path="/stores" element={<Stores />} />

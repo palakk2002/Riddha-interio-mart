@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../data/CartContext';
 import { useUser } from '../data/UserContext';
-import { FiArrowLeft, FiChevronDown, FiChevronUp, FiSmartphone, FiCreditCard, FiSearch, FiUser, FiShoppingCart, FiMenu, FiMapPin, FiCheck, FiGlobe } from 'react-icons/fi';
+import { FiArrowLeft, FiChevronDown, FiChevronUp, FiSmartphone, FiCreditCard, FiSearch, FiUser, FiShoppingCart, FiMenu, FiMapPin, FiCheck, FiGlobe, FiGift } from 'react-icons/fi';
 import Button from '../../../shared/components/Button';
 import api from '../../../shared/utils/api';
 
@@ -110,6 +110,17 @@ const PaymentPage = () => {
             <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest block mb-0.5">TOTAL</span>
             <span className="text-lg font-black text-gray-900">₹{cartTotal.toLocaleString()}</span>
           </div>
+        </div>
+
+        {/* Referral Reward Info */}
+        <div className="bg-[#F0F9F8] border border-[#189D91]/10 rounded-2xl p-4 flex items-center gap-3">
+          <div className="h-8 w-8 bg-[#189D91]/10 rounded-full flex items-center justify-center text-[#189D91]">
+             <FiGift size={16} />
+          </div>
+          <p className="text-[10px] md:text-xs font-bold text-gray-600 uppercase tracking-tight">
+            Referral reward will be applied after your first order. 
+            <span className="ml-1 text-[#189D91]">Earn ₹100 for every friend!</span>
+          </p>
         </div>
 
         {/* Payment Options */}

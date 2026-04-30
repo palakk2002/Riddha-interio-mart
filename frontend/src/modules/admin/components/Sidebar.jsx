@@ -22,7 +22,8 @@ import {
   FiClock,
   FiPackage,
   FiTruck,
-  FiMapPin
+  FiMapPin,
+  FiGift
 } from 'react-icons/fi';
 import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import sidebarBg from '../../../assets/seller_sidebar_bg.png';
@@ -127,6 +128,7 @@ const menuItems = [
     ]
   },
   { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
+  { path: '/admin/referrals', icon: FiGift, label: 'Referral System' },
 ];
 
 const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCount, productCount }) => {

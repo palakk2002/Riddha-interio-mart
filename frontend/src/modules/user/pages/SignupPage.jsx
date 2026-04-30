@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FiArrowLeft, FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiCheck, FiPhone, FiTruck, FiMapPin, FiShoppingBag } from 'react-icons/fi';
+import { FiArrowLeft, FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiCheck, FiPhone, FiTruck, FiMapPin, FiShoppingBag, FiGift } from 'react-icons/fi';
 import { FaGoogle, FaFacebookF, FaXTwitter } from 'react-icons/fa6';
 import Button from '../../../shared/components/Button';
 import LOGIN_BG from '../../../assets/login_bg_fretshop.png';
@@ -415,6 +415,18 @@ const SignupPage = () => {
                       <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Confirm</label>
                       <FiLock className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
                       <input type={showPassword ? "text" : "password"} name="confirmPassword" placeholder={window.innerWidth < 768 ? "Confirm Password" : ""} value={formData.confirmPassword} onChange={handleChange} className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all" />
+                    </div>
+                    <div className="space-y-0.5 relative group md:col-span-2">
+                      <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Referral Code (Optional)</label>
+                      <FiGift className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
+                      <input 
+                        type="text" 
+                        name="referralCode" 
+                        placeholder={window.innerWidth < 768 ? "Referral Code (Optional)" : "e.g. RIDDHA-123"} 
+                        value={formData.referralCode || ''} 
+                        onChange={handleChange} 
+                        className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all" 
+                      />
                     </div>
                   </div>
 

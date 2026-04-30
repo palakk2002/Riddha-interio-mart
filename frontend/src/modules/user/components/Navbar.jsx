@@ -14,7 +14,7 @@ import { useUser } from "../data/UserContext";
 import SearchBar from "./SearchBar";
 import api from '../../../shared/utils/api';
 import { getDeliveryEstimate } from '../../../shared/utils/delivery';
-import Logo from "../../../assets/WhatsApp Image 2026-04-23 at 1.37.51 PM.jpeg";
+import Logo from "../../../assets/WhatsApp_Image_2026-04-23_at_1.37.51_PM-removebg-preview (1).png";
 
 const toTitleCase = (str) => {
   if (!str) return '';
@@ -76,9 +76,11 @@ const Navbar = () => {
           <div className="hidden md:flex items-center justify-between py-3 gap-8">
             <div className="flex items-center gap-10 shrink-0">
               <Link to="/" className="flex items-center">
-                <div className="bg-white p-1 md:p-1.5 rounded-xl flex items-center justify-center shadow-sm">
-                  <img src={Logo} alt="Riddha Interio" className="h-12 md:h-16 w-auto object-contain" />
-                </div>
+                <img 
+                  src={Logo} 
+                  alt="Riddha Interio" 
+                  className="h-14 md:h-16 w-auto object-contain bg-white/95 rounded-md px-1 shadow-sm" 
+                />
               </Link>
               <div className="flex flex-col text-white">
                 <span className="text-[11px] font-bold leading-tight">Delivery in <span className="text-[#D4A017]">{getDeliveryEstimate(pincode).time}</span></span>
@@ -136,9 +138,11 @@ const Navbar = () => {
           {/* Mobile Header Row */}
           <div className="flex md:hidden justify-between items-center h-16">
             <Link to="/" className="flex-shrink-0">
-              <div className="bg-white p-1 rounded-lg flex items-center justify-center shadow-sm">
-                <img src={Logo} alt="Riddha Interio" className="h-10 md:h-12 w-auto object-contain" />
-              </div>
+              <img 
+                src={Logo} 
+                alt="Riddha Interio" 
+                className="h-10 md:h-12 w-auto object-contain bg-white/95 rounded-md px-1 shadow-sm" 
+              />
             </Link>
             <div className="flex items-center space-x-2">
               <Link to="/profile" className="p-2 text-white/80"><FiUser className="h-5 w-5" /></Link>
@@ -243,9 +247,11 @@ const Navbar = () => {
             <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} className="md:hidden fixed top-0 left-0 bottom-0 h-screen w-[85%] max-w-[320px] bg-white z-[100] shadow-2xl flex flex-col overflow-hidden">
               <div className="flex items-center justify-between px-6 py-8 border-b border-soft-oatmeal/15 bg-white/50 backdrop-blur-md">
                 <Link to="/" onClick={closeMobile} className="flex items-center group">
-                  <div className="bg-white p-1 rounded-lg flex items-center justify-center shadow-sm">
-                    <img src={Logo} alt="Riddha Interio" className="h-10 md:h-12 w-auto object-contain" />
-                  </div>
+                  <img 
+                    src={Logo} 
+                    alt="Riddha Interio" 
+                    className="h-10 md:h-12 w-auto object-contain bg-white/95 rounded-md px-1 shadow-sm" 
+                  />
                 </Link>
                 <button onClick={closeMobile} className="p-2.5 text-deep-espresso/40 hover:text-deep-espresso rounded-full"><FiX className="h-5 w-5" /></button>
               </div>

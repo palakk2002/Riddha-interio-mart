@@ -1,23 +1,33 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiUser, FiPackage, FiMapPin, FiSettings, FiLogOut, FiChevronRight } from 'react-icons/fi';
+import { FiUser, FiPackage, FiMapPin, FiSettings, FiLogOut, FiChevronRight, FiGift, FiCopy, FiCheck } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../data/UserContext';
+import { toast } from 'react-hot-toast';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { user, logout } = useUser();
+  const [copied, setCopied] = React.useState(false);
 
   const menuItems = [
     { icon: <FiUser />, title: "My Profile", subtitle: "View and edit your personal details", link: "/profile/edit" },
     { icon: <FiPackage />, title: "My Orders", subtitle: "Track, return or buy things again", link: "/orders" },
     { icon: <FiMapPin />, title: "Saved Addresses", subtitle: "Edit addresses for orders", link: "/address" },
+    { icon: <FiGift />, title: "Referral Rewards", subtitle: "Refer friends and earn credits", link: "/referral-rewards" },
     { icon: <FiSettings />, title: "Account Settings", subtitle: "Update your profile and security", link: "/profile/edit" },
   ];
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const copyReferralCode = () => {
+    navigator.clipboard.writeText('RIDDHA-2026');
+    setCopied(true);
+    toast.success('Referral code copied!');
+    setTimeout(() => setCopied(false), 2000);
   };
 
   if (!user) {
@@ -99,6 +109,37 @@ const Profile = () => {
               </div>
             </Link>
           ))}
+        </div>
+
+        {/* Referral Card Section */}
+        <div className="mt-8 md:mt-16">
+          <div className="bg-gradient-to-r from-[#189D91]/5 to-[#702D8B]/5 rounded-3xl p-6 md:p-10 border border-soft-oatmeal/10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="space-y-2 md:space-y-4 text-center md:text-left">
+              <h2 className="text-xl md:text-3xl font-black text-deep-espresso tracking-tight">Refer a friend, get ₹100</h2>
+              <p className="text-deep-espresso/50 text-xs md:text-sm font-bold tracking-widest uppercase">Your friends get ₹50 on their first purchase</p>
+              <div className="flex items-center justify-center md:justify-start gap-4 pt-2">
+                <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                  <FiGift className="text-[#189D91]" />
+                </div>
+                <p className="text-[10px] font-black text-[#189D91] uppercase tracking-[0.2em]">2 Friends Referred Successfully</p>
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 md:p-6 rounded-3xl shadow-xl border border-soft-oatmeal/10 w-full md:w-auto">
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 text-center">MY REFERRAL CODE</p>
+              <div className="flex items-center gap-3">
+                <div className="px-6 py-3 bg-soft-oatmeal/10 rounded-xl border-2 border-dashed border-warm-sand/30 font-black text-deep-espresso tracking-[0.2em] text-lg">
+                  RIDDHA-2026
+                </div>
+                <button 
+                  onClick={copyReferralCode}
+                  className="h-14 w-14 bg-deep-espresso text-white rounded-xl flex items-center justify-center hover:bg-warm-sand transition-all active:scale-90"
+                >
+                  {copied ? <FiCheck className="h-6 w-6" /> : <FiCopy className="h-6 w-6" />}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Support Section */}
