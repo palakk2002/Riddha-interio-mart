@@ -79,7 +79,7 @@ const Navbar = () => {
                 <img 
                   src={Logo} 
                   alt="Riddha Interio" 
-                  className="h-14 md:h-16 w-auto object-contain bg-white/95 rounded-md px-1 shadow-sm" 
+                  className="h-14 md:h-16 w-auto object-contain bg-white rounded-lg px-2 py-0.5 shadow-[0_0_20px_rgba(255,255,255,0.15)] border border-white/30 hover:scale-105 transition-all duration-300 cursor-pointer brightness-105" 
                 />
               </Link>
               <div className="flex flex-col text-white">
@@ -141,7 +141,7 @@ const Navbar = () => {
               <img 
                 src={Logo} 
                 alt="Riddha Interio" 
-                className="h-10 md:h-12 w-auto object-contain bg-white/95 rounded-md px-1 shadow-sm" 
+                className="h-10 md:h-12 w-auto object-contain bg-white rounded-md px-1.5 py-0.5 shadow-[0_0_15px_rgba(255,255,255,0.15)] border border-white/30 brightness-105" 
               />
             </Link>
             <div className="flex items-center space-x-2">
@@ -169,19 +169,23 @@ const Navbar = () => {
         className="hidden md:block bg-white border-b border-gray-200 relative z-40"
         onMouseLeave={handleCategoryLeave}
       >
-        <div className="max-w-[1440px] mx-auto px-8">
-          <div className="flex items-center justify-start h-10 gap-8">
+        <div className="max-w-[1440px] mx-auto px-8 relative">
+          {/* Left/Right Fade indicators for scroll */}
+          <div className="absolute left-8 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none opacity-0 md:group-hover:opacity-100 transition-opacity" />
+          <div className="absolute right-8 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none opacity-0 md:group-hover:opacity-100 transition-opacity" />
+
+          <div className="flex items-center justify-start h-11 gap-2 lg:gap-4 overflow-x-auto no-scrollbar scroll-smooth">
             {categories.map((cat, i) => (
               <div
                 key={cat._id}
-                className="relative h-full flex items-center group/cat"
+                className="relative h-full flex items-center shrink-0"
                 onMouseEnter={() => handleCategoryEnter(cat._id)}
               >
                 <Link
                   to={`/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`}
-                  className={`text-[13px] font-medium transition-colors h-full flex items-center border-b-2 ${activeCategory === cat._id
-                    ? "text-[#189D91] border-[#189D91]"
-                    : "text-gray-800 border-transparent hover:text-[#189D91]"
+                  className={`text-[12px] font-bold tracking-tight transition-all h-full flex items-center border-b-2 whitespace-nowrap px-3 ${activeCategory === cat._id
+                    ? "text-[#189D91] border-[#189D91] bg-[#189D91]/5"
+                    : "text-gray-600 border-transparent hover:text-[#189D91] hover:bg-gray-50"
                     }`}
                 >
                   {toTitleCase(cat.name)}
@@ -243,14 +247,27 @@ const Navbar = () => {
       <AnimatePresence>
         {isOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={closeMobile} className="md:hidden fixed inset-0 bg-warm-sand/20 backdrop-blur-sm z-[90]" />
-            <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} className="md:hidden fixed top-0 left-0 bottom-0 h-screen w-[85%] max-w-[320px] bg-white z-[100] shadow-2xl flex flex-col overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-8 border-b border-soft-oatmeal/15 bg-white/50 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              transition={{ duration: 0.3 }}
+              onClick={closeMobile} 
+              className="md:hidden fixed inset-0 bg-black/30 backdrop-blur-[2px] z-[90]" 
+            />
+            <motion.div 
+              initial={{ x: "-100%" }} 
+              animate={{ x: 0 }} 
+              exit={{ x: "-100%" }} 
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="md:hidden fixed top-0 left-0 bottom-0 h-screen w-[80%] max-w-[300px] bg-white z-[100] shadow-2xl flex flex-col overflow-hidden"
+            >
+              <div className="flex items-center justify-between px-6 py-6 border-b border-gray-100 bg-white">
                 <Link to="/" onClick={closeMobile} className="flex items-center group">
                   <img 
                     src={Logo} 
                     alt="Riddha Interio" 
-                    className="h-10 md:h-12 w-auto object-contain bg-white/95 rounded-md px-1 shadow-sm" 
+                    className="h-10 w-auto object-contain bg-white rounded-md px-1 shadow-sm" 
                   />
                 </Link>
                 <button onClick={closeMobile} className="p-2.5 text-deep-espresso/40 hover:text-deep-espresso rounded-full"><FiX className="h-5 w-5" /></button>
