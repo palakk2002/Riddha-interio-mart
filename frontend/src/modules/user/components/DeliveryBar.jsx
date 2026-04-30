@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 
+import { getDeliveryEstimate } from '../../../shared/utils/delivery';
+
 const DeliveryBar = () => {
   const [pincode, setPincode] = useState('');
 
@@ -26,15 +28,17 @@ const DeliveryBar = () => {
     };
   }, []);
 
+  const estimate = getDeliveryEstimate(pincode || '452018');
+
   return (
     <div className="bg-white border-b border-gray-100 py-2 px-5 flex items-center relative z-40 md:hidden">
       <div className="flex flex-col items-start">
         <span className="text-[12px] font-bold text-[#1a1a1a] leading-tight flex items-center gap-1.5">
-          Delivery in <span className="text-[#922724]">4 hours</span>
+          Delivery in <span className="text-[#D4A017]">{estimate.time}</span>
         </span>
         <button className="flex items-center gap-1 text-[11px] text-gray-500 font-semibold mt-0.5 group">
-          to {pincode || '452018'}
-          <FiChevronDown className="w-3 h-3 text-gray-400 group-hover:text-[#922724] transition-colors" />
+          to <span className="text-[#D4A017]">{pincode || '452018'}</span>
+          <FiChevronDown className="w-3 h-3 text-gray-400 group-hover:text-[#D4A017] transition-colors" />
         </button>
       </div>
     </div>

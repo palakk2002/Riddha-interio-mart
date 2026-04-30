@@ -20,7 +20,7 @@ const OrderSuccessPage = () => {
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="w-24 h-24 bg-[#8B2323] rounded-full flex items-center justify-center shadow-2xl shadow-[#8B2323]/20 mb-10"
+        className="w-24 h-24 bg-[#189D91] rounded-full flex items-center justify-center shadow-2xl shadow-[#189D91]/20 mb-10"
       >
         <FiCheck className="text-white text-5xl stroke-[3]" />
       </motion.div>
@@ -34,7 +34,7 @@ const OrderSuccessPage = () => {
       >
         <h1 className="text-3xl font-display font-black text-gray-900 tracking-tight uppercase">Order Placed!</h1>
         <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.1em] leading-relaxed px-4">
-          Your payment was successful and your order <span className="text-[#8B2323] font-black">#{orderId}</span> has been confirmed.
+          Your payment was successful and your order <span className="text-[#189D91] font-black">#{orderId}</span> has been confirmed.
         </p>
       </motion.div>
 
@@ -46,7 +46,7 @@ const OrderSuccessPage = () => {
         className="mt-12 w-full max-w-md bg-gray-50 border border-gray-100 rounded-3xl p-8 space-y-8"
       >
         <div className="flex items-center gap-5 text-left">
-           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-[#8B2323]">
+           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-[#189D91]">
               <FiShoppingBag size={20} />
            </div>
            <div>
@@ -56,7 +56,7 @@ const OrderSuccessPage = () => {
         </div>
 
         <div className="flex items-center gap-5 text-left">
-           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-[#8B2323]">
+           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-[#189D91]">
               <FiMapPin size={20} />
            </div>
            <div>
@@ -75,13 +75,13 @@ const OrderSuccessPage = () => {
       >
         <Button 
           onClick={() => navigate('/')}
-          className="w-full h-16 rounded-2xl bg-[#8B2323] text-white font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-[#8B2323]/20 flex items-center justify-center gap-3"
+          className="w-full h-16 rounded-2xl bg-[#189D91] text-white font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-[#189D91]/20 flex items-center justify-center gap-3"
         >
           CONTINUE SHOPPING <FiArrowRight className="text-lg" />
         </Button>
         <button 
           onClick={() => navigate('/orders')}
-          className="w-full py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:text-[#8B2323] transition-colors"
+          className="w-full py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:text-[#189D91] transition-colors"
         >
           View My Orders
         </button>

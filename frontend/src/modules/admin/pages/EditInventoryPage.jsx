@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
-import { LuImage, LuBriefcase, LuTags, LuInfo, LuArrowLeft, LuPackage, LuCheck, LuClock, LuUpload, LuGrid2X2 } from 'react-icons/lu';
-import { FiPackage } from 'react-icons/fi';
+import { LuImage, LuBriefcase, LuTags, LuInfo, LuArrowLeft, LuPackage, LuCheck, LuClock, LuUpload, LuGrid2X2, LuVideo, LuX } from 'react-icons/lu';
+import { FiPackage, FiTrash2, FiPlus } from 'react-icons/fi';
 import api from '../../../shared/utils/api';
 
 const EditInventoryPage = () => {
@@ -11,24 +11,28 @@ const EditInventoryPage = () => {
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [imgFile, setImgFile] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   
   // Custom Dropdown State
   const [isCatOpen, setIsCatOpen] = useState(false);
   const [catSearch, setCatSearch] = useState('');
+  
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
     category: '',
     brand: '',
     price: '',
-    image: '',
+    images: [],
+    videoUrl: '',
     description: '',
     material: '',
     dimensions: '',
     countInStock: 0,
+    unit: 'piece',
+    unitValue: '1',
   });
 
   useEffect(() => {
@@ -51,11 +55,14 @@ const EditInventoryPage = () => {
           category: product.category || '',
           brand: product.brand || '',
           price: product.price || '',
-          image: product.images?.[0] || '',
+          images: product.images || [],
+          videoUrl: product.videoUrl || '',
           description: product.description || '',
           material: product.material || '',
           dimensions: product.dimensions || '',
           countInStock: product.countInStock || 0,
+          unit: product.unit || 'piece',
+          unitValue: product.unitValue || '1',
         });
       } catch (err) {
         console.error('Failed to fetch data:', err);
@@ -72,39 +79,44 @@ const EditInventoryPage = () => {
   );
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImgFile(file);
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, image: reader.result }));
+        setFormData(prev => ({ ...prev, images: [...prev.images, reader.result] }));
       };
       reader.readAsDataURL(file);
-    }
+    });
+  };
+
+  const removeImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.brand) return alert('Please select a brand partner');
     try {
       setSaving(true);
 
-      let imageUrl = formData.image;
+      let finalVideoUrl = formData.videoUrl;
 
-      if (imgFile) {
-        const uploadData = new FormData();
-        uploadData.append('image', imgFile);
-        const { data: uploadRes } = await api.post('/upload', uploadData, {
+      if (videoFile) {
+        const videoData = new FormData();
+        videoData.append('image', videoFile);
+        const { data: uploadRes } = await api.post('/upload', videoData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        imageUrl = uploadRes.url;
+        finalVideoUrl = uploadRes.url;
       }
 
       const payload = {
         ...formData,
         price: Number(formData.price),
         countInStock: Number(formData.countInStock),
-        images: imageUrl ? [imageUrl] : []
+        videoUrl: finalVideoUrl
       };
 
       await api.put(`/products/${id}`, payload);
@@ -144,27 +156,66 @@ const EditInventoryPage = () => {
             
             {/* Image Section */}
             <div className="lg:col-span-1 space-y-6">
-              <div className="bg-white rounded-3xl p-6 border border-soft-oatmeal shadow-sm h-fit">
-                <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest mb-4 block">Product Image</label>
-                <div 
-                  onClick={() => fileInputRef.current.click()}
-                  className="aspect-square rounded-2xl bg-soft-oatmeal/20 border-2 border-dashed border-soft-oatmeal flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer"
-                >
-                  {formData.image ? (
-                    <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <LuImage className="text-warm-sand" size={32} />
-                  )}
-                  <input type="file" hidden ref={fileInputRef} onChange={handleFileChange} accept="image/*" />
+              <div className="bg-white rounded-3xl p-6 border border-soft-oatmeal shadow-sm h-fit space-y-6">
+                <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest block text-center">Product Media</label>
+                
+                <div className="grid grid-cols-2 gap-3">
+                   {formData.images.map((img, idx) => (
+                     <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-soft-oatmeal group">
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                        <button 
+                          type="button" onClick={() => removeImage(idx)}
+                          className="absolute inset-0 bg-red-500/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-white"
+                        >
+                           <FiTrash2 size={16} />
+                        </button>
+                     </div>
+                   ))}
+                   {formData.images.length < 5 && (
+                     <div 
+                       onClick={() => fileInputRef.current.click()}
+                       className="aspect-square bg-soft-oatmeal/10 rounded-xl border-2 border-dashed border-soft-oatmeal flex flex-col items-center justify-center text-warm-sand hover:border-warm-sand hover:text-deep-espresso transition-all cursor-pointer group"
+                     >
+                        <FiPlus size={20} className="opacity-40 group-hover:opacity-100" />
+                        <span className="text-[8px] font-black uppercase tracking-widest mt-1">Add Image</span>
+                     </div>
+                   )}
                 </div>
-                <div className="mt-4">
-                  <input 
-                    type="text" 
-                    placeholder="URL..."
-                    value={formData.image.startsWith('data:') ? 'Custom File Selected' : formData.image}
-                    onChange={(e) => setFormData({...formData, image: e.target.value})}
-                    className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-3 py-2 text-[10px] focus:outline-none"
-                  />
+                <input 
+                  type="file" multiple hidden ref={fileInputRef} 
+                  onChange={handleFileChange} accept="image/*"
+                />
+
+                <div className="space-y-4 pt-4 border-t border-soft-oatmeal/30">
+                   <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                         <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
+                            <LuVideo size={12} /> Product Video
+                         </label>
+                         <input 
+                           type="file" id="edit-inv-video-upload" hidden accept="video/*"
+                           onChange={(e) => setVideoFile(e.target.files[0])}
+                         />
+                         <label htmlFor="edit-inv-video-upload" className="text-[10px] font-black text-deep-espresso uppercase tracking-widest hover:underline cursor-pointer">
+                            {videoFile ? 'Change Video' : 'Upload File'}
+                         </label>
+                      </div>
+                      <input 
+                         type="url" 
+                         placeholder="or YouTube Link"
+                         value={formData.videoUrl}
+                         onChange={(e) => setFormData({...formData, videoUrl: e.target.value})}
+                         className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-[10px] focus:outline-none"
+                      />
+                      {videoFile && (
+                        <div className="flex items-center justify-between p-2 bg-green-50 border border-green-100 rounded-lg">
+                           <span className="text-[9px] font-bold text-green-700 truncate max-w-[150px]">{videoFile.name}</span>
+                           <button onClick={() => setVideoFile(null)} className="text-green-700 hover:text-red-500 transition-colors">
+                              <LuX size={12} />
+                           </button>
+                        </div>
+                      )}
+                   </div>
                 </div>
               </div>
             </div>
@@ -204,47 +255,22 @@ const EditInventoryPage = () => {
                          onFocus={() => setIsCatOpen(true)}
                          className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
                        />
-                       <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-warm-sand">
-                          <LuGrid2X2 size={14} className={isCatOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
-                       </div>
-
                        {isCatOpen && (
-                         <>
-                            <div 
-                              className="fixed inset-0 z-[40]" 
-                              onClick={() => {
-                                 setIsCatOpen(false);
-                                 setCatSearch('');
-                              }}
-                            />
-                            <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-soft-oatmeal rounded-2xl shadow-2xl z-[50] overflow-hidden max-h-64 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
-                               {filteredCategories.length > 0 ? (
-                                 filteredCategories.map(cat => (
-                                   <button
-                                     key={cat._id}
-                                     type="button"
-                                     onClick={() => {
-                                       setFormData({...formData, category: cat.name});
-                                       setCatSearch('');
-                                       setIsCatOpen(false);
-                                     }}
-                                     className="w-full text-left px-5 py-3.5 text-sm font-medium hover:bg-soft-oatmeal/30 transition-colors border-b border-soft-oatmeal/10 last:border-0 flex items-center justify-between group"
-                                   >
-                                     <span className={formData.category === cat.name ? "text-red-800 font-bold" : "text-deep-espresso"}>
-                                       {cat.name}
-                                     </span>
-                                     {formData.category === cat.name && (
-                                       <div className="w-1.5 h-1.5 bg-red-800 rounded-full" />
-                                     )}
-                                   </button>
-                                 ))
-                               ) : (
-                                 <div className="px-5 py-4 text-xs font-bold text-warm-sand uppercase tracking-widest text-center italic">
-                                   No categories found
-                                 </div>
-                               )}
-                            </div>
-                         </>
+                         <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-soft-oatmeal rounded-2xl shadow-2xl z-[50] overflow-hidden max-h-64 overflow-y-auto">
+                            {filteredCategories.map(cat => (
+                              <button
+                                key={cat._id}
+                                type="button"
+                                onClick={() => {
+                                  setFormData({...formData, category: cat.name});
+                                  setIsCatOpen(false);
+                                }}
+                                className="w-full text-left px-5 py-3.5 text-sm font-medium hover:bg-soft-oatmeal/30"
+                              >
+                                {cat.name}
+                              </button>
+                            ))}
+                         </div>
                        )}
                     </div>
                   </div>
@@ -260,15 +286,10 @@ const EditInventoryPage = () => {
                        <option value="">Select Brand</option>
                        {brands.map(brand => <option key={brand._id} value={brand._id}>{brand.name}</option>)}
                     </select>
-                    {!brands.length && (
-                       <p className="text-[9px] text-red-500 font-bold mt-1 uppercase tracking-tight flex items-center gap-1">
-                          <LuInfo size={10} /> No brands found. Please add a brand first.
-                       </p>
-                    )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Price (₹)</label>
                     <input type="number" required value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none font-bold" />
@@ -279,13 +300,41 @@ const EditInventoryPage = () => {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Unit Type</label>
+                      <select 
+                        value={formData.unit}
+                        onChange={(e) => setFormData({...formData, unit: e.target.value})}
+                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none appearance-none cursor-pointer"
+                      >
+                         <option value="piece">Piece (Pcs)</option>
+                         <option value="kg">Kilogram (Kg)</option>
+                         <option value="ltr">Litre (Ltr)</option>
+                         <option value="watt">Watt (W)</option>
+                         <option value="mtr">Meter (m)</option>
+                         <option value="box">Box</option>
+                         <option value="pack">Pack</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Unit Value</label>
+                      <input 
+                        type="text"
+                        value={formData.unitValue}
+                        onChange={(e) => setFormData({...formData, unitValue: e.target.value})}
+                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none"
+                      />
+                    </div>
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Description</label>
                   <textarea rows={4} required value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none resize-none" />
                 </div>
 
                 <div className="flex justify-end pt-6">
-                  <button disabled={saving} type="submit" className="bg-deep-espresso hover:bg-black text-white px-10 py-4 rounded-2xl font-bold flex items-center gap-2 transition-all disabled:opacity-50 shadow-xl shadow-black/10">
+                  <button disabled={saving} type="submit" className="bg-deep-espresso hover:bg-black text-white px-10 py-4 rounded-2xl font-bold flex items-center gap-2 transition-all disabled:opacity-50 shadow-xl shadow-black/10 uppercase tracking-widest text-xs">
                     {saving ? 'UPDATING...' : 'SAVE CHANGES'}
                   </button>
                 </div>

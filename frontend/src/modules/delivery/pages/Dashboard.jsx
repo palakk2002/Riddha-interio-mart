@@ -62,8 +62,8 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso uppercase italic tracking-tight">
-              Partner <span className="text-warm-sand">Dashboard</span>
+            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">
+              Partner Dashboard
             </h1>
             <p className="text-dusty-cocoa font-bold text-xs uppercase tracking-widest mt-2">
               Welcome back, {user?.fullName || 'Partner'}! Here's your delivery summary.
@@ -79,7 +79,7 @@ const Dashboard = () => {
              <button 
                onClick={toggleStatus}
                disabled={updating}
-               className={`relative inline-flex h-10 w-20 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-800 focus:ring-offset-2 ${partnerStatus === 'Available' ? 'bg-red-800' : 'bg-soft-oatmeal'}`}
+               className={`relative inline-flex h-10 w-20 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#001B4E] focus:ring-offset-2 ${partnerStatus === 'Available' ? 'bg-[#001B4E]' : 'bg-soft-oatmeal'}`}
              >
                <span className={`pointer-events-none inline-block h-9 w-9 transform rounded-full bg-white shadow ring-0 transition duration-300 ease-in-out ${partnerStatus === 'Available' ? 'translate-x-10' : 'translate-x-0'}`} />
              </button>

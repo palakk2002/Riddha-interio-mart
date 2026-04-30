@@ -77,7 +77,7 @@ const AdminNotifications = ({ token }) => {
      if (activeNotification.type === 'product') return 'bg-amber-50 text-amber-600';
      if (activeNotification.type === 'delivery_reg') return 'bg-blue-50 text-blue-600';
      if (activeNotification.type === 'delivery_resp') return activeNotification.status === 'Accepted' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600';
-     return 'bg-red-50 text-red-800';
+     return 'bg-brand-pink/5 text-red-800';
   };
 
   return (
@@ -114,7 +114,7 @@ const AdminNotifications = ({ token }) => {
                   </h3>
                   <button 
                     onClick={() => setActiveNotification(null)}
-                    className="p-1 hover:bg-soft-oatmeal rounded-full transition-colors text-warm-sand"
+                    className="p-1 hover:bg-soft-oatmeal rounded-full transition-colors text-brand-teal"
                   >
                     <FiX size={18} />
                   </button>
@@ -125,7 +125,7 @@ const AdminNotifications = ({ token }) => {
                    activeNotification.type === 'delivery_resp' ? `Order ${activeNotification.status}` :
                    `₹${activeNotification.totalPrice?.toLocaleString()} Order Received`}
                </p>
-               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-warm-sand font-medium mt-2">
+               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-brand-teal font-medium mt-2">
                   <span className="flex items-center gap-1">
                      <span className={`w-1.5 h-1.5 rounded-full ${
                        activeNotification.type === 'product' ? 'bg-amber-500' : 
@@ -177,7 +177,7 @@ const AdminNotifications = ({ token }) => {
                   </button>
                   <button 
                     onClick={() => setActiveNotification(null)}
-                    className="px-6 py-3 border border-soft-oatmeal rounded-xl text-[10px] font-black uppercase tracking-widest text-warm-sand hover:bg-soft-oatmeal transition-all"
+                    className="px-6 py-3 border border-soft-oatmeal rounded-xl text-[10px] font-black uppercase tracking-widest text-brand-teal hover:bg-soft-oatmeal transition-all"
                   >
                     Dismiss
                   </button>

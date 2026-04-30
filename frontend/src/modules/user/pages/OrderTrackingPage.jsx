@@ -69,7 +69,7 @@ const OrderTrackingPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FDFCFB] flex flex-col items-center justify-center">
-        <div className="w-10 h-10 border-4 border-gray-100 border-t-[#8B2323] rounded-full animate-spin mb-4" />
+        <div className="w-10 h-10 border-4 border-gray-100 border-t-[#189D91] rounded-full animate-spin mb-4" />
         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Synchronizing Logistics...</p>
       </div>
     );
@@ -96,10 +96,10 @@ const OrderTrackingPage = () => {
           <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full hover:bg-gray-50 flex items-center justify-center transition-colors">
             <FiArrowLeft className="h-6 w-6 text-gray-900" />
           </button>
-          <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter italic">Live <span className="text-[#8B2323]">Tracking</span></h1>
+          <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter italic">Live <span className="text-[#189D91]">Tracking</span></h1>
         </div>
-        <div className="bg-red-50 px-4 py-2 rounded-xl">
-           <span className="text-[9px] font-black text-[#8B2323] uppercase tracking-widest">{order.status}</span>
+        <div className="bg-[#F0F9F8] px-4 py-2 rounded-xl">
+           <span className="text-[9px] font-black text-[#189D91] uppercase tracking-widest">{order.status}</span>
         </div>
       </div>
 
@@ -137,8 +137,8 @@ const OrderTrackingPage = () => {
 
         {/* Tracking Stepper */}
         <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl shadow-gray-200/20 relative">
-           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8B2323] mb-12 flex items-center gap-3">
-              <span className="w-6 h-1 bg-[#8B2323] rounded-full" /> 
+           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#189D91] mb-12 flex items-center gap-3">
+              <span className="w-6 h-1 bg-[#189D91] rounded-full" /> 
               Journey Status
            </h3>
 
@@ -154,7 +154,7 @@ const OrderTrackingPage = () => {
                   <div key={step.id} className="relative flex gap-8 group">
                     <div className={`relative z-10 w-10 h-10 rounded-2xl flex items-center justify-center text-lg transition-all duration-500 ${
                       isCompleted ? 'bg-black text-white' : 
-                      isActive ? 'bg-[#8B2323] text-white shadow-xl shadow-red-900/20 scale-110' : 'bg-gray-100 text-gray-400'
+                      isActive ? 'bg-[#189D91] text-white shadow-xl shadow-[#189D91]/20 scale-110' : 'bg-gray-100 text-gray-400'
                     }`}>
                         {step.icon}
                     </div>

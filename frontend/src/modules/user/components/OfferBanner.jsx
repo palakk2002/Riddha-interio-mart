@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import api from '../../../shared/utils/api';
@@ -104,9 +104,8 @@ const OfferBanner = () => {
             <button
               key={i}
               onClick={() => setCurrent(i)}
-              className={`h-1 md:h-2 rounded-full transition-all duration-300 ${
-                current === i ? 'w-4 md:w-10 bg-warm-sand' : 'w-1 md:w-2 bg-gray-200'
-              }`}
+              className={`h-1 md:h-2 rounded-full transition-all duration-300 ${current === i ? 'w-4 md:w-10 bg-warm-sand' : 'w-1 md:w-2 bg-gray-200'
+                }`}
             />
           ))}
         </div>

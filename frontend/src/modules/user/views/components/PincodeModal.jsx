@@ -53,16 +53,16 @@ const PincodeModal = ({ onComplete }) => {
         className="bg-white rounded-[28px] w-full max-w-[360px] overflow-hidden shadow-2xl relative"
       >
         {/* Header Section with Illustration */}
-        <div className="bg-gradient-to-br from-[#FEF2F2] to-[#FEE2E2] p-5 flex flex-col items-center text-center relative overflow-hidden">
-            <div className="absolute top-2 right-2 w-20 h-20 bg-[#922724]/5 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-2 left-2 w-16 h-16 bg-[#922724]/5 rounded-full blur-3xl"></div>
+        <div className="bg-gradient-to-br from-[#F0F9F8] to-[#E2F2F1] p-5 flex flex-col items-center text-center relative overflow-hidden">
+            <div className="absolute top-2 right-2 w-20 h-20 bg-[#189D91]/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-2 left-2 w-16 h-16 bg-[#189D91]/5 rounded-full blur-3xl"></div>
             
             <motion.div 
                 animate={{ x: [-5, 5, -5] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
                 className="w-32 h-20 mb-4 flex items-center justify-center"
             >
-                <svg viewBox="0 0 100 60" className="w-full h-full text-[#922724]">
+                <svg viewBox="0 0 100 60" className="w-full h-full text-[#189D91]">
                     <path fill="currentColor" opacity="0.1" d="M10,45 L90,45 L85,55 L15,55 Z" />
                     <rect x="25" y="15" width="45" height="25" rx="3" fill="currentColor" />
                     <path d="M70,25 L85,25 L85,40 L70,40 Z" fill="currentColor" opacity="0.8" />
@@ -72,12 +72,12 @@ const PincodeModal = ({ onComplete }) => {
                 </svg>
             </motion.div>
 
-            <p className="text-[10px] font-bold text-[#922724] uppercase tracking-[0.2em] mb-1 opacity-80">Introducing</p>
-            <h2 className="text-xl font-display font-bold text-[#922724] leading-tight mb-2">
+            <p className="text-[10px] font-bold text-[#189D91] uppercase tracking-[0.2em] mb-1 opacity-80">Introducing</p>
+            <h2 className="text-xl font-display font-bold text-[#189D91] leading-tight mb-2">
                 Express Delivery in 4 Hours
             </h2>
             <p className="text-[11px] text-gray-500 max-w-[240px] font-medium leading-normal">
-                Order before <span className="font-bold">5 PM</span> for <span className="text-[#922724] font-bold text-[12px]">4 hour delivery*</span>
+                Order before <span className="font-bold">5 PM</span> for <span className="text-[#189D91] font-bold text-[12px]">4 hour delivery*</span>
                 <br />
                 <span className="text-[9px] opacity-60">*On select pincodes & products</span>
             </p>
@@ -105,8 +105,8 @@ const PincodeModal = ({ onComplete }) => {
             </div>
 
             <div className="space-y-4">
-                <div className={`relative flex items-center border-2 rounded-[20px] p-4 transition-all duration-300 group ${error ? 'border-red-500 bg-red-50/50' : 'border-gray-50 bg-gray-50/50 focus-within:border-[#922724] focus-within:bg-white focus-within:shadow-lg focus-within:shadow-[#922724]/5'}`}>
-                    <FiMapPin className={`w-5 h-5 mr-3 transition-all duration-300 ${error ? 'text-red-500' : 'text-gray-300 group-focus-within:text-[#922724]'}`} />
+                <div className={`relative flex items-center border-2 rounded-[20px] p-4 transition-all duration-300 group ${error ? 'border-red-500 bg-red-50/50' : 'border-gray-50 bg-gray-50/50 focus-within:border-[#189D91] focus-within:bg-white focus-within:shadow-lg focus-within:shadow-[#189D91]/5'}`}>
+                    <FiMapPin className={`w-5 h-5 mr-3 transition-all duration-300 ${error ? 'text-red-500' : 'text-gray-300 group-focus-within:text-[#189D91]'}`} />
                     <input
                         type="text"
                         placeholder="Enter Pincode"
@@ -122,7 +122,7 @@ const PincodeModal = ({ onComplete }) => {
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.8 }}
                                 onClick={checkServiceability}
-                                className="bg-[#922724] text-white p-2 rounded-xl hover:bg-[#7a1f1b] transition-colors shadow-md"
+                                className="bg-[#189D91] text-white p-2 rounded-xl hover:bg-[#127F75] transition-colors shadow-md"
                             >
                                 <FiChevronRight className="w-5 h-5" />
                             </motion.button>
@@ -159,7 +159,7 @@ const PincodeModal = ({ onComplete }) => {
                 <div className="text-center">
                     <button 
                         onClick={handleDefaultPincode}
-                        className="text-[#922724] text-[12px] font-bold underline underline-offset-4 hover:text-[#7a1f1b] transition-all"
+                        className="text-[#189D91] text-[12px] font-bold underline underline-offset-4 hover:text-[#127F75] transition-all"
                     >
                         Continue With Default Pincode
                     </button>
@@ -170,7 +170,7 @@ const PincodeModal = ({ onComplete }) => {
                     disabled={pincode.length !== 6 && !isServiceable}
                     className={`w-full py-4 rounded-[20px] text-[16px] font-black tracking-wide transition-all duration-300 transform active:scale-[0.98] mt-1 ${
                         pincode.length === 6 || isServiceable
-                        ? 'bg-[#922724] text-white hover:bg-[#7a1f1b] shadow-xl shadow-[#922724]/20' 
+                        ? 'bg-[#189D91] text-white hover:bg-[#127F75] shadow-xl shadow-[#189D91]/20' 
                         : 'bg-gray-100 text-gray-300 cursor-not-allowed'
                     }`}
                 >

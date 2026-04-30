@@ -19,16 +19,16 @@ const SellerBottomNavbar = () => {
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-5 left-4 right-4 z-50">
-      <div className="bg-deep-espresso/90 backdrop-blur-2xl border border-white/10 shadow-[0_15px_35px_rgba(0,0,0,0.3)] px-4 py-3 rounded-[28px] flex justify-between items-center transition-all duration-500">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-soft-oatmeal shadow-[0_-5px_20px_rgba(0,0,0,0.05)] px-4 pb-safe">
+      <div className="flex justify-around items-center h-16">
         {navItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
             end={item.path === '/seller'}
             className={({ isActive }) =>
-              `relative flex flex-col items-center gap-1 group transition-all duration-300 ${
-                isActive ? 'text-warm-sand' : 'text-white/40 hover:text-white/60'
+              `relative flex flex-col items-center gap-1 group transition-all duration-300 w-full ${
+                isActive ? 'text-[#bd3b64]' : 'text-dusty-cocoa hover:text-[#bd3b64]'
               }`
             }
           >
@@ -40,20 +40,20 @@ const SellerBottomNavbar = () => {
                     whileTap={{ scale: 0.9 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   >
-                    <item.icon className="h-5 w-5 transition-all duration-300" />
+                    <item.icon className={`h-6 w-6 transition-all duration-300 ${isActive ? 'text-[#bd3b64]' : 'text-dusty-cocoa group-hover:text-[#bd3b64]'}`} />
                   </motion.div>
                 </div>
                 
-                <span className={`text-[8px] font-black uppercase tracking-wider transition-all duration-300 leading-none mt-1 ${
-                  isActive ? 'text-warm-sand' : 'text-white/40'
+                <span className={`text-[10px] font-bold uppercase tracking-tight transition-all duration-300 leading-none mt-1 ${
+                  isActive ? 'text-[#bd3b64]' : 'text-dusty-cocoa group-hover:text-[#bd3b64]'
                 }`}>
                   {item.name}
                 </span>
 
                 {isActive && (
                   <motion.div
-                    layoutId="seller-nav-glow"
-                    className="absolute -bottom-2 w-6 h-1 bg-warm-sand/30 blur-md rounded-full"
+                    layoutId="seller-nav-indicator"
+                    className="absolute -top-3 w-8 h-1 bg-[#bd3b64] rounded-full"
                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   />
                 )}

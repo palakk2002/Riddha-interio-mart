@@ -76,7 +76,7 @@ const OrderCard = ({ order, onAccept, onReject, onUpdateStatus }) => {
           <div className="grid grid-cols-2 gap-3">
             <button 
               onClick={() => onReject(order.id)}
-              className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-soft-oatmeal text-xs font-bold text-dusty-cocoa hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all uppercase tracking-wider"
+              className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-soft-oatmeal text-xs font-bold text-dusty-cocoa hover:bg-[#001B4E]/5 hover:text-[#001B4E] hover:border-[#001B4E]/20 transition-all uppercase tracking-wider"
             >
               <LuX size={14} /> Reject
             </button>

@@ -37,6 +37,7 @@ import ManageDeliveries from './pages/ManageDeliveries';
 import AssignDeliveryPage from './pages/DeliveryAssignment';
 import AddProductFlowPage from './pages/AddProductFlowPage';
 import StockManagement from './pages/StockManagement';
+import BulkProductUpload from './pages/BulkProductUpload';
 
 const AdminRoutes = () => {
   return (
@@ -47,6 +48,7 @@ const AdminRoutes = () => {
         <Route index element={<DashboardPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/catalog" element={<CatalogPage />} />
+        <Route path="/bulk-upload" element={<BulkProductUpload />} />
         <Route path="/catalog/add" element={<AddProductPage />} />
         <Route path="/catalog/edit/:id" element={<EditProductPage />} />
         <Route path="/inventory" element={<ProductListPage />} />

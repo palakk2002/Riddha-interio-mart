@@ -67,45 +67,45 @@ const Wallet = () => {
   return (
     <PageWrapper>
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 md:px-0 text-center md:text-left">
           <div className="space-y-1">
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso">My Wallet</h1>
-            <p className="text-warm-sand text-sm md:text-base">Track your earnings and payout history.</p>
+            <h1 className="text-2xl md:text-4xl font-display font-bold text-deep-espresso">My Wallet</h1>
+            <p className="text-warm-sand text-[10px] md:text-sm font-bold uppercase tracking-widest leading-relaxed">Track your earnings and payout history.</p>
           </div>
           <button 
             onClick={() => setShowWithdrawModal(true)}
-            className="flex items-center justify-center gap-2 bg-red-800 text-white px-6 py-3.5 rounded-2xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20 active:scale-95 text-sm"
+            className="w-full md:w-auto flex items-center justify-center gap-2 bg-red-800 text-white px-8 py-3.5 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-deep-espresso transition-all shadow-xl shadow-red-900/20 active:scale-95"
           >
             Withdraw Funds
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-4 md:px-0">
           <div className="bg-white p-6 rounded-2xl border border-soft-oatmeal shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
               <FiDollarSign size={24} />
             </div>
             <div>
-              <p className="text-xs text-warm-sand font-bold uppercase tracking-wider">Total Earnings</p>
-              <h4 className="text-xl font-black text-deep-espresso">₹85,000</h4>
+              <p className="text-[10px] text-warm-sand font-black uppercase tracking-widest">Total Earnings</p>
+              <h4 className="text-xl md:text-2xl font-black text-deep-espresso">₹85,000</h4>
             </div>
           </div>
           <div className="bg-white p-6 rounded-2xl border border-soft-oatmeal shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <div className="w-12 h-12 rounded-xl bg-brand-pink-light flex items-center justify-center text-brand-pink shrink-0">
               <LuWallet size={24} />
             </div>
             <div>
-              <p className="text-xs text-warm-sand font-bold uppercase tracking-wider">Wallet Balance</p>
-              <h4 className="text-xl font-black text-deep-espresso">₹{balance.toLocaleString()}</h4>
+              <p className="text-[10px] text-warm-sand font-black uppercase tracking-widest">Wallet Balance</p>
+              <h4 className="text-xl md:text-2xl font-black text-deep-espresso">₹{balance.toLocaleString()}</h4>
             </div>
           </div>
           <div className="bg-white p-6 rounded-2xl border border-soft-oatmeal shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+            <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
               <LuTrendingUp size={24} />
             </div>
             <div>
-              <p className="text-xs text-warm-sand font-bold uppercase tracking-wider">Pending Payout</p>
-              <h4 className="text-xl font-black text-deep-espresso">₹5,000</h4>
+              <p className="text-[10px] text-warm-sand font-black uppercase tracking-widest">Pending Payout</p>
+              <h4 className="text-xl md:text-2xl font-black text-deep-espresso">₹5,000</h4>
             </div>
           </div>
         </div>

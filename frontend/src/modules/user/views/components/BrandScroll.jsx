@@ -20,13 +20,13 @@ const BrandLogo = ({ brand }) => {
       <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center text-deep-espresso">
         <span 
           className="text-xs md:text-2xl font-black tracking-tighter uppercase italic"
-          style={{ color: brandColors[brand.name?.toUpperCase()] || '#922724' }}
+          style={{ color: brandColors[brand.name?.toUpperCase()] || '#189D91' }}
         >
           {brand.name}
         </span>
         <div 
           className="h-1 w-8 mt-1 rounded-full opacity-30"
-          style={{ backgroundColor: brandColors[brand.name?.toUpperCase()] || '#922724' }}
+          style={{ backgroundColor: brandColors[brand.name?.toUpperCase()] || '#189D91' }}
         />
       </div>
     );
@@ -78,7 +78,7 @@ const BrandScroll = ({ title }) => {
               >
                 <Link to={`/brand/${brand.slug || brand.name.toLowerCase()}`} className="group flex flex-col items-center gap-2 md:gap-5 w-24 md:w-56">
                   {/* Brand Card */}
-                  <div className="relative aspect-square w-full bg-white border-[1px] md:border-2 border-[#922724] rounded-lg md:rounded-2xl overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300">
+                  <div className="relative aspect-square w-full bg-white border-[1px] md:border-2 border-[#189D91] rounded-lg md:rounded-2xl overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300">
                     <div className="w-full h-full flex items-center justify-center">
                       <BrandLogo brand={brand} />
                     </div>
@@ -86,7 +86,7 @@ const BrandScroll = ({ title }) => {
                   
                   {/* Brand Offer */}
                   <div className="text-center">
-                    <p className="text-[9px] md:text-lg font-bold text-[#922724] tracking-tight group-hover:text-[#b1312d] transition-colors">
+                    <p className="text-[9px] md:text-lg font-bold text-[#189D91] tracking-tight group-hover:text-[#127F75] transition-colors">
                       {brand.offer}
                     </p>
                   </div>

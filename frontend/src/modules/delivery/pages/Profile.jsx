@@ -115,28 +115,28 @@ const Profile = () => {
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header Section */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-1">
-            <h1 className="text-4xl md:text-5xl font-display font-bold text-deep-espresso">My Profile</h1>
-            <p className="text-sm md:text-base text-warm-sand font-medium uppercase tracking-[0.2em]">Partner ID: {currentUser?.id?.slice(-8).toUpperCase()}</p>
+          <div className="space-y-0.5">
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-deep-espresso">My Profile</h1>
+            <p className="text-[10px] text-warm-sand font-black uppercase tracking-widest">Partner ID: {currentUser?.id?.slice(-8).toUpperCase()}</p>
           </div>
           
           <div className="flex items-center gap-4">
             {/* Availability Toggle */}
             <div className={`px-6 py-3 rounded-2xl border transition-all duration-500 flex items-center gap-6 ${
               profile.isOnline 
-                ? 'bg-emerald-50 border-emerald-100 shadow-lg shadow-emerald-500/10' 
+                ? 'bg-[#001B4E]/5 border-[#001B4E]/10 shadow-lg shadow-[#001B4E]/10' 
                 : 'bg-white border-soft-oatmeal'
             }`}>
               <div className="text-left">
                 <p className="text-[9px] font-black text-warm-sand uppercase tracking-widest">Active Status</p>
-                <p className={`text-sm font-black uppercase tracking-tighter ${profile.isOnline ? 'text-emerald-600' : 'text-dusty-cocoa'}`}>
+                <p className={`text-sm font-black uppercase tracking-tighter ${profile.isOnline ? 'text-[#001B4E]' : 'text-dusty-cocoa'}`}>
                   {profile.isOnline ? 'Online' : 'Offline'}
                 </p>
               </div>
               <button 
                 onClick={toggleOnline}
                 className={`w-12 h-6 rounded-full relative transition-colors duration-300 ${
-                  profile.isOnline ? 'bg-emerald-500' : 'bg-soft-oatmeal'
+                  profile.isOnline ? 'bg-[#001B4E]' : 'bg-soft-oatmeal'
                 }`}
               >
                 <motion.div 
@@ -186,14 +186,14 @@ const Profile = () => {
                   <div className="flex items-center justify-between text-xs font-bold text-warm-sand uppercase tracking-widest">
                     <span>Approval Status</span>
                     <span className={`px-3 py-1 rounded-full text-[9px] ${
-                      profile.approvalStatus === 'Approved' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
+                      profile.approvalStatus === 'Approved' ? 'bg-[#001B4E] text-white' : 'bg-[#001B4E] text-white'
                     }`}>
                       {profile.approvalStatus}
                     </span>
                   </div>
-                  <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 flex items-center gap-3">
-                    <LuShieldCheck className="text-emerald-500 shrink-0" size={20} />
-                    <p className="text-[10px] font-bold text-emerald-800 text-left leading-relaxed uppercase tracking-tighter">Identity Verified & Secured by Riddha Mart Protocol</p>
+                  <div className="p-4 bg-[#001B4E]/5 rounded-2xl border border-[#001B4E]/10 flex items-center gap-3">
+                    <LuShieldCheck className="text-[#001B4E] shrink-0" size={20} />
+                    <p className="text-[10px] font-bold text-[#001B4E] text-left leading-relaxed uppercase tracking-tighter">Identity Verified & Secured by Riddha Mart Protocol</p>
                   </div>
                 </div>
               </div>
@@ -204,7 +204,7 @@ const Profile = () => {
 
             <button 
               onClick={logout}
-              className="w-full flex items-center justify-center gap-3 py-5 rounded-[24px] bg-white border border-soft-oatmeal text-red-500 font-black uppercase tracking-widest text-[10px] hover:bg-red-50 hover:border-red-100 transition-all active:scale-95 shadow-sm"
+              className="w-full flex items-center justify-center gap-3 py-5 rounded-[24px] bg-white border border-soft-oatmeal text-[#001B4E] font-black uppercase tracking-widest text-[10px] hover:bg-[#001B4E]/5 hover:border-[#001B4E]/20 transition-all active:scale-95 shadow-sm"
             >
               <LuLogOut size={16} />
               Sign Out Account
@@ -315,7 +315,7 @@ const Profile = () => {
                         <button 
                           disabled={isSaving}
                           type="submit" 
-                          className="flex-1 flex items-center justify-center gap-3 bg-deep-espresso text-white py-5 rounded-[20px] font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-deep-espresso/20 hover:bg-emerald-600 transition-all active:scale-95 disabled:opacity-50"
+                          className="flex-1 flex items-center justify-center gap-3 bg-deep-espresso text-white py-5 rounded-[20px] font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-deep-espresso/20 hover:bg-[#001B4E] transition-all active:scale-95 disabled:opacity-50"
                         >
                           {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <LuSave size={18} />}
                           {isSaving ? 'Processing...' : 'Sync Profile Changes'}
@@ -393,10 +393,10 @@ const Profile = () => {
                 {['Identity Proof', 'Drivers License', 'RC (Registration)', 'Business Insurance'].map((doc) => (
                   <div key={doc} className="flex items-center justify-between p-4 bg-white border border-soft-oatmeal rounded-2xl shadow-sm hover:shadow-md transition-all">
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <div className="w-2 h-2 rounded-full bg-[#001B4E] animate-pulse" />
                       <span className="text-[10px] font-black text-deep-espresso uppercase tracking-widest">{doc}</span>
                     </div>
-                    <span className="text-[8px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-widest">Verified</span>
+                    <span className="text-[8px] font-black text-[#001B4E] bg-[#001B4E]/5 px-2.5 py-1 rounded-full uppercase tracking-widest">Verified</span>
                   </div>
                 ))}
               </div>

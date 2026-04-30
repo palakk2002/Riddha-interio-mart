@@ -174,13 +174,13 @@ const LoginPage = () => {
                   <div className="space-y-1">
                     <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-2 ml-1">Email</label>
                     <div className="relative group">
-                      <FiUser className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#8E2424]/40 group-focus-within:text-[#8E2424] transition-colors h-5 w-5" />
+                      <FiUser className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-5 w-5" />
                       <input
                         type="text"
                         placeholder={window.innerWidth < 768 ? "Email ID" : "Enter your email"}
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
-                        className="w-full md:pl-6 pl-16 pr-6 py-5 md:py-4 rounded-full md:rounded-2xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#8E2424]/20 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-bold transition-all md:text-white placeholder:text-gray-400 md:placeholder:text-white/40"
+                        className="w-full md:pl-6 pl-16 pr-6 py-5 md:py-4 rounded-full md:rounded-2xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-bold transition-all md:text-white placeholder:text-gray-400 md:placeholder:text-white/40"
                       />
                     </div>
                   </div>
@@ -188,13 +188,13 @@ const LoginPage = () => {
                   <div className="space-y-1">
                     <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-2 ml-1">Password</label>
                     <div className="relative group">
-                      <FiLock className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#8E2424]/40 group-focus-within:text-[#8E2424] transition-colors h-5 w-5" />
+                      <FiLock className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-5 w-5" />
                       <input
                         type={showPassword ? "text" : "password"}
                         placeholder={window.innerWidth < 768 ? "••••••" : "••••••••"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full md:pl-6 pl-16 pr-14 py-5 md:py-4 rounded-full md:rounded-2xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#8E2424]/20 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-bold transition-all md:text-white placeholder:text-gray-400 md:placeholder:text-white/40"
+                        className="w-full md:pl-6 pl-16 pr-14 py-5 md:py-4 rounded-full md:rounded-2xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-bold transition-all md:text-white placeholder:text-gray-400 md:placeholder:text-white/40"
                       />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 md:text-white/50 hover:text-white">
                         {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-4 w-4 opacity-50" />}
@@ -210,7 +210,7 @@ const LoginPage = () => {
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 group-hover:text-white">Remember Me</span>
                   </button>
-                  <button type="button" className="text-[10px] font-black text-gray-400 md:text-white/40 uppercase tracking-widest hover:text-[#8E2424] md:hover:text-white mx-auto md:mx-0">
+                  <button type="button" className="text-[10px] font-black text-gray-400 md:text-white/40 uppercase tracking-widest hover:text-[#189D91] md:hover:text-white mx-auto md:mx-0">
                     Forgot Password?
                   </button>
                 </div>
@@ -219,7 +219,7 @@ const LoginPage = () => {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className={`w-full md:w-auto md:ml-auto h-16 md:h-12 px-10 rounded-full md:rounded-xl bg-[#8E2424] md:bg-white hover:bg-black md:hover:bg-warm-sand text-white md:text-deep-espresso md:hover:text-white font-black text-sm md:text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#8E2424]/20 transition-all active:scale-[0.98] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full md:w-auto md:ml-auto h-16 md:h-12 px-10 rounded-full md:rounded-xl bg-[#189D91] md:bg-white hover:bg-black md:hover:bg-warm-sand text-white md:text-deep-espresso md:hover:text-white font-black text-sm md:text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#189D91]/20 transition-all active:scale-[0.98] ${loading ? 'opacity-50' : ''}`}
                   >
                     {loading ? 'Logging In...' : 'Log In'}
                   </Button>
@@ -247,7 +247,7 @@ const LoginPage = () => {
 
                 {/* Mobile Sign Up Link */}
                 <p className="md:hidden text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-4">
-                  Don't have account? <span onClick={() => navigate(getSignupPath())} className="text-[#8E2424] cursor-pointer font-black border-b border-[#8E2424]/30 pb-0.5 ml-1">SIGN UP</span>
+                  Don't have account? <span onClick={() => navigate(getSignupPath())} className="text-[#189D91] cursor-pointer font-black border-b border-[#189D91]/30 pb-0.5 ml-1">SIGN UP</span>
                 </p>
               </form>
             </motion.div>

@@ -30,7 +30,7 @@ const AdminLayout = () => {
 
   return (
     <div 
-      className="flex h-screen w-full bg-white text-deep-espresso overflow-hidden"
+      className="flex h-screen w-full bg-white text-deep-espresso overflow-hidden admin-theme"
       onClick={() => {
         setShowUserMenu(false);
         setShowNotifications(false);
@@ -61,7 +61,7 @@ const AdminLayout = () => {
                 className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-soft-oatmeal text-deep-espresso' : 'text-dusty-cocoa hover:bg-soft-oatmeal'}`}
               >
                 <FiBell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-800 rounded-full border-2 border-white"></span>
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#240046] rounded-full border-2 border-white animate-pulse"></span>
               </button>
 
               {showNotifications && (
@@ -82,10 +82,10 @@ const AdminLayout = () => {
                 className="flex items-center gap-3 cursor-pointer group focus:outline-none"
               >
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-bold leading-tight group-hover:text-red-800 transition-colors uppercase tracking-tight">{user?.fullName || user?.name || 'Admin'}</p>
+                  <p className="text-sm font-bold leading-tight group-hover:text-[#240046] transition-colors uppercase tracking-tight">{user?.fullName || user?.name || 'Admin'}</p>
                   <p className="text-[10px] text-warm-sand font-black uppercase tracking-widest leading-none mt-0.5">Super Admin</p>
                 </div>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ring-2 ring-white shadow-sm transition-all overflow-hidden ${showUserMenu ? 'bg-red-800' : 'bg-dusty-cocoa'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ring-2 ring-white shadow-sm transition-all overflow-hidden ${showUserMenu ? 'bg-[#240046]' : 'bg-[#240046]/80'}`}>
                   {user?.avatar ? (
                     <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
@@ -108,7 +108,7 @@ const AdminLayout = () => {
                   <div className="h-[1px] bg-soft-oatmeal my-1"></div>
                   <button 
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#240046] hover:bg-purple-50 transition-colors"
                   >
                     <FiLogOut size={18} />
                     Sign Out

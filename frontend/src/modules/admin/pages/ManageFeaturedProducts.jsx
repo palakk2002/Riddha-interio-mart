@@ -31,10 +31,10 @@ const ManageFeaturedProducts = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">
+            <h1 className="text-3xl md:text-5xl font-display font-extrabold text-[#240046] tracking-tight leading-none">
               Featured Products
             </h1>
-            <p className="text-warm-sand mt-1 text-sm md:text-base">
+            <p className="subtitle mt-2">
               Control the homepage Featured Highlights section.
             </p>
           </div>
@@ -50,7 +50,7 @@ const ManageFeaturedProducts = () => {
         {/* Section Label */}
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-soft-oatmeal/40" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-warm-sand">
+          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-brand-teal">
             Homepage Preview
           </span>
           <div className="h-px flex-1 bg-soft-oatmeal/40" />
@@ -96,7 +96,7 @@ const ManageFeaturedProducts = () => {
                     </button>
                     <button
                       onClick={() => handleDelete(product.id)}
-                      className="h-7 w-7 bg-white/90 backdrop-blur-md shadow-xl rounded-full flex items-center justify-center text-red-400 hover:text-red-600 transition-all"
+                      className="h-7 w-7 bg-white/90 backdrop-blur-md shadow-xl rounded-full flex items-center justify-center text-[#240046]/60 hover:text-[#240046] hover:bg-[#240046]/5 transition-all"
                       title="Delete"
                     >
                       <LuTrash2 size={14} />
@@ -108,13 +108,13 @@ const ManageFeaturedProducts = () => {
                 <div className="flex-1 p-1 md:p-2 flex flex-col justify-between space-y-0.5 md:space-y-1">
                   <div className="space-y-2">
                     <div className="flex justify-between items-start">
-                      <h4 className="text-[8px] md:text-[10px] uppercase tracking-[0.2em] text-warm-sand font-black">
+                      <h4 className="text-[8px] md:text-[10px] uppercase tracking-[0.2em] text-brand-teal font-black">
                         {product.category}
                       </h4>
                     </div>
 
                     {/* Product Name */}
-                    <h3 className="text-[9px] md:text-[11px] font-display font-bold text-deep-espresso line-clamp-1 leading-tight group-hover:text-warm-sand transition-colors duration-300">
+                    <h3 className="text-[9px] md:text-[11px] font-display font-bold text-deep-espresso line-clamp-1 leading-tight group-hover:text-brand-teal transition-colors duration-300">
                       {product.name}
                     </h3>
                   </div>
@@ -151,9 +151,9 @@ const ManageFeaturedProducts = () => {
           <motion.button
             layout
             onClick={() => navigate('/admin/manage-featured/add')}
-            className="border-2 border-dashed border-soft-oatmeal rounded-2xl md:rounded-3xl min-h-[180px] md:min-h-[260px] flex flex-col items-center justify-center gap-1.5 text-warm-sand hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group active:scale-95"
+            className="border-2 border-dashed border-soft-oatmeal rounded-2xl md:rounded-3xl min-h-[180px] md:min-h-[260px] flex flex-col items-center justify-center gap-1.5 text-brand-teal hover:border-dusty-cocoa hover:text-dusty-cocoa hover:bg-white/50 transition-all group active:scale-95"
           >
-            <div className="w-10 h-10 rounded-full bg-soft-oatmeal/20 flex items-center justify-center group-hover:bg-dusty-cocoa/10 transition-colors">
+            <div className="w-10 h-10 rounded-full bg-soft-oatmeal/20 flex items-center justify-center group-hover:bg-brand-purple/10 transition-colors">
               <LuPackagePlus size={18} className="group-hover:scale-110 transition-transform opacity-60" />
             </div>
             <span className="font-bold text-[9px] md:text-[10px] uppercase tracking-wider">Add Product</span>
@@ -161,7 +161,7 @@ const ManageFeaturedProducts = () => {
         </div>
 
         {/* Summary Footer */}
-        <div className="bg-white p-4 rounded-xl border border-soft-oatmeal/30 flex items-center justify-between text-xs text-warm-sand">
+        <div className="bg-white p-4 rounded-xl border border-soft-oatmeal/30 flex items-center justify-between text-xs text-brand-teal">
           <p>
             Showing <span className="font-bold text-deep-espresso">{products.length}</span> featured products on homepage
           </p>

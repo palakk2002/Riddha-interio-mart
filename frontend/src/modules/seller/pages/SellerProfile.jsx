@@ -130,51 +130,51 @@ const SellerProfile = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[48px] overflow-hidden shadow-2xl shadow-soft-oatmeal border border-soft-oatmeal/50 relative"
+          className="bg-white rounded-3xl md:rounded-[48px] overflow-hidden shadow-2xl shadow-soft-oatmeal border border-soft-oatmeal/50 relative mx-1 md:mx-0"
         >
           {/* Cover Accent */}
-          <div className="h-32 bg-gradient-to-r from-red-900 to-red-700" />
+          <div className="h-24 md:h-32 bg-gradient-to-r from-red-900 to-red-700" />
           
-          <div className="px-8 pb-12 -mt-16 flex flex-col md:flex-row items-end gap-8">
+          <div className="px-6 md:px-8 pb-8 md:pb-12 -mt-12 md:-mt-16 flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
             <div className="relative">
-              <div className="h-40 w-40 rounded-[40px] bg-white p-2 shadow-2xl">
-                <div className="h-full w-full rounded-[32px] overflow-hidden bg-soft-oatmeal flex items-center justify-center relative">
+              <div className="h-32 w-32 md:h-40 md:w-40 rounded-3xl md:rounded-[40px] bg-white p-1.5 md:p-2 shadow-2xl">
+                <div className="h-full w-full rounded-2xl md:rounded-[32px] overflow-hidden bg-soft-oatmeal flex items-center justify-center relative">
                   {profileData.avatar ? (
                     <img src={profileData.avatar} alt="Store" className="w-full h-full object-cover" />
                   ) : (
-                    <FiUser size={64} className="text-red-800/20" />
+                    <FiUser size={48} className="text-red-800/20" />
                   )}
                   {isSaving && (
                     <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center">
-                      <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     </div>
                   )}
                 </div>
               </div>
-              <label className="absolute bottom-2 right-2 h-12 w-12 bg-white text-red-800 rounded-2xl flex items-center justify-center shadow-xl border border-soft-oatmeal cursor-pointer hover:bg-red-800 hover:text-white transition-all active:scale-90">
-                <FiCamera className="text-xl" />
+              <label className="absolute bottom-1 right-1 h-10 w-10 md:h-12 md:w-12 bg-white text-red-800 rounded-xl md:rounded-2xl flex items-center justify-center shadow-xl border border-soft-oatmeal cursor-pointer hover:bg-red-800 hover:text-white transition-all active:scale-90">
+                <FiCamera className="text-lg md:text-xl" />
                 <input type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
               </label>
             </div>
 
-            <div className="flex-1 pb-4 text-center md:text-left">
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-4">
-                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-sm ${profileData.tier === 'Premium Seller' ? 'bg-orange-500 text-white' : 'bg-red-800 text-white'}`}>
+            <div className="flex-1 pb-2 md:pb-4 text-center md:text-left">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 mb-3 md:mb-4">
+                <span className={`px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] shadow-sm ${profileData.tier === 'Premium Seller' ? 'bg-orange-500 text-white' : 'bg-red-800 text-white'}`}>
                   {profileData.tier}
                 </span>
-                <span className="flex items-center gap-2 px-4 py-1.5 bg-yellow-500/10 text-yellow-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-yellow-500/10">
-                  <FiStar size={12} fill="currentColor" /> {profileData.rating} Rating
+                <span className="flex items-center gap-1.5 px-3 py-1 md:px-4 md:py-1.5 bg-yellow-500/10 text-yellow-600 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-yellow-500/10">
+                  <FiStar size={10} md:size={12} fill="currentColor" /> {profileData.rating} Rating
                 </span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-display font-black text-deep-espresso tracking-tight">{profileData.shopName}</h1>
-              <p className="text-red-800 font-bold text-sm mt-2 uppercase tracking-[0.3em] flex items-center justify-center md:justify-start gap-3">
-                <FiUser size={14} /> {profileData.fullName}
+              <h1 className="text-2xl md:text-6xl font-display font-black text-deep-espresso tracking-tight">{profileData.shopName}</h1>
+              <p className="text-red-800 font-bold text-xs md:text-sm mt-1 md:mt-2 uppercase tracking-[0.2em] md:tracking-[0.3em] flex items-center justify-center md:justify-start gap-2 md:gap-3">
+                <FiUser size={12} md:size={14} /> {profileData.fullName}
               </p>
             </div>
 
             <button 
               onClick={() => setIsEditing(!isEditing)}
-              className="mb-4 px-8 py-4 rounded-2xl bg-soft-oatmeal/20 text-red-800 font-black uppercase tracking-widest text-[10px] hover:bg-red-800 hover:text-white transition-all border border-red-800/10"
+              className="mb-2 md:mb-4 px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl bg-soft-oatmeal/20 text-red-800 font-black uppercase tracking-widest text-[9px] md:text-[10px] hover:bg-red-800 hover:text-white transition-all border border-red-800/10 w-full md:w-auto"
             >
               {isEditing ? 'Discard Changes' : 'Manage Profile'}
             </button>
@@ -191,99 +191,99 @@ const SellerProfile = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  className="bg-white p-10 rounded-[40px] border border-soft-oatmeal shadow-sm"
+                  className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm"
                 >
-                  <h3 className="text-xl font-bold text-deep-espresso mb-8 flex items-center gap-3">
-                    <FiEdit2 className="text-red-800" /> Evolution of Identity
+                  <h3 className="text-lg md:text-xl font-bold text-deep-espresso mb-6 md:mb-8 flex items-center gap-3">
+                    <FiEdit2 className="text-red-800 shrink-0" /> Evolution of Identity
                   </h3>
-                  <form onSubmit={handleSave} className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <form onSubmit={handleSave} className="space-y-6 md:space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                        <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Shop Essence</label>
+                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Shop Essence</label>
                          <input 
                            type="text" 
                            value={profileData.shopName}
                            onChange={(e) => setProfileData({...profileData, shopName: e.target.value})}
                            placeholder="Ex: Golden Threads"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-2xl px-6 py-4 font-bold text-deep-espresso transition-all outline-none"
+                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
                          />
                        </div>
                        <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Owner's Name</label>
+                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Owner's Name</label>
                          <input 
                            type="text" 
                            value={profileData.fullName}
                            onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
                            placeholder="Full Name"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-2xl px-6 py-4 font-bold text-deep-espresso transition-all outline-none"
+                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
                          />
                        </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                       <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Email Conduit</label>
+                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Email Conduit</label>
                          <input 
                            type="email" 
                            value={profileData.email}
                            onChange={(e) => setProfileData({...profileData, email: e.target.value})}
                            placeholder="Email"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-2xl px-6 py-4 font-bold text-deep-espresso transition-all outline-none"
+                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
                          />
                        </div>
                        <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Primary Contact</label>
+                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Primary Contact</label>
                          <input 
                            type="tel" 
                            value={profileData.phone}
                            onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
                            placeholder="Phone"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-2xl px-6 py-4 font-bold text-deep-espresso transition-all outline-none"
+                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
                          />
                        </div>
                     </div>
 
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Physical Foundation (Address)</label>
+                       <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Physical HQ (Address)</label>
                        <textarea 
                          value={profileData.shopAddress}
                          onChange={(e) => setProfileData({...profileData, shopAddress: e.target.value})}
                          placeholder="Store Address"
-                         className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-2xl px-6 py-4 font-bold text-deep-espresso transition-all outline-none h-32 resize-none"
+                         className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none h-24 md:h-32 resize-none text-sm"
                        />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                        <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">GST-IN Credentials</label>
+                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">GST-IN Credentials</label>
                          <input 
                            type="text" 
                            value={profileData.gstNumber}
                            onChange={(e) => setProfileData({...profileData, gstNumber: e.target.value})}
                            placeholder="GST Code"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-2xl px-6 py-4 font-bold text-deep-espresso transition-all outline-none"
+                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
                          />
                        </div>
                        <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Personal Taxation (PAN)</label>
+                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Personal Taxation (PAN)</label>
                          <input 
                            type="text" 
                            value={profileData.panNumber}
                            onChange={(e) => setProfileData({...profileData, panNumber: e.target.value})}
                            placeholder="PAN Card Number"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-2xl px-6 py-4 font-bold text-deep-espresso transition-all outline-none"
+                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
                          />
                        </div>
                     </div>
 
-                    <div className="flex gap-4 pt-4">
+                    <div className="flex gap-4 pt-2 md:pt-4">
                        <button 
                          type="submit" 
                          disabled={isSaving}
-                         className="flex-1 py-5 bg-red-800 text-white rounded-[24px] font-black uppercase tracking-[0.3em] text-[10px] shadow-2xl shadow-red-800/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4"
+                         className="flex-1 py-4 md:py-5 bg-red-800 text-white rounded-2xl md:rounded-[24px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-[9px] md:text-[10px] shadow-2xl shadow-red-800/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 md:gap-4"
                        >
-                         {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <FiSave className="text-xl" />}
-                         {isSaving ? 'Processing Evolution...' : 'Commit Profile Updates'}
+                         {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <FiSave className="text-lg md:text-xl" />}
+                         {isSaving ? 'Processing...' : 'Commit Updates'}
                        </button>
                     </div>
                   </form>
@@ -295,34 +295,34 @@ const SellerProfile = () => {
                   animate={{ opacity: 1, x: 0 }}
                   className="space-y-12"
                 >
-                  <div className="grid grid-cols-2 gap-8">
-                     <div className="bg-white p-10 rounded-[40px] border border-soft-oatmeal shadow-sm flex flex-col justify-between group hover:border-red-800/20 transition-all">
-                        <div className="w-16 h-16 rounded-3xl bg-red-800 text-white flex items-center justify-center shadow-2xl shadow-red-800/20">
-                           <FiShoppingBag size={28} />
+                  <div className="grid grid-cols-2 gap-4 md:gap-8">
+                     <div className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm flex flex-col justify-between group hover:border-red-800/20 transition-all">
+                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-red-800 text-white flex items-center justify-center shadow-2xl shadow-red-800/20 shrink-0">
+                           <FiShoppingBag size={24} md:size={28} />
                         </div>
-                        <div className="mt-8">
-                           <p className="text-[10px] font-black text-red-800 uppercase tracking-widest mb-1">Established</p>
-                           <p className="text-2xl font-black text-deep-espresso">{profileData.joinDate}</p>
+                        <div className="mt-6 md:mt-8">
+                           <p className="text-[8px] md:text-[10px] font-black text-red-800 uppercase tracking-widest mb-1">Established</p>
+                           <p className="text-lg md:text-2xl font-black text-deep-espresso">{profileData.joinDate}</p>
                         </div>
                      </div>
-                     <div className="bg-white p-10 rounded-[40px] border border-soft-oatmeal shadow-sm flex flex-col justify-between group hover:border-red-800/20 transition-all">
-                        <div className="w-16 h-16 rounded-3xl bg-deep-espresso text-white flex items-center justify-center shadow-2xl shadow-deep-espresso/20">
-                           <FiShoppingBag size={28} />
+                     <div className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm flex flex-col justify-between group hover:border-red-800/20 transition-all">
+                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-deep-espresso text-white flex items-center justify-center shadow-2xl shadow-deep-espresso/20 shrink-0">
+                           <FiShoppingBag size={24} md:size={28} />
                         </div>
-                        <div className="mt-8">
-                           <p className="text-[10px] font-black text-red-800 uppercase tracking-widest mb-1">Seller Tier</p>
-                           <p className="text-2xl font-black text-deep-espresso">{profileData.tier.split(' ')[0]}</p>
+                        <div className="mt-6 md:mt-8">
+                           <p className="text-[8px] md:text-[10px] font-black text-red-800 uppercase tracking-widest mb-1">Seller Tier</p>
+                           <p className="text-lg md:text-2xl font-black text-deep-espresso">{profileData.tier.split(' ')[0]}</p>
                         </div>
                      </div>
                   </div>
 
-                  <div className="bg-white p-12 rounded-[48px] border border-soft-oatmeal shadow-sm overflow-hidden relative">
-                    <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
-                      <FiShoppingBag size={200} className="text-red-800" />
+                  <div className="bg-white p-8 md:p-12 rounded-[2rem] md:rounded-[48px] border border-soft-oatmeal shadow-sm overflow-hidden relative">
+                    <div className="absolute top-0 right-0 p-8 md:p-12 opacity-5 pointer-events-none">
+                      <FiShoppingBag size={120} md:size={200} className="text-red-800" />
                     </div>
                     
-                    <h2 className="text-2xl font-black text-deep-espresso mb-10 flex items-center gap-4">
-                      <div className="w-2 h-8 bg-red-800 rounded-full" /> Business Identity
+                    <h2 className="text-xl md:text-2xl font-black text-deep-espresso mb-8 md:mb-10 flex items-center gap-3 md:gap-4">
+                      <div className="w-1.5 md:w-2 h-6 md:h-8 bg-red-800 rounded-full" /> Business Identity
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-16">
@@ -350,34 +350,34 @@ const SellerProfile = () => {
           </div>
 
           {/* Quick Actions Sidebar */}
-          <div className="space-y-8">
-            <div className="bg-white p-10 rounded-[40px] border border-soft-oatmeal shadow-sm">
-               <h3 className="text-xl font-bold text-deep-espresso mb-8">Quick Actions</h3>
-               <div className="space-y-4">
+          <div className="space-y-6 md:space-y-8">
+            <div className="bg-white p-8 md:p-10 rounded-[2rem] md:rounded-[40px] border border-soft-oatmeal shadow-sm">
+               <h3 className="text-lg md:text-xl font-bold text-deep-espresso mb-6 md:mb-8">Quick Actions</h3>
+               <div className="space-y-3 md:space-y-4">
                   <button 
                     onClick={() => setIsEditing(!isEditing)} 
-                    className={`w-full flex items-center justify-between p-5 rounded-2xl transition-all font-bold group ${isEditing ? 'bg-red-800 text-white' : 'bg-soft-oatmeal/10 hover:bg-soft-oatmeal/30 text-deep-espresso'}`}
+                    className={`w-full flex items-center justify-between p-4 md:p-5 rounded-2xl transition-all font-bold group ${isEditing ? 'bg-red-800 text-white' : 'bg-soft-oatmeal/10 hover:bg-soft-oatmeal/30 text-deep-espresso'}`}
                   >
                      <div className="flex items-center gap-4">
                         <FiEdit2 className={isEditing ? 'text-white' : 'text-red-800'} />
-                        <span className="text-sm uppercase tracking-widest font-black">
+                        <span className="text-xs md:text-sm uppercase tracking-widest font-black">
                           {isEditing ? 'Stop Editing' : 'Edit Profile'}
                         </span>
                      </div>
                   </button>
                   <button 
                     onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-4 p-6 rounded-[24px] bg-red-50 text-red-900 hover:bg-red-900 hover:text-white transition-all font-black text-[10px] uppercase tracking-[0.3em] mt-8 shadow-xl shadow-red-900/5"
+                    className="w-full flex items-center justify-center gap-3 md:gap-4 p-5 md:p-6 rounded-[20px] md:rounded-[24px] bg-red-50 text-red-900 hover:bg-red-900 hover:text-white transition-all font-black text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] mt-6 md:mt-8 shadow-xl shadow-red-900/5"
                   >
                      <FiLogOut /> Logout
                   </button>
                </div>
             </div>
 
-            <div className="bg-red-900/5 p-10 rounded-[40px] border border-red-900/10">
-               <h3 className="text-lg font-black text-red-900 uppercase tracking-widest mb-4">Merchant Support</h3>
-               <p className="text-xs text-red-900/60 font-bold leading-relaxed mb-8 uppercase tracking-tighter">Our high-priority specialists are available 24/7 to ensure your storefront maintains its prestige status.</p>
-               <button className="w-full py-4 bg-red-900 text-white rounded-2xl font-black uppercase tracking-widest text-[10px]">Contact Liaison</button>
+            <div className="bg-red-900/5 p-8 md:p-10 rounded-[2rem] md:rounded-[40px] border border-red-900/10">
+               <h3 className="text-base md:text-lg font-black text-red-900 uppercase tracking-widest mb-4">Merchant Support</h3>
+               <p className="text-[10px] md:text-xs text-red-900/60 font-bold leading-relaxed mb-6 md:mb-8 uppercase tracking-tighter">Our specialists are available 24/7 to ensure your storefront maintains its prestige status.</p>
+               <button className="w-full py-4 bg-red-900 text-white rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-[10px]">Contact Liaison</button>
             </div>
           </div>
         </div>

@@ -48,7 +48,14 @@ const ProductSchema = new mongoose.Schema({
     type: String,
     default: 'piece'
   },
+  unitValue: {
+    type: String,
+    default: '1'
+  },
   images: [String],
+  videoUrl: {
+    type: String
+  },
   countInStock: {
     type: Number,
     required: true,

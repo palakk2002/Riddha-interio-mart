@@ -32,14 +32,14 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
       {/* Mobile Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-deep-espresso/20 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-[#001B4E]/20 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-deep-espresso border-r border-white/5 
+        fixed inset-y-0 left-0 z-50 w-72 bg-[#001B4E] border-r border-white/5 
         transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
@@ -64,7 +64,7 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
                 className={({ isActive }) => `
                   flex items-center gap-4 px-6 py-4 rounded-xl text-sm font-bold transition-all duration-300 group
                   ${isActive 
-                    ? 'bg-red-800 text-white shadow-lg shadow-red-900/20' 
+                    ? 'bg-white/15 text-white border-l-4 border-blue-400 shadow-lg' 
                     : 'text-white/70 hover:bg-white/5 hover:text-white'}
                 `}
               >
@@ -82,7 +82,7 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
           <div className="p-4 border-t border-white/5">
             <button 
               onClick={handleLogout}
-              className="w-full flex items-center gap-4 px-6 py-4 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors group"
+              className="w-full flex items-center gap-4 px-6 py-4 rounded-xl text-sm font-bold text-white hover:bg-white/10 transition-colors group"
             >
               <FiLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
               Sign Out

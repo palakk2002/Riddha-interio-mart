@@ -7,13 +7,19 @@ const checkEmailExists = require('../utils/checkEmailExists');
 // @access  Public
 exports.registerUser = async (req, res, next) => {
   try {
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, userType, businessDetails } = req.body;
 
     if (await checkEmailExists(email)) {
       return res.status(400).json({ success: false, error: 'Email already registered' });
     }
 
-    const user = await User.create({ fullName, email, password });
+    const user = await User.create({ 
+      fullName, 
+      email, 
+      password,
+      userType: userType || 'customer',
+      businessDetails: userType === 'enterpriser' ? businessDetails : undefined
+    });
     sendTokenResponse(user, 201, res);
   } catch (err) {
     next(err);

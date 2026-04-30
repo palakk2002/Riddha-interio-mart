@@ -60,7 +60,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-red-800 relative z-50">
+      <nav className="bg-[#189D91] relative z-50">
         <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
           {/* Main Desktop Header Row */}
           <div className="hidden md:flex items-center justify-between py-3 gap-8">
@@ -106,7 +106,7 @@ const Navbar = () => {
                 <div className="relative">
                   <FiShoppingCart className="h-6 w-6 mb-1 group-hover:scale-110 transition-transform" />
                   {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-white text-red-800 text-[8px] font-black h-3.5 w-3.5 flex items-center justify-center rounded-full">
+                    <span className="absolute -top-1 -right-1 bg-white text-[#189D91] text-[8px] font-black h-3.5 w-3.5 flex items-center justify-center rounded-full">
                       {cartCount}
                     </span>
                   )}
@@ -129,7 +129,7 @@ const Navbar = () => {
               <Link to="/cart" className="p-2 text-white/80 relative">
                 <FiShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-white text-red-800 text-[8px] font-bold h-4 w-4 flex items-center justify-center rounded-full">{cartCount}</span>
+                  <span className="absolute top-1 right-1 bg-white text-[#189D91] text-[8px] font-bold h-4 w-4 flex items-center justify-center rounded-full">{cartCount}</span>
                 )}
               </Link>
               <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-white/80">
@@ -164,8 +164,8 @@ const Navbar = () => {
                       to={`/shop?category=${item.key}`}
                       className={`text-[13px] font-medium transition-colors h-full flex items-center border-b-2 ${
                         activeCategory === item.key 
-                        ? "text-red-800 border-red-800" 
-                        : "text-gray-800 border-transparent hover:text-red-800"
+                        ? "text-[#189D91] border-[#189D91]" 
+                        : "text-gray-800 border-transparent hover:text-[#189D91]"
                       }`}
                     >
                       {item.name}
@@ -192,7 +192,7 @@ const Navbar = () => {
                   <div className="grid grid-cols-4 lg:grid-cols-5 gap-12">
                     {/* For demo, we'll split the subcategories into columns or just list them */}
                     <div className="flex flex-col gap-6">
-                       <h3 className="text-red-800 font-bold text-sm uppercase tracking-wide border-b border-gray-100 pb-2">
+                       <h3 className="text-[#189D91] font-bold text-sm uppercase tracking-wide border-b border-gray-100 pb-2">
                          {activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} Types
                        </h3>
                        <div className="flex flex-col gap-3">
@@ -200,7 +200,7 @@ const Navbar = () => {
                             <Link 
                               key={idx}
                               to={`/shop?category=${activeCategory}&sub=${sub.slug}`}
-                              className="text-gray-600 hover:text-red-800 text-sm font-medium transition-colors"
+                              className="text-gray-600 hover:text-[#189D91] text-sm font-medium transition-colors"
                             >
                               {sub.name}
                             </Link>

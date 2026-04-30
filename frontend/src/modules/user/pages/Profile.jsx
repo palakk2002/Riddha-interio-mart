@@ -59,8 +59,10 @@ const Profile = () => {
           </div>
 
           <div className="text-center md:text-left space-y-0.5 md:space-y-3">
-            <h1 className="text-2xl md:text-5xl font-black text-deep-espresso tracking-tighter uppercase">{user.fullName || user.name}</h1>
-            <p className="text-[10px] md:text-sm text-gray-400 font-bold uppercase tracking-[0.2em]">{user.email}</p>
+            <h1 className="text-2xl md:text-5xl font-semibold text-deep-espresso tracking-tighter capitalize">
+              {(user.fullName || user.name || '').toLowerCase()}
+            </h1>
+            <p className="text-[10px] md:text-sm text-gray-400 font-bold tracking-[0.2em]">{user.email?.toLowerCase()}</p>
             <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-2 md:pt-4">
               <span className="text-[10px] uppercase tracking-[0.2em] font-black bg-warm-sand/10 text-warm-sand px-4 py-1.5 rounded-full border border-warm-sand/10">
                 Member of Riddha
@@ -87,8 +89,12 @@ const Profile = () => {
                   {React.cloneElement(item.icon, { size: 20 })}
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-sm md:text-base font-black text-deep-espresso uppercase tracking-tight">{item.title}</h3>
-                  <p className="text-gray-400 text-[9px] md:text-[10px] font-bold uppercase tracking-widest leading-relaxed">{item.subtitle}</p>
+                  <h3 className="text-sm md:text-base font-semibold text-deep-espresso tracking-tight capitalize">
+                    {item.title.toLowerCase()}
+                  </h3>
+                  <p className="text-gray-400 text-[9px] md:text-[10px] font-bold tracking-widest leading-relaxed capitalize">
+                    {item.subtitle.toLowerCase()}
+                  </p>
                 </div>
               </div>
             </Link>
@@ -97,7 +103,7 @@ const Profile = () => {
 
         {/* Support Section */}
         <div className="mt-8 md:mt-16 space-y-4 md:space-y-8">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-warm-sand px-2">Support & Information</h2>
+          <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-warm-sand px-2">Support & information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t border-l border-soft-oatmeal/10">
             {[
               { title: "Contact Support", link: "/contact" },
@@ -110,7 +116,7 @@ const Profile = () => {
                 to={item.link}
                 className="flex items-center justify-between p-4 border-r border-b border-soft-oatmeal/10 hover:bg-soft-oatmeal/5 transition-colors group"
               >
-                <span className="text-[11px] font-black text-deep-espresso uppercase tracking-[0.2em]">{item.title}</span>
+                <span className="text-[11px] font-semibold text-deep-espresso tracking-[0.2em] capitalize">{item.title.toLowerCase()}</span>
                 <FiChevronRight className="text-gray-300 group-hover:text-warm-sand transition-colors" />
               </Link>
             ))}
@@ -121,9 +127,9 @@ const Profile = () => {
         <div className="mt-12 md:mt-20">
           <button 
             onClick={handleLogout}
-            className="w-full md:w-auto px-16 py-4 md:py-6 bg-deep-espresso text-white font-black uppercase tracking-[0.3em] text-xs hover:bg-warm-sand transition-all duration-500 shadow-2xl flex items-center justify-center gap-4 group"
+            className="w-full md:w-auto px-16 py-4 md:py-6 bg-deep-espresso text-white font-semibold uppercase tracking-[0.3em] text-xs hover:bg-warm-sand transition-all duration-500 shadow-2xl flex items-center justify-center gap-4 group"
           >
-            LOGOUT 
+            Logout 
             <FiLogOut className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>

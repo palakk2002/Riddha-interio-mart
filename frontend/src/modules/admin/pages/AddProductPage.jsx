@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
-import { FiArrowLeft, FiImage, FiSave, FiInfo, FiTag, FiDollarSign, FiType, FiUser, FiPackage } from 'react-icons/fi';
+import { FiArrowLeft, FiImage, FiVideo, FiSave, FiInfo, FiTag, FiDollarSign, FiType, FiUser, FiPackage, FiTrash2, FiPlus, FiX } from 'react-icons/fi';
 import api from '../../../shared/utils/api';
 
 const AddProductPage = () => {
@@ -12,22 +12,25 @@ const AddProductPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [imgFile, setImgFile] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
   
   // Custom Dropdown State
   const [isCatOpen, setIsCatOpen] = useState(false);
   const [catSearch, setCatSearch] = useState('');
-  
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
     category: '',
     brand: '',
     price: '',
-    image: '',
     description: '',
     material: '',
     dimensions: '',
     stock: 50,
+    unit: 'piece',
+    unitValue: '1',
+    images: [],
+    videoUrl: ''
   });
 
   useEffect(() => {
@@ -72,15 +75,21 @@ const AddProductPage = () => {
   const fileInputRef = React.useRef(null);
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImgFile(file);
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, image: reader.result }));
+        setFormData(prev => ({ ...prev, images: [...prev.images, reader.result] }));
       };
       reader.readAsDataURL(file);
-    }
+    });
+  };
+
+  const removeImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
   };
 
   const triggerFileInput = () => {
@@ -104,11 +113,23 @@ const AddProductPage = () => {
         imageUrl = uploadRes.url;
       }
       
+      let finalVideoUrl = formData.videoUrl;
+
+      if (videoFile) {
+        const videoData = new FormData();
+        videoData.append('image', videoFile);
+        const { data: uploadRes } = await api.post('/upload', videoData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        finalVideoUrl = uploadRes.url;
+      }
+      
       const payload = {
         ...formData,
         price: Number(formData.price),
-        stock: Number(formData.stock),
-        images: imageUrl ? [imageUrl] : []
+        countInStock: Number(formData.stock),
+        images: formData.images,
+        videoUrl: finalVideoUrl
       };
 
       await api.post('/catalog', payload);
@@ -159,53 +180,70 @@ const AddProductPage = () => {
           {/* Main Form Card */}
           <div className="bg-white rounded-3xl md:rounded-[32px] border border-soft-oatmeal shadow-xl grid grid-cols-1 lg:grid-cols-3 relative">
              {/* Left: Image Preview Area */}
-             <div className="p-6 md:p-8 bg-soft-oatmeal/10 border-b lg:border-r lg:border-b-0 border-soft-oatmeal flex flex-col items-center justify-center space-y-4">
+             <div className="p-6 md:p-8 bg-soft-oatmeal/10 border-b lg:border-r lg:border-b-0 border-soft-oatmeal space-y-6">
                 <input 
                   type="file" 
+                  multiple
                   ref={fileInputRef} 
                   onChange={handleFileChange} 
                   accept="image/*" 
                   className="hidden" 
                 />
-                <div 
-                  onClick={triggerFileInput}
-                  className="w-full aspect-square rounded-2xl border-2 border-dashed border-soft-oatmeal flex flex-col items-center justify-center overflow-hidden bg-white/50 relative group cursor-pointer hover:border-warm-sand transition-all"
-                >
-                   {formData.image ? (
-                      <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                   ) : (
-                      <div className="flex flex-col items-center gap-2 text-warm-sand">
-                         <FiImage size={48} className="opacity-20" />
-                         <span className="text-[10px] font-black uppercase tracking-widest text-center">Click to Upload<br/>Product Image</span>
-                      </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                   {formData.images.map((img, idx) => (
+                     <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-soft-oatmeal group">
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                        <button 
+                          type="button" onClick={() => removeImage(idx)}
+                          className="absolute inset-0 bg-red-500/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-white"
+                        >
+                           <FiTrash2 size={16} />
+                        </button>
+                     </div>
+                   ))}
+                   {formData.images.length < 5 && (
+                     <div 
+                       onClick={triggerFileInput}
+                       className="aspect-square bg-white rounded-xl border-2 border-dashed border-soft-oatmeal flex flex-col items-center justify-center text-warm-sand hover:border-warm-sand hover:text-deep-espresso transition-all cursor-pointer group"
+                     >
+                        <FiPlus size={20} className="opacity-40 group-hover:opacity-100" />
+                        <span className="text-[8px] font-black uppercase tracking-widest mt-1">Add Image</span>
+                     </div>
                    )}
-                   <div className="absolute inset-0 bg-deep-espresso/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-white text-xs font-bold px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/20">
-                        {formData.image ? "Change Image" : "Upload Image"}
-                      </span>
-                   </div>
                 </div>
-                <div className="w-full space-y-2">
-                   <div className="flex items-center justify-between">
-                      <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
-                         <FiImage size={12} /> Image URL
-                      </label>
-                      <button 
-                        type="button"
-                        onClick={triggerFileInput}
-                        className="text-[10px] font-black text-deep-espresso uppercase tracking-widest hover:underline"
-                      >
-                        or Upload File
-                      </button>
-                   </div>
-                   <input 
-                      type="url" 
-                      placeholder="https://example.com/item.jpg"
-                      value={formData.image}
-                      onChange={(e) => setFormData({...formData, image: e.target.value})}
-                      className="w-full bg-white border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
-                   />
-                </div>
+
+                 <div className="space-y-4 pt-4 border-t border-soft-oatmeal/30">
+                    <div className="space-y-2">
+                       <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
+                             <FiVideo size={12} /> Product Video
+                          </label>
+                          <input 
+                            type="file" id="admin-video-upload" hidden accept="video/*"
+                            onChange={(e) => setVideoFile(e.target.files[0])}
+                          />
+                          <label htmlFor="admin-video-upload" className="text-[10px] font-black text-deep-espresso uppercase tracking-widest hover:underline cursor-pointer">
+                             {videoFile ? 'Change Video' : 'Upload File'}
+                          </label>
+                       </div>
+                       <input 
+                          type="url" 
+                          placeholder="or YouTube Link"
+                          value={formData.videoUrl}
+                          onChange={(e) => setFormData({...formData, videoUrl: e.target.value})}
+                          className="w-full bg-white border border-soft-oatmeal rounded-xl px-4 py-3 text-[10px] focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                       />
+                       {videoFile && (
+                         <div className="flex items-center justify-between p-2 bg-green-50 border border-green-100 rounded-lg">
+                            <span className="text-[9px] font-bold text-green-700 truncate max-w-[150px]">{videoFile.name}</span>
+                            <button onClick={() => setVideoFile(null)} className="text-green-700 hover:text-red-500 transition-colors">
+                               <FiX size={12} />
+                            </button>
+                         </div>
+                       )}
+                    </div>
+                 </div>
              </div>
 
              {/* Right: Detailed Fields */}
@@ -310,30 +348,59 @@ const AddProductPage = () => {
                           )}
                        </div>
                     </div>
-                   <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
-                           <FiDollarSign size={12} /> Price (₹)
-                        </label>
-                        <input 
-                          type="number" required placeholder="0.00"
-                          value={formData.price}
-                          onChange={(e) => setFormData({...formData, price: e.target.value})}
-                          className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
-                           <FiPackage size={12} /> Stock
-                        </label>
-                        <input 
-                          type="number" required
-                          value={formData.stock}
-                          onChange={(e) => setFormData({...formData, stock: e.target.value})}
-                          className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
-                        />
-                      </div>
-                   </div>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-2">
+                         <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
+                            <FiDollarSign size={12} /> Price (₹)
+                         </label>
+                         <input 
+                           type="number" required placeholder="0.00"
+                           value={formData.price}
+                           onChange={(e) => setFormData({...formData, price: e.target.value})}
+                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                         />
+                       </div>
+                       <div className="space-y-2">
+                         <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
+                            <FiPackage size={12} /> Stock
+                         </label>
+                         <input 
+                           type="number" required
+                           value={formData.stock}
+                           onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                         />
+                       </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-2">
+                         <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Unit</label>
+                         <select 
+                           value={formData.unit} onChange={(e) => setFormData({...formData, unit: e.target.value})}
+                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all cursor-pointer"
+                         >
+                            <option value="piece">Piece (Pcs)</option>
+                            <option value="kg">Kilogram (Kg)</option>
+                            <option value="ltr">Litre (Ltr)</option>
+                            <option value="watt">Watt (W)</option>
+                            <option value="mtr">Meter (m)</option>
+                            <option value="ft">Feet (ft)</option>
+                            <option value="sqft">Sq. Ft.</option>
+                            <option value="box">Box</option>
+                            <option value="bundle">Bundle</option>
+                            <option value="pack">Pack</option>
+                         </select>
+                       </div>
+                       <div className="space-y-2">
+                         <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Unit Value (Qty)</label>
+                         <input 
+                           type="text" placeholder="e.g. 5 or 50"
+                           value={formData.unitValue} onChange={(e) => setFormData({...formData, unitValue: e.target.value})}
+                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                         />
+                       </div>
+                    </div>
                 </div>
 
                 <div className="space-y-2">

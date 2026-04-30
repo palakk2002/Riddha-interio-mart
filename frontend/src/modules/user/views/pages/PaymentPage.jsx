@@ -263,7 +263,7 @@ const PaymentPage = () => {
           disabled={isProcessing}
           onClick={handlePayNow}
           size="lg" 
-          className="px-3 md:px-12 h-10 md:h-16 rounded-lg md:rounded-xl bg-[#922724] hover:bg-[#7a201e] text-white font-black text-[10px] md:text-sm uppercase tracking-wider md:tracking-[0.2em] shadow-2xl shadow-[#922724]/20 whitespace-nowrap"
+          className="px-3 md:px-12 h-10 md:h-16 rounded-lg md:rounded-xl bg-[#189D91] hover:bg-[#127F75] text-white font-black text-[10px] md:text-sm uppercase tracking-wider md:tracking-[0.2em] shadow-2xl shadow-[#189D91]/20 whitespace-nowrap"
         >
           {isProcessing ? 'PROCESSING...' : (selectedMethod === 'cod' ? 'CONFIRM ORDER' : 'PAY NOW')}
         </Button>
@@ -305,7 +305,7 @@ const PaymentPage = () => {
               </div>
               <Button 
                 onClick={() => setShowPriceSummary(false)}
-                className="w-full h-12 rounded-xl bg-[#922724] text-white font-black uppercase tracking-widest text-[10px] mt-6"
+                className="w-full h-12 rounded-xl bg-[#189D91] text-white font-black uppercase tracking-widest text-[10px] mt-6"
               >
                 CLOSE
               </Button>

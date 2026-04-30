@@ -53,7 +53,7 @@ const CartPage = () => {
         </p>
         <Link to="/products">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button size="lg" className="px-8 md:px-12 h-12 md:h-16 rounded-full shadow-2xl shadow-[var(--color-header-red)]/30 bg-[var(--color-header-red)] text-sm md:text-lg font-black uppercase tracking-widest text-white">Start Shopping</Button>
+            <Button size="lg" className="px-8 md:px-12 h-12 md:h-16 rounded-full shadow-2xl shadow-[#189D91]/30 bg-[#189D91] text-sm md:text-lg font-black uppercase tracking-widest text-white">Start Shopping</Button>
           </motion.div>
         </Link>
       </motion.div>
@@ -102,7 +102,7 @@ const CartPage = () => {
                   <button className="text-[10px] font-black text-warm-sand uppercase tracking-wider">Change</button>
                 </div>
               </div>
-              <button onClick={() => navigate('/login')} className="text-[10px] font-black text-[#F44336] uppercase tracking-wider border-b border-[#F44336]/30">LOGIN NOW</button>
+              <button onClick={() => navigate('/login')} className="text-[10px] font-black text-[#189D91] uppercase tracking-wider border-b border-[#189D91]/30">LOGIN NOW</button>
             </div>
           ) : !address ? (
             <div className="flex items-center justify-between">
@@ -138,7 +138,7 @@ const CartPage = () => {
             <p className="text-deep-espresso/30 font-bold uppercase tracking-[0.2em] text-[10px]">Review your selected pieces before secure checkout</p>
           </div>
           <motion.button 
-            whileHover={{ color: '#EF4444', scale: 1.05 }}
+            whileHover={{ color: '#189D91', scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={clearCart}
             className="flex items-center text-xs font-black uppercase tracking-[0.2em] text-gray-400 group transition-all"
@@ -302,7 +302,7 @@ const CartPage = () => {
           <motion.button 
             whileTap={{ scale: 0.95 }}
             onClick={handleAction}
-            className="bg-[var(--color-header-red)] text-white px-8 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-[var(--color-header-red)]/20"
+            className="bg-[#189D91] text-white px-8 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-[#189D91]/20"
           >
             {getButtonText()}
           </motion.button>

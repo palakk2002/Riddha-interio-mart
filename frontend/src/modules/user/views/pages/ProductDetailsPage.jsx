@@ -65,7 +65,7 @@ const ProductDetailsPage = () => {
         <motion.div variants={fadeInUp} className="space-y-2 md:space-y-6">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl md:rounded-[3rem] bg-white border border-soft-oatmeal/10 shadow-lg group">
             {/* Discount Badge */}
-            <div className="absolute top-3 left-3 z-10 h-12 w-12 md:h-16 md:w-16 bg-[#922724] rounded-full flex flex-col items-center justify-center text-white font-black shadow-lg ring-4 ring-white/20">
+            <div className="absolute top-3 left-3 z-10 h-12 w-12 md:h-16 md:w-16 bg-[#189D91] rounded-full flex flex-col items-center justify-center text-white font-black shadow-lg ring-4 ring-white/20">
               <span className="text-[10px] md:text-sm leading-none">{Math.round((1 - product.price / product.originalPrice) * 100)}%</span>
               <span className="text-[8px] md:text-[10px] uppercase">Off</span>
             </div>
@@ -88,7 +88,7 @@ const ProductDetailsPage = () => {
           {/* Carousel Dots */}
           <div className="flex justify-center items-center space-x-2 md:space-x-3 py-1 md:py-2">
             {[0, 1, 2].map((i) => (
-              <div key={i} className={`h-1.5 w-1.5 md:h-2.5 md:w-2.5 rounded-full transition-all duration-300 ${i === 0 ? 'bg-[#922724] scale-125' : 'bg-gray-300'}`} />
+              <div key={i} className={`h-1.5 w-1.5 md:h-2.5 md:w-2.5 rounded-full transition-all duration-300 ${i === 0 ? 'bg-[#189D91] scale-125' : 'bg-gray-300'}`} />
             ))}
             <div className="h-3 w-3 md:h-4 md:w-4 text-gray-400 flex items-center justify-center ml-1 md:ml-2">
               <svg className="w-3 h-3 md:w-4 md:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 7l-7 5 7 5V7z" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" /></svg>
@@ -99,7 +99,7 @@ const ProductDetailsPage = () => {
         {/* Info */}
         <motion.div variants={stagger} className="flex flex-col h-full py-0">
           <motion.div variants={fadeInUp} className="mb-2 md:mb-8 space-y-1 md:space-y-4">
-            <div className="text-blue-600 font-bold text-[10px] md:text-base tracking-tight mb-1 md:mb-2">
+            <div className="text-[#189D91] font-bold text-[10px] md:text-base tracking-tight mb-1 md:mb-2">
               Brand: {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
             </div>
 
@@ -117,7 +117,7 @@ const ProductDetailsPage = () => {
                 <span className="text-gray-400 font-medium tracking-tight">
                   MRP: <span className="line-through">₹{product.originalPrice}</span>
                 </span>
-                <span className="text-[#922724] font-bold">
+                <span className="text-[#189D91] font-bold">
                   ({Math.round((1 - product.price / product.originalPrice) * 100)}% off)
                 </span>
               </div>
@@ -147,7 +147,7 @@ const ProductDetailsPage = () => {
                       whileHover={{ scale: 1.15 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => setSelectedColor(color)}
-                      className={`h-10 w-10 md:h-12 md:w-12 rounded-full border-[3px] md:border-4 p-1 md:p-1.5 transition-all shadow-lg ${selectedColor === color ? 'border-[#922724] ring-2 md:ring-4 ring-[#922724]/10' : 'border-white'}`}
+                      className={`h-10 w-10 md:h-12 md:w-12 rounded-full border-[3px] md:border-4 p-1 md:p-1.5 transition-all shadow-lg ${selectedColor === color ? 'border-[#189D91] ring-2 md:ring-4 ring-[#189D91]/10' : 'border-white'}`}
                     >
                       <div className="h-full w-full rounded-full shadow-inner" style={{ backgroundColor: color }} />
                     </motion.button>
@@ -195,7 +195,7 @@ const ProductDetailsPage = () => {
                 <motion.button
                   whileTap={{ scale: 0.8 }}
                   onClick={() => updateQuantity(product.id, currentQuantity - 1)}
-                  className="h-10 w-10 flex items-center justify-center text-deep-espresso/60 hover:text-red-500 transition-colors bg-white rounded-xl shadow-sm"
+                  className="h-10 w-10 flex items-center justify-center text-deep-espresso/60 hover:text-[#189D91] transition-colors bg-white rounded-xl shadow-sm"
                 >
                   <FiMinus className="h-5 w-5" />
                 </motion.button>
@@ -263,7 +263,7 @@ const ProductDetailsPage = () => {
           <motion.section variants={fadeInUp} className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 md:mb-16 gap-2 md:gap-4">
               <h2 className="text-xl md:text-4xl font-bold tracking-tight text-deep-espresso">You May Also Like</h2>
-              <Link to="/products" className="text-[#922724] font-black uppercase tracking-widest text-[9px] md:text-xs hover:text-deep-espresso transition-all group">
+              <Link to="/products" className="text-[#189D91] font-black uppercase tracking-widest text-[9px] md:text-xs hover:text-deep-espresso transition-all group">
                 See all products <span className="ml-2 group-hover:translate-x-1 inline-block transition-transform">→</span>
               </Link>
             </div>

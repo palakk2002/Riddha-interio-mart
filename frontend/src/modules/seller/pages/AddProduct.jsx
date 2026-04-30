@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuPlus, LuBox, LuTags, LuCheck, LuClock, LuImage, LuX, LuTrash2 } from 'react-icons/lu';
+import { LuPlus, LuBox, LuTags, LuCheck, LuClock, LuImage, LuVideo, LuX, LuTrash2 } from 'react-icons/lu';
 import api from '../../../shared/utils/api';
 
 const AddProduct = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const catalogId = queryParams.get('catalogId');
   const [selection, setSelection] = useState(null); // 'new' or 'catalog'
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoUploading, setVideoUploading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -38,13 +44,53 @@ const AddProduct = () => {
     thickness: '',
     color: '',
     unit: 'piece',
+    unitValue: '1',
     countInStock: '',
-    images: [] // Array of base64
+    images: [], // Array of base64
+    videoUrl: ''
   });
 
   useEffect(() => {
     fetchInitialData();
-  }, []);
+    if (catalogId) {
+      fetchCatalogItem();
+    }
+  }, [catalogId]);
+
+  const fetchCatalogItem = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get(`/catalog/${catalogId}`);
+      const item = data.data;
+      
+      // Find brand ID if it's a name or object
+      let brandId = '';
+      if (item.brand) {
+        brandId = typeof item.brand === 'object' ? item.brand._id : item.brand;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        name: item.name || '',
+        sku: item.sku || '',
+        description: item.description || '',
+        category: item.category || '',
+        subcategory: item.subcategory || '',
+        brand: brandId,
+        material: item.material || '',
+        dimensions: item.dimensions || '',
+        thickness: item.thickness || '',
+        color: item.color || '',
+        images: item.images || [],
+      }));
+      setSelection('catalog');
+    } catch (err) {
+      console.error('Failed to fetch catalog item:', err);
+      setError('Failed to load catalog item details.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredCategories = categories.filter(cat => 
     cat.name.toLowerCase().includes(catSearch.toLowerCase())
@@ -110,6 +156,20 @@ const AddProduct = () => {
         throw new Error('Please upload at least one product image');
       }
 
+      let finalVideoUrl = formData.videoUrl;
+
+      // Upload video if selected
+      if (videoFile) {
+        setVideoUploading(true);
+        const uploadData = new FormData();
+        uploadData.append('image', videoFile);
+        const { data: uploadRes } = await api.post('/upload', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        finalVideoUrl = uploadRes.url;
+        setVideoUploading(false);
+      }
+
       // Upload images to Cloudinary
       const uploadedUrls = [];
       const existingUrls = formData.images.filter(img => img.startsWith('http'));
@@ -126,7 +186,11 @@ const AddProduct = () => {
 
       const res = await api.post('/products', { 
         ...formData, 
+        price: Number(formData.price),
+        discountPrice: formData.discountPrice ? Number(formData.discountPrice) : undefined,
+        countInStock: Number(formData.countInStock),
         images: uploadedUrls,
+        videoUrl: finalVideoUrl,
         source: selection 
       });
       if (res.data.success) {
@@ -135,9 +199,10 @@ const AddProduct = () => {
         setFormData({
           name: '', sku: '', description: '', price: '', discountPrice: '',
           category: '', subcategory: '', brand: '', material: '',
-          dimensions: '', thickness: '', color: '', unit: 'piece',
-          countInStock: '', images: []
+          dimensions: '', thickness: '', color: '', unit: 'piece', unitValue: '1',
+          countInStock: '', images: [], videoUrl: ''
         });
+        setVideoFile(null);
         setImgFiles([]);
         setTimeout(() => {
           setSuccess(false);
@@ -161,43 +226,43 @@ const AddProduct = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="py-12 md:py-20 flex flex-col items-center justify-center space-y-12"
+              className="py-10 md:py-20 flex flex-col items-center justify-center space-y-8 md:space-y-12"
             >
-              <div className="text-center space-y-4">
-                <h1 className="text-4xl md:text-6xl font-display font-bold text-deep-espresso tracking-tight">Add Product</h1>
-                <p className="text-warm-sand font-black uppercase tracking-[0.3em] text-xs">How would you like to list your product?</p>
+              <div className="text-center space-y-3 md:space-y-4">
+                <h1 className="text-3xl md:text-6xl font-display font-bold text-deep-espresso tracking-tight">Add Product</h1>
+                <p className="text-warm-sand font-black uppercase tracking-[0.3em] text-[10px] md:text-xs">How would you like to list your product?</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl px-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full max-w-4xl px-4">
                 <button 
                   onClick={() => setSelection('new')}
-                  className="group relative bg-white border border-soft-oatmeal p-10 rounded-[40px] shadow-sm hover:shadow-2xl hover:border-warm-sand/30 transition-all duration-500 flex flex-col items-center text-center space-y-6"
+                  className="group relative bg-white border border-soft-oatmeal p-8 md:p-10 rounded-3xl md:rounded-[40px] shadow-sm hover:shadow-2xl hover:border-warm-sand/30 transition-all duration-500 flex flex-col items-center text-center space-y-4 md:space-y-6"
                 >
-                  <div className="w-20 h-20 bg-soft-oatmeal/10 rounded-3xl flex items-center justify-center text-warm-sand group-hover:bg-warm-sand group-hover:text-white transition-all duration-500">
-                    <LuPlus size={40} />
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-soft-oatmeal/10 rounded-2xl md:rounded-3xl flex items-center justify-center text-warm-sand group-hover:bg-warm-sand group-hover:text-white transition-all duration-500">
+                    <LuPlus size={32} md:size={40} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-deep-espresso">Add New Product</h3>
-                    <p className="text-warm-sand/60 text-sm font-medium mt-2 leading-relaxed">Create a completely new product listing. Requires Admin approval before going live.</p>
+                    <h3 className="text-xl md:text-2xl font-bold text-deep-espresso">Add New Product</h3>
+                    <p className="text-warm-sand/60 text-xs md:text-sm font-medium mt-2 leading-relaxed">Create a completely new product listing. Requires Admin approval.</p>
                   </div>
-                  <div className="pt-4">
-                    <span className="px-6 py-3 bg-soft-oatmeal/20 rounded-full text-[10px] font-black uppercase tracking-widest text-warm-sand group-hover:bg-warm-sand/10 transition-colors">Start New Entry</span>
+                  <div className="pt-2 md:pt-4">
+                    <span className="px-5 py-2.5 md:px-6 md:py-3 bg-soft-oatmeal/20 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest text-warm-sand group-hover:bg-warm-sand/10 transition-colors">Start New Entry</span>
                   </div>
                 </button>
 
                 <Link 
                   to="/seller/catalog"
-                  className="group relative bg-white border border-soft-oatmeal p-10 rounded-[40px] shadow-sm hover:shadow-2xl hover:border-warm-sand/30 transition-all duration-500 flex flex-col items-center text-center space-y-6"
+                  className="group relative bg-white border border-soft-oatmeal p-8 md:p-10 rounded-3xl md:rounded-[40px] shadow-sm hover:shadow-2xl hover:border-warm-sand/30 transition-all duration-500 flex flex-col items-center text-center space-y-4 md:space-y-6"
                 >
-                  <div className="w-20 h-20 bg-soft-oatmeal/10 rounded-3xl flex items-center justify-center text-warm-sand group-hover:bg-warm-sand group-hover:text-white transition-all duration-500">
-                    <LuTags size={40} />
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-soft-oatmeal/10 rounded-2xl md:rounded-3xl flex items-center justify-center text-warm-sand group-hover:bg-warm-sand group-hover:text-white transition-all duration-500">
+                    <LuTags size={32} md:size={40} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-deep-espresso">Add From Catalog</h3>
-                    <p className="text-warm-sand/60 text-sm font-medium mt-2 leading-relaxed">List a product that already exists in the catalog. Instant approval, no waiting required.</p>
+                    <h3 className="text-xl md:text-2xl font-bold text-deep-espresso">Add From Catalog</h3>
+                    <p className="text-warm-sand/60 text-xs md:text-sm font-medium mt-2 leading-relaxed">List a product that already exists in the catalog. Instant approval.</p>
                   </div>
-                  <div className="pt-4">
-                    <span className="px-6 py-3 bg-soft-oatmeal/20 rounded-full text-[10px] font-black uppercase tracking-widest text-warm-sand group-hover:bg-warm-sand/10 transition-colors">Select From Catalog</span>
+                  <div className="pt-2 md:pt-4">
+                    <span className="px-5 py-2.5 md:px-6 md:py-3 bg-soft-oatmeal/20 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest text-warm-sand group-hover:bg-warm-sand/10 transition-colors">Select From Catalog</span>
                   </div>
                 </Link>
               </div>
@@ -209,18 +274,18 @@ const AddProduct = () => {
               animate={{ opacity: 1, x: 0 }}
               className="space-y-8"
             >
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-soft-oatmeal/30">
-                <div className="space-y-2">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-soft-oatmeal/30 px-4 md:px-0">
+                <div className="space-y-2 text-center md:text-left">
                   <button 
                     onClick={() => setSelection(null)}
-                    className="text-[10px] font-black uppercase tracking-widest text-warm-sand hover:text-deep-espresso transition-colors flex items-center gap-2 mb-2"
+                    className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-warm-sand hover:text-deep-espresso transition-colors flex items-center justify-center md:justify-start gap-2 mb-2 w-full md:w-auto"
                   >
                     ← Back to selection
                   </button>
-                  <h1 className="text-3xl md:text-5xl font-display font-bold text-deep-espresso tracking-tight">
+                  <h1 className="text-2xl md:text-5xl font-display font-bold text-deep-espresso tracking-tight">
                     {selection === 'new' ? 'Create New Listing' : 'Catalog Listing'}
                   </h1>
-                  <p className="text-warm-sand font-medium uppercase tracking-[0.2em] text-[10px]">Merchant Inventory Portal • {selection === 'new' ? 'Approval Required' : 'Instant Approval'}</p>
+                  <p className="text-warm-sand font-medium uppercase tracking-[0.2em] text-[9px] md:text-[10px]">Merchant Inventory Portal • {selection === 'new' ? 'Approval Required' : 'Instant Approval'}</p>
                 </div>
               </div>
 
@@ -230,12 +295,12 @@ const AddProduct = () => {
           <div className="lg:col-span-2 space-y-8">
             
             {/* General Information Card */}
-            <div className="bg-white rounded-[40px] border border-soft-oatmeal p-8 md:p-12 shadow-sm space-y-10">
-              <div className="flex items-center gap-4 border-b border-soft-oatmeal pb-6">
-                <div className="w-12 h-12 bg-soft-oatmeal/10 rounded-2xl flex items-center justify-center text-warm-sand">
-                  <LuBox size={24} />
+            <div className="bg-white rounded-3xl md:rounded-[40px] border border-soft-oatmeal p-6 md:p-12 shadow-sm space-y-8 md:space-y-10">
+              <div className="flex items-center gap-4 border-b border-soft-oatmeal pb-5 md:pb-6">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-soft-oatmeal/10 rounded-xl md:rounded-2xl flex items-center justify-center text-warm-sand">
+                  <LuBox size={20} md:size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-deep-espresso">General Information</h3>
+                <h3 className="text-lg md:text-xl font-bold text-deep-espresso">General Information</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -283,12 +348,12 @@ const AddProduct = () => {
             </div>
 
             {/* Specifications Card */}
-            <div className="bg-white rounded-[40px] border border-soft-oatmeal p-8 md:p-12 shadow-sm space-y-10">
-              <div className="flex items-center gap-4 border-b border-soft-oatmeal pb-6">
-                <div className="w-12 h-12 bg-soft-oatmeal/10 rounded-2xl flex items-center justify-center text-warm-sand">
-                  <LuTags size={24} />
+            <div className="bg-white rounded-3xl md:rounded-[40px] border border-soft-oatmeal p-6 md:p-12 shadow-sm space-y-8 md:space-y-10">
+              <div className="flex items-center gap-4 border-b border-soft-oatmeal pb-5 md:pb-6">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-soft-oatmeal/10 rounded-xl md:rounded-2xl flex items-center justify-center text-warm-sand">
+                  <LuTags size={20} md:size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-deep-espresso">Detailed Specifications</h3>
+                <h3 className="text-lg md:text-xl font-bold text-deep-espresso">Detailed Specifications</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -417,7 +482,7 @@ const AddProduct = () => {
           <div className="space-y-8">
              
              {/* Pricing Card */}
-             <div className="bg-white rounded-[40px] border border-soft-oatmeal p-8 md:p-10 shadow-sm space-y-8">
+             <div className="bg-white rounded-3xl md:rounded-[40px] border border-soft-oatmeal p-6 md:p-10 shadow-sm space-y-6 md:space-y-8">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand border-b border-soft-oatmeal pb-4">Pricing & Inventory</h3>
                 
                 <div className="space-y-6">
@@ -444,13 +509,27 @@ const AddProduct = () => {
                           value={formData.unit} onChange={(e) => setFormData({...formData, unit: e.target.value})}
                           className="w-full px-4 py-3.5 rounded-xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 transition-all text-xs font-bold"
                         >
-                           <option value="piece">Piece</option>
+                           <option value="piece">Piece (Pcs)</option>
+                           <option value="kg">Kilogram (Kg)</option>
+                           <option value="ltr">Litre (Ltr)</option>
+                           <option value="watt">Watt (W)</option>
+                           <option value="mtr">Meter (m)</option>
+                           <option value="ft">Feet (ft)</option>
                            <option value="sqft">Sq. Ft.</option>
                            <option value="box">Box</option>
                            <option value="bundle">Bundle</option>
+                           <option value="pack">Pack</option>
                         </select>
                       </div>
                       <div className="space-y-2">
+                        <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Unit Value (Qty)</label>
+                        <input 
+                          type="text" placeholder="e.g. 5 or 50"
+                          value={formData.unitValue} onChange={(e) => setFormData({...formData, unitValue: e.target.value})}
+                          className="w-full px-4 py-3.5 rounded-xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 transition-all text-sm font-bold"
+                        />
+                      </div>
+                      <div className="space-y-2 col-span-2">
                         <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Stock Qty</label>
                         <input 
                           required type="number" placeholder="0"
@@ -463,7 +542,7 @@ const AddProduct = () => {
              </div>
 
              {/* Media Card */}
-             <div className="bg-white rounded-[40px] border border-soft-oatmeal p-8 md:p-10 shadow-sm space-y-8 sticky top-24">
+             <div className="bg-white rounded-3xl md:rounded-[40px] border border-soft-oatmeal p-6 md:p-10 shadow-sm space-y-6 md:space-y-8 md:sticky md:top-24">
                 <div className="flex items-center justify-between border-b border-soft-oatmeal pb-4">
                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">Media Assets</h3>
                    <span className="text-[9px] font-bold text-warm-sand px-2 py-1 bg-soft-oatmeal/10 rounded-full">{formData.images.length} / 5</span>
@@ -493,7 +572,36 @@ const AddProduct = () => {
                 </div>
                 <input type="file" multiple hidden ref={fileInputRef} onChange={handleImageUpload} accept="image/*" />
 
-                <div className="pt-4 space-y-4">
+                <div className="pt-4 space-y-6">
+                   <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                         <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand flex items-center gap-2">
+                            <LuVideo size={14} /> Product Video
+                         </label>
+                         <input 
+                           type="file" id="video-upload" hidden accept="video/*"
+                           onChange={(e) => setVideoFile(e.target.files[0])}
+                         />
+                         <label htmlFor="video-upload" className="text-[10px] font-black text-deep-espresso uppercase tracking-widest hover:underline cursor-pointer">
+                            {videoFile ? 'Change Video' : 'Upload Video File'}
+                         </label>
+                      </div>
+                      
+                      <input 
+                        type="url" placeholder="or Paste YouTube Link"
+                        value={formData.videoUrl} onChange={(e) => setFormData({...formData, videoUrl: e.target.value})}
+                        className="w-full px-5 py-4 rounded-xl bg-soft-oatmeal/5 border border-soft-oatmeal/30 focus:border-warm-sand focus:bg-white transition-all text-xs font-medium"
+                      />
+                      {videoFile && (
+                        <div className="flex items-center justify-between p-3 bg-green-50 border border-green-100 rounded-xl">
+                           <span className="text-[10px] font-bold text-green-700 truncate max-w-[200px]">{videoFile.name}</span>
+                           <button onClick={() => setVideoFile(null)} className="text-green-700 hover:text-red-500 transition-colors">
+                              <LuX size={14} />
+                           </button>
+                        </div>
+                      )}
+                   </div>
+
                    {error && (
                      <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 text-red-500">
                         <LuX className="shrink-0 mt-0.5" size={16} />

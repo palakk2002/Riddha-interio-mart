@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { FiCheckCircle, FiXCircle, FiTruck, FiBox, FiMapPin, FiMoreHorizontal } from "react-icons/fi";
 import api from "../../../shared/utils/api";
 import { motion, AnimatePresence } from "framer-motion";
+import OrderCard from "../components/OrderCard";
 
 const Orders = () => {
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -199,118 +200,132 @@ const Orders = () => {
           </div>
         </div>
 
-        {/* Orders Table */}
-        <div className="bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/20 overflow-hidden">
-          <div className="overflow-x-auto overflow-y-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50/50 border-b border-gray-100">
-                  <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Transaction ID</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Customer / Location</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Revenue</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Stage</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Control</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                <AnimatePresence>
-                  {loading ? (
-                    <tr>
-                      <td colSpan="5" className="px-8 py-20 text-center">
-                        <div className="w-10 h-10 border-4 border-gray-100 border-t-red-800 rounded-full animate-spin mx-auto mb-4" />
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Synchronizing Encrypted Data...</p>
-                      </td>
-                    </tr>
-                  ) : filteredOrders.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="px-8 py-20 text-center">
-                        <LuPackage size={48} className="text-gray-100 mx-auto mb-4" />
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No matching transactions found</p>
-                      </td>
-                    </tr>
-                  ) : filteredOrders.map((order) => (
-                    <motion.tr
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      key={order._id}
-                      className="hover:bg-gray-50/50 transition-colors group"
-                    >
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-white transition-colors">
-                            <LuClock size={16} />
-                          </div>
-                          <div>
-                            <p className="text-xs font-black text-gray-900 tracking-tighter uppercase">#{order._id.slice(-8).toUpperCase()}</p>
-                            <p className="text-[9px] text-gray-400 font-bold mt-1 uppercase tracking-widest">{new Date(order.createdAt).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-800 font-black text-[10px]">
-                            {String(order.shippingAddress?.fullName || "G").charAt(0)}
-                          </div>
-                          <div>
-                            <p className="text-xs font-black text-gray-900 uppercase tracking-tighter">{String(order.shippingAddress?.fullName || "Guest")}</p>
-                            <p className="text-[9px] text-gray-400 font-bold flex items-center gap-1 uppercase tracking-widest">
-                              <FiMapPin size={8} /> {String(order.shippingAddress?.city || "Unknown")}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6">
-                        <p className="text-sm font-black text-gray-900 tracking-tighter">₹{Number(order.totalPrice || 0).toLocaleString()}</p>
-                        <p className="text-[9px] text-green-600 font-black uppercase tracking-widest mt-1">Paid via {order.paymentMethod}</p>
-                      </td>
-                      <td className="px-8 py-6">
-                        <span
-                          className={`text-[9px] font-black uppercase tracking-[0.15em] px-4 py-2 rounded-xl border-2 inline-flex items-center gap-2 ${order.status === "Pending"
-                              ? "text-amber-600 bg-amber-50 border-amber-100"
-                              : order.status === "Processing"
-                                ? "text-blue-600 bg-blue-50 border-blue-100"
-                                : order.status === "Shipped"
-                                  ? "text-purple-600 bg-purple-50 border-purple-100"
-                                  : order.status === "Delivered"
-                                    ? "text-green-600 bg-green-50 border-green-100"
-                                    : "text-red-600 bg-red-50 border-red-100"
-                            }`}
-                        >
-                          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${order.status === "Pending" ? "bg-amber-600" :
-                              order.status === "Processing" ? "bg-blue-600" :
-                                order.status === "Shipped" ? "bg-purple-600" : "bg-green-600"
-                            }`} />
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="px-8 py-6 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => navigate(`/seller/order/${order._id}`)}
-                            className="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-900 hover:border-gray-900 transition-all shadow-sm"
+        {/* Orders List / Table */}
+        <div className="space-y-4">
+          <AnimatePresence>
+            {loading ? (
+              <div className="bg-white rounded-[2rem] border border-soft-oatmeal p-20 text-center">
+                <div className="w-10 h-10 border-4 border-soft-oatmeal/30 border-t-[#bd3b64] rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Synchronizing Encrypted Data...</p>
+              </div>
+            ) : filteredOrders.length === 0 ? (
+              <div className="bg-white rounded-[2rem] border border-soft-oatmeal p-20 text-center">
+                <LuPackage size={48} className="text-soft-oatmeal mx-auto mb-4" />
+                <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest">No matching transactions found</p>
+              </div>
+            ) : (
+              <>
+                {/* Desktop Table View */}
+                <div className="hidden md:block bg-white rounded-[2rem] border border-soft-oatmeal shadow-xl shadow-soft-oatmeal/20 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead className="bg-soft-oatmeal/10 border-b border-soft-oatmeal">
+                        <tr>
+                          <th className="px-8 py-6 text-[10px] font-black text-warm-sand uppercase tracking-[0.2em]">Transaction ID</th>
+                          <th className="px-8 py-6 text-[10px] font-black text-warm-sand uppercase tracking-[0.2em]">Customer / Location</th>
+                          <th className="px-8 py-6 text-[10px] font-black text-warm-sand uppercase tracking-[0.2em]">Revenue</th>
+                          <th className="px-8 py-6 text-[10px] font-black text-warm-sand uppercase tracking-[0.2em]">Stage</th>
+                          <th className="px-8 py-6 text-[10px] font-black text-warm-sand uppercase tracking-[0.2em] text-right">Control</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-soft-oatmeal/30">
+                        {filteredOrders.map((order) => (
+                          <motion.tr
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            key={order._id}
+                            className="hover:bg-soft-oatmeal/10 transition-colors group"
                           >
-                            <LuEye size={18} />
-                          </button>
+                            <td className="px-8 py-6">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-soft-oatmeal/20 flex items-center justify-center text-warm-sand group-hover:bg-white transition-colors">
+                                  <LuClock size={16} />
+                                </div>
+                                <div>
+                                  <p className="text-xs font-black text-deep-espresso tracking-tighter uppercase">#{order._id.slice(-8).toUpperCase()}</p>
+                                  <p className="text-[9px] text-warm-sand font-bold mt-1 uppercase tracking-widest">{new Date(order.createdAt).toLocaleDateString()}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-8 py-6">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-[#bd3b64]/10 flex items-center justify-center text-[#bd3b64] font-black text-[10px]">
+                                  {String(order.shippingAddress?.fullName || "G").charAt(0)}
+                                </div>
+                                <div>
+                                  <p className="text-xs font-black text-deep-espresso uppercase tracking-tighter">{String(order.shippingAddress?.fullName || "Guest")}</p>
+                                  <p className="text-[9px] text-warm-sand font-bold flex items-center gap-1 uppercase tracking-widest">
+                                    <FiMapPin size={8} /> {String(order.shippingAddress?.city || "Unknown")}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-8 py-6">
+                              <p className="text-sm font-black text-deep-espresso tracking-tighter">₹{Number(order.totalPrice || 0).toLocaleString()}</p>
+                              <p className="text-[9px] text-emerald-600 font-black uppercase tracking-widest mt-1">Paid via {order.paymentMethod}</p>
+                            </td>
+                            <td className="px-8 py-6">
+                              <span
+                                className={`text-[9px] font-black uppercase tracking-[0.15em] px-4 py-2 rounded-xl border-2 inline-flex items-center gap-2 ${order.status === "Pending"
+                                    ? "text-amber-600 bg-amber-50 border-amber-100"
+                                    : order.status === "Processing"
+                                      ? "text-blue-600 bg-blue-50 border-blue-100"
+                                      : order.status === "Shipped"
+                                        ? "text-purple-600 bg-purple-50 border-purple-100"
+                                        : order.status === "Delivered"
+                                          ? "text-emerald-600 bg-emerald-50 border-emerald-100"
+                                          : "text-red-600 bg-red-50 border-red-100"
+                                  }`}
+                              >
+                                <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${order.status === "Pending" ? "bg-amber-600" :
+                                    order.status === "Processing" ? "bg-blue-600" :
+                                      order.status === "Shipped" ? "bg-purple-600" : "bg-emerald-600"
+                                  }`} />
+                                {order.status}
+                              </span>
+                            </td>
+                            <td className="px-8 py-6 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => navigate(`/seller/order/${order._id}`)}
+                                  className="w-10 h-10 bg-white border border-soft-oatmeal rounded-xl flex items-center justify-center text-warm-sand hover:text-deep-espresso hover:border-deep-espresso transition-all shadow-sm"
+                                >
+                                  <LuEye size={18} />
+                                </button>
+      
+                                {order.status === 'Processing' && (
+                                  <button
+                                    onClick={() => handleAssignInit(order)}
+                                    className="w-10 h-10 bg-deep-espresso text-white rounded-xl flex items-center justify-center hover:bg-black transition-all shadow-lg shadow-black/10"
+                                  >
+                                    <FiTruck size={18} />
+                                  </button>
+                                )}
+                                <button className="w-10 h-10 bg-white border border-soft-oatmeal rounded-xl flex items-center justify-center text-warm-sand hover:text-deep-espresso transition-all">
+                                  <FiMoreHorizontal size={18} />
+                                </button>
+                              </div>
+                            </td>
+                          </motion.tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
-                          {order.status === 'Processing' && (
-                            <button
-                              onClick={() => handleAssignInit(order)}
-                              className="w-10 h-10 bg-gray-900 text-white rounded-xl flex items-center justify-center hover:bg-black transition-all shadow-lg shadow-black/10"
-                            >
-                              <FiTruck size={18} />
-                            </button>
-                          )}
-                          <button className="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all">
-                            <FiMoreHorizontal size={18} />
-                          </button>
-                        </div>
-                      </td>
-                    </motion.tr>
+                {/* Mobile Card List View */}
+                <div className="md:hidden space-y-3 mobile-full-bleed">
+                  {filteredOrders.map((order) => (
+                    <OrderCard 
+                      key={order._id} 
+                      order={order} 
+                      onClick={() => navigate(`/seller/order/${order._id}`)} 
+                    />
                   ))}
-                </AnimatePresence>
-              </tbody>
-            </table>
-          </div>
+                </div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
         {/* Assignment Modal Overlay */}
         <AnimatePresence>
