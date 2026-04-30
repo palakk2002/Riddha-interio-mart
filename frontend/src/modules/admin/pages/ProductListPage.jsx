@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
-import { LuSearch, LuPlus, LuTrash2, LuPen, LuFilter, LuBox, LuPackage } from 'react-icons/lu';
+import { LuSearch, LuPlus, LuTrash2, LuPen, LuFilter, LuBox, LuPackage, LuTag } from 'react-icons/lu';
 import api from '../../../shared/utils/api';
 
 const ProductListPage = () => {
@@ -11,6 +11,7 @@ const ProductListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState(null);
+  const [commissionModal, setCommissionModal] = useState({ open: false, product: null, commission: 2 });
 
   const fetchProducts = async () => {
     try {
@@ -26,9 +27,13 @@ const ProductListPage = () => {
     }
   };
 
-  const handleApprove = async (id, status) => {
+  const handleApprove = async (id, status, commission = 0) => {
     try {
-      await api.put(`/products/${id}/approval`, { approvalStatus: status });
+      await api.put(`/products/${id}/approval`, { 
+        approvalStatus: status,
+        adminCommission: commission
+      });
+      setCommissionModal({ open: false, product: null, commission: 2 });
       fetchProducts(); // Refresh list
     } catch (err) {
       console.error('Approval error:', err);
@@ -114,12 +119,13 @@ const ProductListPage = () => {
               <table className="w-full text-left border-collapse">
                 <thead className="bg-soft-oatmeal/20 border-b border-soft-oatmeal">
                   <tr>
-                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Image</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Product Name</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">SKU</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Category</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Status</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Price</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Product & Seller</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">SKU & Brand</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest text-center">Category & Unit</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest text-center">Status</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Seller Price</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest text-center">Comm. %</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest">Final Price</th>
                     <th className="px-6 py-4 text-[10px] font-black text-brand-teal uppercase tracking-widest text-right">Actions</th>
                   </tr>
                 </thead>
@@ -127,28 +133,44 @@ const ProductListPage = () => {
                   {filteredProducts.map((product) => (
                     <tr key={product._id} className="hover:bg-soft-oatmeal/5 transition-colors group">
                       <td className="px-6 py-4">
-                        <img 
-                          src={product.images?.[0] || 'https://via.placeholder.com/150'} 
-                          alt={product.name} 
-                          className="w-12 h-12 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" 
-                        />
+                        <div className="flex items-center gap-4">
+                          <img 
+                            src={product.images?.[0] || 'https://via.placeholder.com/150'} 
+                            alt={product.name} 
+                            className="w-14 h-14 rounded-2xl object-cover shadow-sm group-hover:scale-105 transition-transform border border-soft-oatmeal" 
+                          />
+                          <div className="space-y-0.5">
+                            <p className="font-bold text-deep-espresso text-base">{product.name}</p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9px] font-black bg-brand-purple/5 text-brand-purple px-1.5 py-0.5 rounded border border-brand-purple/10 uppercase tracking-widest">Seller</span>
+                              <p className="text-xs font-bold text-brand-teal">{product.seller?.shopName || product.seller?.fullName || 'Internal'}</p>
+                            </div>
+                          </div>
+                        </div>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="font-bold text-deep-espresso">{product.name}</p>
-                        <p className="text-[10px] text-brand-teal uppercase tracking-wider mt-0.5">{product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-[10px] font-black text-deep-espresso/60 bg-soft-oatmeal/30 px-2 py-1 rounded border border-soft-oatmeal">
-                          {product.sku || 'NO-SKU'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="text-[10px] font-bold text-red-800 uppercase tracking-widest bg-brand-purple/5 px-2.5 py-1 rounded-full border border-red-800/10">
-                          {product.category}
-                        </span>
+                        <div className="space-y-1.5">
+                          <span className="block text-[10px] font-black text-deep-espresso/60 bg-soft-oatmeal/30 px-2 py-1 rounded border border-soft-oatmeal w-fit">
+                            {product.sku || 'NO-SKU'}
+                          </span>
+                          <p className="text-[11px] font-bold text-warm-sand flex items-center gap-1">
+                            <LuTag size={12} className="opacity-50" />
+                            {product.brand?.name || 'No Brand'}
+                          </p>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                        <div className="space-y-1.5">
+                          <span className="inline-block text-[10px] font-bold text-red-800 uppercase tracking-widest bg-brand-purple/5 px-2.5 py-1 rounded-full border border-red-800/10">
+                            {product.category}
+                          </span>
+                          <p className="text-[10px] font-black text-brand-teal/60 uppercase tracking-widest">
+                            {product.unitValue} {product.unit} • {product.countInStock} {product.countInStock > 0 ? 'Left' : 'OUT'}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border shadow-sm ${
                           product.approvalStatus === 'approved' 
                           ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
                           : product.approvalStatus === 'rejected'
@@ -158,22 +180,32 @@ const ProductListPage = () => {
                           {product.approvalStatus || 'Pending'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-black text-deep-espresso text-right">
-                        ₹{product.price?.toLocaleString()}
+                      <td className="px-6 py-4">
+                         <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest mb-0.5">Seller Asks</p>
+                         <p className="font-black text-deep-espresso/60">₹{(product.sellerPrice || product.price)?.toLocaleString()}</p>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="text-lg font-display font-bold text-emerald-600">
+                          {product.adminCommission || 0}%
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-[10px] font-black text-[#240046] uppercase tracking-widest mb-0.5">User Price</p>
+                        <p className="font-black text-[#240046] text-xl">₹{product.price?.toLocaleString()}</p>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           {product.approvalStatus === 'pending' && (
                             <>
                               <button 
-                                onClick={() => handleApprove(product._id, 'approved')}
-                                className="px-3 py-1.5 bg-emerald-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-700 transition-colors"
+                                onClick={() => setCommissionModal({ open: true, product, commission: 2 })}
+                                className="px-4 py-2 bg-emerald-600 text-white text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-900/10 active:scale-95"
                               >
                                 Approve
                               </button>
                               <button 
                                 onClick={() => handleApprove(product._id, 'rejected')}
-                                className="px-3 py-1.5 bg-red-100 text-red-600 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-red-200 transition-colors"
+                                className="px-4 py-2 bg-red-100 text-red-600 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-red-200 transition-all active:scale-95"
                               >
                                 Reject
                               </button>
@@ -181,15 +213,15 @@ const ProductListPage = () => {
                           )}
                           <button 
                             onClick={() => navigate(`/admin/inventory/edit/${product._id}`)}
-                            className="p-2 text-deep-espresso hover:bg-soft-oatmeal rounded-lg transition-colors"
+                            className="p-2.5 text-deep-espresso hover:bg-soft-oatmeal rounded-xl transition-all hover:scale-110"
                           >
-                            <LuPen size={16} />
+                            <LuPen size={18} />
                           </button>
                           <button 
                             onClick={() => setDeleteId(product._id)}
-                            className="p-2 text-red-600 hover:bg-brand-pink/5 rounded-lg transition-colors"
+                            className="p-2.5 text-red-600 hover:bg-red-50 rounded-xl transition-all hover:scale-110"
                           >
-                            <LuTrash2 size={16} />
+                            <LuTrash2 size={18} />
                           </button>
                         </div>
                       </td>
@@ -202,25 +234,59 @@ const ProductListPage = () => {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {deleteId && (
+      {/* Commission Approval Modal */}
+      {commissionModal.open && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-deep-espresso/20 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-soft-oatmeal">
-            <h3 className="text-xl font-display font-bold text-deep-espresso mb-2">Delete Product?</h3>
-            <p className="text-brand-teal mb-6">Are you sure you want to remove this product from your list? This action cannot be undone.</p>
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setDeleteId(null)}
-                className="flex-1 px-6 py-3 rounded-xl font-bold text-deep-espresso bg-soft-oatmeal/30 hover:bg-soft-oatmeal/50 transition-all"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={() => handleDelete(deleteId)}
-                className="flex-1 px-6 py-3 rounded-xl font-bold text-white bg-brand-purple hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20"
-              >
-                Delete
-              </button>
+          <div className="bg-white rounded-[40px] p-10 max-w-md w-full shadow-2xl border border-soft-oatmeal overflow-hidden relative">
+            {/* Background Accent */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 opacity-50" />
+            
+            <div className="relative z-10 space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-2xl font-display font-bold text-deep-espresso">Set Commission</h3>
+                <p className="text-brand-teal text-sm">Configure the markup for <span className="font-bold text-emerald-600">{commissionModal.product.name}</span></p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="bg-soft-oatmeal/20 p-4 rounded-2xl">
+                    <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest mb-1">Seller Price</p>
+                    <p className="text-xl font-display font-bold text-deep-espresso">₹{commissionModal.product.price?.toLocaleString()}</p>
+                 </div>
+                 <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100">
+                    <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Final Price</p>
+                    <p className="text-xl font-display font-bold text-[#240046]">
+                       ₹{Math.round(commissionModal.product.price * (1 + commissionModal.commission / 100)).toLocaleString()}
+                    </p>
+                 </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest ml-1">Commission Percentage (%)</label>
+                <div className="relative">
+                  <input 
+                    type="number"
+                    value={commissionModal.commission}
+                    onChange={(e) => setCommissionModal({...commissionModal, commission: Number(e.target.value)})}
+                    className="w-full bg-soft-oatmeal/30 border-2 border-transparent focus:border-emerald-500 rounded-2xl px-6 py-4 text-lg font-bold text-deep-espresso outline-none transition-all"
+                  />
+                  <span className="absolute right-6 top-1/2 -translate-y-1/2 text-emerald-600 font-bold">%</span>
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button 
+                  onClick={() => setCommissionModal({ open: false, product: null, commission: 2 })}
+                  className="flex-1 px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest text-deep-espresso bg-soft-oatmeal/50 hover:bg-soft-oatmeal/70 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => handleApprove(commissionModal.product._id, 'approved', commissionModal.commission)}
+                  className="flex-1 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-900/20 active:scale-95"
+                >
+                  Confirm & Approve
+                </button>
+              </div>
             </div>
           </div>
         </div>

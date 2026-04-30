@@ -3,45 +3,50 @@ import PageWrapper from "../components/PageWrapper";
 import {
   LuSearch,
   LuFilter,
-  LuArrowUpRight,
-  LuArrowDownLeft,
+  LuDollarSign,
+  LuCreditCard,
+  LuShoppingBag,
+  LuArrowRight,
+  LuClock,
 } from "react-icons/lu";
-import { FiDownload, FiDollarSign } from "react-icons/fi";
-
-
-
+import { FiCheckCircle, FiClock, FiXCircle } from "react-icons/fi";
 import api from "../../../shared/utils/api";
+import { useNavigate } from "react-router-dom";
 
-const SellerTransactionsPage = () => {
+const UserPaymentsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [transactions, setTransactions] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchOrders = async () => {
       try {
         setLoading(true);
-        const { data } = await api.get('/auth/admin/payments/sellers');
-        if (data.success) {
-          setTransactions(data.data);
+        // If searchTerm exists, use the new search endpoint, otherwise get all orders
+        const endpoint = searchTerm.trim() 
+          ? `/auth/admin/orders/search?query=${searchTerm}`
+          : '/orders';
+          
+        const { data: res } = await api.get(endpoint);
+        if (res.success) {
+          setOrders(res.data);
         }
       } catch (err) {
-        console.error('Failed to fetch seller transactions:', err);
+        console.error('Failed to fetch orders:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchTransactions();
-  }, []);
 
-  const filteredTransactions = transactions.filter(
-    (t) =>
-      t.sellerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.shopName.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+    const timer = setTimeout(() => {
+      fetchOrders();
+    }, 500); // 500ms debounce
 
-  const totalPayout = transactions.reduce((sum, t) => sum + t.amount, 0);
-  const totalCommission = transactions.reduce((sum, t) => sum + t.commission, 0);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const filteredOrders = orders; // Now filtered by the API call logic above
 
   return (
     <PageWrapper>
@@ -50,53 +55,53 @@ const SellerTransactionsPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso">
-              Seller Transactions
+              User Payments
             </h1>
             <p className="text-warm-sand text-sm md:text-base">
-              Monitor payouts and financial adjustments for all sellers.
+              Monitor customer order payments and transactional history.
             </p>
           </div>
-          <button className="flex items-center justify-center gap-2 bg-red-800 text-white px-6 py-3.5 rounded-2xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20 active:scale-95 text-sm">
-            <FiDownload size={18} />
-            Export Report
-          </button>
         </div>
 
         {/* Stats Summary */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white p-6 rounded-2xl border border-soft-oatmeal shadow-sm flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
-              <FiDollarSign size={24} />
+              <LuDollarSign size={24} />
             </div>
             <div>
-              <p className="text-xs text-warm-sand font-bold uppercase tracking-wider">
-                Total Payouts
+              <p className="text-[10px] text-warm-sand font-black uppercase tracking-wider">
+                Total Collection
               </p>
               <h4 className="text-xl font-black text-deep-espresso">
-                ₹{totalPayout.toLocaleString()}
+                ₹{orders.reduce((sum, o) => sum + (o.isPaid ? o.totalPrice : 0), 0).toLocaleString()}
               </h4>
             </div>
           </div>
           <div className="bg-white p-6 rounded-2xl border border-soft-oatmeal shadow-sm flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-              <FiDollarSign size={24} />
+              <LuClock size={24} />
             </div>
             <div>
-              <p className="text-xs text-warm-sand font-bold uppercase tracking-wider">
-                Total Commission (10%)
+              <p className="text-[10px] text-warm-sand font-black uppercase tracking-wider">
+                Pending COD
               </p>
-              <h4 className="text-xl font-black text-deep-espresso">₹{totalCommission.toLocaleString()}</h4>
+              <h4 className="text-xl font-black text-deep-espresso">
+                ₹{orders.reduce((sum, o) => sum + (!o.isPaid ? o.totalPrice : 0), 0).toLocaleString()}
+              </h4>
             </div>
           </div>
           <div className="bg-white p-6 rounded-2xl border border-soft-oatmeal shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
-              <FiDollarSign size={24} />
+            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+              <LuShoppingBag size={24} />
             </div>
             <div>
-              <p className="text-xs text-warm-sand font-bold uppercase tracking-wider">
-                Transactions
+              <p className="text-[10px] text-warm-sand font-black uppercase tracking-wider">
+                Paid Orders
               </p>
-              <h4 className="text-xl font-black text-deep-espresso">{transactions.length}</h4>
+              <h4 className="text-xl font-black text-deep-espresso">
+                {orders.filter(o => o.isPaid).length}
+              </h4>
             </div>
           </div>
         </div>
@@ -110,10 +115,10 @@ const SellerTransactionsPage = () => {
             />
             <input
               type="text"
-              placeholder="Search by seller or shop..."
+              placeholder="Search by Order ID or Customer name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all text-sm"
+              className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all text-sm font-bold"
             />
           </div>
           <button className="flex items-center justify-center gap-2 border border-soft-oatmeal text-deep-espresso px-6 py-3 md:py-0 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-soft-oatmeal/20 transition-all">
@@ -122,20 +127,20 @@ const SellerTransactionsPage = () => {
           </button>
         </div>
 
-        {/* Transactions Table */}
+        {/* Payments Table */}
         <div className="bg-white rounded-2xl border border-soft-oatmeal shadow-md overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead className="bg-soft-oatmeal/20 border-b border-soft-oatmeal">
                 <tr>
                   <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
-                    Transaction ID
+                    Order ID
                   </th>
                   <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
-                    Seller & Shop
+                    Customer
                   </th>
                   <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
-                    Type
+                    Method
                   </th>
                   <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
                     Amount
@@ -146,61 +151,61 @@ const SellerTransactionsPage = () => {
                   <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
                     Date
                   </th>
+                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest text-right">
+                    Details
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-soft-oatmeal/50">
                 {loading ? (
-                  Array(3).fill(0).map((_, i) => (
-                    <tr key={i} className="animate-pulse">
-                      <td colSpan="6" className="h-16 bg-gray-50/50 px-6"></td>
-                    </tr>
-                  ))
-                ) : filteredTransactions.map((t) => (
+                   Array(5).fill(0).map((_, i) => (
+                      <tr key={i} className="animate-pulse">
+                         <td colSpan="7" className="px-6 py-4 h-16 bg-gray-50/50"></td>
+                      </tr>
+                   ))
+                ) : filteredOrders.map((o) => (
                   <tr
-                    key={t._id}
+                    key={o._id}
                     className="hover:bg-soft-oatmeal/5 transition-colors group"
                   >
-                    <td className="px-6 py-4 text-xs font-bold text-deep-espresso/60">
-                      #TXN-00{t.id}
+                    <td className="px-6 py-4 text-xs font-black text-[#240046]">
+                      #{o._id.toString().slice(-8).toUpperCase()}
                     </td>
                     <td className="px-6 py-4">
-                      <div>
-                        <p className="font-bold text-deep-espresso text-sm">
-                          {t.sellerName}
-                        </p>
-                        <p className="text-[10px] text-warm-sand uppercase tracking-wider font-bold">
-                          {t.shopName}
-                        </p>
-                      </div>
+                      <p className="font-bold text-deep-espresso text-sm">
+                        {o.user?.fullName || 'Guest'}
+                      </p>
                     </td>
                     <td className="px-6 py-4">
-                      <div
-                        className={`flex items-center gap-1.5 text-xs font-bold ${t.type === "Payout" ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {t.type === "Payout" ? (
-                          <LuArrowUpRight size={14} />
-                        ) : (
-                          <LuArrowDownLeft size={14} />
-                        )}
-                        {t.type}
+                      <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
+                         <LuCreditCard size={14} className="text-warm-sand" />
+                         {o.paymentMethod}
                       </div>
                     </td>
                     <td className="px-6 py-4 font-black text-deep-espresso text-sm">
-                      ₹{t.amount.toLocaleString()}
+                      ₹{o.totalPrice.toLocaleString()}
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
-                          t.status === "Completed"
+                        className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                          o.isPaid
                             ? "text-green-700 bg-green-50 border-green-700/10"
                             : "text-amber-700 bg-amber-50 border-amber-700/10"
                         }`}
                       >
-                        {t.status}
+                        {o.isPaid ? 'Paid' : 'Unpaid'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs text-deep-espresso/70 font-medium">
-                      {t.date}
+                    <td className="px-6 py-4 text-xs text-deep-espresso/70 font-bold uppercase">
+                      {new Date(o.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                       <button 
+                         onClick={() => navigate(`/admin/orders/view/${o._id}`)}
+                         className="p-2 hover:bg-soft-oatmeal/30 rounded-lg text-warm-sand transition-all hover:scale-110"
+                       >
+                          <LuArrowRight size={18} />
+                       </button>
                     </td>
                   </tr>
                 ))}
@@ -213,4 +218,4 @@ const SellerTransactionsPage = () => {
   );
 };
 
-export default SellerTransactionsPage;
+export default UserPaymentsPage;

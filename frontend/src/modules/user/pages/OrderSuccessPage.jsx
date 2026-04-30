@@ -55,7 +55,7 @@ const OrderSuccessPage = () => {
            </div>
         </div>
 
-        <div className="flex items-center gap-5 text-left">
+        <div className="flex items-center gap-5 text-left border-t border-gray-200/50 pt-6">
            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-[#189D91]">
               <FiMapPin size={20} />
            </div>
@@ -63,6 +63,32 @@ const OrderSuccessPage = () => {
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-2">ESTIMATED DELIVERY</p>
               <p className="text-xs font-black text-gray-900 uppercase">Within 4 Hours</p>
            </div>
+        </div>
+
+        {/* Placeholder Map UI Inside Card */}
+        <div className="relative h-40 bg-emerald-50/50 rounded-2xl border border-[#189D91]/10 overflow-hidden mt-4">
+          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#189D91 1px, transparent 1px)', backgroundSize: '12px 12px' }} />
+          
+          <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+            <path d="M 40,120 Q 120,120 150,80 T 280,30" fill="none" stroke="#189D91" strokeWidth="2" strokeDasharray="5 5" className="opacity-20" />
+            <motion.path 
+              d="M 40,120 Q 120,120 150,80 T 280,30" fill="none" stroke="#189D91" strokeWidth="2" strokeDasharray="5 5"
+              initial={{ pathLength: 0 }} animate={{ pathLength: 0.7 }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            />
+          </svg>
+
+          <div className="absolute left-8 bottom-6 text-[#189D91] opacity-40"><FiShoppingBag size={12} /></div>
+          <div className="absolute right-8 top-6 text-[#189D91]"><FiMapPin size={16} /></div>
+          
+          <motion.div 
+            animate={{ x: [0, 80, 0], y: [0, -30, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute left-16 bottom-14 w-2 h-2 bg-[#189D91] rounded-full shadow-[0_0_10px_rgba(24,157,145,0.5)] border border-white"
+          />
+
+          <div className="absolute top-3 left-3 px-3 py-1 bg-white/90 backdrop-blur-md rounded-xl shadow-sm border border-white/50">
+             <p className="text-[7px] font-black text-gray-900 uppercase tracking-tighter">Live Tracking Soon</p>
+          </div>
         </div>
       </motion.div>
 

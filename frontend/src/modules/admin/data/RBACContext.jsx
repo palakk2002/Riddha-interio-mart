@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../../../shared/utils/api';
+import { useUser } from '../../user/data/UserContext';
 import { DEFAULT_ASSISTANT_PERMISSIONS } from './permissionsMap';
 
 const RBACContext = createContext();
@@ -12,52 +14,44 @@ export const useRBAC = () => {
 };
 
 export const RBACProvider = ({ children }) => {
-  // State for current role and permissions
-  const [role, setRole] = useState(() => {
-    const saved = localStorage.getItem('rbac_role');
-    return saved || 'admin';
-  });
+  const { user } = useUser();
+  
+  // State for current role and permissions - synced with User session
+  const [role, setRole] = useState('user');
+  const [currentPermissions, setCurrentPermissions] = useState(null);
+  const [assistants, setAssistants] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const [currentPermissions, setCurrentPermissions] = useState(() => {
-    const saved = localStorage.getItem('rbac_permissions');
-    if (saved) return JSON.parse(saved);
-    return role === 'admin' ? null : DEFAULT_ASSISTANT_PERMISSIONS;
-  });
+  useEffect(() => {
+    if (user && user.role === 'admin') {
+      setRole(user.type === 'superadmin' ? 'admin' : 'assistant');
+      setCurrentPermissions(user.type === 'superadmin' ? null : user.permissions);
+      fetchAssistants();
+    } else {
+      setRole('user');
+      setCurrentPermissions(null);
+    }
+  }, [user]);
 
-  // State for assistants list (simulating DB)
-  const [assistants, setAssistants] = useState(() => {
-    const saved = localStorage.getItem('rbac_assistants');
-    if (saved) return JSON.parse(saved);
-    return [
-      {
-        id: '1',
-        name: 'John Assistant',
-        email: 'john@riddha.com',
-        role: 'assistant',
-        permissions: { ...DEFAULT_ASSISTANT_PERMISSIONS, analytics: true }
-      },
-      {
-        id: '2',
-        name: 'Sarah Clerk',
-        email: 'sarah@riddha.com',
-        role: 'assistant',
-        permissions: { ...DEFAULT_ASSISTANT_PERMISSIONS, orders: true, products: false }
+  const fetchAssistants = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/auth/admin/assistants');
+      if (data.success) {
+        setAssistants(data.data.map(a => ({
+          id: a._id,
+          name: a.fullName,
+          email: a.email,
+          role: a.type,
+          permissions: a.permissions
+        })));
       }
-    ];
-  });
-
-  // Persist state
-  useEffect(() => {
-    localStorage.setItem('rbac_role', role);
-  }, [role]);
-
-  useEffect(() => {
-    localStorage.setItem('rbac_permissions', JSON.stringify(currentPermissions));
-  }, [currentPermissions]);
-
-  useEffect(() => {
-    localStorage.setItem('rbac_assistants', JSON.stringify(assistants));
-  }, [assistants]);
+    } catch (err) {
+      console.error('Failed to fetch assistants:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const switchRole = (newRole, permissions = null) => {
     setRole(newRole);
@@ -74,22 +68,42 @@ export const RBACProvider = ({ children }) => {
     return !!currentPermissions[permissionKey];
   };
 
-  const addAssistant = (assistantData) => {
-    const newAssistant = {
-      ...assistantData,
-      id: Date.now().toString(),
-      role: 'assistant'
-    };
-    setAssistants(prev => [...prev, newAssistant]);
-    return newAssistant;
+  const addAssistant = async (assistantData) => {
+    try {
+      const { data } = await api.post('/auth/admin/assistants', assistantData);
+      if (data.success) {
+        fetchAssistants(); // Refresh list
+        return data.data;
+      }
+    } catch (err) {
+      console.error('Failed to add assistant:', err);
+      throw err;
+    }
   };
 
-  const updateAssistant = (id, updatedData) => {
-    setAssistants(prev => prev.map(a => a.id === id ? { ...a, ...updatedData } : a));
+  const updateAssistant = async (id, updatedData) => {
+    try {
+      const { data } = await api.put(`/auth/admin/assistants/${id}`, updatedData);
+      if (data.success) {
+        fetchAssistants();
+        return data.data;
+      }
+    } catch (err) {
+      console.error('Failed to update assistant:', err);
+      throw err;
+    }
   };
 
-  const removeAssistant = (id) => {
-    setAssistants(prev => prev.filter(a => a.id !== id));
+  const removeAssistant = async (id) => {
+    try {
+      const { data } = await api.delete(`/auth/admin/assistants/${id}`);
+      if (data.success) {
+        setAssistants(prev => prev.filter(a => a.id !== id));
+      }
+    } catch (err) {
+      console.error('Failed to remove assistant:', err);
+      throw err;
+    }
   };
 
   return (
@@ -101,7 +115,8 @@ export const RBACProvider = ({ children }) => {
       hasPermission,
       addAssistant,
       updateAssistant,
-      removeAssistant
+      removeAssistant,
+      loading
     }}>
       {children}
     </RBACContext.Provider>

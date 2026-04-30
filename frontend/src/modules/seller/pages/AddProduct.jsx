@@ -305,7 +305,8 @@ const AddProduct = () => {
                   <input 
                     required type="text" placeholder="e.g. Premium White Marble Slabs"
                     value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                    readOnly={selection === 'catalog'}
+                    className={`w-full px-6 py-4.5 rounded-2xl border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm ${selection === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
                   />
                 </div>
                 
@@ -314,7 +315,8 @@ const AddProduct = () => {
                   <input 
                     type="text" placeholder="e.g. WH-MAR-001"
                     value={formData.sku} onChange={(e) => setFormData({...formData, sku: e.target.value})}
-                    className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                    readOnly={selection === 'catalog'}
+                    className={`w-full px-6 py-4.5 rounded-2xl border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm ${selection === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
                   />
                 </div>
 
@@ -323,7 +325,8 @@ const AddProduct = () => {
                   <select 
                     required
                     value={formData.brand} onChange={(e) => setFormData({...formData, brand: e.target.value})}
-                    className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                    disabled={selection === 'catalog'}
+                    className={`w-full px-6 py-4.5 rounded-2xl border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm ${selection === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
                   >
                     <option value="">Select Brand</option>
                     {brands.map(brand => (
@@ -337,7 +340,8 @@ const AddProduct = () => {
                   <textarea 
                     required rows="4" placeholder="Highlight the quality, finish, and best uses..."
                     value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm resize-none"
+                    readOnly={selection === 'catalog'}
+                    className={`w-full px-6 py-4.5 rounded-2xl border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm resize-none ${selection === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
                   />
                 </div>
               </div>
@@ -358,14 +362,16 @@ const AddProduct = () => {
                     <div className="relative group">
                        <input 
                          type="text"
+                         readOnly={selection === 'catalog'}
                          placeholder={formData.category || "Search or select..."}
                          value={catSearch}
                          onChange={(e) => {
+                            if (selection === 'catalog') return;
                             setCatSearch(e.target.value);
                             setIsCatOpen(true);
                          }}
-                         onFocus={() => setIsCatOpen(true)}
-                         className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                         onFocus={() => { if (selection !== 'catalog') setIsCatOpen(true); }}
+                         className={`w-full px-6 py-4.5 rounded-2xl border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm ${selection === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
                        />
                        {isCatOpen && (
                          <>
@@ -401,15 +407,16 @@ const AddProduct = () => {
                     <div className="relative group">
                        <input 
                          type="text"
-                         disabled={!formData.category}
+                         disabled={!formData.category || selection === 'catalog'}
                          placeholder={formData.subcategory || "Search or select..."}
                          value={subSearch}
                          onChange={(e) => {
+                            if (selection === 'catalog') return;
                             setSubSearch(e.target.value);
                             setIsSubOpen(true);
                          }}
-                         onFocus={() => setIsSubOpen(true)}
-                         className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm disabled:opacity-30"
+                         onFocus={() => { if (selection !== 'catalog') setIsSubOpen(true); }}
+                         className={`w-full px-6 py-4.5 rounded-2xl border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm ${(!formData.category || selection === 'catalog') ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
                        />
                        {isSubOpen && !(!formData.category) && (
                          <>
@@ -443,7 +450,8 @@ const AddProduct = () => {
                     <input 
                       type="text" placeholder="e.g. High Grade Ceramic"
                       value={formData.material} onChange={(e) => setFormData({...formData, material: e.target.value})}
-                      className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                      readOnly={selection === 'catalog'}
+                      className={`w-full px-6 py-4.5 rounded-2xl border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm ${selection === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
                     />
                  </div>
                  <div className="space-y-3">
@@ -451,7 +459,8 @@ const AddProduct = () => {
                     <input 
                       type="text" placeholder="e.g. 600 x 600 mm"
                       value={formData.dimensions} onChange={(e) => setFormData({...formData, dimensions: e.target.value})}
-                      className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                      readOnly={selection === 'catalog'}
+                      className={`w-full px-6 py-4.5 rounded-2xl border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm ${selection === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
                     />
                  </div>
                  <div className="space-y-3">
@@ -459,7 +468,8 @@ const AddProduct = () => {
                     <input 
                       type="text" placeholder="e.g. 10 mm"
                       value={formData.thickness} onChange={(e) => setFormData({...formData, thickness: e.target.value})}
-                      className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                      readOnly={selection === 'catalog'}
+                      className={`w-full px-6 py-4.5 rounded-2xl border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm ${selection === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
                     />
                  </div>
                  <div className="space-y-3">
@@ -467,7 +477,8 @@ const AddProduct = () => {
                     <input 
                       type="text" placeholder="e.g. Glossy White"
                       value={formData.color} onChange={(e) => setFormData({...formData, color: e.target.value})}
-                      className="w-full px-6 py-4.5 rounded-2xl bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm"
+                      readOnly={selection === 'catalog'}
+                      className={`w-full px-6 py-4.5 rounded-2xl border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm ${selection === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
                     />
                  </div>
               </div>
@@ -551,14 +562,15 @@ const AddProduct = () => {
                      <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-soft-oatmeal group">
                         <img src={img} alt="" className="w-full h-full object-cover" />
                         <button 
-                          type="button" onClick={() => removeImage(idx)}
-                          className="absolute inset-0 bg-red-500/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-white"
+                          type="button" 
+                          onClick={() => selection !== 'catalog' && removeImage(idx)}
+                          className={`absolute inset-0 bg-red-500/80 flex items-center justify-center opacity-0 transition-all text-white ${selection === 'catalog' ? 'cursor-not-allowed' : 'group-hover:opacity-100'}`}
                         >
                            <LuTrash2 size={20} />
                         </button>
                      </div>
                    ))}
-                   {formData.images.length < 5 && (
+                   {formData.images.length < 5 && selection !== 'catalog' && (
                      <div 
                        onClick={() => fileInputRef.current.click()}
                        className="aspect-square bg-soft-oatmeal/5 rounded-2xl border-2 border-dashed border-soft-oatmeal flex flex-col items-center justify-center text-warm-sand hover:bg-white hover:border-warm-sand hover:text-deep-espresso transition-all cursor-pointer group"
@@ -576,19 +588,25 @@ const AddProduct = () => {
                          <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand flex items-center gap-2">
                             <LuVideo size={14} /> Product Video
                          </label>
-                         <input 
-                           type="file" id="video-upload" hidden accept="video/*"
-                           onChange={(e) => setVideoFile(e.target.files[0])}
-                         />
-                         <label htmlFor="video-upload" className="text-[10px] font-black text-deep-espresso uppercase tracking-widest hover:underline cursor-pointer">
-                            {videoFile ? 'Change Video' : 'Upload Video File'}
-                         </label>
+                         {selection !== 'catalog' && (
+                           <input 
+                             type="file" id="video-upload" hidden accept="video/*"
+                             onChange={(e) => setVideoFile(e.target.files[0])}
+                           />
+                         )}
+                         {selection !== 'catalog' && (
+                           <label htmlFor="video-upload" className="text-[10px] font-black text-deep-espresso uppercase tracking-widest hover:underline cursor-pointer">
+                              {videoFile ? 'Change Video' : 'Upload Video File'}
+                           </label>
+                         )}
                       </div>
                       
                       <input 
-                        type="url" placeholder="or Paste YouTube Link"
-                        value={formData.videoUrl} onChange={(e) => setFormData({...formData, videoUrl: e.target.value})}
-                        className="w-full px-5 py-4 rounded-xl bg-soft-oatmeal/5 border border-soft-oatmeal/30 focus:border-warm-sand focus:bg-white transition-all text-xs font-medium"
+                        type="url" placeholder={selection === 'catalog' ? "Catalog video" : "or Paste YouTube Link"}
+                        value={formData.videoUrl} 
+                        onChange={(e) => selection !== 'catalog' && setFormData({...formData, videoUrl: e.target.value})}
+                        readOnly={selection === 'catalog'}
+                        className={`w-full px-5 py-4 rounded-xl border border-soft-oatmeal/30 focus:border-warm-sand focus:bg-white transition-all text-xs font-medium ${selection === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
                       />
                       {videoFile && (
                         <div className="flex items-center justify-between p-3 bg-green-50 border border-green-100 rounded-xl">

@@ -50,6 +50,11 @@ const CatalogSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  targetCustomer: {
+    type: String,
+    enum: ['individual', 'enterpriser', 'both'],
+    default: 'both'
   }
 }, {
   timestamps: true

@@ -6,7 +6,7 @@ import { useUser } from '../../user/data/UserContext';
 import { FiMenu, FiBell, FiUser, FiLogOut, FiChevronDown, FiCheck, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { connectSocket, disconnectSocket } from '../../../shared/utils/socket';
-import { playNewOrderChime, primeNotificationAudio, isSoundEnabled } from '../utils/notificationSound';
+import { playNotificationSound, primeNotificationAudio, isSoundEnabled } from '../../../shared/utils/notificationSound';
 import { getSellerNotifications, setSellerNotifications, prependSellerNotification } from '../utils/sellerNotifications';
 
 const SellerLayout = () => {
@@ -93,7 +93,7 @@ const SellerLayout = () => {
       });
 
       if (isSoundEnabled()) {
-        await playNewOrderChime();
+        await playNotificationSound();
       }
 
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
@@ -123,7 +123,7 @@ const SellerLayout = () => {
       });
 
       if (isSoundEnabled()) {
-        await playNewOrderChime(); // Reusing the chime for now
+        await playNotificationSound();
       }
 
       window.dispatchEvent(new CustomEvent('seller:product-approval', { detail: payload }));
@@ -156,7 +156,7 @@ const SellerLayout = () => {
       });
 
       if (isSoundEnabled()) {
-        await playNewOrderChime();
+        await playNotificationSound();
       }
 
       window.dispatchEvent(new CustomEvent('delivery:response_received', { detail: payload }));

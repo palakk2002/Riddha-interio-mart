@@ -8,7 +8,8 @@ const {
   notifyAdminNewOrder, 
   notifyDeliveryAssignment, 
   notifySellerDeliveryResponse,
-  notifyAdminDeliveryResponse 
+  notifyAdminDeliveryResponse,
+  notifyUserOrderStatus
 } = require('../socket');
 
 // @desc    Create new order
@@ -232,6 +233,14 @@ exports.updateOrderStatus = async (req, res) => {
       }
 
       const updatedOrder = await order.save();
+      
+      // Notify user about order status update
+      notifyUserOrderStatus(order.user, {
+        orderId: order._id,
+        status: order.status,
+        message: `Your order #${order._id.toString().slice(-8).toUpperCase()} is now ${order.status}.`
+      });
+
       res.status(200).json({
         success: true,
         data: updatedOrder

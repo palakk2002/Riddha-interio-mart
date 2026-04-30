@@ -16,6 +16,7 @@ export const permissionsMap = {
   SETTINGS: 'settings',
   REFERRALS: 'referrals',
   TEAM: 'team',
+  PAYMENTS: 'payments',
 
   // Label to Permission Key mapping (for Sidebar)
   menuMapping: {
@@ -24,6 +25,7 @@ export const permissionsMap = {
     'Order Tracking': 'orders',
     'Assign Delivery': 'delivery',
     'Create Listing': 'products',
+    'Inventory': 'products',
     'Product Management': 'products',
     'Stock Management': 'products',
     'Order Management': 'orders',
@@ -39,7 +41,8 @@ export const permissionsMap = {
     'Bulk Orders': 'orders',
     'Settings': 'settings',
     'Referral System': 'referrals',
-    'Team Management': 'team'
+    'Team Management': 'team',
+    'Payments': 'payments'
   }
 };
 

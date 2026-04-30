@@ -12,8 +12,14 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
   const isList = variant === 'list';
   const isMinimal = variant === 'minimal';
 
-  const displayPrice = product.discountPrice != null && product.discountPrice !== '' ? product.discountPrice : product.price;
-  const originalPrice = product.discountPrice != null && product.discountPrice !== '' ? product.price : (product.originalPrice || product.price);
+  const originalPrice = Number(product.price || 0);
+  
+  // Safety: If discount price is invalid, treat as 0
+  const parsedDiscount = Number(product.discountPrice || 0);
+  let displayPrice = (parsedDiscount > 0 && parsedDiscount < originalPrice) 
+    ? parsedDiscount 
+    : originalPrice;
+
   const displayPriceString = displayPrice != null ? Number(displayPrice).toLocaleString() : '0';
   const originalPriceString = originalPrice != null ? Number(originalPrice).toLocaleString() : '0';
   const rawImage = product.image || (product.images && product.images.length > 0 ? product.images[0] : '');

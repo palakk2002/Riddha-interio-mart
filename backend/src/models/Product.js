@@ -15,7 +15,14 @@ const ProductSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
-    required: [true, 'Please add a price']
+    required: [true, 'Please add a price'] // Final Price (shown to user)
+  },
+  sellerPrice: {
+    type: Number // Original Price from Seller
+  },
+  adminCommission: {
+    type: Number,
+    default: 0 // Percentage
   },
   discountPrice: {
     type: Number

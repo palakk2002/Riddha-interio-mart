@@ -112,6 +112,10 @@ const OrderSchema = new mongoose.Schema({
     shopName: String,
     gstNumber: String,
     taxationCode: String
+  },
+  isCashDeposited: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

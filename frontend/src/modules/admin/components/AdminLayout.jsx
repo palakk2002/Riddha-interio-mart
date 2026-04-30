@@ -33,14 +33,13 @@ const AdminLayoutContent = () => {
 
   return (
     <div 
-      className="flex h-screen w-full bg-white text-deep-espresso overflow-hidden admin-theme"
+      className={`flex h-screen w-full text-deep-espresso overflow-hidden ${role === 'admin' ? 'admin-theme bg-[#240046]/5' : 'assistant-theme bg-[#189D91]/5'}`}
       onClick={() => {
         setShowUserMenu(false);
         setShowNotifications(false);
       }}
     >
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <AdminNotifications token={user?.token} />
       
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
         {/* Header */}
@@ -48,13 +47,18 @@ const AdminLayoutContent = () => {
           <div className="flex items-center gap-4">
             <button 
               onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(true); }}
-              className="lg:hidden p-2 hover:bg-soft-oatmeal rounded-lg"
+              className={`lg:hidden p-2 rounded-lg transition-colors ${role === 'admin' ? 'hover:bg-purple-100 text-[#240046]' : 'hover:bg-teal-100 text-[#189D91]'}`}
             >
               <FiMenu size={24} />
             </button>
-            <h2 className="text-sm font-medium text-warm-sand hidden sm:block">
-              Welcome back, <span className="font-bold text-deep-espresso">Admin!</span>
-            </h2>
+            <div className="flex flex-col">
+              <h2 className="text-sm font-black text-deep-espresso hidden sm:block uppercase tracking-tight">
+                {role === 'admin' ? 'Super Admin' : 'Assistant'} <span className={`italic ${role === 'admin' ? 'text-brand-purple' : 'text-[#189D91]'}`}>Workspace</span>
+              </h2>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hidden sm:block">
+                {role === 'admin' ? 'Full System Control' : 'Standard Operations Mode'}
+              </p>
+            </div>
             
             {/* Demo Mode Switcher */}
             <div className="hidden lg:block ml-4">
@@ -93,12 +97,12 @@ const AdminLayoutContent = () => {
                   <p className="text-sm font-bold leading-tight group-hover:text-[#240046] transition-colors uppercase tracking-tight">{user?.fullName || user?.name || 'Admin'}</p>
                   <div className="flex items-center justify-end gap-1">
                     {role === 'admin' ? (
-                      <span className="text-[10px] text-brand-purple font-black uppercase tracking-widest leading-none mt-0.5 flex items-center gap-1">
-                        <FiShield size={10} /> Super Admin
+                      <span className="px-2 py-0.5 bg-purple-50 text-brand-purple text-[8px] font-black uppercase tracking-[0.2em] rounded-full border border-purple-100 flex items-center gap-1">
+                        <FiShield size={8} /> MASTER
                       </span>
                     ) : (
-                      <span className="text-[10px] text-warm-sand font-black uppercase tracking-widest leading-none mt-0.5 flex items-center gap-1">
-                        Assistant
+                      <span className="px-2 py-0.5 bg-teal-50 text-[#189D91] text-[8px] font-black uppercase tracking-[0.2em] rounded-full border border-teal-100 flex items-center gap-1">
+                        OPERATOR
                       </span>
                     )}
                   </div>
@@ -147,9 +151,7 @@ const AdminLayoutContent = () => {
 
 const AdminLayout = () => {
   return (
-    <RBACProvider>
-      <AdminLayoutContent />
-    </RBACProvider>
+    <AdminLayoutContent />
   );
 };
 

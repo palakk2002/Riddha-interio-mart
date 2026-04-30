@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FiUser, FiMail, FiShield, FiArrowLeft, FiCheck } from 'react-icons/fi';
+import { FiUser, FiMail, FiShield, FiArrowLeft, FiCheck, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useRBAC } from '../data/RBACContext';
 import { permissionsMap, DEFAULT_ASSISTANT_PERMISSIONS } from '../data/permissionsMap';
 import PageWrapper from '../components/PageWrapper';
@@ -10,11 +10,14 @@ const CreateAssistantPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { addAssistant, assistants, updateAssistant } = useRBAC();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = !!id;
 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     permissions: { ...DEFAULT_ASSISTANT_PERMISSIONS }
   });
 
@@ -25,6 +28,7 @@ const CreateAssistantPage = () => {
         setFormData({
           name: assistant.name,
           email: assistant.email,
+          password: assistant.password || '',
           permissions: assistant.permissions
         });
       }
@@ -41,14 +45,22 @@ const CreateAssistantPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isEditing) {
-      updateAssistant(id, formData);
-    } else {
-      addAssistant(formData);
+    try {
+      setIsSubmitting(true);
+      if (isEditing) {
+        await updateAssistant(id, formData);
+      } else {
+        await addAssistant(formData);
+      }
+      navigate('/admin/team');
+    } catch (err) {
+      console.error('Submission failed:', err);
+      alert(err.response?.data?.error || 'Operation failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-    navigate('/admin/team');
   };
 
   const permissionKeys = Object.values(permissionsMap).filter(v => typeof v === 'string');
@@ -106,6 +118,28 @@ const CreateAssistantPage = () => {
                   />
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Access Password</label>
+                <div className="relative">
+                  <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand" />
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    required={!isEditing}
+                    value={formData.password}
+                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                    placeholder={isEditing ? "•••••••• (Leave blank to keep current)" : "Set secure password"}
+                    className="w-full bg-soft-oatmeal/20 border-none focus:ring-2 focus:ring-brand-purple rounded-2xl py-4 pl-12 pr-12 text-deep-espresso font-bold text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-warm-sand hover:text-deep-espresso transition-colors"
+                  >
+                    {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -146,9 +180,13 @@ const CreateAssistantPage = () => {
             </button>
             <button 
               type="submit"
-              className="px-12 py-4 bg-deep-espresso text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all hover:bg-[#240046] shadow-xl shadow-purple-900/20 active:scale-95"
+              disabled={isSubmitting}
+              className={`px-12 py-4 bg-deep-espresso text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all hover:bg-[#240046] shadow-xl shadow-purple-900/20 active:scale-95 flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              {isEditing ? 'Update' : 'Save'} Assistant
+              {isSubmitting ? (
+                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              ) : <FiCheck size={14} />}
+              {isSubmitting ? 'Processing...' : (isEditing ? 'Update' : 'Save') + ' Assistant'}
             </button>
           </div>
         </form>

@@ -6,7 +6,7 @@ import { LuMenu, LuBell, LuUser, LuChevronDown, LuTruck, LuCheck, LuX } from 're
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../user/data/UserContext';
 import { connectSocket, disconnectSocket } from '../../../shared/utils/socket';
-import { playNewOrderChime, primeNotificationAudio, isSoundEnabled } from '../../seller/utils/notificationSound';
+import { playNotificationSound, primeNotificationAudio, isSoundEnabled } from '../../../shared/utils/notificationSound';
 import { getDeliveryNotifications, setDeliveryNotifications, prependDeliveryNotification } from '../utils/deliveryNotifications';
 import api from '../../../shared/utils/api';
 
@@ -66,7 +66,7 @@ const DeliveryLayout = () => {
       setAssignmentRequest(payload);
       setToast({ title: 'New Task', message: 'A new order is available for pickup!', type: 'info' });
       prependDeliveryNotification({ title: 'Order Assigned', message: 'New order task received.', time: 'Just now', status: 'unread', link: '/delivery/orders' });
-      if (isSoundEnabled()) playNewOrderChime();
+      if (isSoundEnabled()) playNotificationSound();
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
     };
 
@@ -77,7 +77,7 @@ const DeliveryLayout = () => {
       }
       setToast({ title: 'Account Status', message: payload.message, type: payload.status === 'Approved' ? 'success' : 'danger' });
       prependDeliveryNotification({ title: 'Approval Update', message: payload.message, time: 'Just now', status: 'unread', link: '/delivery/profile' });
-      if (isSoundEnabled()) playNewOrderChime();
+      if (isSoundEnabled()) playNotificationSound();
     };
 
     socket.on('delivery:assigned', onAssigned);

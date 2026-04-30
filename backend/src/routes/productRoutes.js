@@ -21,7 +21,7 @@ router.get('/my-products', protect, authorize('seller', 'admin'), getSellerProdu
 router.put('/:id/approval', protect, authorize('admin'), updateApprovalStatus);
 
 router.route('/:id')
-  .get(getProduct)
+  .get(tryProtect, getProduct)
   .put(protect, authorize('seller', 'admin'), updateProduct)
   .delete(protect, authorize('seller', 'admin'), deleteProduct);
 

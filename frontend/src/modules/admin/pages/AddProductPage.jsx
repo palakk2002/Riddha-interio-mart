@@ -30,7 +30,8 @@ const AddProductPage = () => {
     unit: 'piece',
     unitValue: '1',
     images: [],
-    videoUrl: ''
+    videoUrl: '',
+    targetCustomer: 'both'
   });
 
   useEffect(() => {
@@ -53,12 +54,6 @@ const AddProductPage = () => {
         setCategories(fetchedCategories);
         setBrands(fetchedBrands);
         
-        // No longer auto-defaulting to first item to force explicit selection
-        // setFormData(prev => ({
-        //   ...prev,
-        //   category: fetchedCategories?.[0]?.name || '',
-        //   brand: fetchedBrands?.[0]?._id || ''
-        // }));
       } catch (err) {
         console.error('Failed to fetch initialization data:', err);
       } finally {
@@ -257,7 +252,7 @@ const AddProductPage = () => {
                         type="text" required placeholder="Italian White Marble"
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all font-medium"
                       />
                    </div>
                    <div className="space-y-2">
@@ -279,16 +274,13 @@ const AddProductPage = () => {
                         required
                         value={formData.brand}
                         onChange={(e) => setFormData({...formData, brand: e.target.value})}
-                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all cursor-pointer"
+                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all cursor-pointer font-medium"
                       >
                          <option value="">{brands.length > 0 ? 'Select associated brand' : 'No brands found'}</option>
                          {brands.map(b => (
                            <option key={b._id} value={b._id}>{b.name}</option>
                          ))}
                       </select>
-                      {brands.length === 0 && (
-                        <p className="text-[9px] text-red-500 font-bold mt-1 uppercase tracking-tight">Initialize brands in Partner Management first</p>
-                      )}
                    </div>
                     <div className="space-y-2 relative">
                        <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Category</label>
@@ -302,7 +294,7 @@ const AddProductPage = () => {
                                setIsCatOpen(true);
                             }}
                             onFocus={() => setIsCatOpen(true)}
-                            className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                            className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all font-medium"
                           />
                           <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-warm-sand">
                              <FiTag size={14} className={isCatOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
@@ -348,6 +340,23 @@ const AddProductPage = () => {
                           )}
                        </div>
                     </div>
+                    
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
+                          <FiUser size={12} /> Target Audience
+                       </label>
+                       <select 
+                         required
+                         value={formData.targetCustomer}
+                         onChange={(e) => setFormData({...formData, targetCustomer: e.target.value})}
+                         className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all cursor-pointer font-medium"
+                       >
+                          <option value="individual">Individual Customers</option>
+                          <option value="enterpriser">Enterprisers Only</option>
+                          <option value="both">Both (Public)</option>
+                       </select>
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                        <div className="space-y-2">
                          <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
@@ -357,7 +366,7 @@ const AddProductPage = () => {
                            type="number" required placeholder="0.00"
                            value={formData.price}
                            onChange={(e) => setFormData({...formData, price: e.target.value})}
-                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all font-medium"
                          />
                        </div>
                        <div className="space-y-2">
@@ -368,7 +377,7 @@ const AddProductPage = () => {
                            type="number" required
                            value={formData.stock}
                            onChange={(e) => setFormData({...formData, stock: e.target.value})}
-                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all font-medium"
                          />
                        </div>
                     </div>
@@ -378,7 +387,7 @@ const AddProductPage = () => {
                          <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Unit</label>
                          <select 
                            value={formData.unit} onChange={(e) => setFormData({...formData, unit: e.target.value})}
-                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all cursor-pointer"
+                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all cursor-pointer font-medium"
                          >
                             <option value="piece">Piece (Pcs)</option>
                             <option value="kg">Kilogram (Kg)</option>
@@ -399,7 +408,7 @@ const AddProductPage = () => {
                          <input 
                            type="text" placeholder="e.g. 5 or 50"
                            value={formData.unitValue} onChange={(e) => setFormData({...formData, unitValue: e.target.value})}
-                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all font-medium"
                          />
                        </div>
                     </div>
@@ -414,7 +423,7 @@ const AddProductPage = () => {
                      placeholder="Enter product description, key features, and heritage information..."
                      value={formData.description}
                      onChange={(e) => setFormData({...formData, description: e.target.value})}
-                     className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all resize-none"
+                     className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all resize-none font-medium"
                    ></textarea>
                 </div>
 
@@ -425,7 +434,7 @@ const AddProductPage = () => {
                         type="text" placeholder="e.g. Carrara Marble"
                         value={formData.material}
                         onChange={(e) => setFormData({...formData, material: e.target.value})}
-                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all font-medium"
                       />
                    </div>
                    <div className="space-y-2">
@@ -434,7 +443,7 @@ const AddProductPage = () => {
                         type="text" placeholder="e.g. 60x60x2 cm"
                         value={formData.dimensions}
                         onChange={(e) => setFormData({...formData, dimensions: e.target.value})}
-                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all font-medium"
                       />
                    </div>
                 </div>

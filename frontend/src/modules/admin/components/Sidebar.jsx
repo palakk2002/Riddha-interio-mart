@@ -26,7 +26,8 @@ import {
   FiTruck,
   FiMapPin,
   FiGift,
-  FiShield
+  FiShield,
+  FiDollarSign
 } from 'react-icons/fi';
 import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import sidebarBg from '../../../assets/seller_sidebar_bg.png';
@@ -34,6 +35,15 @@ import sidebarBg from '../../../assets/seller_sidebar_bg.png';
 const menuItems = [
   { path: '/admin', icon: FiLayout, label: 'Dashboard' },
   { path: '/admin/analytics', icon: FiTrendingUp, label: 'Analytics' },
+  { 
+    label: 'Inventory', 
+    icon: FiBox, 
+    path: '/admin/inventory',
+    children: [
+      { path: '/admin/inventory', icon: FiGrid, label: 'All Products' },
+      { path: '/admin/inventory/pending', icon: FiClock, label: 'Pending Approval', showBadge: true, badgeType: 'product' },
+    ]
+  },
   { path: '/admin/orders/tracking', icon: FiMapPin, label: 'Order Tracking' },
   { path: '/admin/delivery/assign', icon: FiTruck, label: 'Assign Delivery' },
   { 
@@ -43,15 +53,6 @@ const menuItems = [
     children: [
       { path: '/admin/inventory/add', icon: FiPlus, label: 'Create Order' },
       { path: '/admin/catalog', icon: FiPackage, label: 'Select from Catalog' },
-    ]
-  },
-  { 
-    label: 'Product Management', 
-    icon: FiPackage, 
-    path: '/admin/inventory',
-    children: [
-      { path: '/admin/inventory', icon: FiGrid, label: 'All Inventory' },
-      { path: '/admin/inventory/pending', icon: FiClock, label: 'Pending Approval', showBadge: true, badgeType: 'product' },
     ]
   },
   { path: '/admin/stock-management', icon: FiTrendingUp, label: 'Stock Management' },
@@ -131,13 +132,33 @@ const menuItems = [
     ]
   },
   { path: '/admin/bulk-orders', icon: FiPackage, label: 'Bulk Orders' },
+  { 
+    label: 'Customer Management', 
+    icon: FiUsers, 
+    path: '/admin/customers',
+    children: [
+      { path: '/admin/customers/individual', icon: FiGrid, label: 'Individual Customers' },
+      { path: '/admin/customers/enterpriser', icon: FiGrid, label: 'Enterprisers' },
+    ]
+  },
+  { 
+    label: 'Payments', 
+    icon: FiDollarSign, 
+    path: '/admin/payments',
+    children: [
+      { path: '/admin/payments/users', icon: FiGrid, label: 'User Payments' },
+      { path: '/admin/payments/delivery', icon: FiGrid, label: 'Delivery Payments' },
+      { path: '/admin/payments/sellers', icon: FiGrid, label: 'Seller Payments' },
+    ]
+  },
   { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
   { path: '/admin/referrals', icon: FiGift, label: 'Referral System' },
   { path: '/admin/team', icon: FiShield, label: 'Team Management' },
 ];
 
 const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCount, productCount }) => {
-  const { hasPermission } = useRBAC();
+  const { hasPermission, role } = useRBAC();
+  const location = useLocation();
   const permissionKey = permissionsMap.menuMapping[item.label];
   
   if (permissionKey && !hasPermission(permissionKey)) {
@@ -145,7 +166,6 @@ const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCoun
   }
 
   const hasChildren = item.children && item.children.length > 0;
-  const location = useLocation();
   const isSelfActive = location.pathname === item.path;
   const isChildActive = hasChildren && item.children.some(child => location.pathname === child.path);
   const isActive = isSelfActive || isChildActive;
@@ -164,7 +184,7 @@ const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCoun
         className={`
           flex items-center justify-between p-3 rounded-xl transition-all duration-300 group border border-white/5
           ${isActive 
-            ? 'bg-gradient-to-r from-purple-600/20 to-transparent border-l-4 border-purple-500 text-white shadow-lg shadow-purple-900/10 scale-[1.02]' 
+            ? `bg-gradient-to-r ${role === 'admin' ? 'from-purple-600/20' : 'from-[#189D91]/20'} to-transparent border-l-4 ${role === 'admin' ? 'border-purple-500' : 'border-[#189D91]'} text-white shadow-lg ${role === 'admin' ? 'shadow-purple-900/10' : 'shadow-teal-900/10'} scale-[1.02]` 
             : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10'}
         `}
       >
@@ -227,7 +247,7 @@ const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCoun
                         <child.icon size={16} className={`transition-transform duration-300 group-hover:scale-110 ${isCurrentChildActive ? 'text-white' : 'text-white/50'}`} />
                         <span className="text-sm tracking-wide text-white">{child.label}</span>
                         {child.showBadge && count > 0 && (
-                          <span className="ml-auto w-5 h-5 bg-[#a855f7] text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-purple-500/40">
+                          <span className={`ml-auto w-5 h-5 ${role === 'admin' ? 'bg-[#a855f7]' : 'bg-[#189D91]'} text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse shadow-lg ${role === 'admin' ? 'shadow-purple-500/40' : 'shadow-teal-500/40'}`}>
                             {count}
                           </span>
                         )}
@@ -248,6 +268,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useUser();
+  const { role } = useRBAC();
   const [expandedItems, setExpandedItems] = useState(() => {
     const initial = {};
     menuItems.forEach(item => {
@@ -313,7 +334,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Sidebar Content */}
       <aside
         className={`
-          fixed lg:static top-0 left-0 h-screen w-72 lg:shrink-0 bg-[#240046] text-white z-50 flex flex-col shadow-2xl lg:shadow-none overflow-hidden
+          fixed lg:static top-0 left-0 h-screen w-72 lg:shrink-0 ${role === 'admin' ? 'bg-[#240046]' : 'bg-[#112d2a]'} text-white z-50 flex flex-col shadow-2xl lg:shadow-none overflow-hidden
           transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
@@ -325,17 +346,17 @@ const Sidebar = ({ isOpen, onClose }) => {
             alt="Interior Decorative Lighting" 
             className="w-full h-full object-cover opacity-10 grayscale"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#240046] via-[#240046]/95 to-[#240046]"></div>
+          <div className={`absolute inset-0 bg-gradient-to-b ${role === 'admin' ? 'from-[#240046] via-[#240046]/95 to-[#240046]' : 'from-[#112d2a] via-[#112d2a]/95 to-[#112d2a]'}`}></div>
         </div>
 
         {/* Header */}
         <div className="relative z-10 p-6 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-warm-sand rounded-lg flex items-center justify-center text-[#240046] font-bold text-xl">
-              R
+            <div className={`w-10 h-10 ${role === 'admin' ? 'bg-warm-sand' : 'bg-[#189D91]'} rounded-lg flex items-center justify-center text-white font-bold text-xl`}>
+              {role === 'admin' ? 'R' : 'A'}
             </div>
             <span className="font-display font-bold text-xl tracking-wide uppercase text-white">
-              Riddha <span className="text-warm-sand">Admin</span>
+              Riddha <span className={role === 'admin' ? 'text-warm-sand' : 'text-[#189D91]'}>{role === 'admin' ? 'Admin' : 'Assistant'}</span>
             </span>
           </div>
           <button onClick={onClose} className="lg:hidden text-white/60 hover:text-white">
@@ -360,16 +381,16 @@ const Sidebar = ({ isOpen, onClose }) => {
         </nav>
 
         {/* Footer info and logout */}
-        <div className="relative z-10 p-6 border-t border-white/10 mt-auto backdrop-blur-sm bg-[#240046]/20">
+        <div className="relative z-10 p-6 border-t border-white/10 mt-auto backdrop-blur-sm bg-black/20">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold text-purple-300 hover:bg-white/5 transition-colors group mb-4"
+            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold ${role === 'admin' ? 'text-purple-300' : 'text-teal-300'} hover:bg-white/5 transition-colors group mb-4`}
           >
             <FiLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
             Sign Out
           </button>
           <p className="font-medium text-white/80 drop-shadow-md">© 2026 Riddha Interio Mart</p>
-          <p className="mt-1 text-[10px] tracking-wide uppercase drop-shadow-md">Admin Workspace v1.0</p>
+          <p className="mt-1 text-[10px] tracking-wide uppercase drop-shadow-md">{role === 'admin' ? 'Master Control' : 'Operation Unit'} v1.0</p>
         </div>
       </aside>
     </>

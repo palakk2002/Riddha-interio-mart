@@ -20,7 +20,9 @@ const sendTokenResponse = (user, statusCode, res) => {
       vehicleType: user.vehicleType || "",
       vehicleNumber: user.vehicleNumber || "",
       isVerified: user.isVerified || false,
-      approvalStatus: user.approvalStatus || ""
+      approvalStatus: user.approvalStatus || "",
+      type: user.type || "standard",
+      permissions: user.permissions || {}
     }
   });
 };

@@ -4,16 +4,15 @@ import { FiPackage, FiX, FiArrowRight, FiTruck } from 'react-icons/fi';
 import { connectSocket, disconnectSocket } from '../../../shared/utils/socket';
 import { useNavigate } from 'react-router-dom';
 
-const NOTIFICATION_SOUND = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
+import { playNotificationSound } from '../../../shared/utils/notificationSound';
 
 const AdminNotifications = ({ token }) => {
   const [activeNotification, setActiveNotification] = useState(null);
   const navigate = useNavigate();
-  const audio = React.useMemo(() => new Audio(NOTIFICATION_SOUND), []);
 
   const playSound = useCallback(() => {
-    audio.play().catch(e => console.warn('Audio play failed:', e));
-  }, [audio]);
+    playNotificationSound();
+  }, []);
 
   useEffect(() => {
     if (!token) {

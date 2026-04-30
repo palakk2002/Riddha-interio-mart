@@ -10,8 +10,12 @@ import DeliveryRoutes from './modules/delivery/routes';
 // import { Toaster } from 'react-hot-toast'; // Triggering re-save for Vite
 import PincodeModal from './modules/user/components/PincodeModal';
 import DeliveryBar from './modules/user/components/DeliveryBar';
+import UserNotifications from './modules/user/components/UserNotifications';
+import AdminNotifications from './modules/admin/components/AdminNotifications';
+import { useUser } from './modules/user/data/UserContext';
 
 function App() {
+  const { user } = useUser();
   const [showPincodeModal, setShowPincodeModal] = useState(false);
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith('/admin');
@@ -38,8 +42,14 @@ function App() {
 
   return (
     <div className={`min-h-screen flex flex-col user-theme bg-white border-deep-espresso/5 ${(!isDashboardLayout && !isCheckoutPath && !isProductPage) ? 'pb-24 md:pb-0' : ''}`}>
-      {/* <Toaster position="top-center" reverseOrder={false} /> */}
       {showPincodeModal && <PincodeModal onComplete={handlePincodeComplete} />}
+      
+      {/* Global Notifications */}
+      {user?.role === 'admin' ? (
+        <AdminNotifications token={user.token} />
+      ) : (
+        user?.token && <UserNotifications token={user.token} />
+      )}
       
       {!isDashboardLayout && (
         <>

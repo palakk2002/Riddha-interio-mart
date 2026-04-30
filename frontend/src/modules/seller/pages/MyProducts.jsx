@@ -46,7 +46,11 @@ const MyProducts = () => {
 
   const handleEditOpen = (product) => {
     setEditingProduct(product);
-    setEditFormData({ name: product.name, category: product.category, price: product.price });
+    setEditFormData({ 
+      name: product.name, 
+      category: product.category, 
+      price: product.sellerPrice || product.price 
+    });
     setShowEditModal(true);
   };
 
@@ -144,7 +148,7 @@ const MyProducts = () => {
                       <h3 className="text-[11px] font-bold text-deep-espresso line-clamp-2 leading-tight">{product.name}</h3>
                     </div>
                     <div className="flex items-center justify-between border-t border-soft-oatmeal/50 pt-2 gap-2">
-                      <span className="text-sm font-black text-deep-espresso">Rs. {product.price}</span>
+                      <span className="text-sm font-black text-deep-espresso">Rs. {product.sellerPrice || product.price}</span>
                       <div className="flex items-center gap-1">
                         <button 
                           onClick={() => handleEditOpen(product)}
@@ -195,7 +199,7 @@ const MyProducts = () => {
                         <span className="text-[10px] font-bold text-dusty-cocoa uppercase tracking-widest">{product.category}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm font-black text-deep-espresso">Rs. {product.price}</span>
+                        <span className="text-sm font-black text-deep-espresso">Rs. {product.sellerPrice || product.price}</span>
                       </td>
                       <td className="px-4 py-3">
                         <StatusBadge status={product.status || (product.isActive ? 'approved' : 'pending')} />
@@ -239,13 +243,22 @@ const MyProducts = () => {
               <h3 className="text-xl font-display font-bold text-deep-espresso mb-6">Edit Product</h3>
               <form onSubmit={handleUpdate} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Product Name</label>
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Product Name</label>
+                    {editingProduct?.source === 'catalog' && (
+                      <span className="text-[8px] font-black bg-warm-sand/10 text-warm-sand px-2 py-0.5 rounded-full uppercase tracking-tighter">Catalog Item</span>
+                    )}
+                  </div>
                   <input 
                     type="text" required 
                     value={editFormData.name}
                     onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
-                    className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all"
+                    readOnly={editingProduct?.source === 'catalog'}
+                    className={`w-full border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all ${editingProduct?.source === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/10'}`}
                   />
+                  {editingProduct?.source === 'catalog' && (
+                    <p className="text-[9px] font-medium text-warm-sand italic mt-1">* Name and details of catalog items cannot be modified.</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Price (Rs.)</label>

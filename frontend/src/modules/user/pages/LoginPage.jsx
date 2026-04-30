@@ -8,8 +8,6 @@ import Button from '../../../shared/components/Button';
 import LOGIN_BG from '../../../assets/login_bg_fretshop.png';
 import api from '../../../shared/utils/api';
 
-import { DEFAULT_ASSISTANT_PERMISSIONS } from '../../admin/data/permissionsMap';
-
 const LoginPage = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -43,26 +41,22 @@ const LoginPage = () => {
 
     try {
       const role = getRole();
+      const authPath = role === 'admin' 
+        ? '/auth/admin/login' 
+        : role === 'seller' 
+          ? '/auth/seller/login' 
+          : role === 'delivery' 
+            ? '/auth/delivery/login' 
+            : '/auth/user/login';
 
-      const response = await api.post(`/auth/${role}/login`, {
+      const response = await api.post(authPath, {
         email: identifier,
-        password: password,
-        role: role
+        password: password
       });
 
       if (response.data.success) {
         const { token, user } = response.data;
         
-        // Handle RBAC for Admin module
-        if (role === 'admin') {
-          localStorage.setItem('rbac_role', rbacRole);
-          if (rbacRole === 'assistant') {
-            localStorage.setItem('rbac_permissions', JSON.stringify(DEFAULT_ASSISTANT_PERMISSIONS));
-          } else {
-            localStorage.removeItem('rbac_permissions');
-          }
-        }
-
         login({ ...user, token });
 
         // Navigate based on role
@@ -175,23 +169,23 @@ const LoginPage = () => {
               {/* Role Selection for Admin */}
               {getRole() === 'admin' && (
                 <div className="mb-8">
-                  <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10">
+                  <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 backdrop-blur-md">
                     <button
                       type="button"
                       onClick={() => setRbacRole('admin')}
-                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${rbacRole === 'admin' ? 'bg-white text-deep-espresso shadow-lg' : 'text-white/40 hover:text-white'}`}
+                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${rbacRole === 'admin' ? 'bg-white text-deep-espresso shadow-lg scale-100' : 'text-white/40 hover:text-white scale-95'}`}
                     >
                       Super Admin
                     </button>
                     <button
                       type="button"
                       onClick={() => setRbacRole('assistant')}
-                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${rbacRole === 'assistant' ? 'bg-white text-deep-espresso shadow-lg' : 'text-white/40 hover:text-white'}`}
+                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${rbacRole === 'assistant' ? 'bg-[#189D91] text-white shadow-lg scale-100' : 'text-white/40 hover:text-white scale-95'}`}
                     >
                       Assistant
                     </button>
                   </div>
-                  <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest text-center mt-3 italic">Select your workspace role to continue</p>
+                  <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest text-center mt-3 italic">Choose your workspace to continue</p>
                 </div>
               )}
 
@@ -258,7 +252,7 @@ const LoginPage = () => {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className={`w-full md:w-auto md:ml-auto h-16 md:h-12 px-10 rounded-full md:rounded-xl bg-[#189D91] md:bg-white hover:bg-black md:hover:bg-warm-sand text-white md:text-deep-espresso md:hover:text-white font-black text-sm md:text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#189D91]/20 transition-all active:scale-[0.98] ${loading ? 'opacity-50' : ''}`}
+                    className={`w-full md:w-auto md:ml-auto h-16 md:h-12 px-10 rounded-full md:rounded-xl ${(getRole() === 'admin' && rbacRole === 'admin') ? 'bg-deep-espresso md:bg-white text-white md:text-deep-espresso' : 'bg-[#189D91] text-white'} hover:bg-black md:hover:bg-warm-sand md:hover:text-white font-black text-sm md:text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#189D91]/20 transition-all active:scale-[0.98] ${loading ? 'opacity-50' : ''}`}
                   >
                     {loading ? 'Logging In...' : 'Log In'}
                   </Button>

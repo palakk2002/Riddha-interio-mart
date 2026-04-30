@@ -121,6 +121,11 @@ function notifyDeliveryApproval(deliveryBoyId, payload) {
   io.to(`delivery:${deliveryBoyId}`).emit('delivery:approval_update', payload);
 }
 
+function notifyUserOrderStatus(userId, payload) {
+  if (!io) return;
+  io.to(`user:${userId}`).emit('order:status_update', payload);
+}
+
 module.exports = {
   initSocket,
   getIO,
@@ -132,5 +137,6 @@ module.exports = {
   notifySellerDeliveryResponse,
   notifyAdminDeliveryResponse,
   notifyAdminNewDelivery,
-  notifyDeliveryApproval
+  notifyDeliveryApproval,
+  notifyUserOrderStatus
 };

@@ -94,6 +94,12 @@ exports.tryProtect = async (req, res, next) => {
       default: Model = User;
     }
     req.user = await Model.findById(decoded.id);
+    
+    // Safety: ensure role is available
+    if (req.user && !req.user.role) {
+      req.user.role = decoded.role;
+    }
+    
     next();
   } catch (err) {
     next(); // Just proceed without user

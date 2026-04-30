@@ -84,6 +84,11 @@ exports.createProduct = async (req, res, next) => {
       req.body.approvalStatus = 'pending';
     }
 
+    // Set initial sellerPrice from the provided price
+    if (req.body.price) {
+      req.body.sellerPrice = req.body.price;
+    }
+
     // 2. Create the product
     const product = await Product.create(req.body);
 
@@ -117,10 +122,30 @@ exports.updateApprovalStatus = async (req, res, next) => {
       return res.status(400).json({ success: false, error: 'Invalid approval status' });
     }
 
-    const product = await Product.findByIdAndUpdate(id, {
+    const { adminCommission } = req.body;
+    const updateData = {
       approvalStatus,
       isApproved: approvalStatus === 'approved'
-    }, { new: true });
+    };
+
+    if (adminCommission !== undefined) {
+      updateData.adminCommission = adminCommission;
+    }
+
+    // Recalculate price if approved
+    const existingProduct = await Product.findById(id);
+    if (!existingProduct) {
+      return res.status(404).json({ success: false, error: 'Product not found' });
+    }
+
+    if (approvalStatus === 'approved') {
+      const commission = adminCommission !== undefined ? adminCommission : existingProduct.adminCommission;
+      const sPrice = existingProduct.sellerPrice || existingProduct.price;
+      updateData.price = Math.round(sPrice * (1 + commission / 100));
+      updateData.sellerPrice = sPrice; // Ensure it's set
+    }
+
+    const product = await Product.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!product) {
       return res.status(404).json({ success: false, error: 'Product not found' });
@@ -222,6 +247,29 @@ exports.updateProduct = async (req, res, next) => {
     // Make sure user is product owner or admin
     if (product.seller.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(401).json({ success: false, error: 'User not authorized to update this product' });
+    }
+
+    // If admin is updating, handle commission logic
+    if (req.user.role === 'admin') {
+      const { adminCommission, price: newPrice, sellerPrice: newSPrice } = req.body;
+      
+      const sPrice = newSPrice || product.sellerPrice || product.price;
+      const commission = adminCommission !== undefined ? adminCommission : product.adminCommission;
+      
+      // If adminCommission was updated, recalculate price
+      if (adminCommission !== undefined) {
+        req.body.price = Math.round(sPrice * (1 + commission / 100));
+        req.body.sellerPrice = sPrice;
+      }
+    } else {
+      // If seller is updating, update sellerPrice instead of final price if they try to change price
+      if (req.body.price) {
+        req.body.sellerPrice = req.body.price;
+        // Keep final price synced but wait for admin to re-approve or just keep commission the same
+        req.body.price = Math.round(req.body.price * (1 + product.adminCommission / 100));
+      }
+      // Sellers shouldn't touch commission
+      delete req.body.adminCommission;
     }
 
     product = await Product.findByIdAndUpdate(req.params.id, req.body, {

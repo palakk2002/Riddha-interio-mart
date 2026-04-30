@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageWrapper from "../components/PageWrapper";
 import {
   LuBanknote,
@@ -8,47 +8,48 @@ import {
 } from "react-icons/lu";
 import { FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 
-const collectionsData = [
-  {
-    id: 1,
-    name: "Suresh Raina",
-    amount: 4500,
-    date: "2024-04-14",
-    status: "Deposited",
-    orders: 5,
-  },
-  {
-    id: 2,
-    name: "Mahendra Singh",
-    amount: 8200,
-    date: "2024-04-14",
-    status: "In Hand",
-    orders: 8,
-  },
-  {
-    id: 3,
-    name: "Virat Kohli",
-    amount: 2100,
-    date: "2024-04-13",
-    status: "Deposited",
-    orders: 3,
-  },
-];
+
+
+import api from "../../../shared/utils/api";
 
 const CashCollectionPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [collections, setCollections] = useState(collectionsData);
+  const [collections, setCollections] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchCollections = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/auth/admin/payments/delivery');
+      if (data.success) {
+        setCollections(data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch cash collections:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCollections();
+  }, []);
 
   const filteredCollections = collections.filter((c) =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handleConfirmDeposit = (id) => {
+  const handleConfirmDeposit = async (id) => {
     if (window.confirm("Confirm that cash has been deposited by the delivery partner?")) {
-      setCollections(prev => prev.map(c => 
-        c.id === id ? { ...c, status: "Deposited", date: new Date().toISOString().split('T')[0] } : c
-      ));
-      alert("Deposit Confirmed Successfully!");
+      try {
+        const { data } = await api.put(`/auth/admin/payments/delivery/confirm/${id}`);
+        if (data.success) {
+          alert("Deposit Confirmed Successfully!");
+          fetchCollections(); // Refresh
+        }
+      } catch (err) {
+        alert("Failed to confirm deposit.");
+      }
     }
   };
 
@@ -112,9 +113,15 @@ const CashCollectionPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-soft-oatmeal/50">
-                {filteredCollections.map((c) => (
+                {loading ? (
+                  Array(3).fill(0).map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td colSpan="6" className="h-16 bg-gray-50/50 px-6"></td>
+                    </tr>
+                  ))
+                ) : filteredCollections.map((c) => (
                   <tr
-                    key={c.id}
+                    key={c._id}
                     className="hover:bg-soft-oatmeal/5 transition-colors group"
                   >
                     <td className="px-6 py-4">

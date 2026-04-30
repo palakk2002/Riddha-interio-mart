@@ -33,6 +33,9 @@ const EditInventoryPage = () => {
     countInStock: 0,
     unit: 'piece',
     unitValue: '1',
+    adminCommission: 0,
+    sellerPrice: 0,
+    discountPrice: 0,
   });
 
   useEffect(() => {
@@ -63,6 +66,9 @@ const EditInventoryPage = () => {
           countInStock: product.countInStock || 0,
           unit: product.unit || 'piece',
           unitValue: product.unitValue || '1',
+          adminCommission: product.adminCommission || 0,
+          sellerPrice: product.sellerPrice || product.price || 0,
+          discountPrice: product.discountPrice || 0,
         });
       } catch (err) {
         console.error('Failed to fetch data:', err);
@@ -289,16 +295,72 @@ const EditInventoryPage = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Price (₹)</label>
-                    <input type="number" required value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none font-bold" />
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Seller Price (₹)</label>
+                      <input 
+                        type="number" 
+                        value={formData.sellerPrice} 
+                        onChange={(e) => {
+                          const sPrice = Number(e.target.value);
+                          setFormData({
+                            ...formData, 
+                            sellerPrice: sPrice,
+                            price: Math.round(sPrice * (1 + formData.adminCommission / 100))
+                          });
+                        }} 
+                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none font-bold text-brand-teal" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Admin Commission (%)</label>
+                      <input 
+                        type="number" 
+                        value={formData.adminCommission} 
+                        onChange={(e) => {
+                          const comm = Number(e.target.value);
+                          setFormData({
+                            ...formData, 
+                            adminCommission: comm,
+                            price: Math.round(formData.sellerPrice * (1 + comm / 100))
+                          });
+                        }} 
+                        className="w-full bg-emerald-50/50 border border-emerald-100 rounded-xl px-4 py-3 text-sm focus:outline-none font-bold text-emerald-600" 
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Stock</label>
-                    <input type="number" required value={formData.countInStock} onChange={(e) => setFormData({...formData, countInStock: e.target.value})} className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none" />
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Final Consumer Price (₹)</label>
+                      <input 
+                        type="number" 
+                        readOnly
+                        value={formData.price} 
+                        className="w-full bg-[#240046]/5 border border-[#240046]/10 rounded-xl px-4 py-3 text-sm focus:outline-none font-black text-[#240046]" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-2">
+                        Discount Price (₹) <span className="opacity-50 lowercase font-normal italic">(optional)</span>
+                      </label>
+                      <input 
+                        type="number" 
+                        placeholder="Leave 0 if no discount"
+                        value={formData.discountPrice} 
+                        onChange={(e) => setFormData({...formData, discountPrice: Number(e.target.value)})} 
+                        className="w-full bg-rose-50/30 border border-rose-100 rounded-xl px-4 py-3 text-sm focus:outline-none font-bold text-rose-600" 
+                      />
+                    </div>
                   </div>
-                </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Stock Management</label>
+                      <input type="number" required value={formData.countInStock} onChange={(e) => setFormData({...formData, countInStock: e.target.value})} className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none" />
+                    </div>
+                    <div className="space-y-2" />
+                  </div>
 
                 <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">

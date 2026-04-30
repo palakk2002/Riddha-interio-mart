@@ -42,6 +42,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  isBlocked: {
+    type: Boolean,
+    default: false
+  },
   password: {
     type: String,
     required: [true, 'Please add a password'],

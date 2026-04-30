@@ -32,6 +32,16 @@ const AdminSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  type: {
+    type: String,
+    enum: ['superadmin', 'assistant'],
+    default: 'superadmin'
+  },
+  permissions: {
+    type: Map,
+    of: Boolean,
+    default: {}
+  },
   password: {
     type: String,
     required: [true, 'Please add a password'],
