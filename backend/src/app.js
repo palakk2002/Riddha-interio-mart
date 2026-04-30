@@ -26,6 +26,7 @@ const sectionRoutes = require('./routes/sectionRoutes');
 const favouriteSectionRoutes = require('./routes/favouriteSectionRoutes');
 const brandRoutes = require('./routes/brandRoutes');
 const catalogRoutes = require('./routes/catalogRoutes');
+const bulkOrderRoutes = require('./routes/bulkOrderRoutes');
 const errorHandler = require('./middleware/errorMiddleware');
 const { initSocket } = require('./socket');
 
@@ -66,6 +67,7 @@ app.use('/api/sections', sectionRoutes);
 app.use('/api/favourite-section', favouriteSectionRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/catalog', catalogRoutes);
+app.use('/api/bulk-orders', bulkOrderRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Riddha Mart API' });
