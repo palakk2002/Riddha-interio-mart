@@ -70,7 +70,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
         <div className="flex items-center justify-between gap-2 md:gap-3 min-w-0">
           <div className="min-w-0 flex-1 flex flex-col">
             <div className="flex flex-col md:flex-row md:items-baseline md:gap-2 min-w-0">
-              <span className="text-[16px] md:text-2xl font-bold text-deep-espresso tracking-tight whitespace-nowrap">
+              <span className="text-[16px] md:text-2xl font-black text-[#189D91] tracking-tight whitespace-nowrap">
                 ₹{displayPriceString}
               </span>
               {originalPrice > displayPrice && (

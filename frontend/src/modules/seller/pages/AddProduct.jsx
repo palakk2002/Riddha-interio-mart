@@ -156,33 +156,29 @@ const AddProduct = () => {
         throw new Error('Please upload at least one product image');
       }
 
+      // Prepare multi-media upload
+      const uploadData = new FormData();
+      imgFiles.forEach(file => {
+        uploadData.append('images', file);
+      });
+      if (videoFile) {
+        uploadData.append('video', videoFile);
+      }
+
+      let uploadedUrls = [];
       let finalVideoUrl = formData.videoUrl;
 
-      // Upload video if selected
-      if (videoFile) {
-        setVideoUploading(true);
-        const uploadData = new FormData();
-        uploadData.append('image', videoFile);
-        const { data: uploadRes } = await api.post('/upload', uploadData, {
+      if (imgFiles.length > 0 || videoFile) {
+        const { data: uploadRes } = await api.post('/upload/bulk', uploadData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        finalVideoUrl = uploadRes.url;
-        setVideoUploading(false);
+        uploadedUrls = uploadRes.images || [];
+        if (uploadRes.videoUrl) finalVideoUrl = uploadRes.videoUrl;
       }
 
-      // Upload images to Cloudinary
-      const uploadedUrls = [];
-      const existingUrls = formData.images.filter(img => img.startsWith('http'));
-      uploadedUrls.push(...existingUrls);
-
-      for (const file of imgFiles) {
-        const uploadData = new FormData();
-        uploadData.append('image', file);
-        const { data: uploadRes } = await api.post('/upload', uploadData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        uploadedUrls.push(uploadRes.url);
-      }
+      // Add existing URLs if any (e.g. from catalog)
+      const existingUrls = formData.images.filter(img => typeof img === 'string' && img.startsWith('http'));
+      uploadedUrls = [...existingUrls, ...uploadedUrls];
 
       const res = await api.post('/products', { 
         ...formData, 
@@ -511,6 +507,8 @@ const AddProduct = () => {
                         >
                            <option value="piece">Piece (Pcs)</option>
                            <option value="kg">Kilogram (Kg)</option>
+                           <option value="gm">Gram (g)</option>
+                           <option value="ml">Millilitre (ml)</option>
                            <option value="ltr">Litre (Ltr)</option>
                            <option value="watt">Watt (W)</option>
                            <option value="mtr">Meter (m)</option>

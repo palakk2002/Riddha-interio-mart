@@ -21,6 +21,10 @@ exports.getProducts = async (req, res, next) => {
       filter.brand = req.query.brand;
     }
 
+    if (req.query.search) {
+      filter.name = { $regex: req.query.search, $options: 'i' };
+    }
+
     // Default: only show approved products unless filter specifies otherwise
     // Admins can see everything
     const isAdmin = req.user && req.user.role === 'admin';

@@ -196,7 +196,7 @@ const ProductDetailsPage = () => {
 
             <div className="space-y-0.5 md:space-y-1">
               <div className="flex items-baseline space-x-2 md:space-x-3">
-                <span className="text-2xl md:text-5xl font-black text-deep-espresso tracking-tighter">₹{product.price}</span>
+                <span className="text-2xl md:text-5xl font-black text-[#189D91] tracking-tighter">₹{product.price}</span>
                 <span className="text-[9px] md:text-sm font-medium text-gray-400 italic">Incl. GST</span>
               </div>
 
@@ -204,7 +204,7 @@ const ProductDetailsPage = () => {
                 <span className="text-gray-400 font-medium tracking-tight">
                   MRP: <span className="line-through">₹{product.originalPrice}</span>
                 </span>
-                <span className="text-[#189D91] font-bold">
+                <span className="text-[#189D91] font-black">
                   ({Math.round((1 - product.price / product.originalPrice) * 100)}% off)
                 </span>
               </div>

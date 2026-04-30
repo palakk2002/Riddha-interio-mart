@@ -70,7 +70,7 @@ const ProductTile = ({ product }) => {
         </div>
         <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-base font-black text-deep-espresso">
+            <p className="text-base font-black text-[#189D91]">
               {toMoney(displayPrice)}
             </p>
             {originalPrice != null && Number(originalPrice) > Number(displayPrice) && (

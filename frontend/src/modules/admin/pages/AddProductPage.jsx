@@ -11,7 +11,7 @@ const AddProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
-  const [imgFile, setImgFile] = useState(null);
+  const [imgFiles, setImgFiles] = useState([]);
   const [videoFile, setVideoFile] = useState(null);
   
   // Custom Dropdown State
@@ -76,6 +76,7 @@ const AddProductPage = () => {
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
+    setImgFiles(prev => [...prev, ...files]);
     files.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -86,6 +87,7 @@ const AddProductPage = () => {
   };
 
   const removeImage = (index) => {
+    setImgFiles(prev => prev.filter((_, i) => i !== index));
     setFormData(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
@@ -102,33 +104,31 @@ const AddProductPage = () => {
       setSubmitting(true);
       setStatusMessage('');
 
-      let imageUrl = formData.image;
-
-      if (imgFile) {
-        const uploadData = new FormData();
-        uploadData.append('image', imgFile);
-        const { data: uploadRes } = await api.post('/upload', uploadData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        imageUrl = uploadRes.url;
+      // Prepare multi-media upload
+      const uploadData = new FormData();
+      imgFiles.forEach(file => {
+        uploadData.append('images', file);
+      });
+      if (videoFile) {
+        uploadData.append('video', videoFile);
       }
-      
+
+      let uploadedUrls = [];
       let finalVideoUrl = formData.videoUrl;
 
-      if (videoFile) {
-        const videoData = new FormData();
-        videoData.append('image', videoFile);
-        const { data: uploadRes } = await api.post('/upload', videoData, {
+      if (imgFiles.length > 0 || videoFile) {
+        const { data: uploadRes } = await api.post('/upload/bulk', uploadData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        finalVideoUrl = uploadRes.url;
+        uploadedUrls = uploadRes.images || [];
+        if (uploadRes.videoUrl) finalVideoUrl = uploadRes.videoUrl;
       }
       
       const payload = {
         ...formData,
         price: Number(formData.price),
         countInStock: Number(formData.stock),
-        images: formData.images,
+        images: uploadedUrls,
         videoUrl: finalVideoUrl
       };
 
@@ -382,6 +382,8 @@ const AddProductPage = () => {
                          >
                             <option value="piece">Piece (Pcs)</option>
                             <option value="kg">Kilogram (Kg)</option>
+                            <option value="gm">Gram (g)</option>
+                            <option value="ml">Millilitre (ml)</option>
                             <option value="ltr">Litre (Ltr)</option>
                             <option value="watt">Watt (W)</option>
                             <option value="mtr">Meter (m)</option>
