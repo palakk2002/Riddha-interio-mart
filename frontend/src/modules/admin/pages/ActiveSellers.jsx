@@ -86,12 +86,12 @@ const ActiveSellers = () => {
                   <div className="bg-soft-oatmeal/5 flex flex-col items-center justify-center py-4 rounded-3xl border border-soft-oatmeal/20">
                     <LuPackage size={20} className="text-warm-sand mb-1.5" />
                     <span className="text-[10px] font-black text-warm-sand/40 uppercase tracking-widest">Products</span>
-                    <span className="text-sm font-black text-deep-espresso">24 Active</span>
+                    <span className="text-sm font-black text-deep-espresso">{seller.productCount || 0} Items</span>
                   </div>
                   <div className="bg-soft-oatmeal/5 flex flex-col items-center justify-center py-4 rounded-3xl border border-soft-oatmeal/20">
                     <LuTrendingUp size={20} className="text-warm-sand mb-1.5" />
                     <span className="text-[10px] font-black text-warm-sand/40 uppercase tracking-widest">Sales</span>
-                    <span className="text-sm font-black text-deep-espresso">₹ 14.2k</span>
+                    <span className="text-sm font-black text-deep-espresso">₹ {(seller.totalSales / 1000).toFixed(1)}k</span>
                   </div>
                 </div>
 

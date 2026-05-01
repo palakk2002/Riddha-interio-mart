@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LuPackage, LuRefreshCw } from 'react-icons/lu';
 import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
+import { toast } from 'react-hot-toast';
 
 const Orders = () => {
   const [activeTab, setActiveTab] = React.useState('my'); // Default to my accepted orders
@@ -21,6 +22,7 @@ const Orders = () => {
       }
     } catch (err) {
       console.error('Failed to fetch orders:', err);
+      toast.error('Failed to sync shipment data');
     } finally {
       setLoading(false);
     }
@@ -30,30 +32,39 @@ const Orders = () => {
     fetchOrders();
     
     // Refresh on new assignment
-    const handleNewAssignment = () => fetchOrders();
+    const handleNewAssignment = () => {
+      fetchOrders();
+      toast.success('New shipment assignment detected!');
+    };
     window.addEventListener('delivery:assigned', handleNewAssignment);
     return () => window.removeEventListener('delivery:assigned', handleNewAssignment);
   }, []);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
+    const loadingToast = toast.loading(`Updating status to ${newStatus}...`);
     try {
       const { data } = await api.put(`/orders/${orderId}/status`, { status: newStatus });
       if (data.success) {
+        toast.success(`Shipment successfully marked as ${newStatus}`, { id: loadingToast });
         fetchOrders();
       }
     } catch (err) {
       console.error('Failed to update status:', err);
+      toast.error(err.response?.data?.error || 'Failed to update shipment status', { id: loadingToast });
     }
   };
 
   const handleDeliveryResponse = async (orderId, status) => {
+    const loadingToast = toast.loading(`${status === 'Accepted' ? 'Accepting' : 'Rejecting'} shipment...`);
     try {
       const { data } = await api.put(`/orders/${orderId}/delivery-response`, { status });
       if (data.success) {
+        toast.success(`Shipment ${status.toLowerCase()} successfully`, { id: loadingToast });
         fetchOrders();
       }
     } catch (err) {
       console.error('Failed to respond to assignment:', err);
+      toast.error(err.response?.data?.error || 'Failed to process shipment response', { id: loadingToast });
     }
   };
 

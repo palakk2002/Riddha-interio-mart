@@ -16,6 +16,8 @@ router.route('/')
   .get(tryProtect, getProducts)
   .post(protect, authorize('seller', 'admin'), createProduct);
 
+router.post('/bulk', protect, authorize('seller', 'admin'), require('../controllers/productController').createBulkProducts);
+
 router.get('/my-products', protect, authorize('seller', 'admin'), getSellerProducts);
 
 router.put('/:id/approval', protect, authorize('admin'), updateApprovalStatus);

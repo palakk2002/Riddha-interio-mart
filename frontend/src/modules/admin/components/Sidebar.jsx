@@ -45,7 +45,15 @@ const menuItems = [
     ]
   },
   { path: '/admin/orders/tracking', icon: FiMapPin, label: 'Order Tracking' },
-  { path: '/admin/delivery/assign', icon: FiTruck, label: 'Assign Delivery' },
+  { 
+    label: 'Delivery Management', 
+    icon: FiTruck, 
+    path: '/admin/delivery',
+    children: [
+      { path: '/admin/delivery', icon: FiGrid, label: 'Manage Delivery' },
+      { path: '/admin/delivery/assign', icon: FiTruck, label: 'Assign Delivery' },
+    ]
+  },
   { 
     label: 'Create Listing', 
     icon: FiPlus, 

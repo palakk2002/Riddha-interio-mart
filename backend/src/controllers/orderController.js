@@ -129,7 +129,8 @@ exports.getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate('user', 'fullName email')
-      .populate('seller', 'fullName shopName email phone shopAddress');
+      .populate('seller', 'fullName shopName email phone shopAddress')
+      .populate('deliveryBoy', 'fullName email phone avatar vehicleType vehicleNumber');
 
     if (order) {
       res.status(200).json({
@@ -218,17 +219,30 @@ exports.updateOrderStatus = async (req, res) => {
 
     if (order) {
       const newStatus = req.body.status;
-      order.status = newStatus || order.status;
       
-      // Auto-sync deliveryStatus for tracking
-      const deliveryTrackingStatuses = ['Picked', 'Out for Delivery', 'Delivered'];
+      // Define valid overall statuses for the Order model
+      const validOverallStatuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+      
+      // If the new status is a valid overall status, update it
+      if (validOverallStatuses.includes(newStatus)) {
+        order.status = newStatus;
+      }
+      
+      // Always handle delivery status tracking
+      const deliveryTrackingStatuses = ['Accepted', 'Picked', 'Out for Delivery', 'Delivered', 'Rejected'];
       if (deliveryTrackingStatuses.includes(newStatus)) {
         order.deliveryStatus = newStatus;
+        
+        // Logical mapping: if picked or out for delivery, overall status is 'Shipped'
+        if (newStatus === 'Picked' || newStatus === 'Out for Delivery') {
+          order.status = 'Shipped';
+        }
       }
 
       if (newStatus === 'Delivered') {
         order.isDelivered = true;
         order.deliveredAt = Date.now();
+        order.status = 'Delivered';
         order.deliveryStatus = 'Delivered';
       }
 
@@ -238,7 +252,8 @@ exports.updateOrderStatus = async (req, res) => {
       notifyUserOrderStatus(order.user, {
         orderId: order._id,
         status: order.status,
-        message: `Your order #${order._id.toString().slice(-8).toUpperCase()} is now ${order.status}.`
+        deliveryStatus: order.deliveryStatus,
+        message: `Your order #${order._id.toString().slice(-8).toUpperCase()} is now ${order.deliveryStatus || order.status}.`
       });
 
       res.status(200).json({

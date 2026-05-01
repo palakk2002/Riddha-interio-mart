@@ -47,7 +47,8 @@ import ManageUserPage from './pages/ManageUserPage';
 import UserPaymentsPage from './pages/UserPaymentsPage';
 import CashCollectionPage from './pages/CashCollectionPage';
 import SellerTransactionsPage from './pages/SellerTransactionsPage';
-
+import ManageSellerListPage from './pages/ManageSellerListPage';
+import ManageDeliveryBoyPage from './pages/ManageDeliveryBoyPage';
 import { RBACProvider } from './data/RBACContext';
 
 const AdminRoutes = () => {
@@ -102,13 +103,14 @@ const AdminRoutes = () => {
 
           {/* Delivery */}
           <Route element={<ProtectedRoute permission="delivery" />}>
-            <Route path="/delivery" element={<ManageDeliveries />} />
+            <Route path="/delivery" element={<ManageDeliveryBoyPage />} />
             <Route path="/delivery/pending" element={<ManageDeliveries />} />
             <Route path="/delivery/assign" element={<AssignDeliveryPage />} />
           </Route>
 
           {/* Sellers */}
           <Route element={<ProtectedRoute permission="sellers" />}>
+            <Route path="/sellers" element={<ManageSellerListPage />} />
             <Route path="/sellers/pending" element={<PendingSellers />} />
             <Route path="/sellers/active" element={<ActiveSellers />} />
             <Route path="/customers" element={<ManageUserPage type="customer" />} />

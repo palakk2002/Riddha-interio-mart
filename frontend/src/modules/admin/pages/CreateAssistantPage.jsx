@@ -9,10 +9,13 @@ import { motion } from 'framer-motion';
 const CreateAssistantPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { addAssistant, assistants, updateAssistant } = useRBAC();
+  const { addAssistant, assistants, updateAssistant, role } = useRBAC();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = !!id;
+  
+  // Only the main admin (Superadmin) can manage team permissions
+  const canManageTeam = role === 'admin';
 
   const [formData, setFormData] = useState({
     name: '',
@@ -28,7 +31,7 @@ const CreateAssistantPage = () => {
         setFormData({
           name: assistant.name,
           email: assistant.email,
-          password: assistant.password || '',
+          password: '', // Don't show existing password
           permissions: assistant.permissions
         });
       }
@@ -36,6 +39,7 @@ const CreateAssistantPage = () => {
   }, [id, assistants, isEditing]);
 
   const handlePermissionToggle = (key) => {
+    if (!canManageTeam) return; // Prevent toggle if not authorized
     setFormData(prev => ({
       ...prev,
       permissions: {
@@ -47,6 +51,8 @@ const CreateAssistantPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!canManageTeam) return;
+    
     try {
       setIsSubmitting(true);
       if (isEditing) {
@@ -76,9 +82,17 @@ const CreateAssistantPage = () => {
           >
             <FiArrowLeft /> Back to Team
           </button>
-          <h1 className="text-3xl font-black text-deep-espresso tracking-tight uppercase italic">
-            {isEditing ? 'Edit' : 'Create'} <span className="text-warm-sand">Assistant</span>
-          </h1>
+          <div className="flex items-center justify-between gap-4">
+            <h1 className="text-3xl font-black text-deep-espresso tracking-tight uppercase italic">
+              {isEditing ? 'Edit' : 'Create'} <span className="text-warm-sand">Assistant</span>
+            </h1>
+            {!canManageTeam && (
+              <div className="px-4 py-2 bg-amber-50 border border-amber-100 rounded-xl flex items-center gap-2">
+                <FiShield className="text-amber-600" />
+                <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">View Only Mode</span>
+              </div>
+            )}
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -96,10 +110,11 @@ const CreateAssistantPage = () => {
                   <input 
                     type="text" 
                     required
+                    disabled={!canManageTeam}
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="Enter assistant name"
-                    className="w-full bg-soft-oatmeal/20 border-none focus:ring-2 focus:ring-brand-purple rounded-2xl py-4 pl-12 pr-4 text-deep-espresso font-bold text-sm"
+                    className="w-full bg-soft-oatmeal/20 border-none focus:ring-2 focus:ring-brand-purple rounded-2xl py-4 pl-12 pr-4 text-deep-espresso font-bold text-sm disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -111,10 +126,11 @@ const CreateAssistantPage = () => {
                   <input 
                     type="email" 
                     required
+                    disabled={!canManageTeam}
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="assistant@riddha.com"
-                    className="w-full bg-soft-oatmeal/20 border-none focus:ring-2 focus:ring-brand-purple rounded-2xl py-4 pl-12 pr-4 text-deep-espresso font-bold text-sm"
+                    className="w-full bg-soft-oatmeal/20 border-none focus:ring-2 focus:ring-brand-purple rounded-2xl py-4 pl-12 pr-4 text-deep-espresso font-bold text-sm disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -126,10 +142,11 @@ const CreateAssistantPage = () => {
                   <input 
                     type={showPassword ? "text" : "password"} 
                     required={!isEditing}
+                    disabled={!canManageTeam}
                     value={formData.password}
                     onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    placeholder={isEditing ? "•••••••• (Leave blank to keep current)" : "Set secure password"}
-                    className="w-full bg-soft-oatmeal/20 border-none focus:ring-2 focus:ring-brand-purple rounded-2xl py-4 pl-12 pr-12 text-deep-espresso font-bold text-sm"
+                    placeholder={isEditing ? "•••••••• (Restricted)" : "Set secure password"}
+                    className="w-full bg-soft-oatmeal/20 border-none focus:ring-2 focus:ring-brand-purple rounded-2xl py-4 pl-12 pr-12 text-deep-espresso font-bold text-sm disabled:opacity-50"
                   />
                   <button
                     type="button"
@@ -159,6 +176,7 @@ const CreateAssistantPage = () => {
                     ${formData.permissions[key] 
                       ? 'bg-purple-50 border-brand-purple text-brand-purple shadow-lg shadow-purple-900/5' 
                       : 'bg-white border-soft-oatmeal text-gray-400 hover:border-warm-sand/30'}
+                    ${!canManageTeam ? 'opacity-50 cursor-not-allowed' : ''}
                   `}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${formData.permissions[key] ? 'bg-brand-purple text-white' : 'bg-soft-oatmeal/50'}`}>
@@ -178,16 +196,18 @@ const CreateAssistantPage = () => {
             >
               Cancel
             </button>
-            <button 
-              type="submit"
-              disabled={isSubmitting}
-              className={`px-12 py-4 bg-deep-espresso text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all hover:bg-[#240046] shadow-xl shadow-purple-900/20 active:scale-95 flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
-            >
-              {isSubmitting ? (
-                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-              ) : <FiCheck size={14} />}
-              {isSubmitting ? 'Processing...' : (isEditing ? 'Update' : 'Save') + ' Assistant'}
-            </button>
+            {canManageTeam && (
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className={`px-12 py-4 bg-deep-espresso text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all hover:bg-[#240046] shadow-xl shadow-purple-900/20 active:scale-95 flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+              >
+                {isSubmitting ? (
+                  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                ) : <FiCheck size={14} />}
+                {isSubmitting ? 'Processing...' : (isEditing ? 'Update' : 'Save') + ' Assistant'}
+              </button>
+            )}
           </div>
         </form>
       </div>

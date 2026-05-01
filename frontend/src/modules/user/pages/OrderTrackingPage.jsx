@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiInbox, FiClock } from 'react-icons/fi';
+import { FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiInbox, FiClock, FiPhone, FiUser } from 'react-icons/fi';
 import api from '../../../shared/utils/api';
 
 const OrderTrackingPage = () => {
@@ -26,6 +26,9 @@ const OrderTrackingPage = () => {
   useEffect(() => {
     if (id) {
       fetchOrderDetail();
+      // Poll for updates every 30 seconds
+      const interval = setInterval(fetchOrderDetail, 30000);
+      return () => clearInterval(interval);
     }
   }, [id]);
 
@@ -49,7 +52,11 @@ const OrderTrackingPage = () => {
        title: 'Shipped', 
        status: 'Shipped', 
        icon: <FiTruck />,
-       description: 'Your order is in transit to your location.'
+       description: order?.deliveryStatus === 'Out for Delivery' 
+         ? 'Your parcel is in the final stretch, out for delivery!'
+         : order?.deliveryStatus === 'Picked'
+         ? 'Our partner has picked up your order and is en route.'
+         : 'Your order is in transit to your location.'
     },
     { 
        id: 4, 
@@ -87,47 +94,101 @@ const OrderTrackingPage = () => {
   }
 
   const currentStepIndex = getCurrentStep();
+  const isOutForDelivery = order.deliveryStatus === 'Out for Delivery';
+  const showDeliveryPartner = (order.deliveryStatus === 'Picked' || order.deliveryStatus === 'Out for Delivery' || order.deliveryStatus === 'Delivered') && order.deliveryBoy;
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] pb-32">
+    <div className="min-h-screen bg-gray-50 pb-20 font-sans">
       {/* Header */}
-      <div className="bg-white px-6 py-8 flex items-center justify-between border-b border-gray-50 sticky top-0 z-10 shadow-sm shadow-gray-100/10">
-        <div className="flex items-center gap-6">
-          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full hover:bg-gray-50 flex items-center justify-center transition-colors">
-            <FiArrowLeft className="h-6 w-6 text-gray-900" />
+      <div className="bg-white px-4 py-6 md:px-8 flex items-center justify-between border-b border-gray-100 sticky top-0 z-50">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
+            <FiArrowLeft className="h-5 w-5 text-gray-700" />
           </button>
-          <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter italic">Live <span className="text-[#189D91]">Tracking</span></h1>
+          <h1 className="text-lg font-bold text-gray-900">Live Tracking</h1>
         </div>
-        <div className="bg-[#F0F9F8] px-4 py-2 rounded-xl">
-           <span className="text-[9px] font-black text-[#189D91] uppercase tracking-widest">{order.status}</span>
+        <div className={`px-4 py-1.5 rounded-full border ${isOutForDelivery ? 'bg-amber-50 border-amber-100 text-amber-700' : 'bg-teal-50 border-teal-100 text-teal-700'}`}>
+           <span className="text-[10px] font-bold uppercase tracking-wider">
+             {isOutForDelivery ? 'Out for Delivery' : order.status}
+           </span>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 pt-12">
-        {/* Order Header */}
-        <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl shadow-gray-200/20 mb-10">
-           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+      <div className="max-w-xl mx-auto px-4 pt-8 md:pt-12 space-y-6">
+        {/* Delivery Partner Card */}
+        <AnimatePresence>
+          {showDeliveryPartner && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl p-6 md:p-8 border border-gray-200 shadow-sm overflow-hidden relative"
+            >
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-teal-600">Delivery Partner</h3>
+                  {isOutForDelivery && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 rounded-full">
+                      <div className="w-1.5 h-1.5 bg-amber-600 rounded-full animate-pulse" />
+                      <span className="text-[8px] font-bold text-amber-700 uppercase">Live Now</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-5">
+                  <div className="w-16 h-16 bg-gray-100 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden">
+                    {order.deliveryBoy.avatar ? (
+                      <img src={order.deliveryBoy.avatar} alt={order.deliveryBoy.fullName} className="w-full h-full object-cover" />
+                    ) : (
+                      <FiUser size={24} className="text-gray-400" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-lg font-bold text-gray-900">{order.deliveryBoy.fullName}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                       <FiTruck size={14} className="text-teal-600" />
+                       <span className="text-xs font-medium text-gray-500">
+                         {order.deliveryBoy.vehicleType || 'Bike'} • {order.deliveryBoy.vehicleNumber || 'Tracking Active'}
+                       </span>
+                    </div>
+                  </div>
+                  <a 
+                    href={`tel:${order.deliveryBoy.phone}`}
+                    className="w-12 h-12 bg-gray-900 text-white rounded-xl flex items-center justify-center shadow-md hover:bg-teal-600 transition-all active:scale-95"
+                  >
+                    <FiPhone size={20} />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Order Details Header */}
+        <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-200 shadow-sm">
+           <div className="flex items-start justify-between gap-4 pb-6 border-b border-gray-100 mb-6">
              <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Transaction Identity</p>
-                <p className="text-3xl font-black text-gray-900 tracking-tighter uppercase italic">#{order._id.slice(-8).toUpperCase()}</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Order ID</p>
+                <p className="text-xl font-bold text-gray-900 tracking-tight">#{order._id.slice(-8).toUpperCase()}</p>
              </div>
-             <div className="text-left md:text-right">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Estimated Arrival</p>
-                <p className="text-xl font-black text-gray-900 tracking-tighter">{order.status === 'Delivered' ? 'Fully Received' : '48 Hours'}</p>
+             <div className="text-right">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Status</p>
+                <p className="text-sm font-bold text-gray-900">
+                  {order.status === 'Delivered' ? 'Delivered' : isOutForDelivery ? 'Arriving Now' : 'Processing'}
+                </p>
              </div>
            </div>
 
-           <div className="space-y-6">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50 pb-4">Consignment Manifest</p>
+           <div className="space-y-4">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Order Summary</p>
               <div className="space-y-4">
                  {order.orderItems.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-5">
-                       <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100">
+                    <div key={idx} className="flex items-center gap-4">
+                       <div className="w-12 h-12 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 p-1">
                           <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
                        </div>
-                       <div>
-                          <p className="text-xs font-black text-gray-900 uppercase tracking-tighter">{item.name}</p>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Quantity: {item.quantity}</p>
+                       <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-gray-900 truncate">{item.name}</p>
+                          <p className="text-[10px] text-gray-500 mt-0.5">Quantity: {item.quantity}</p>
                        </div>
                     </div>
                  ))}
@@ -135,15 +196,15 @@ const OrderTrackingPage = () => {
            </div>
         </div>
 
-        {/* Tracking Stepper */}
-        <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl shadow-gray-200/20 relative">
-           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#189D91] mb-12 flex items-center gap-3">
-              <span className="w-6 h-1 bg-[#189D91] rounded-full" /> 
-              Journey Status
+        {/* Tracking Journey */}
+        <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-200 shadow-sm relative">
+           <h3 className="text-xs font-bold text-gray-900 mb-10 flex items-center gap-2">
+              <div className="w-1 h-4 bg-teal-600 rounded-full" />
+              Delivery Progress
            </h3>
 
-           <div className="space-y-12 relative">
-              {/* Progress Line */}
+           <div className="space-y-10 relative">
+              {/* Stepper Line */}
               <div className="absolute left-[1.12rem] top-2 bottom-2 w-0.5 bg-gray-100" />
               
               {steps.map((step, idx) => {
@@ -151,25 +212,25 @@ const OrderTrackingPage = () => {
                 const isActive = idx === currentStepIndex && order.status !== 'Delivered';
                 
                 return (
-                  <div key={step.id} className="relative flex gap-8 group">
-                    <div className={`relative z-10 w-10 h-10 rounded-2xl flex items-center justify-center text-lg transition-all duration-500 ${
-                      isCompleted ? 'bg-black text-white' : 
-                      isActive ? 'bg-[#189D91] text-white shadow-xl shadow-[#189D91]/20 scale-110' : 'bg-gray-100 text-gray-400'
+                  <div key={step.id} className="relative flex gap-6">
+                    <div className={`relative z-10 w-9 h-9 rounded-xl flex items-center justify-center text-base transition-all duration-300 ${
+                      isCompleted ? 'bg-gray-900 text-white' : 
+                      isActive ? 'bg-teal-600 text-white shadow-lg shadow-teal-100 scale-105' : 'bg-gray-100 text-gray-400'
                     }`}>
-                        {step.icon}
+                        {React.cloneElement(step.icon, { size: 16 })}
                     </div>
 
                     <div className="flex-1 pt-1">
-                       <div className="flex items-center justify-between gap-4 mb-2">
-                          <p className={`text-xs font-black uppercase tracking-widest transition-colors ${isActive || isCompleted ? 'text-gray-900' : 'text-gray-400'}`}>
+                       <div className="flex items-center justify-between mb-1">
+                          <p className={`text-xs font-bold transition-colors ${isActive || isCompleted ? 'text-gray-900' : 'text-gray-400'}`}>
                             {step.title}
                           </p>
                           {(isCompleted || order.status === 'Delivered') && (
-                             <FiCheckCircle className="text-green-500" />
+                             <FiCheckCircle className="text-teal-600" size={14} />
                           )}
                        </div>
-                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">
-                         {isCompleted || isActive ? step.description : 'Awaiting completion of previous stage.'}
+                       <p className="text-[10px] text-gray-500 leading-relaxed font-medium">
+                         {isCompleted || isActive ? step.description : 'Awaiting this step...'}
                        </p>
                     </div>
                   </div>

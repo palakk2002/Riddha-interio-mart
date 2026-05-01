@@ -58,7 +58,26 @@ exports.getPendingSellers = async (req, res, next) => {
 // @desc    Get all active (verified) sellers
 exports.getActiveSellers = async (req, res, next) => {
   try {
-    const sellers = await Seller.find({ isVerified: true }).sort('-createdAt');
+    const Product = require('../models/Product');
+    const Order = require('../models/Order');
+    let sellers = await Seller.find({ isVerified: true }).sort('-createdAt').lean();
+
+    // Add stats for each seller
+    sellers = await Promise.all(sellers.map(async (seller) => {
+      const productCount = await Product.countDocuments({ seller: seller._id });
+      const orderStats = await Order.aggregate([
+        { $match: { seller: seller._id, status: 'Delivered' } },
+        { $group: { _id: null, total: { $sum: '$totalPrice' }, count: { $sum: 1 } } }
+      ]);
+
+      return {
+        ...seller,
+        productCount,
+        totalSales: orderStats[0]?.total || 0,
+        orderCount: orderStats[0]?.count || 0
+      };
+    }));
+
     res.status(200).json({ success: true, data: sellers });
   } catch (err) {
     next(err);
@@ -247,6 +266,7 @@ exports.createAssistant = async (req, res, next) => {
   try {
     const { name, email, password, permissions } = req.body;
     
+    // Check if email already exists in Admin or Seller collections
     if (await checkEmailExists(email)) {
       return res.status(400).json({ success: false, error: 'Email already registered' });
     }
@@ -270,7 +290,7 @@ exports.createAssistant = async (req, res, next) => {
 // @access  Private/Admin
 exports.getAssistants = async (req, res, next) => {
   try {
-    const assistants = await Admin.find({ type: 'assistant' });
+    const assistants = await Admin.find({ type: 'assistant' }).sort('-createdAt');
     res.status(200).json({ success: true, data: assistants });
   } catch (err) {
     next(err);
@@ -283,18 +303,30 @@ exports.getAssistants = async (req, res, next) => {
 exports.updateAssistant = async (req, res, next) => {
   try {
     const { name, email, password, permissions } = req.body;
-    const updateData = { fullName: name, email, permissions };
     
-    if (password) {
-      updateData.password = password;
+    let assistant = await Admin.findById(req.params.id).select('+password');
+    if (!assistant) {
+      return res.status(404).json({ success: false, error: 'Assistant not found' });
     }
 
-    const assistant = await Admin.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-      runValidators: true
-    });
+    // Check if new email is already taken by another user
+    if (email && email !== assistant.email) {
+      if (await checkEmailExists(email)) {
+        return res.status(400).json({ success: false, error: 'Email already in use by another account' });
+      }
+      assistant.email = email;
+    }
 
-    if (!assistant) return res.status(404).json({ success: false, error: 'Assistant not found' });
+    // Update other fields
+    if (name) assistant.fullName = name;
+    if (permissions) assistant.permissions = permissions;
+    
+    // If password is provided, set it (middleware will hash it on .save())
+    if (password && password.trim() !== "") {
+      assistant.password = password;
+    }
+
+    await assistant.save();
     
     res.status(200).json({ success: true, data: assistant });
   } catch (err) {

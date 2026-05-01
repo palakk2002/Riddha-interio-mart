@@ -130,7 +130,20 @@ exports.updateDeliveryStatus = async (req, res, next) => {
 // @access  Private/Admin
 exports.getAllDeliveryPartners = async (req, res, next) => {
   try {
-    const partners = await Delivery.find().select('-password').sort('-createdAt');
+    const Order = require('../models/Order');
+    let partners = await Delivery.find().select('-password').sort('-createdAt').lean();
+    
+    // Add order counts for each partner
+    partners = await Promise.all(partners.map(async (partner) => {
+      const orderCount = await Order.countDocuments({ deliveryBoy: partner._id, deliveryStatus: 'Delivered' });
+      const pendingCount = await Order.countDocuments({ deliveryBoy: partner._id, deliveryStatus: { $in: ['Accepted', 'Picked', 'Out for Delivery'] } });
+      return { 
+        ...partner, 
+        totalDeliveries: orderCount,
+        activeDeliveries: pendingCount
+      };
+    }));
+
     res.status(200).json({ success: true, data: partners });
   } catch (err) {
     next(err);

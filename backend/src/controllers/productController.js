@@ -282,3 +282,77 @@ exports.updateProduct = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Create multiple products
+// @route   POST /api/products/bulk
+// @access  Private/Admin or Seller
+exports.createBulkProducts = async (req, res, next) => {
+  try {
+    const { products } = req.body;
+    const Brand = require('../models/Brand');
+
+    console.log('Bulk Create Request Received. Count:', products?.length);
+
+    if (!products || !Array.isArray(products)) {
+      console.log('Invalid products array provided');
+      return res.status(400).json({ success: false, error: 'Please provide an array of products' });
+    }
+
+    const seller = req.user.id;
+    const sellerType = req.user.role === 'admin' ? 'Admin' : 'Seller';
+    const isApproved = req.user.role === 'admin';
+    const approvalStatus = req.user.role === 'admin' ? 'approved' : 'pending';
+
+    console.log('Processing products for seller:', seller, 'sellerType:', sellerType);
+
+    const productsToCreate = await Promise.all(products.map(async (p, index) => {
+      let brandId = p.brand;
+      
+      // If brand is a string (name), find or create it
+      if (typeof p.brand === 'string' && p.brand.trim() !== '') {
+        let brand = await Brand.findOne({ name: { $regex: new RegExp(`^${p.brand.trim()}$`, 'i') } });
+        if (!brand) {
+          console.log(`Creating new brand: ${p.brand.trim()}`);
+          brand = await Brand.create({ name: p.brand.trim() });
+        }
+        brandId = brand._id;
+      } else if (!p.brand) {
+        // Fallback to a default brand if none provided to satisfy 'required' constraint
+        console.log(`No brand provided for product ${index}. Using fallback.`);
+        let defaultBrand = await Brand.findOne({ name: 'General' });
+        if (!defaultBrand) {
+          defaultBrand = await Brand.create({ name: 'General' });
+        }
+        brandId = defaultBrand._id;
+      }
+
+      return {
+        ...p,
+        brand: brandId,
+        seller,
+        sellerType,
+        isApproved,
+        approvalStatus,
+        sellerPrice: p.price,
+        description: p.description || `${p.name} - Quality product from Riddha Mart.`
+      };
+    }));
+
+    console.log('Attempting to insert', productsToCreate.length, 'products into database');
+    const createdProducts = await Product.insertMany(productsToCreate);
+    console.log('Successfully created', createdProducts.length, 'products');
+
+    res.status(201).json({
+      success: true,
+      count: createdProducts.length,
+      data: createdProducts
+    });
+  } catch (error) {
+    console.error('Bulk Create Error:', error.message);
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      console.error('Validation Errors:', messages);
+    }
+    next(error);
+  }
+};
