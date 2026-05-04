@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiArrowLeft, FiMic, FiTrendingUp, FiClock, FiSearch, FiX, FiPackage, FiChevronRight } from 'react-icons/fi';
+import { FiArrowLeft, FiMic, FiTrendingUp, FiClock, FiSearch, FiX, FiPackage, FiChevronRight, FiCamera, FiUploadCloud, FiImage } from 'react-icons/fi';
 import api from '../../../shared/utils/api';
 
 const SearchEntryPage = () => {
@@ -9,7 +9,12 @@ const SearchEntryPage = () => {
   const [recentSearches, setRecentSearches] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scannedImage, setScannedImage] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const fileInputRef = React.useRef(null);
 
   const popularSearches = [
     "3 Seater Sofas",
@@ -24,8 +29,68 @@ const SearchEntryPage = () => {
   useEffect(() => {
     const saved = localStorage.getItem('recentSearches');
     if (saved) setRecentSearches(JSON.parse(saved));
-    document.getElementById('main-search-input')?.focus();
-  }, []);
+    
+    // Check if we should auto-start voice or image search
+    if (location.state?.autoStart === 'voice') {
+      startVoiceSearch();
+    } else if (location.state?.autoStart === 'image') {
+      fileInputRef.current?.click();
+    } else {
+      document.getElementById('main-search-input')?.focus();
+    }
+  }, [location.state]);
+
+  // Voice Search Logic
+  const startVoiceSearch = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Voice search is not supported in this browser.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = true;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0])
+        .map(result => result.transcript)
+        .join('');
+      
+      setQuery(transcript);
+      if (event.results[0].isFinal) {
+        handleSearch(transcript);
+      }
+    };
+
+    recognition.start();
+  };
+
+  // Image Search Logic
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setScannedImage(event.target.result);
+        setIsScanning(true);
+        // Simulate scanning delay
+        setTimeout(() => {
+          setIsScanning(false);
+          // For demo: search for a random furniture category
+          const mockResults = ["Sofa", "Chair", "Table", "Bed"];
+          const randomSearch = mockResults[Math.floor(Math.random() * mockResults.length)];
+          setQuery(randomSearch);
+          handleSearch(randomSearch);
+        }, 3000);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Debounced Search Logic
   useEffect(() => {
@@ -96,16 +161,105 @@ const SearchEntryPage = () => {
           {query && (
             <button 
               onClick={() => setQuery('')}
-              className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
+              className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
             >
               <FiX size={18} />
             </button>
           )}
-          <button className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#189D91] transition-colors">
-            <FiMic size={22} />
-          </button>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-3">
+            <button 
+              onClick={startVoiceSearch}
+              className="text-gray-400 hover:text-[#189D91] transition-colors"
+            >
+              <FiMic size={22} />
+            </button>
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="text-gray-400 hover:text-[#189D91] transition-colors"
+            >
+              <FiCamera size={22} />
+            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept="image/*" 
+              onChange={handleImageUpload}
+            />
+          </div>
         </div>
       </div>
+
+      {/* Voice Listening Overlay */}
+      <AnimatePresence>
+        {isListening && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-[#189D91]/95 backdrop-blur-md flex flex-col items-center justify-center text-white"
+          >
+            <motion.div
+              animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.5, 1, 0.5]
+              }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+              className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center mb-8"
+            >
+              <FiMic size={48} className="text-white" />
+            </motion.div>
+            <h2 className="text-2xl font-bold mb-2">Listening...</h2>
+            <p className="text-white/70 italic">"{query || 'Say something...'}"</p>
+            <button 
+              onClick={() => setIsListening(false)}
+              className="mt-12 px-8 py-3 bg-white/10 hover:bg-white/20 rounded-full border border-white/20 transition-all font-bold"
+            >
+              Cancel
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Image Scanning Overlay */}
+      <AnimatePresence>
+        {isScanning && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center text-white"
+          >
+            <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-3xl overflow-hidden border-4 border-[#189D91]/50 shadow-2xl">
+              <img src={scannedImage} className="w-full h-full object-cover" alt="Scanning" />
+              <motion.div
+                animate={{ top: ['0%', '100%', '0%'] }}
+                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                className="absolute left-0 right-0 h-1 bg-[#189D91] shadow-[0_0_20px_#189D91] z-10"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-[#189D91]/10 to-transparent" />
+            </div>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-10 text-center"
+            >
+              <h2 className="text-2xl font-bold mb-2 tracking-tight">Analyzing Image</h2>
+              <p className="text-white/60 font-medium">Finding similar furniture pieces for you...</p>
+              <div className="flex gap-2 justify-center mt-6">
+                {[0, 1, 2].map(i => (
+                  <motion.div
+                    key={i}
+                    animate={{ scale: [1, 1.5, 1], opacity: [0.3, 1, 0.3] }}
+                    transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
+                    className="w-2 h-2 bg-[#189D91] rounded-full"
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Content Area */}
       <div className="p-4 md:p-6 max-w-2xl mx-auto overflow-y-auto max-h-[calc(100vh-80px)] no-scrollbar">

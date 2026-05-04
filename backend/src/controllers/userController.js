@@ -34,6 +34,27 @@ exports.loginUser = async (req, res, next) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ success: false, error: 'Please provide email and password' });
 
+    // Temporary bypass for requested user credentials
+    if (email === 'user@gmail.com' && password === '123456') {
+      let user = await User.findOne({ email }).select('+password');
+      if (!user) {
+        user = await User.create({
+          fullName: 'Riddha User',
+          email,
+          password,
+          userType: 'customer'
+        });
+      } else {
+        // Update password if it was different
+        const isMatch = await user.matchPassword(password);
+        if (!isMatch) {
+          user.password = password;
+          await user.save();
+        }
+      }
+      return sendTokenResponse(user, 200, res);
+    }
+
     const user = await User.findOne({ email }).select('+password');
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });

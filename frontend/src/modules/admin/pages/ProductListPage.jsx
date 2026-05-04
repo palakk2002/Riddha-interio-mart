@@ -4,7 +4,7 @@ import PageWrapper from '../components/PageWrapper';
 import { LuSearch, LuPlus, LuTrash2, LuPen, LuFilter, LuBox, LuPackage, LuTag } from 'react-icons/lu';
 import api from '../../../shared/utils/api';
 
-const ProductListPage = () => {
+const ProductListPage = ({ status }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState([]);
@@ -46,11 +46,15 @@ const ProductListPage = () => {
   }, []);
 
   const filteredProducts = useMemo(() => {
-    return products.filter(p => 
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  }, [searchTerm, products]);
+    return products.filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const matchesStatus = status === 'pending' ? p.approvalStatus === 'pending' : true;
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [searchTerm, products, status]);
 
   const handleDelete = async (id) => {
     try {
@@ -69,8 +73,12 @@ const ProductListPage = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso">Product List</h1>
-            <p className="text-brand-teal text-sm md:text-base">Comprehensive view of all your inventory.</p>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso">
+              {status === 'pending' ? 'Pending Approval' : 'Product List'}
+            </h1>
+            <p className="text-brand-teal text-sm md:text-base">
+              {status === 'pending' ? 'Review and approve products from sellers.' : 'Comprehensive view of all your inventory.'}
+            </p>
           </div>
           <button 
             onClick={() => navigate('/admin/inventory/add')}

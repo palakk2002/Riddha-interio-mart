@@ -110,7 +110,7 @@ const CartPage = () => {
                 <div className="flex-1 py-1 flex flex-col justify-between">
                   <div>
                     <h3 className="text-sm font-bold text-deep-espresso">{item.name}</h3>
-                    <p className="text-sm font-bold text-[#189D91] mt-1">₹{item.price} <span className="text-[10px] text-gray-400 font-medium italic">incl. GST</span></p>
+                    <p className="text-sm font-bold text-black mt-1">₹{item.price} <span className="text-[10px] text-gray-400 font-medium italic">incl. GST</span></p>
                   </div>
                   <div className="flex items-center justify-between mt-2">
                     <button

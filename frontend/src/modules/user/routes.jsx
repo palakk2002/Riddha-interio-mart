@@ -28,11 +28,25 @@ import BrandPage from './pages/BrandPage';
 import SearchEntryPage from './pages/SearchEntryPage';
 import InvoicePage from './pages/InvoicePage';
 import ReferralRewardsPage from './pages/ReferralRewardsPage';
+import ComingSoonPage from './pages/ComingSoonPage';
+import ComingSoonSubPage from './pages/ComingSoonSubPage';
+import ComingSoonAboutPage from './pages/ComingSoonAboutPage';
+import ComingSoonServicesPage from './pages/ComingSoonServicesPage';
+import ComingSoonCategoriesPage from './pages/ComingSoonCategoriesPage';
+import ComingSoonShopPage from './pages/ComingSoonShopPage';
+import ComingSoonContactPage from './pages/ComingSoonContactPage';
 
 const UserRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/coming-soon" element={<ComingSoonPage />} />
+      <Route path="/coming-soon/about" element={<ComingSoonAboutPage />} />
+      <Route path="/coming-soon/services" element={<ComingSoonServicesPage />} />
+      <Route path="/coming-soon/categories" element={<ComingSoonCategoriesPage />} />
+      <Route path="/coming-soon/shop" element={<ComingSoonShopPage />} />
+      <Route path="/coming-soon/contact" element={<ComingSoonContactPage />} />
+      <Route path="/coming-soon/:section" element={<ComingSoonSubPage />} />
       <Route path="/products" element={<ProductListingPage />} />
       <Route path="/products/:id" element={<ProductDetailsPage />} />
       <Route path="/categories" element={<CategoriesPage />} />

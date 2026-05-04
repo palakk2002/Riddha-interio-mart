@@ -65,7 +65,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
         <div className={`flex ${isList ? 'flex-row items-end' : (isMinimal ? 'flex-col items-start pt-1' : 'items-center')} justify-between gap-1 md:gap-2 md:pt-4`}>
           <div className="flex flex-col w-auto grow">
             <div className={`flex items-baseline gap-1.5 ${isMinimal ? 'flex-wrap' : ''}`}>
-              <span className={`${isMinimal ? 'text-[12px]' : (isList ? 'text-[13px] md:text-2xl' : 'text-[11px] md:text-2xl')} font-black text-[var(--color-header-red)] tracking-tight`}>
+              <span className={`${isMinimal ? 'text-[12px]' : (isList ? 'text-[13px] md:text-2xl' : 'text-[11px] md:text-2xl')} font-black text-black tracking-tight`}>
                 ₹{product.price}
               </span>
               {product.originalPrice > product.price && (

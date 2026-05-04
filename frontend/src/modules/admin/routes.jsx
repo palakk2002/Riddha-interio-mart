@@ -79,6 +79,7 @@ const AdminRoutes = () => {
           {/* Inventory & Stock */}
           <Route element={<ProtectedRoute permission="products" />}>
             <Route path="/inventory" element={<ProductListPage />} />
+            <Route path="/inventory/pending" element={<ProductListPage status="pending" />} />
             <Route path="/inventory/add-flow" element={<AddProductFlowPage />} />
             <Route path="/inventory/add" element={<AddInventoryPage />} />
             <Route path="/inventory/edit/:id" element={<EditInventoryPage />} />

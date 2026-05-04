@@ -196,7 +196,7 @@ const ProductDetailsPage = () => {
 
             <div className="space-y-0.5 md:space-y-1">
               <div className="flex items-baseline space-x-2 md:space-x-3">
-                <span className="text-2xl md:text-5xl font-black text-[#189D91] tracking-tighter">₹{product.price}</span>
+                <span className="text-2xl md:text-5xl font-black text-black tracking-tighter">₹{product.price}</span>
                 <span className="text-[9px] md:text-sm font-medium text-gray-400 italic">Incl. GST</span>
               </div>
 

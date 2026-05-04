@@ -113,7 +113,7 @@ const CategoryQuickAccess = ({ isScrollable = false }) => {
       <div className="max-w-[1440px] mx-auto px-4 md:px-8">
         {/* Horizontal Category Tabs */}
         {!isScrollable && (
-          <div className="flex overflow-x-auto pb-1 mb-0 md:mb-4 gap-6 md:gap-8 no-scrollbar items-center border-b border-soft-oatmeal/20 whitespace-nowrap px-4 md:px-0 -mx-4 md:mx-0">
+          <div className="flex md:hidden overflow-x-auto pb-1 mb-0 md:mb-4 gap-6 md:gap-8 no-scrollbar items-center border-b border-soft-oatmeal/20 whitespace-nowrap px-4 md:px-0 -mx-4 md:mx-0">
             {tabs.map((tab) => (
               <button
                 key={tab}

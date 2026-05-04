@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { motion } from 'framer-motion';
 import { LuArrowLeft, LuCheck, LuImage, LuPackagePlus, LuStar, LuType, LuChevronRight } from 'react-icons/lu';
+import { manageFeaturedData } from '../data/manageFeaturedData';
 
 const AddFeaturedProductPage = () => {
   const navigate = useNavigate();
@@ -26,7 +27,10 @@ const AddFeaturedProductPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!newProduct.name || !newProduct.price) return;
+    if (!newProduct.name || !newProduct.price) {
+      alert('Please provide at least a name and price for the featured item.');
+      return;
+    }
 
     const productToAdd = {
       id: Date.now(),
@@ -44,7 +48,6 @@ const AddFeaturedProductPage = () => {
     
     // If we're starting fresh, initialize with default data first
     if (!saved) {
-      const { manageFeaturedData } = require('../data/manageFeaturedData');
       products = [...manageFeaturedData];
     }
     

@@ -23,7 +23,7 @@ function App() {
   const isDeliveryPath = location.pathname.startsWith('/delivery');
   const isAuthPath = location.pathname === '/login' || location.pathname === '/signup' || 
                       location.pathname.endsWith('/login') || location.pathname.endsWith('/signup') ||
-                      location.pathname === '/search';
+                      location.pathname === '/search' || location.pathname.startsWith('/coming-soon');
   const isDashboardLayout = isAdminPath || isSellerPath || isDeliveryPath || isAuthPath;
   const isProductPage = location.pathname.startsWith('/product/') || location.pathname.startsWith('/products/');
   const isCheckoutPath = ['/cart', '/address', '/payment'].includes(location.pathname);
