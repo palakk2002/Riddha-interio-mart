@@ -5,6 +5,7 @@ import OfferBanner from '../components/OfferBanner';
 import FavouriteCategories from '../components/FavouriteCategories';
 import TopBrands from '../components/TopBrands';
 import CategoryQuickAccess from '../components/CategoryQuickAccess';
+import PromoGrid from '../components/PromoGrid';
 import ExpressDeliveryBanner from '../components/ExpressDeliveryBanner';
 import DynamicSections from '../components/DynamicSections';
 import ProductCard from '../components/ProductCard';
@@ -58,17 +59,20 @@ const HomePage = () => {
   };
 
   return (
-    <div className="space-y-2 md:space-y-4 py-2 md:py-2">
+    <div className="space-y-0 py-0">
+      {/* Banner Section (Now at Top) */}
+      <section className="w-full">
+        <Banner banners={banners} />
+      </section>
+
       {/* Quick Access Categories */}
       <CategoryQuickAccess />
 
+      {/* Promo Section (Benefits for Contractors, Designers, etc.) */}
+      <PromoGrid />
+
       {/* Express Delivery Banner */}
       <ExpressDeliveryBanner />
-
-      {/* Banner Section */}
-      <section className="max-w-[1440px] mx-auto px-0 md:px-4 lg:px-8">
-        <Banner banners={banners} />
-      </section>
 
       {/* Offer Banner (Just below modern banner) */}
       <OfferBanner />
@@ -80,16 +84,16 @@ const HomePage = () => {
       <DynamicSections />
 
       {/* Featured Products Section */}
-      <section className="bg-soft-oatmeal/10 pt-4 pb-10 md:py-32 border-y border-soft-oatmeal/20">
+      <section className="bg-soft-oatmeal/10 pt-4 pb-10 md:pt-6 md:pb-24 border-y border-soft-oatmeal/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
           <Motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="flex flex-col md:flex-row justify-between items-center md:items-end mb-8 md:mb-16 gap-6 md:gap-8 text-center md:text-left"
+            className="flex flex-col items-center mb-8 md:mb-16 gap-6 md:gap-8 text-center"
           >
-            <div className="max-w-2xl space-y-2 md:space-y-4">
-              <h2 className="text-3xl md:text-5xl font-display font-semibold tracking-tight text-black text-center md:text-left">Featured Highlights</h2>
+            <div className="max-w-3xl space-y-2 md:space-y-4">
+              <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight text-black">Featured Highlights</h2>
               <p className="text-deep-espresso/50 text-base md:text-lg font-normal leading-relaxed">
                 Handpicked designs that bring character and sophistication to your living spaces.
               </p>

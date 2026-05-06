@@ -51,17 +51,17 @@ const ProductTile = ({ product }) => {
       to={`/products/${productId}`}
       className="group overflow-hidden rounded-[1.75rem] border border-soft-oatmeal/60 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-soft-oatmeal/10">
+      <div className="relative aspect-[4/3.2] md:aspect-video md:h-40 overflow-hidden bg-soft-oatmeal/10">
         <img
           src={getProductImage(product)}
           alt={product?.name || 'Product'}
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-deep-espresso/45 via-transparent to-transparent" />
       </div>
-      <div className="space-y-1 p-2 md:p-4">
+      <div className="space-y-1 p-2 md:p-3">
         <div className="space-y-1">
-          <p className="line-clamp-1 text-[13px] font-bold text-deep-espresso">
+          <p className="line-clamp-1 text-[13px] md:text-sm font-bold text-deep-espresso">
             {product?.name}
           </p>
           <p className="line-clamp-1 text-[10px] font-black tracking-[0.24em] text-warm-sand">
@@ -70,7 +70,7 @@ const ProductTile = ({ product }) => {
         </div>
         <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-base font-black text-black">
+            <p className="text-base md:text-md font-black text-black">
               {toMoney(displayPrice)}
             </p>
             {originalPrice != null && Number(originalPrice) > Number(displayPrice) && (
@@ -94,14 +94,14 @@ const SectionShell = ({ section, children, action }) => {
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-1 md:py-20"
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-1 md:py-10"
     >
       <div className="mx-auto mb-1 md:mb-10 max-w-5xl text-center space-y-1 md:space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-soft-oatmeal/40 border border-soft-oatmeal/60 text-[10px] font-black uppercase tracking-[0.35em] text-warm-sand">
           Curated Collection
         </div>
 
-        <h2 className="text-2xl md:text-6xl font-display font-bold tracking-tight text-black">
+        <h2 className="text-2xl md:text-6xl font-display font-black tracking-tight text-black">
           {section.title}
         </h2>
 
@@ -227,7 +227,7 @@ const DynamicSections = () => {
                 )}
 
                 {products.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                     {products.map((product) => (
                       <ProductTile key={getId(product)} product={product} />
                     ))}

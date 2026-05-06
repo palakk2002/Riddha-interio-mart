@@ -64,7 +64,7 @@ const CategoryDetailPage = () => {
   return (
     <div className="min-h-svh bg-[#FDFBF9]">
       {/* Category Hero */}
-      <div className="relative h-[300px] md:h-[450px] overflow-hidden">
+      <div className="relative h-[220px] md:h-[320px] overflow-hidden">
         <img
           src={category.image && !category.image.startsWith('C:') ? category.image : 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1600&q=80'}
           alt={category.name}
@@ -76,24 +76,24 @@ const CategoryDetailPage = () => {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="space-y-4 md:space-y-6"
+            className="space-y-2 md:space-y-6"
           >
-            <nav className="flex items-center gap-2 text-white/50 text-[11px] md:text-sm font-medium mb-4">
+            <nav className="flex items-center gap-2 text-white/50 text-[9px] md:text-sm font-medium mb-1 md:mb-4">
               <Link to="/" className="hover:text-white transition-colors">Home</Link>
               <FiChevronRight size={14} />
               <span className="text-white">Collections</span>
             </nav>
-            <h1 className="text-4xl md:text-8xl font-display font-semibold text-white tracking-tight leading-none">
+            <h1 className="text-3xl md:text-6xl font-display font-semibold text-white tracking-tight leading-none">
               {category.name}
             </h1>
-            <p className="text-white/70 text-sm md:text-xl font-light leading-relaxed max-w-2xl border-l-2 border-warm-sand pl-6 italic">
+            <p className="text-white/70 text-[10px] md:text-xl font-light leading-relaxed max-w-2xl border-l-2 border-warm-sand pl-4 md:pl-6 italic line-clamp-2 md:line-clamp-none">
               {category.description || `Exquisite pieces curated from the world's finest artisans, designed to bring character and timeless elegance to your modern living spaces.`}
             </p>
           </motion.div>
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 md:px-12 py-4 md:py-24">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-12 py-4 md:py-12">
         <div className="flex flex-col lg:flex-row gap-12 md:gap-24 relative">
 
           {/* Professional Sidebar - Categories Navigation */}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiShoppingCart, FiHeart, FiMinus, FiPlus } from 'react-icons/fi';
+import { FiShoppingCart, FiMinus, FiPlus } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { useCart } from '../data/CartContext';
 import Button from '../../../shared/components/Button';
@@ -13,11 +13,11 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
   const isMinimal = variant === 'minimal';
 
   const originalPrice = Number(product.price || 0);
-  
+
   // Safety: If discount price is invalid, treat as 0
   const parsedDiscount = Number(product.discountPrice || 0);
-  let displayPrice = (parsedDiscount > 0 && parsedDiscount < originalPrice) 
-    ? parsedDiscount 
+  let displayPrice = (parsedDiscount > 0 && parsedDiscount < originalPrice)
+    ? parsedDiscount
     : originalPrice;
 
   const displayPriceString = displayPrice != null ? Number(displayPrice).toLocaleString() : '0';
@@ -39,21 +39,15 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
     >
       <Link
         to={`/products/${productId}`}
-        className={`relative block overflow-hidden shrink-0 ${isList ? 'w-[45%] md:w-full aspect-square md:aspect-auto md:h-80' : 'aspect-[4/3.2] md:aspect-auto md:h-80 w-full'
+        className={`relative block overflow-hidden shrink-0 ${isList ? 'w-[45%] md:w-full aspect-square md:aspect-auto md:h-40' : 'aspect-[4/3.2] md:aspect-video md:h-40 w-full'
           }`}
       >
         <img
           src={productImage}
           alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
         />
 
-        {/* Heart Icon */}
-        <div className="absolute top-3 right-3 md:top-4 md:right-4">
-          <button className="h-8 w-8 md:h-10 md:w-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-gray-400 hover:text-[#189D91] shadow-sm transition-all active:scale-90 border-none outline-none">
-            <FiHeart className="h-4 w-4 md:h-5 md:w-5" />
-          </button>
-        </div>
 
         {/* Top Choice Badge */}
         <div className="absolute top-3 left-3 md:top-4 md:left-4">
@@ -63,20 +57,20 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
         </div>
       </Link>
 
-      <div className="flex-1 min-w-0 p-2 md:p-8 flex flex-col justify-between space-y-1.5 md:space-y-4">
-        <div className="space-y-0 md:space-y-1">
-          <h3 className="text-[14px] md:text-2xl font-display font-semibold text-black leading-tight line-clamp-1 md:line-clamp-none">
+      <div className="flex-1 min-w-0 p-1.5 md:p-3 flex flex-col justify-between space-y-0.5 md:space-y-2">
+        <Link to={`/products/${productId}`} className="space-y-0 md:space-y-1 block hover:opacity-80 transition-opacity">
+          <h3 className="text-[13px] md:text-lg font-display font-semibold text-black leading-tight line-clamp-1">
             {product.name}
           </h3>
-          <h4 className="text-[10px] md:text-xs font-medium text-gray-400">
+          <h4 className="text-[9px] md:text-xs font-medium text-gray-400">
             {product.category}
           </h4>
-        </div>
+        </Link>
 
         <div className="flex items-center justify-between gap-2 md:gap-3 min-w-0">
-          <div className="min-w-0 flex-1 flex flex-col">
+          <Link to={`/products/${productId}`} className="min-w-0 flex-1 flex flex-col hover:opacity-80 transition-opacity">
             <div className="flex flex-col md:flex-row md:items-baseline md:gap-2 min-w-0">
-              <span className="text-[16px] md:text-2xl font-black text-black tracking-tight whitespace-nowrap">
+              <span className="text-[15px] md:text-xl font-black text-black tracking-tight whitespace-nowrap">
                 ₹{displayPriceString}
               </span>
               {originalPrice > displayPrice && (
@@ -85,17 +79,17 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
                 </span>
               )}
             </div>
-            <span className="text-[9px] md:text-[11px] text-gray-400 font-medium">
+            <span className="text-[8px] md:text-[11px] text-gray-400 font-medium">
               Incl. GST {product.unitValue && product.unit && product.unit !== 'piece' && (
                 <span className="ml-1 text-[#189D91] font-bold">• {product.unitValue} {product.unit.toUpperCase()}</span>
               )}
             </span>
-          </div>
+          </Link>
 
           {quantity === 0 ? (
             <button
               onClick={(e) => { e.preventDefault(); addToCart(product); }}
-              className="bg-[#702D8B] text-white px-4 md:px-8 py-2 md:py-3 rounded-lg md:rounded-xl text-[11px] md:text-sm font-semibold shadow-md hover:bg-[#5d2574] transition-all active:scale-95 whitespace-nowrap"
+              className="bg-[#702D8B] text-white px-3 md:px-8 py-1.5 md:py-3 rounded-lg md:rounded-xl text-[10px] md:text-sm font-semibold shadow-md hover:bg-[#5d2574] transition-all active:scale-95 whitespace-nowrap"
             >
               Add
             </button>
@@ -107,7 +101,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
               >
                 <FiMinus className="w-3 h-3 md:w-4 md:h-4" />
               </button>
-              <span className="min-w-[16px] md:min-w-[32px] text-center text-[11px] md:text-lg font-semibold text-deep-espresso">
+              <span className="min-w-[14px] md:min-w-[32px] text-center text-[10px] md:text-lg font-semibold text-deep-espresso">
                 {quantity}
               </span>
               <button

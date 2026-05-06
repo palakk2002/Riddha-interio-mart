@@ -16,8 +16,11 @@ import {
   FiRefreshCw,
   FiShield,
   FiLogOut,
-  FiXCircle
+  FiXCircle,
+  FiTruck,
+  FiFileText
 } from "react-icons/fi";
+import { AiOutlineShop } from "react-icons/ai";
 import { motion, AnimatePresence } from "framer-motion";
 import { LuWallet } from "react-icons/lu";
 import { useCart } from "../data/CartContext";
@@ -31,6 +34,19 @@ const toTitleCase = (str) => {
   if (!str) return '';
   return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
+
+const NAV_CATEGORIES = [
+  { name: 'Furniture', slug: 'furniture' },
+  { name: 'Lighting', slug: 'lighting' },
+  { name: 'Wall Solutions', slug: 'wall-solutions' },
+  { name: 'Decor', slug: 'decor' },
+  { name: 'Hardware', slug: 'hardware' },
+  { name: 'Flooring', slug: 'flooring' },
+  { name: 'Modular Kitchen', slug: 'modular-kitchen' },
+  { name: 'Bathroom', slug: 'bathroom' },
+  { name: 'Office Furniture', slug: 'office-furniture' },
+  { name: 'Outdoor', slug: 'outdoor' }
+];
 
 const SidebarLink = ({ to, icon: Icon, label, onClick }) => (
   <Link
@@ -56,7 +72,7 @@ const Navbar = () => {
   const { cartCount } = useCart();
   const location = useLocation();
   const isCartPage = location.pathname === "/cart";
-  const [pincode, setPincode] = useState('452018');
+  const [pincode, setPincode] = useState('700016');
   const [showMoreCategories, setShowMoreCategories] = useState(false);
 
   useEffect(() => {
@@ -107,67 +123,73 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-[#189D91] relative z-50">
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
+      <nav className="bg-white border-b border-gray-100 relative z-50">
+        <div className="max-w-[1440px] mx-auto px-4 lg:px-6">
           {/* Main Desktop Header Row */}
-          <div className="hidden md:flex items-center justify-between py-3 gap-8">
-            <div className="flex items-center gap-10 shrink-0">
+          <div className="hidden md:flex items-center justify-between py-4 gap-4 lg:gap-8">
+            <div className="flex items-center gap-6 lg:gap-8 shrink-0">
               <Link to="/" className="flex items-center">
-                <img 
-                  src={Logo} 
-                  alt="Riddha Interio" 
-                  className="h-14 md:h-16 w-auto object-contain bg-white rounded-lg px-2 py-0.5 shadow-[0_0_20px_rgba(255,255,255,0.15)] border border-white/30 hover:scale-105 transition-all duration-300 cursor-pointer brightness-105" 
+                <img
+                  src={Logo}
+                  alt="Riddha Interio"
+                  className="h-16 lg:h-18 w-auto object-contain hover:scale-105 transition-transform duration-300"
                 />
               </Link>
-              <div className="flex flex-col text-white">
-                <span className="text-[11px] font-bold leading-tight">Delivery in <span className="text-[#D4A017]">{getDeliveryEstimate(pincode).time}</span></span>
-                <button className="flex items-center gap-1 text-[13px] font-bold mt-0.5 group">
-                  to <span className="text-[#D4A017] group-hover:underline">{pincode}</span> <FiChevronDown size={14} />
-                </button>
+              
+              {/* Delivery Location */}
+              <div className="flex items-center gap-3 text-gray-700">
+                <div className="p-2 rounded-full bg-gray-50">
+                  <FiMapPin className="text-[#189D91] w-5 h-5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] lg:text-[11px] font-medium text-gray-400 leading-none">Delivering to</span>
+                  <button className="flex items-center gap-1 text-[12px] lg:text-[13px] font-bold text-gray-800 mt-0.5 group">
+                    Kolkata - <span className="">{pincode}</span> <FiChevronDown className="text-gray-400 group-hover:text-[#189D91] transition-colors" size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Delivery Time */}
+              <div className="flex items-center gap-3 text-gray-700">
+                <div className="p-2 rounded-full bg-gray-50">
+                  <FiTruck className="text-[#189D91] w-5 h-5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] lg:text-[11px] font-medium text-gray-400 leading-none">Delivery in</span>
+                  <span className="text-[12px] lg:text-[13px] font-bold text-[#FF6B35] mt-0.5">
+                    {getDeliveryEstimate(pincode).time}
+                  </span>
+                </div>
               </div>
             </div>
 
             {!isCartPage && (
-              <div className="flex-1 max-w-2xl px-4">
-                <SearchBar variant="desktop" />
+              <div className="flex-1 max-w-xl xl:max-w-2xl px-2">
+                <SearchBar variant="premium" />
               </div>
             )}
 
-            <div className="flex items-center gap-6 shrink-0">
-              <Link to="/stores" className="flex flex-col items-center text-white/90 hover:text-white transition-colors group">
-                <div className="h-6 w-6 mb-1 border-2 border-white/40 rounded flex items-center justify-center p-0.5 group-hover:border-white transition-colors">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-full h-full"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+            <div className="flex items-center gap-4 lg:gap-6 shrink-0">
+              {/* Become a Seller */}
+              <Link to="/seller/join" className="flex items-center gap-3 group">
+                <div className="p-2.5 rounded-xl bg-gray-50 group-hover:bg-[#189D91]/5 transition-colors">
+                  <AiOutlineShop className="text-gray-800 w-6 h-6 group-hover:text-[#189D91]" />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider">Store</span>
+                <div className="flex flex-col">
+                  <span className="text-[12px] lg:text-[13px] font-bold text-gray-800 leading-tight">Become a Seller</span>
+                  <span className="text-[11px] lg:text-[12px] font-bold text-[#189D91]">Join Now</span>
+                </div>
               </Link>
-              <Link to="/contact" className="flex flex-col items-center text-white/90 hover:text-white transition-colors group">
-                <div className="h-6 w-6 mb-1 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-full h-full transition-colors"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+
+              {/* Bulk Order */}
+              <Link to="/bulk-order" className="flex items-center gap-3 group border-l border-gray-100 pl-4 lg:pl-6">
+                <div className="p-2.5 rounded-xl bg-gray-50 group-hover:bg-[#189D91]/5 transition-colors">
+                  <FiFileText className="text-gray-800 w-5 h-5 group-hover:text-[#189D91]" />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-center">Contact us</span>
-              </Link>
-              <Link to="/profile" className="flex flex-col items-center text-white/90 hover:text-white transition-colors group px-2 border-l border-white/20">
-                <div className="h-6 w-6 mb-1 group-hover:scale-110 transition-transform flex items-center justify-center overflow-hidden rounded-full font-bold text-[8px]">
-                  {user?.avatar ? (
-                    <img src={user.avatar} className="w-full h-full object-cover" />
-                  ) : (
-                    <FiUser className="h-full w-full" />
-                  )}
+                <div className="flex flex-col">
+                  <span className="text-[12px] lg:text-[13px] font-bold text-gray-800 leading-tight">Bulk Order</span>
+                  <span className="text-[11px] lg:text-[12px] font-bold text-[#189D91]">Get Best Price</span>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider truncate max-w-[60px]">
-                  {user ? (user.fullName?.split(' ')[0] || 'Profile') : 'Login'}
-                </span>
-              </Link>
-              <Link to="/cart" className="flex flex-col items-center text-white/90 hover:text-white transition-colors group relative px-2 border-l border-white/20">
-                <div className="relative">
-                  <FiShoppingCart className="h-6 w-6 mb-1 group-hover:scale-110 transition-transform" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-white text-[#189D91] text-[8px] font-black h-3.5 w-3.5 flex items-center justify-center rounded-full">
-                      {cartCount}
-                    </span>
-                  )}
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider">Cart</span>
               </Link>
             </div>
           </div>
@@ -175,65 +197,110 @@ const Navbar = () => {
           {/* Mobile Header Row */}
           <div className="flex md:hidden justify-between items-center h-16">
             <Link to="/" className="flex-shrink-0">
-              <img 
-                src={Logo} 
-                alt="Riddha Interio" 
-                className="h-10 md:h-12 w-auto object-contain bg-white rounded-md px-1.5 py-0.5 shadow-[0_0_15px_rgba(255,255,255,0.15)] border border-white/30 brightness-105" 
+              <img
+                src={Logo}
+                alt="Riddha Interio"
+                className="h-11 w-auto object-contain"
               />
             </Link>
-            <div className="flex items-center space-x-2">
-              <Link to="/profile" className="p-2 text-white/80"><FiUser className="h-5 w-5" /></Link>
-              <Link to="/cart" className="p-2 text-white/80 relative">
-                <FiShoppingCart className="h-5 w-5" />
-                {cartCount > 0 && <span className="absolute top-1 right-1 bg-white text-[#189D91] text-[8px] font-bold h-4 w-4 flex items-center justify-center rounded-full">{cartCount}</span>}
+            <div className="flex items-center space-x-1">
+              <Link to="/cart" className="p-2 text-gray-600 relative">
+                <FiShoppingCart className="h-6 w-6" />
+                {cartCount > 0 && <span className="absolute top-1 right-1 bg-[#FF6B35] text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-white">{cartCount}</span>}
               </Link>
-              <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-white/80">
+              <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-gray-600">
                 {isOpen ? <FiX className="h-6 w-6" /> : <FiMenu className="h-6 w-6" />}
               </button>
             </div>
           </div>
 
           {!isCartPage && (
-            <div className="md:hidden pb-2 font-IBO">
-              <SearchBar className="scale-95 origin-left" />
+            <div className="md:hidden pb-3">
+              <SearchBar variant="premium" />
             </div>
           )}
         </div>
       </nav>
 
-      {/* Desktop Secondary Categories Nav with Mega Menu */}
-      <div
-        className="hidden md:block bg-white border-b border-gray-200 relative z-40"
-        onMouseLeave={handleCategoryLeave}
-      >
-        <div className="max-w-[1440px] mx-auto px-8 relative">
-          {/* Left/Right Fade indicators for scroll */}
-          <div className="absolute left-8 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none opacity-0 md:group-hover:opacity-100 transition-opacity" />
-          <div className="absolute right-8 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none opacity-0 md:group-hover:opacity-100 transition-opacity" />
 
-          <div className="flex items-center justify-start h-11 gap-2 lg:gap-4 overflow-x-auto no-scrollbar scroll-smooth">
-            {categories.map((cat, i) => (
-              <div
-                key={cat._id}
-                className="relative h-full flex items-center shrink-0"
-                onMouseEnter={() => handleCategoryEnter(cat._id)}
+      {/* Desktop Secondary Categories Nav with Mega Menu */}
+      <div className="hidden md:block bg-white border-b border-gray-200 relative z-40">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-8 flex items-center justify-between h-14">
+          <div className="flex items-center gap-6 overflow-hidden">
+            {/* All Categories Button */}
+            <div className="relative group/cat shrink-0">
+              <button 
+                className="flex items-center gap-2 bg-[#004D40] text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-[#003d33] transition-colors"
               >
-                <Link
-                  to={`/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`}
-                  className={`text-[12px] font-bold tracking-tight transition-all h-full flex items-center border-b-2 whitespace-nowrap px-3 ${activeCategory === cat._id
-                    ? "text-[#189D91] border-[#189D91] bg-[#189D91]/5"
-                    : "text-gray-600 border-transparent hover:text-[#189D91] hover:bg-gray-50"
-                    }`}
-                >
-                  {toTitleCase(cat.name)}
-                </Link>
+                <FiMenu className="w-5 h-5" />
+                <span>All Categories</span>
+              </button>
+              
+              {/* Categories Dropdown */}
+              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover/cat:opacity-100 group-hover/cat:visible transition-all duration-300 z-50">
+                <div className="bg-white shadow-2xl border border-gray-100 rounded-xl py-3 w-64">
+                  {NAV_CATEGORIES.map((cat, i) => (
+                    <Link
+                      key={i}
+                      to={`/category/${cat.slug}`}
+                      className="flex items-center gap-3 px-6 py-2.5 hover:bg-gray-50 text-gray-700 hover:text-[#189D91] transition-colors"
+                    >
+                      <span className="text-sm font-bold tracking-tight">{cat.name}</span>
+                    </Link>
+                  ))}
+                  <div className="mt-2 pt-2 border-t border-gray-50 px-6">
+                    <Link to="/categories" className="text-xs font-bold text-[#189D91] hover:underline">View All Categories</Link>
+                  </div>
+                </div>
               </div>
-            ))}
+            </div>
+
+            {/* Dynamic Categories */}
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar scroll-smooth">
+              {NAV_CATEGORIES.map((cat, i) => (
+                <div
+                  key={i}
+                  className="relative h-full flex items-center shrink-0"
+                >
+                  <Link
+                    to={`/category/${cat.slug}`}
+                    className={`text-[13px] font-bold tracking-tight transition-all h-full flex items-center whitespace-nowrap px-3 py-4 ${activeCategory === cat.slug
+                      ? "text-[#189D91]"
+                      : "text-gray-700 hover:text-[#189D91]"
+                      }`}
+                  >
+                    {cat.name}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* User Actions on the Right */}
+          <div className="flex items-center gap-6 shrink-0 border-l border-gray-100 pl-6">
+             <Link to="/profile" className="flex items-center gap-2 group">
+                <FiUser className="w-5 h-5 text-gray-700 group-hover:text-[#189D91] transition-colors" />
+                <span className="text-[13px] font-bold text-gray-700 group-hover:text-[#189D91] transition-colors">
+                   {user ? (user.fullName?.split(' ')[0] || 'Profile') : 'Login / Sign Up'}
+                </span>
+             </Link>
+
+
+             <Link to="/cart" className="flex items-center gap-2 group relative">
+                <FiShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-[#189D91] transition-colors" />
+                <span className="text-[13px] font-bold text-gray-700 group-hover:text-[#189D91] transition-colors">Cart</span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-[#FF6B35] text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-white">
+                    {cartCount}
+                  </span>
+                )}
+             </Link>
           </div>
         </div>
 
-        {/* Mega Menu Dropdown */}
-        <AnimatePresence>
+
+        {/* Mega Menu Dropdown - DISABLED AS REQUESTED */}
+        {/* <AnimatePresence>
           {activeCategory && (
             <motion.div
               initial={{ opacity: 0, y: -5 }}
@@ -278,33 +345,33 @@ const Navbar = () => {
               </div>
             </motion.div>
           )}
-        </AnimatePresence>
+        </AnimatePresence> */}
       </div>
 
       <AnimatePresence>
         {isOpen && (
           <>
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              onClick={closeMobile} 
-              className="md:hidden fixed inset-0 bg-black/30 backdrop-blur-[2px] z-[90]" 
+              onClick={closeMobile}
+              className="md:hidden fixed inset-0 bg-black/30 backdrop-blur-[2px] z-[90]"
             />
-            <motion.div 
-              initial={{ x: "-100%" }} 
-              animate={{ x: 0 }} 
-              exit={{ x: "-100%" }} 
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
               className="md:hidden fixed top-0 left-0 bottom-0 h-screen w-[80%] max-w-[300px] bg-white z-[100] shadow-2xl flex flex-col overflow-hidden"
             >
               <div className="flex items-center justify-between px-6 py-6 border-b border-gray-100 bg-white">
                 <Link to="/" onClick={closeMobile} className="flex items-center group">
-                  <img 
-                    src={Logo} 
-                    alt="Riddha Interio" 
-                    className="h-10 w-auto object-contain bg-white rounded-md px-1 shadow-sm" 
+                  <img
+                    src={Logo}
+                    alt="Riddha Interio"
+                    className="h-10 w-auto object-contain bg-white rounded-md px-1 shadow-sm"
                   />
                 </Link>
                 <button onClick={closeMobile} className="p-2.5 text-deep-espresso/40 hover:text-deep-espresso rounded-full"><FiX className="h-5 w-5" /></button>
@@ -340,6 +407,21 @@ const Navbar = () => {
                   <div className="pb-4 mb-4 border-b border-gray-50">
                     <SidebarLink to="/" icon={FiHome} label="Home" onClick={closeMobile} />
                     <SidebarLink to="/categories" icon={FiGrid} label="Shop by Category" onClick={closeMobile} />
+                    
+                    {/* Dynamic Categories in Mobile Sidebar */}
+                    <div className="px-4 py-2 grid grid-cols-2 gap-2">
+                      {NAV_CATEGORIES.map((cat, i) => (
+                        <Link
+                          key={i}
+                          to={`/category/${cat.slug}`}
+                          onClick={closeMobile}
+                          className="px-3 py-2.5 bg-gray-50 rounded-lg text-[10px] font-bold text-gray-600 hover:text-[#189D91] hover:bg-[#189D91]/5 transition-all text-center flex items-center justify-center"
+                        >
+                          {cat.name}
+                        </Link>
+                      ))}
+                    </div>
+
                     <SidebarLink to="/referral-rewards" icon={LuWallet} label="Riddha Wallet" onClick={closeMobile} />
                     <SidebarLink to="/orders" icon={FiShoppingBag} label="My Orders" onClick={closeMobile} />
                     <SidebarLink to="/profile" icon={FiUser} label="My Account" onClick={closeMobile} />
@@ -366,7 +448,7 @@ const Navbar = () => {
               {/* Logout Footer */}
               <div className="p-6 border-t border-gray-100 bg-gray-50/30">
                 {user ? (
-                  <button 
+                  <button
                     onClick={() => { logout(); navigate('/'); closeMobile(); }}
                     className="w-full py-3 px-4 rounded-xl border-2 border-red-50 text-red-600 font-black text-sm flex items-center justify-center gap-3 hover:bg-red-50 transition-colors"
                   >
@@ -384,4 +466,7 @@ const Navbar = () => {
   );
 };
 
+
 export default Navbar;
+
+

@@ -33,14 +33,14 @@ const FavouriteSectionCard = ({ section }) => {
   const products = Array.isArray(activeBlock?.productIds) ? activeBlock.productIds.filter(Boolean) : [];
 
   return (
-    <section className="bg-soft-oatmeal/5 py-4 md:py-12 border-b border-soft-oatmeal/10">
+    <section className="bg-soft-oatmeal/5 py-4 md:py-6 border-b border-soft-oatmeal/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 md:space-y-8">
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-warm-sand/5 border border-warm-sand/10 text-[10px] font-semibold uppercase tracking-[0.1em] text-warm-sand/80">
             Premium Selection
           </div>
 
-          <h2 className="text-3xl md:text-5xl font-display font-semibold tracking-tight text-black leading-tight">
+          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight text-black leading-tight">
             {section.heading}
           </h2>
 
@@ -53,7 +53,7 @@ const FavouriteSectionCard = ({ section }) => {
           )}
         </div>
 
-        <div className="flex justify-start md:justify-center gap-3 md:gap-5 overflow-x-auto no-scrollbar pb-4 px-4 md:px-0 -mx-4 md:mx-0">
+        <div className="flex justify-start md:justify-start gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-4 px-4 -mx-4 md:mx-0 md:px-2">
           {blocks.map((block) => {
             const category = block?.categoryId;
             const categoryId = String(getId(category));
