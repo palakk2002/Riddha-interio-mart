@@ -128,7 +128,7 @@ const SearchEntryPage = () => {
     
     setRecentSearches(updatedRecent);
     localStorage.setItem('recentSearches', JSON.stringify(updatedRecent));
-    navigate(`/products?search=${encodeURIComponent(searchTerm)}`);
+    navigate(`/search-results?search=${encodeURIComponent(searchTerm)}`);
   };
 
   const clearRecent = () => {

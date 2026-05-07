@@ -57,7 +57,7 @@ const Banner = () => {
   return (
     <section className="py-2 md:py-8 bg-white">
       <div className="max-w-[1600px] mx-auto px-2 md:px-8">
-        <div className="relative w-full h-[240px] md:h-[420px] overflow-hidden bg-gray-50 flex items-center rounded-[24px] md:rounded-[48px] shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
+        <div className="relative w-full h-[180px] md:h-[360px] overflow-hidden bg-[#E0F2F1] md:bg-gray-50 flex items-center rounded-[24px] md:rounded-[48px] shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -73,11 +73,10 @@ const Banner = () => {
                 alt="Modern Interior" 
                 className="w-full h-full object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/10 to-transparent md:bg-gradient-to-r md:from-white/40 md:via-white/10 md:to-transparent" />
             </motion.div>
           </AnimatePresence>
 
-          <div className="w-full px-6 md:px-20 relative z-10 flex flex-col md:flex-row items-center md:items-center justify-between gap-4 md:gap-8 text-center md:text-left">
+          <div className="w-full h-full px-6 md:px-20 relative z-10 flex flex-row items-center justify-between gap-4 md:gap-8 text-left">
             
             {/* Left Content */}
             <div className="flex-1 max-w-2xl">
@@ -89,19 +88,19 @@ const Banner = () => {
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-gray-900 leading-[1.2] tracking-tight uppercase">
+                  <h1 className="text-[15px] md:text-3xl lg:text-[40px] font-black text-[#004D40] md:text-gray-900 leading-tight uppercase">
                     {slides[currentSlide].titlePart1} <br />
-                    <span className="text-[#FF0055]">{slides[currentSlide].titlePart2}</span>
+                    <span className="text-[#702D8B] md:text-[#FF0055]">{slides[currentSlide].titlePart2}</span>
                   </h1>
                   
-                  <p className="mt-3 text-gray-600 font-bold text-[9px] md:text-lg flex items-center justify-center md:justify-start gap-2 uppercase tracking-widest text-[#189D91]">
+                  <p className="mt-1.5 text-gray-500 md:text-[#189D91] font-bold text-[9px] md:text-lg flex items-center justify-start gap-2 uppercase tracking-widest">
                     {slides[currentSlide].subtitle}
                   </p>
                 </motion.div>
               </AnimatePresence>
 
               {/* Info Stats (Hidden on mobile) */}
-              <div className="hidden md:grid mt-8 grid-cols-3 gap-6">
+              <div className="hidden md:grid mt-6 grid-cols-3 gap-6">
                 <motion.div 
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -149,56 +148,57 @@ const Banner = () => {
               </div>
 
               {/* CTA Buttons */}
-              <div className="mt-8 md:mt-10 flex flex-row items-center justify-center md:justify-start gap-3 w-full">
+              {/* CTA Buttons - Hidden on Mobile to match screenshot */}
+              <div className="hidden md:flex mt-6 md:mt-10 flex-row items-center justify-start gap-3 w-full">
                 <Link 
                   to="/products" 
-                  className="bg-[#004D40] text-white px-5 md:px-10 py-3 md:py-4 rounded-xl font-black text-[11px] md:text-sm flex items-center gap-2 hover:bg-[#003d33] transition-all group whitespace-nowrap"
+                  className="bg-[#004D40] text-white px-5 md:px-8 py-3 md:py-3.5 rounded-xl font-black text-[11px] md:text-xs flex items-center gap-2 hover:bg-[#003d33] transition-all group whitespace-nowrap"
                 >
                   Shop Now <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link 
                   to="/categories" 
-                  className="border-2 border-gray-200 text-gray-700 px-5 md:px-10 py-3 md:py-4 rounded-xl font-black text-[11px] md:text-sm hover:border-[#189D91] hover:text-[#189D91] transition-all whitespace-nowrap"
+                  className="border-2 border-gray-200 text-gray-700 px-5 md:px-8 py-3 md:py-3.5 rounded-xl font-black text-[11px] md:text-xs hover:border-[#189D91] hover:text-[#189D91] transition-all whitespace-nowrap"
                 >
                   Explore
                 </Link>
               </div>
             </div>
 
+
             {/* Right Content - Today's Deal (Ultra Compact) */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, x: 30 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               transition={{ delay: 0.6 }}
-              className="hidden lg:block w-[210px] bg-white rounded-[20px] p-3.5 shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-100 relative"
+              className="hidden lg:block w-[180px] bg-white rounded-[20px] p-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-100 relative"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[#FF0055] font-black text-[9px] uppercase tracking-wider italic">Today's Deal</span>
-                <div className="flex items-center gap-1 text-gray-500 font-mono text-[10px] font-bold">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[#FF0055] font-black text-[8px] uppercase tracking-wider italic">Today's Deal</span>
+                <div className="flex items-center gap-1 text-gray-500 font-mono text-[9px] font-bold">
                   <span>{formatTime(timeLeft.hours)}</span>:
                   <span>{formatTime(timeLeft.minutes)}</span>:
                   <span>{formatTime(timeLeft.seconds)}</span>
                 </div>
               </div>
 
-              <div className="aspect-square rounded-xl bg-gray-50 overflow-hidden mb-3 group">
+              <div className="aspect-square rounded-xl bg-gray-50 overflow-hidden mb-2 group">
                 <img 
                   src={DealProduct} 
                   alt="Deal Product" 
-                  className="w-full h-full object-contain p-1.5 group-hover:scale-110 transition-transform duration-500" 
+                  className="w-full h-full object-contain p-1 group-hover:scale-110 transition-transform duration-500" 
                 />
               </div>
 
               <div className="space-y-0.5">
-                <h3 className="font-black text-gray-900 text-[12px] leading-tight truncate uppercase">Modern Pendant Light</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm font-black text-gray-900">₹2,499</span>
-                  <span className="text-[9px] text-gray-400 line-through font-bold">₹3,999</span>
-                  <span className="bg-[#E8F5E9] text-[#2E7D32] text-[7px] font-black px-1 py-0.5 rounded uppercase">37% OFF</span>
+                <h3 className="font-black text-gray-900 text-[10px] leading-tight truncate uppercase">Modern Pendant Light</h3>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[12px] font-black text-gray-900">₹2,499</span>
+                  <span className="text-[8px] text-gray-400 line-through font-bold">₹3,999</span>
                 </div>
               </div>
 
-              <button className="w-full mt-3 bg-[#FF0055] text-white py-2.5 rounded-lg font-black text-[9px] hover:bg-[#D81B60] transition-all active:scale-95 uppercase tracking-wider">
+              <button className="w-full mt-2 bg-[#FF0055] text-white py-2 rounded-lg font-black text-[8px] hover:bg-[#D81B60] transition-all active:scale-95 uppercase tracking-wider">
                 Shop Now
               </button>
             </motion.div>

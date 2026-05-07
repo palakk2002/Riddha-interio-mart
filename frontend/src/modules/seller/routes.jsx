@@ -19,10 +19,12 @@ import SellerProfile from './pages/SellerProfile';
 import OrderTracking from './pages/OrderTracking';
 import Notifications from './pages/Notifications';
 import BulkProductUpload from './pages/BulkProductUpload';
+import SellerJoin from './pages/SellerJoin';
 
 const SellerRoutes = () => {
   return (
     <Routes>
+      <Route path="/join" element={<SellerJoin />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route element={<SellerLayout />}>

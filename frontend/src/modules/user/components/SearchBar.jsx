@@ -50,32 +50,37 @@ const SearchBar = ({ className = '', variant = 'standard' }) => {
             </div>
           </>
         ) : variant === 'premium' ? (
-          <div className="flex w-full items-center bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
-            <div className="flex-1 relative">
+          <div className="flex w-full items-center bg-white border border-gray-200 rounded-full md:rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 relative">
+            <div className="flex-1 relative flex items-center">
+              {/* Mobile Search Icon */}
+              <div className="md:hidden pl-4 pr-1">
+                <FiSearch className="h-4 w-4 text-gray-400" />
+              </div>
+              
               <input
                 type="text"
                 readOnly
-                placeholder="Search products, brands, materials, contractors..."
-                className="w-full pl-5 pr-24 py-3 bg-transparent focus:outline-none text-gray-700 text-[13px] md:text-sm font-medium cursor-pointer placeholder:text-gray-400"
+                placeholder="Search products or brands..."
+                className="w-full pl-1 md:pl-5 pr-24 py-2.5 md:py-3 bg-transparent focus:outline-none text-gray-700 text-[12px] md:text-sm font-medium cursor-pointer placeholder:text-gray-400"
               />
               <div className="absolute inset-y-0 right-3 flex items-center gap-2">
                 <button
                   onClick={(e) => handleAction(e, 'image')}
-                  className="p-1.5 text-gray-500 hover:text-[#189D91] transition-colors"
+                  className="p-1.5 text-gray-400 md:text-gray-500 hover:text-[#189D91] transition-colors"
                   title="Search by image"
                 >
-                  <FiCamera className="h-5 w-5" />
+                  <FiCamera className="h-4 w-4 md:h-5 md:w-5" />
                 </button>
                 <button
                   onClick={(e) => handleAction(e, 'voice')}
-                  className="p-1.5 text-gray-500 hover:text-[#189D91] transition-colors"
+                  className="p-1.5 text-gray-400 md:text-gray-500 hover:text-[#189D91] transition-colors"
                   title="Search by voice"
                 >
-                  <FiMic className="h-5 w-5" />
+                  <FiMic className="h-4 w-4 md:h-5 md:w-5" />
                 </button>
               </div>
             </div>
-            <button className="bg-[#004D40] hover:bg-[#003d33] text-white px-6 py-3.5 transition-colors flex items-center justify-center">
+            <button className="hidden md:flex bg-[#004D40] hover:bg-[#003d33] text-white px-6 py-3.5 transition-colors items-center justify-center">
               <FiSearch className="h-5 w-5" />
             </button>
           </div>

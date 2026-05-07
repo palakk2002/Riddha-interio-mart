@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link, useParams } from 'react-router-dom';
 import { FiArrowLeft, FiClock, FiSettings, FiLayout, FiTruck, FiPhone, FiInfo, FiArrowRight, FiGrid, FiLayers, FiZap, FiAward } from 'react-icons/fi';
-import Logo from "../../../assets/WhatsApp_Image_2026-04-23_at_1.37.51_PM-removebg-preview.png";
+import Logo from "../../../assets/WhatsApp Image 2026-05-06 at 3.50.08 PM.jpeg";
 
 const ComingSoonSubPage = () => {
   const { section } = useParams();

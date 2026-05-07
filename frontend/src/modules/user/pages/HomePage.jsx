@@ -12,6 +12,7 @@ import ProductCard from '../components/ProductCard';
 import Button from '../../../shared/components/Button';
 import { Link } from 'react-router-dom';
 import api from '../../../shared/utils/api';
+import ShopByCategory from '../components/ShopByCategory';
 
 import WhatsAppFloat from '../components/WhatsAppFloat';
 
@@ -68,11 +69,12 @@ const HomePage = () => {
       {/* Quick Access Categories */}
       <CategoryQuickAccess />
 
+      {/* Visual Shop by Category Row */}
+      <ShopByCategory />
+
       {/* Promo Section (Benefits for Contractors, Designers, etc.) */}
       <PromoGrid />
 
-      {/* Express Delivery Banner */}
-      <ExpressDeliveryBanner />
 
       {/* Offer Banner (Just below modern banner) */}
       <OfferBanner />

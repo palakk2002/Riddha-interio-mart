@@ -26,6 +26,7 @@ import OrderTrackingPage from './pages/OrderTrackingPage';
 import EditProfile from './pages/EditProfile';
 import BrandPage from './pages/BrandPage';
 import SearchEntryPage from './pages/SearchEntryPage';
+import SearchProductsPage from './pages/SearchProductsPage';
 import InvoicePage from './pages/InvoicePage';
 import ReferralRewardsPage from './pages/ReferralRewardsPage';
 import ComingSoonPage from './pages/ComingSoonPage';
@@ -80,6 +81,7 @@ const UserRoutes = () => {
       <Route path="/profile/edit" element={<EditProfile />} />
       <Route path="/brand/:brandName" element={<BrandPage />} />
       <Route path="/search" element={<SearchEntryPage />} />
+      <Route path="/search-results" element={<SearchProductsPage />} />
       <Route path="/order/invoice/:id" element={<InvoicePage />} />
     </Routes>
   );

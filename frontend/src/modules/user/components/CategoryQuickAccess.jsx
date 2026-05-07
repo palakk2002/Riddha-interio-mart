@@ -72,17 +72,19 @@ const CategoryQuickAccess = () => {
               >
                 <Link
                   to={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="group flex flex-col items-center justify-center min-w-[82px] md:min-w-[135px] h-[72px] md:h-[110px] bg-white border border-gray-100 rounded-[12px] md:rounded-[20px] shadow-[0_4px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.06)] hover:border-gray-200 transition-all duration-300"
+                  className="group flex flex-col items-center justify-center min-w-[72px] md:min-w-[135px] transition-all duration-300"
                 >
-                  <div className="mb-0.5 md:mb-3 flex items-center justify-center">
+                  <div 
+                    className="mb-2 md:mb-3 h-12 w-12 md:h-16 md:w-16 rounded-full flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300"
+                    style={{ backgroundColor: `${config.color}15` }}
+                  >
                     <Icon 
-                      size={22} 
-                      style={{ color: config.color }} 
-                      strokeWidth={1.4}
-                      className="md:w-10 md:h-10 group-hover:scale-105 transition-transform duration-300"
+                      className="w-6 h-6 md:w-8 md:h-8" 
+                      style={{ color: config.color }}
+                      strokeWidth={1.5}
                     />
                   </div>
-                  <span className="text-[8.5px] md:text-[12px] font-bold text-gray-700 text-center px-1 group-hover:text-black transition-colors leading-tight">
+                  <span className="text-[10px] md:text-[12px] font-bold text-gray-700 text-center px-1 group-hover:text-black transition-colors leading-tight">
                     {toTitleCase(category.name)}
                   </span>
                 </Link>

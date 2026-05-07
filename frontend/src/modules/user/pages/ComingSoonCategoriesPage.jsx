@@ -7,7 +7,7 @@ import {
   FiInstagram, FiTwitter, FiLinkedin 
 } from 'react-icons/fi';
 import ComingSoonHeader from '../components/ComingSoonHeader';
-import Logo from "../../../assets/WhatsApp_Image_2026-04-23_at_1.37.51_PM-removebg-preview.png";
+import Logo from "../../../assets/WhatsApp Image 2026-05-06 at 3.50.08 PM.jpeg";
 
 const ComingSoonCategoriesPage = () => {
   const categories = [

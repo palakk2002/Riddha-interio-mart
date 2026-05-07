@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiUser, FiPackage, FiMapPin, FiSettings, FiLogOut, FiChevronRight, FiGift, FiCopy, FiCheck } from 'react-icons/fi';
+import { FiUser, FiPackage, FiMapPin, FiSettings, FiLogOut, FiChevronRight, FiGift, FiCopy, FiCheck, FiHeart } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../data/UserContext';
+import { useWishlist } from '../data/WishlistContext';
+import ProductCard from '../components/ProductCard';
 import { toast } from 'react-hot-toast';
 
 const Profile = () => {
@@ -12,6 +14,7 @@ const Profile = () => {
 
   const menuItems = [
     { icon: <FiUser />, title: "My Profile", subtitle: "View and edit your personal details", link: "/profile/edit" },
+    { icon: <FiHeart />, title: "My Wishlist", subtitle: "Your favorite pieces saved for later", scrollTarget: "wishlist-section" },
     { icon: <FiPackage />, title: "My Orders", subtitle: "Track, return or buy things again", link: "/orders" },
     { icon: <FiMapPin />, title: "Saved Addresses", subtitle: "Edit addresses for orders", link: "/address" },
     { icon: <FiGift />, title: "Referral Rewards", subtitle: "Refer friends and earn credits", link: "/referral-rewards" },
@@ -89,25 +92,50 @@ const Profile = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border-t border-l border-soft-oatmeal/10">
           {menuItems.map((item, index) => (
-            <Link 
-              key={index} 
-              to={item.link}
-              className="group p-4 md:p-6 border-r border-b border-soft-oatmeal/10 hover:bg-soft-oatmeal/5 transition-all duration-500"
-            >
-              <div className="flex flex-row items-center gap-4 md:flex-col md:items-start md:gap-4">
-                <div className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center text-warm-sand group-hover:scale-110 transition-transform duration-500">
-                  {React.cloneElement(item.icon, { size: 20 })}
+            item.link ? (
+              <Link 
+                key={index} 
+                to={item.link}
+                className="group p-4 md:p-6 border-r border-b border-soft-oatmeal/10 hover:bg-soft-oatmeal/5 transition-all duration-500"
+              >
+                <div className="flex flex-row items-center gap-4 md:flex-col md:items-start md:gap-4">
+                  <div className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center text-warm-sand group-hover:scale-110 transition-transform duration-500">
+                    {React.cloneElement(item.icon, { size: 20 })}
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm md:text-base font-semibold text-deep-espresso tracking-tight capitalize">
+                      {item.title.toLowerCase()}
+                    </h3>
+                    <p className="text-gray-400 text-[9px] md:text-[10px] font-bold tracking-widest leading-relaxed capitalize">
+                      {item.subtitle.toLowerCase()}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-sm md:text-base font-semibold text-deep-espresso tracking-tight capitalize">
-                    {item.title.toLowerCase()}
-                  </h3>
-                  <p className="text-gray-400 text-[9px] md:text-[10px] font-bold tracking-widest leading-relaxed capitalize">
-                    {item.subtitle.toLowerCase()}
-                  </p>
+              </Link>
+            ) : (
+              <button
+                key={index}
+                onClick={() => {
+                  const element = document.getElementById(item.scrollTarget);
+                  if (element) element.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="group p-4 md:p-6 border-r border-b border-soft-oatmeal/10 hover:bg-soft-oatmeal/5 transition-all duration-500 text-left w-full"
+              >
+                <div className="flex flex-row items-center gap-4 md:flex-col md:items-start md:gap-4">
+                  <div className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center text-warm-sand group-hover:scale-110 transition-transform duration-500">
+                    {React.cloneElement(item.icon, { size: 20 })}
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm md:text-base font-semibold text-deep-espresso tracking-tight capitalize">
+                      {item.title.toLowerCase()}
+                    </h3>
+                    <p className="text-gray-400 text-[9px] md:text-[10px] font-bold tracking-widest leading-relaxed capitalize">
+                      {item.subtitle.toLowerCase()}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </Link>
+              </button>
+            )
           ))}
         </div>
 
@@ -176,6 +204,43 @@ const Profile = () => {
         </div>
       </div>
     </motion.div>
+  );
+};
+
+const WishlistSection = () => {
+  const { wishlistItems } = useWishlist();
+
+  return (
+    <div id="wishlist-section" className="mt-8 md:mt-24 space-y-4 md:space-y-8 scroll-mt-20">
+      <div className="flex items-center justify-between px-2">
+        <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-warm-sand">My Saved Pieces</h2>
+        <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">{wishlistItems.length} items</span>
+      </div>
+
+      {wishlistItems.length > 0 ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6 border-t border-soft-oatmeal/10 pt-8">
+          {wishlistItems.map((product, index) => (
+            <ProductCard key={product._id || product.id} product={product} index={index} />
+          ))}
+        </div>
+      ) : (
+        <div className="bg-gray-50/50 rounded-[2.5rem] border border-dashed border-soft-oatmeal/20 py-20 text-center space-y-4">
+          <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm">
+             <FiHeart className="text-gray-200" size={24} />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-deep-espresso uppercase tracking-widest">Your wishlist is empty</h3>
+            <p className="text-[10px] font-medium text-gray-400 uppercase tracking-[0.2em]">Start saving your favorite pieces today</p>
+          </div>
+          <Link 
+            to="/shop" 
+            className="inline-block mt-4 text-[10px] font-black text-warm-sand uppercase tracking-[0.3em] hover:underline"
+          >
+            Explore Collection
+          </Link>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../data/CartContext';
-import { FiShoppingCart, FiArrowLeft, FiTruck, FiShield, FiRotateCcw, FiPlus, FiMinus, FiShare2, FiCheck, FiChevronDown, FiChevronUp, FiPlay } from 'react-icons/fi';
+import { FiShoppingCart, FiArrowLeft, FiTruck, FiShield, FiRotateCcw, FiPlus, FiMinus, FiShare2, FiCheck, FiChevronDown, FiChevronUp, FiPlay, FiStar, FiSettings, FiPackage, FiInfo, FiBox, FiCpu, FiExternalLink, FiMaximize } from 'react-icons/fi';
+import { FaStar } from 'react-icons/fa';
 import Button from '../../../shared/components/Button';
 import ProductCard from '../components/ProductCard';
 import api from '../../../shared/utils/api';
@@ -18,6 +19,8 @@ const ProductDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [pincode, setPincode] = useState(localStorage.getItem('userPincode') || '452018');
+  const [showARModal, setShowARModal] = useState(false);
+  const [show360, setShow360] = useState(false);
 
   useEffect(() => {
     const handlePincodeUpdate = () => {
@@ -127,6 +130,9 @@ const ProductDetailsPage = () => {
             <button className="absolute top-3 right-3 z-10 h-10 w-10 md:h-12 md:w-12 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-deep-espresso shadow-xl hover:scale-110 active:scale-95 transition-all">
               <FiShare2 className="h-5 w-5 md:h-6 md:w-6" />
             </button>
+            
+            {/* AR View Button (Enhancement) */}
+            <ARViewButton onClick={() => setShowARModal(true)} />
 
             <AnimatePresence mode="wait">
               <motion.div
@@ -168,8 +174,8 @@ const ProductDetailsPage = () => {
             {allMedia.map((media, i) => (
               <button
                 key={i}
-                onClick={() => setActiveMediaIndex(i)}
-                className={`h-10 w-10 md:h-16 md:w-16 rounded-lg md:rounded-xl border-2 transition-all overflow-hidden bg-white ${activeMediaIndex === i ? 'border-[#189D91] scale-110 shadow-md' : 'border-soft-oatmeal/20 opacity-60 hover:opacity-100'}`}
+                onClick={() => { setActiveMediaIndex(i); setShow360(false); }}
+                className={`h-10 w-10 md:h-16 md:w-16 rounded-lg md:rounded-xl border-2 transition-all overflow-hidden bg-white ${activeMediaIndex === i && !show360 ? 'border-[#189D91] scale-110 shadow-md' : 'border-soft-oatmeal/20 opacity-60 hover:opacity-100'}`}
               >
                 {media?.type === 'video' ? (
                   <div className="h-full w-full flex items-center justify-center bg-soft-oatmeal/20">
@@ -180,57 +186,93 @@ const ProductDetailsPage = () => {
                 )}
               </button>
             ))}
+            
+            {/* 360 Viewer Tab (Enhancement) */}
+            {product.images360 && (
+              <button
+                onClick={() => setShow360(true)}
+                className={`h-10 w-10 md:h-16 md:w-16 rounded-lg md:rounded-xl border-2 transition-all flex flex-col items-center justify-center bg-white ${show360 ? 'border-[#189D91] scale-110 shadow-md' : 'border-soft-oatmeal/20 opacity-60 hover:opacity-100'}`}
+              >
+                <FiRotateCcw className={`h-5 w-5 md:h-6 md:w-6 ${show360 ? 'text-[#189D91]' : 'text-gray-400'}`} />
+                <span className="text-[6px] md:text-[8px] font-black uppercase mt-1">360°</span>
+              </button>
+            )}
           </div>
         </motion.div>
 
         {/* Info */}
         <motion.div variants={stagger} className="flex flex-col h-full py-0">
-          <motion.div variants={fadeInUp} className="mb-0 md:mb-8 space-y-0.5 md:space-y-4">
-            <div className="text-[#189D91] font-bold text-[10px] md:text-base tracking-tight mb-0.5 md:mb-2">
-              Brand: {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
+          <motion.div variants={fadeInUp} className="mb-0 md:mb-8 space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-2xl md:text-4xl font-bold leading-tight text-gray-900">{product.name}</h1>
+              <span className="shrink-0 px-3 py-1 bg-[#FFB347]/20 text-[#FFB347] text-[10px] md:text-xs font-black uppercase tracking-wider rounded-md">Bestseller</span>
             </div>
 
-            <h1 className="text-xl md:text-4xl font-semibold leading-tight text-black">{product.name}</h1>
-
-            <hr className="border-soft-oatmeal/20" />
-
-            <div className="space-y-0.5 md:space-y-1">
-              <div className="flex items-baseline space-x-2 md:space-x-3">
-                <span className="text-2xl md:text-5xl font-black text-black tracking-tighter">₹{product.price}</span>
-                <span className="text-[9px] md:text-sm font-medium text-gray-400 italic">Incl. GST</span>
+            <div className="flex items-center gap-1.5 -mt-2">
+              <div className="flex items-center text-[#4CAF50]">
+                <FaStar className="w-3.5 h-3.5" />
               </div>
+              <span className="text-sm font-bold text-gray-900">4.7</span>
+              <span className="text-sm font-medium text-gray-400">(212)</span>
+            </div>
 
-              <div className="flex items-center space-x-2 text-[10px] md:text-sm">
-                <span className="text-gray-400 font-medium tracking-tight">
-                  MRP: <span className="line-through">₹{product.originalPrice}</span>
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">₹{product.price}</span>
+                <span className="text-lg md:text-xl font-medium text-gray-400 line-through decoration-gray-400/50">₹{product.originalPrice}</span>
+                <span className="px-2 py-0.5 bg-green-50 text-green-600 text-[11px] md:text-sm font-bold rounded">
+                  {Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
                 </span>
-                <span className="text-[#189D91] font-black">
-                  ({Math.round((1 - product.price / product.originalPrice) * 100)}% off)
-                </span>
+              </div>
+              <p className="text-[11px] md:text-xs font-medium text-gray-500 flex items-center gap-2">
+                Inclusive of all taxes
+                <span className="h-3 w-px bg-gray-200" />
+                <DeliveryInfo pincode={pincode} />
+              </p>
+            </div>
+
+            <div className="grid grid-cols-4 gap-4 py-6 border-y border-gray-100 mt-4">
+              <div className="flex flex-col items-center text-center space-y-2">
+                <div className="p-2 rounded-full bg-gray-50 text-gray-600">
+                  <FiSettings className="w-5 h-5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] md:text-[10px] font-bold text-gray-800 leading-tight">Premium</span>
+                  <span className="text-[9px] md:text-[10px] font-bold text-gray-800 leading-tight">Quality</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-center text-center space-y-2">
+                <div className="p-2 rounded-full bg-gray-50 text-gray-600">
+                  <FiShield className="w-5 h-5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] md:text-[10px] font-bold text-gray-800 leading-tight">10 Years</span>
+                  <span className="text-[9px] md:text-[10px] font-bold text-gray-800 leading-tight">Warranty</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-center text-center space-y-2">
+                <div className="p-2 rounded-full bg-gray-50 text-gray-600">
+                  <FiPackage className="w-5 h-5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] md:text-[10px] font-bold text-gray-800 leading-tight">Easy</span>
+                  <span className="text-[9px] md:text-[10px] font-bold text-gray-800 leading-tight">Installation</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-center text-center space-y-2">
+                <div className="p-2 rounded-full bg-gray-50 text-gray-600">
+                  <FiCheck className="w-5 h-5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] md:text-[10px] font-bold text-gray-800 leading-tight">In Stock</span>
+                  <span className="text-[9px] md:text-[10px] font-bold text-gray-800 leading-tight text-gray-400">Ready to Ship</span>
+                </div>
               </div>
             </div>
 
-            {product.unit && (
-              <div className="text-gray-500 font-bold text-[9px] md:text-xs pt-0.5 md:pt-1 uppercase tracking-wider">
-                {product.unitValue || '1'} {product.unit.toUpperCase()} per unit
-              </div>
-            )}
-
-            <p className="text-deep-espresso/60 text-[13px] md:text-lg font-light leading-relaxed max-w-xl py-1 md:py-0">
+            <p className="text-gray-600 text-sm md:text-base font-normal leading-relaxed pt-2">
               {product.description}
             </p>
-
-            <div className="flex items-center gap-3 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 max-w-sm">
-              <div className="h-8 w-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
-                <FiTruck size={16} />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700/50 leading-none mb-1">Estimated Delivery</span>
-                <span className="text-sm font-bold text-deep-espresso">
-                  Get it in <span className="text-emerald-600">{getDeliveryEstimate(pincode).time}</span> at {pincode}
-                </span>
-              </div>
-            </div>
           </motion.div>
 
           <motion.div variants={fadeInUp} className="space-y-4 md:space-y-12 mb-4 md:mb-16">
@@ -260,18 +302,16 @@ const ProductDetailsPage = () => {
             {/* Size Selector */}
             {product.sizes && (
               <div>
-                <h4 className="text-[10px] items-center flex uppercase tracking-[0.3em] font-black text-deep-espresso/30 mb-6">
-                  <span className="h-px w-6 bg-soft-oatmeal mr-3"></span>
-                  Select Format
+                <h4 className="text-[14px] md:text-[16px] font-bold text-gray-900 mb-4 md:mb-6">
+                  Select Size
                 </h4>
-                <div className="flex flex-wrap gap-2 md:gap-4">
+                <div className="flex flex-wrap gap-3 md:gap-4">
                   {product.sizes.map(size => (
                     <motion.button
                       key={size}
-                      whileHover={{ y: -3 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedSize(size)}
-                      className={`px-5 py-2.5 md:px-8 md:py-4 rounded-xl md:rounded-2xl border-2 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${selectedSize === size ? 'bg-deep-espresso text-white border-deep-espresso shadow-2xl' : 'border-soft-oatmeal/40 text-deep-espresso hover:border-warm-sand'}`}
+                      className={`px-6 py-3 md:px-10 md:py-4 rounded-xl border-2 text-xs md:text-sm font-bold transition-all ${selectedSize === size ? 'bg-white border-[#189D91] text-gray-900 shadow-sm' : 'border-gray-100 bg-gray-50/50 text-gray-500 hover:border-gray-200'}`}
                     >
                       {size}
                     </motion.button>
@@ -357,6 +397,44 @@ const ProductDetailsPage = () => {
       <motion.section variants={fadeInUp} className="mb-16 md:mb-32">
         <SpecificationSection specifications={product.specifications} />
       </motion.section>
+
+      {/* Material & Durability Details (Enhancement) */}
+      <motion.section variants={fadeInUp} className="mb-16 md:mb-32">
+        <MaterialDetails product={product} />
+      </motion.section>
+
+      {/* Vendor Details (Enhancement) */}
+      <motion.section variants={fadeInUp} className="mb-16 md:mb-32">
+        <VendorInfo product={product} />
+      </motion.section>
+
+      {/* AR Modal Placeholder */}
+      <AnimatePresence>
+        {showARModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowARModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl"
+            >
+              <div className="w-20 h-20 bg-warm-sand/10 rounded-full flex items-center justify-center mx-auto mb-6 text-warm-sand">
+                <FiMaximize size={40} />
+              </div>
+              <h3 className="text-2xl font-display font-semibold text-deep-espresso mb-3">AR Mode Coming Soon</h3>
+              <p className="text-deep-espresso/60 mb-8 leading-relaxed">We're building an immersive experience so you can see this piece in your room using augmented reality.</p>
+              <Button onClick={() => setShowARModal(false)} className="w-full h-14 rounded-2xl">Got It</Button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Suggested Products */}
       <AnimatePresence>
@@ -480,6 +558,129 @@ const SpecificationSection = ({ specifications }) => {
                   </div>
                 </div>
               ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const ARViewButton = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="absolute bottom-3 left-3 z-10 flex items-center gap-2 px-3 py-2 bg-white/90 backdrop-blur-md rounded-xl text-deep-espresso shadow-xl hover:scale-105 active:scale-95 transition-all border border-soft-oatmeal/20"
+  >
+    <FiMaximize className="h-4 w-4 text-[#189D91]" />
+    <span className="text-[10px] font-black uppercase tracking-widest">See in Room</span>
+  </button>
+);
+
+const MaterialDetails = ({ product }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  if (!product.material && !product.thickness) return null;
+
+  return (
+    <div className="border border-soft-oatmeal/20 rounded-2xl md:rounded-3xl overflow-hidden bg-white shadow-sm">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-6 md:p-8 bg-soft-oatmeal/5 hover:bg-soft-oatmeal/10 transition-colors"
+      >
+        <div className="flex items-center gap-4">
+          <FiBox className="h-6 w-6 text-warm-sand" />
+          <h3 className="text-xl md:text-2xl font-black text-deep-espresso tracking-tight">Material & Build</h3>
+        </div>
+        {isOpen ? <FiChevronUp className="h-6 w-6 text-warm-sand" /> : <FiChevronDown className="h-6 w-6 text-warm-sand" />}
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden border-t border-soft-oatmeal/10"
+          >
+            <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+              {product.material && (
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Primary Material</p>
+                  <p className="text-base font-bold text-deep-espresso">{product.material}</p>
+                </div>
+              )}
+              {product.thickness && (
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Thickness</p>
+                  <p className="text-base font-bold text-deep-espresso">{product.thickness}</p>
+                </div>
+              )}
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest">Durability</p>
+                <p className="text-base font-bold text-deep-espresso">High Performance</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const DeliveryInfo = ({ pincode }) => {
+  const estimate = getDeliveryEstimate(pincode);
+  return (
+    <span className="inline-flex items-center gap-1 text-[#189D91] font-bold">
+      <FiTruck size={12} />
+      Delivering in {estimate.time}
+    </span>
+  );
+};
+
+const VendorInfo = ({ product }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const vendorName = product.brand?.name || product.vendorName || "Verified Vendor";
+
+  return (
+    <div className="border border-soft-oatmeal/20 rounded-2xl md:rounded-3xl overflow-hidden bg-white shadow-sm">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-6 md:p-8 bg-soft-oatmeal/5 hover:bg-soft-oatmeal/10 transition-colors"
+      >
+        <div className="flex items-center gap-4">
+          <FiPackage className="h-6 w-6 text-warm-sand" />
+          <h3 className="text-xl md:text-2xl font-black text-deep-espresso tracking-tight">Vendor Information</h3>
+        </div>
+        {isOpen ? <FiChevronUp className="h-6 w-6 text-warm-sand" /> : <FiChevronDown className="h-6 w-6 text-warm-sand" />}
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden border-t border-soft-oatmeal/10"
+          >
+            <div className="p-6 md:p-8 flex items-center gap-6">
+              <div className="h-16 w-16 bg-soft-oatmeal/20 rounded-2xl flex items-center justify-center text-warm-sand">
+                <FiPackage size={32} />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-lg font-bold text-deep-espresso">{vendorName}</h4>
+                <div className="flex items-center gap-4 mt-1">
+                  <div className="flex items-center gap-1 text-[10px] font-black text-green-600 uppercase tracking-widest">
+                    <FiCheck size={12} />
+                    Verified Seller
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] font-black text-warm-sand uppercase tracking-widest">
+                    <FiStar size={12} className="fill-current" />
+                    4.9 Rating
+                  </div>
+                </div>
+              </div>
+              <button className="text-[10px] font-black text-[#189D91] uppercase tracking-[0.2em] hover:underline flex items-center gap-1">
+                View Shop <FiExternalLink size={12} />
+              </button>
             </div>
           </motion.div>
         )}

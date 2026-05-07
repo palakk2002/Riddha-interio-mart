@@ -97,32 +97,32 @@ const CategoryDetailPage = () => {
         <div className="flex flex-col lg:flex-row gap-12 md:gap-24 relative">
 
           {/* Professional Sidebar - Categories Navigation */}
-          <aside className="lg:w-72 shrink-0">
-            <div className="sticky top-32 space-y-12">
+          <aside className="w-full lg:w-72 shrink-0">
+            <div className="lg:sticky lg:top-32 space-y-8 lg:space-y-12">
               <div className="space-y-8">
                 <div className="flex items-center justify-between border-b border-soft-oatmeal pb-4">
                   <h3 className="text-[11px] font-semibold uppercase tracking-wider text-deep-espresso/30">Collections</h3>
                   <FiFilter className="text-warm-sand h-4 w-4" />
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
                   {allCategories.map(cat => (
                     <Link
                       key={cat._id}
                       to={`/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`}
-                      className={`group flex items-center justify-between py-3.5 px-5 rounded-2xl transition-all duration-300 ${cat._id === category._id ? 'bg-deep-espresso text-white shadow-2xl shadow-black/20' : 'text-deep-espresso/60 hover:bg-soft-oatmeal/10 hover:text-deep-espresso'}`}
+                      className={`group flex items-center justify-between py-2.5 lg:py-3.5 px-4 lg:px-5 rounded-xl lg:rounded-2xl transition-all duration-300 shrink-0 lg:shrink ${cat._id === category._id ? 'bg-deep-espresso text-white shadow-xl lg:shadow-2xl shadow-black/20' : 'text-deep-espresso/60 bg-soft-oatmeal/5 lg:bg-transparent border border-soft-oatmeal/20 lg:border-none hover:bg-soft-oatmeal/10 hover:text-deep-espresso'}`}
                     >
-                      <span className={`text-sm font-semibold ${cat._id === category._id ? 'translate-x-1' : 'group-hover:translate-x-1'} transition-transform`}>
+                      <span className={`text-[12px] lg:text-sm font-semibold whitespace-nowrap ${cat._id === category._id ? 'translate-x-0 lg:translate-x-1' : 'group-hover:translate-x-1'} transition-transform`}>
                         {cat.name}
                       </span>
-                      {cat._id === category._id && <div className="w-1.5 h-1.5 rounded-full bg-warm-sand shadow-[0_0_10px_rgba(182,143,101,0.5)]" />}
+                      {cat._id === category._id && <div className="hidden lg:block w-1.5 h-1.5 rounded-full bg-warm-sand shadow-[0_0_10px_rgba(182,143,101,0.5)]" />}
                     </Link>
                   ))}
                 </div>
               </div>
 
-              {/* Sub-collections Visual Links */}
+              {/* Sub-collections Visual Links - Hidden on Mobile to save space */}
               {category.subcategories && category.subcategories.length > 0 && (
-                <div className="space-y-8 animate-in slide-in-from-bottom-5 duration-700">
+                <div className="hidden lg:block space-y-8 animate-in slide-in-from-bottom-5 duration-700">
                   <h3 className="text-[11px] font-semibold uppercase tracking-wider text-deep-espresso/30 border-b border-soft-oatmeal pb-4">Refine Search</h3>
                   <div className="grid grid-cols-1 gap-4">
                     {category.subcategories.map(sub => (

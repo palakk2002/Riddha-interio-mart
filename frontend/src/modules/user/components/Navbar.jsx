@@ -28,7 +28,8 @@ import { useUser } from "../data/UserContext";
 import SearchBar from "./SearchBar";
 import api from '../../../shared/utils/api';
 import { getDeliveryEstimate } from '../../../shared/utils/delivery';
-import Logo from "../../../assets/WhatsApp_Image_2026-04-23_at_1.37.51_PM-removebg-preview (1).png";
+import BulkOrderModal from "./BulkOrderModal";
+import Logo from "../../../assets/WhatsApp Image 2026-05-06 at 3.50.08 PM.jpeg";
 
 const toTitleCase = (str) => {
   if (!str) return '';
@@ -74,6 +75,7 @@ const Navbar = () => {
   const isCartPage = location.pathname === "/cart";
   const [pincode, setPincode] = useState('700016');
   const [showMoreCategories, setShowMoreCategories] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   useEffect(() => {
     const savedPincode = localStorage.getItem('userPincode');
@@ -123,16 +125,16 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-white border-b border-gray-100 relative z-50">
+      <nav className="bg-[#189D91] md:bg-white border-b-0 md:border-b border-gray-100 relative z-50">
         <div className="max-w-[1440px] mx-auto px-4 lg:px-6">
           {/* Main Desktop Header Row */}
-          <div className="hidden md:flex items-center justify-between py-4 gap-4 lg:gap-8">
+          <div className="hidden md:flex items-center justify-between py-2 lg:py-1 gap-4 lg:gap-8">
             <div className="flex items-center gap-6 lg:gap-8 shrink-0">
               <Link to="/" className="flex items-center">
                 <img
                   src={Logo}
                   alt="Riddha Interio"
-                  className="h-16 lg:h-18 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                  className="h-20 lg:h-22 w-auto object-contain hover:scale-105 transition-transform duration-300"
                 />
               </Link>
               
@@ -182,44 +184,47 @@ const Navbar = () => {
               </Link>
 
               {/* Bulk Order */}
-              <Link to="/bulk-order" className="flex items-center gap-3 group border-l border-gray-100 pl-4 lg:pl-6">
-                <div className="p-2.5 rounded-xl bg-gray-50 group-hover:bg-[#189D91]/5 transition-colors">
+              <button 
+                onClick={() => setIsBulkModalOpen(true)}
+                className="flex items-center gap-3 group border-l border-gray-100 pl-4 lg:pl-6"
+              >
+                <div className="p-2.5 rounded-xl bg-gray-50 group-hover:bg-[#189D91]/5 transition-colors text-left">
                   <FiFileText className="text-gray-800 w-5 h-5 group-hover:text-[#189D91]" />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col text-left">
                   <span className="text-[12px] lg:text-[13px] font-bold text-gray-800 leading-tight">Bulk Order</span>
                   <span className="text-[11px] lg:text-[12px] font-bold text-[#189D91]">Get Best Price</span>
                 </div>
-              </Link>
+              </button>
             </div>
           </div>
 
           {/* Mobile Header Row */}
-          <div className="flex md:hidden justify-between items-center h-16">
+          <div className="flex md:hidden justify-between items-center h-14 px-1">
             <Link to="/" className="flex-shrink-0">
-              <img
-                src={Logo}
-                alt="Riddha Interio"
-                className="h-11 w-auto object-contain"
-              />
+              <img src={Logo} alt="Riddha Interio" className="h-8 w-auto object-contain" />
             </Link>
-            <div className="flex items-center space-x-1">
-              <Link to="/cart" className="p-2 text-gray-600 relative">
-                <FiShoppingCart className="h-6 w-6" />
-                {cartCount > 0 && <span className="absolute top-1 right-1 bg-[#FF6B35] text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-white">{cartCount}</span>}
+            <div className="flex items-center gap-1">
+              <Link to="/profile" className="p-2 text-white">
+                <FiUser className="h-6 w-6" />
               </Link>
-              <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-gray-600">
+              <Link to="/cart" className="p-2 text-white relative">
+                <FiShoppingCart className="h-6 w-6" />
+                {cartCount > 0 && <span className="absolute top-1 right-1 bg-[#FF6B35] text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-[#189D91]">{cartCount}</span>}
+              </Link>
+              <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-white">
                 {isOpen ? <FiX className="h-6 w-6" /> : <FiMenu className="h-6 w-6" />}
               </button>
             </div>
           </div>
 
           {!isCartPage && (
-            <div className="md:hidden pb-3">
+            <div className="md:hidden pb-4">
               <SearchBar variant="premium" />
             </div>
           )}
         </div>
+        
       </nav>
 
 
@@ -462,6 +467,11 @@ const Navbar = () => {
           </>
         )}
       </AnimatePresence>
+      
+      <BulkOrderModal 
+        isOpen={isBulkModalOpen} 
+        onClose={() => setIsBulkModalOpen(false)} 
+      />
     </>
   );
 };
