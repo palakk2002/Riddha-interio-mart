@@ -21,27 +21,36 @@ exports.registerAdmin = async (req, res, next) => {
 exports.loginAdmin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    if (email === 'test@test.com') return res.status(200).json({ success: true, message: 'Backend Reached' });
+    console.log('Login attempt:', { email, password });
     if (!email || !password) return res.status(400).json({ success: false, error: 'Please provide email and password' });
 
-    // Temporary bypass for requested credentials
-    if (email === 'riddhamart@gmail.com' && password === '123456') {
-      let admin = await Admin.findOne({ email }).select('+password');
-      if (!admin) {
-        admin = await Admin.create({
-          fullName: 'Riddha Admin',
-          email,
-          password,
-          type: 'superadmin'
-        });
-      } else {
-        // Update password if it was different
-        const isMatch = await admin.matchPassword(password);
-        if (!isMatch) {
-          admin.password = password;
-          await admin.save();
+    // ULTIMATE Admin Credentials Bypass (Lenient Mode)
+    const trimmedEmail = (email || '').toString().trim().toLowerCase();
+    const trimmedPassword = (password || '').toString().trim();
+    
+    console.log('--- LOGIN DEBUG ---');
+    console.log('Received Email:', `"${trimmedEmail}"`, 'Length:', trimmedEmail.length);
+    console.log('Received Password:', `"${trimmedPassword}"`, 'Length:', trimmedPassword.length);
+
+    if (trimmedEmail === 'riddhamart@gmail.com' && trimmedPassword === '123456') {
+      console.log('!!! ADMIN BYPASS MATCHED !!!');
+      try {
+        let admin = await Admin.findOne({ email: trimmedEmail });
+        if (!admin) {
+          console.log('Admin not found in DB, creating on-the-fly...');
+          admin = await Admin.create({
+            fullName: 'Riddha Admin',
+            email: trimmedEmail,
+            password: '123456',
+            type: 'superadmin'
+          });
         }
+        console.log('Login successful for:', admin.email);
+        return sendTokenResponse(admin, 200, res);
+      } catch (bypassErr) {
+        console.error('CRITICAL: Admin bypass failed during DB operation:', bypassErr);
       }
-      return sendTokenResponse(admin, 200, res);
     }
 
     const admin = await Admin.findOne({ email }).select('+password');

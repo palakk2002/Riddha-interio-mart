@@ -28,50 +28,36 @@ const getCategoryConfig = (name) => {
   return { icon: LuShapes, color: '#64748B' }; // Default
 };
 
+const QUICK_CATEGORIES = [
+  { name: 'Furniture', slug: 'furniture' },
+  { name: 'Lighting', slug: 'lighting' },
+  { name: 'Wall Solutions', slug: 'wall-solutions' },
+  { name: 'Decor', slug: 'decor' },
+  { name: 'Hardware', slug: 'hardware' },
+  { name: 'Flooring', slug: 'flooring' },
+  { name: 'Modular Kitchen', slug: 'modular-kitchen' },
+  { name: 'Bathroom', slug: 'bathroom' },
+  { name: 'Office Furniture', slug: 'office-furniture' },
+  { name: 'Outdoor', slug: 'outdoor' }
+];
+
 const CategoryQuickAccess = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await api.get('/categories');
-        setCategories(response.data.data);
-      } catch (err) {
-        console.error('Failed to fetch categories:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCategories();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="py-10 flex items-center justify-center gap-4 overflow-x-auto no-scrollbar px-6">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-          <div key={i} className="min-w-[110px] h-[90px] bg-gray-50 rounded-xl animate-pulse" />
-        ))}
-      </div>
-    );
-  }
-
   return (
     <section className="py-1 md:py-10 bg-white overflow-hidden">
       <div className="max-w-[1440px] mx-auto px-6 md:px-12">
         <div className="flex items-center overflow-x-auto no-scrollbar gap-2 md:gap-4 pb-2 md:pb-4 scroll-smooth">
-          {categories.map((category) => {
+          {QUICK_CATEGORIES.map((category, idx) => {
             const config = getCategoryConfig(category.name);
             const Icon = config.icon;
 
             return (
               <motion.div
-                key={category._id}
+                key={idx}
                 whileHover={{ y: -3 }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
               >
                 <Link
-                  to={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
+                  to={`/category/${category.slug}`}
                   className="group flex flex-col items-center justify-center min-w-[72px] md:min-w-[135px] transition-all duration-300"
                 >
                   <div 

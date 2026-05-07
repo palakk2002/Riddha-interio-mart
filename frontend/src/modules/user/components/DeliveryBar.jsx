@@ -19,7 +19,7 @@ const DeliveryBar = () => {
     updatePincode();
     // Listen for storage changes in the same tab
     window.addEventListener('storage', updatePincode);
-    
+
     // Custom event to handle updates within the session
     const handlePincodeUpdate = () => updatePincode();
     window.addEventListener('pincodeUpdated', handlePincodeUpdate);
@@ -34,7 +34,7 @@ const DeliveryBar = () => {
 
   return (
     <>
-      <div className="bg-white border-b border-gray-100 py-2 px-5 flex items-center justify-between relative z-40 md:hidden">
+      <div className="bg-white border-b border-gray-100 py-1.5 px-5 flex items-center justify-between relative z-40 md:hidden">
         <div className="flex flex-col items-start">
           <span className="text-[12px] font-bold text-[#1a1a1a] leading-tight flex items-center gap-1.5">
             Delivery in <span className="text-[#D4A017]">{estimate.time}</span>
@@ -45,7 +45,7 @@ const DeliveryBar = () => {
           </button>
         </div>
 
-        <button 
+        <button
           onClick={() => setIsBulkModalOpen(true)}
           className="flex items-center gap-1.5 bg-[#189D91] text-white px-3 py-1.5 rounded-lg hover:bg-[#14847a] transition-all duration-300 shadow-sm active:scale-95 group"
         >
@@ -56,9 +56,9 @@ const DeliveryBar = () => {
         </button>
       </div>
 
-      <BulkOrderModal 
-        isOpen={isBulkModalOpen} 
-        onClose={() => setIsBulkModalOpen(false)} 
+      <BulkOrderModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
       />
     </>
   );

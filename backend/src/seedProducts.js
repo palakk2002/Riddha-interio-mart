@@ -9,7 +9,7 @@ const seedProducts = async () => {
     await connectDB();
     
     // Find an admin to be the owner
-    const admin = await Admin.findOne({ email: 'admin@riddha.com' }) || await Admin.findOne({});
+    const admin = await Admin.findOne({ email: 'riddhamart@gmail.com' }) || await Admin.findOne({});
     if (!admin) {
       console.error('No admin found to own products. Please create an admin first.');
       process.exit(1);

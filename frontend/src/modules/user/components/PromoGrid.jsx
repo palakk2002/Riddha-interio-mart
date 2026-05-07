@@ -12,10 +12,10 @@ import GiftImg from '../../../assets/promo_giftbox.png';
 const PromoCard = ({ title, items, btnText, bg, textColor, btnColor, img, link }) => (
   <motion.div
     whileHover={{ y: -5 }}
-    className={`${bg} rounded-[18px] md:rounded-[24px] p-3 md:p-8 flex items-center justify-between overflow-hidden relative group h-[140px] md:h-[220px] border border-gray-100/50`}
+    className={`${bg} rounded-[20px] md:rounded-[24px] p-3.5 md:p-8 flex items-center justify-between overflow-hidden relative group h-[155px] md:h-[220px] border border-gray-100/50`}
   >
-    <div className="z-10 flex flex-col justify-between h-full max-w-[48%] md:max-w-[60%]">
-      <div>
+    <div className="z-10 flex flex-col justify-between h-full max-w-[58%] md:max-w-[60%]">
+      <div className="flex-1">
         <h3 className={`text-[12px] md:text-xl font-black mb-1 md:mb-3 leading-tight ${textColor}`}>{title}</h3>
         {items && (
           <ul className="space-y-0.5 md:space-y-1">
@@ -35,13 +35,13 @@ const PromoCard = ({ title, items, btnText, bg, textColor, btnColor, img, link }
 
       <Link
         to={link || "#"}
-        className={`mt-2 md:mt-4 w-fit flex items-center gap-1 md:gap-2 px-2.5 py-1.5 md:px-5 md:py-2.5 rounded-lg md:rounded-xl text-[8px] md:text-xs font-black bg-white shadow-sm border border-gray-100 hover:shadow-md transition-all ${btnColor}`}
+        className={`mt-auto w-fit flex items-center gap-1 md:gap-2 px-2 py-1 md:px-5 md:py-2.5 rounded-lg md:rounded-xl text-[8px] md:text-xs font-black bg-white shadow-sm border border-gray-100 hover:shadow-md transition-all ${btnColor}`}
       >
         {btnText} <FiArrowRight className="text-[9px] md:text-xs" />
       </Link>
     </div>
 
-    <div className="absolute right-0 top-0 bottom-0 w-[50%] md:w-[45%] h-full flex items-end justify-end pointer-events-none">
+    <div className="absolute right-0 top-0 bottom-0 w-[42%] md:w-[45%] h-full flex items-end justify-end pointer-events-none">
       <img
         src={img}
         alt={title}

@@ -56,7 +56,7 @@ const SearchBar = ({ className = '', variant = 'standard' }) => {
               <div className="md:hidden pl-4 pr-1">
                 <FiSearch className="h-4 w-4 text-gray-400" />
               </div>
-              
+
               <input
                 type="text"
                 readOnly

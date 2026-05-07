@@ -137,7 +137,7 @@ const Navbar = () => {
                   className="h-20 lg:h-22 w-auto object-contain hover:scale-105 transition-transform duration-300"
                 />
               </Link>
-              
+
               {/* Delivery Location */}
               <div className="flex items-center gap-3 text-gray-700">
                 <div className="p-2 rounded-full bg-gray-50">
@@ -184,7 +184,7 @@ const Navbar = () => {
               </Link>
 
               {/* Bulk Order */}
-              <button 
+              <button
                 onClick={() => setIsBulkModalOpen(true)}
                 className="flex items-center gap-3 group border-l border-gray-100 pl-4 lg:pl-6"
               >
@@ -200,7 +200,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Header Row */}
-          <div className="flex md:hidden justify-between items-center h-14 px-1">
+          <div className="flex md:hidden justify-between items-center h-12 px-1">
             <Link to="/" className="flex-shrink-0">
               <img src={Logo} alt="Riddha Interio" className="h-8 w-auto object-contain" />
             </Link>
@@ -219,12 +219,12 @@ const Navbar = () => {
           </div>
 
           {!isCartPage && (
-            <div className="md:hidden pb-4">
+            <div className="md:hidden pb-3">
               <SearchBar variant="premium" />
             </div>
           )}
         </div>
-        
+
       </nav>
 
 
@@ -234,13 +234,14 @@ const Navbar = () => {
           <div className="flex items-center gap-6 overflow-hidden">
             {/* All Categories Button */}
             <div className="relative group/cat shrink-0">
-              <button 
+              <Link 
+                to="/categories"
                 className="flex items-center gap-2 bg-[#004D40] text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-[#003d33] transition-colors"
               >
                 <FiMenu className="w-5 h-5" />
                 <span>All Categories</span>
-              </button>
-              
+              </Link>
+
               {/* Categories Dropdown */}
               <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover/cat:opacity-100 group-hover/cat:visible transition-all duration-300 z-50">
                 <div className="bg-white shadow-2xl border border-gray-100 rounded-xl py-3 w-64">
@@ -283,23 +284,23 @@ const Navbar = () => {
 
           {/* User Actions on the Right */}
           <div className="flex items-center gap-6 shrink-0 border-l border-gray-100 pl-6">
-             <Link to="/profile" className="flex items-center gap-2 group">
-                <FiUser className="w-5 h-5 text-gray-700 group-hover:text-[#189D91] transition-colors" />
-                <span className="text-[13px] font-bold text-gray-700 group-hover:text-[#189D91] transition-colors">
-                   {user ? (user.fullName?.split(' ')[0] || 'Profile') : 'Login / Sign Up'}
+            <Link to="/profile" className="flex items-center gap-2 group">
+              <FiUser className="w-5 h-5 text-gray-700 group-hover:text-[#189D91] transition-colors" />
+              <span className="text-[13px] font-bold text-gray-700 group-hover:text-[#189D91] transition-colors">
+                {user ? (user.fullName?.split(' ')[0] || 'Profile') : 'Login / Sign Up'}
+              </span>
+            </Link>
+
+
+            <Link to="/cart" className="flex items-center gap-2 group relative">
+              <FiShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-[#189D91] transition-colors" />
+              <span className="text-[13px] font-bold text-gray-700 group-hover:text-[#189D91] transition-colors">Cart</span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-[#FF6B35] text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-white">
+                  {cartCount}
                 </span>
-             </Link>
-
-
-             <Link to="/cart" className="flex items-center gap-2 group relative">
-                <FiShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-[#189D91] transition-colors" />
-                <span className="text-[13px] font-bold text-gray-700 group-hover:text-[#189D91] transition-colors">Cart</span>
-                {cartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-[#FF6B35] text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-white">
-                    {cartCount}
-                  </span>
-                )}
-             </Link>
+              )}
+            </Link>
           </div>
         </div>
 
@@ -412,7 +413,7 @@ const Navbar = () => {
                   <div className="pb-4 mb-4 border-b border-gray-50">
                     <SidebarLink to="/" icon={FiHome} label="Home" onClick={closeMobile} />
                     <SidebarLink to="/categories" icon={FiGrid} label="Shop by Category" onClick={closeMobile} />
-                    
+
                     {/* Dynamic Categories in Mobile Sidebar */}
                     <div className="px-4 py-2 grid grid-cols-2 gap-2">
                       {NAV_CATEGORIES.map((cat, i) => (
@@ -467,10 +468,10 @@ const Navbar = () => {
           </>
         )}
       </AnimatePresence>
-      
-      <BulkOrderModal 
-        isOpen={isBulkModalOpen} 
-        onClose={() => setIsBulkModalOpen(false)} 
+
+      <BulkOrderModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
       />
     </>
   );
