@@ -30,6 +30,7 @@ import api from '../../../shared/utils/api';
 import { getDeliveryEstimate } from '../../../shared/utils/delivery';
 import BulkOrderModal from "./BulkOrderModal";
 import Logo from "../../../assets/WhatsApp Image 2026-05-06 at 3.50.08 PM.jpeg";
+import TransparentLogo from "../../../assets/transparent logo.png";
 
 const toTitleCase = (str) => {
   if (!str) return '';
@@ -125,40 +126,40 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-[#189D91] md:bg-white border-b-0 md:border-b border-gray-100 relative z-50">
+      <nav className="bg-[#189D91] md:bg-[#006B5C] border-b-0 md:border-b border-white/10 relative z-50">
         <div className="max-w-[1440px] mx-auto px-4 lg:px-6">
           {/* Main Desktop Header Row */}
-          <div className="hidden md:flex items-center justify-between py-2 lg:py-1 gap-4 lg:gap-8">
+          <div className="hidden md:flex items-center justify-between py-1 md:py-0.5 gap-4 lg:gap-6">
             <div className="flex items-center gap-6 lg:gap-8 shrink-0">
               <Link to="/" className="flex items-center">
                 <img
-                  src={Logo}
+                  src={TransparentLogo}
                   alt="Riddha Interio"
-                  className="h-20 lg:h-22 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                  className="h-14 lg:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300"
                 />
               </Link>
 
               {/* Delivery Location */}
-              <div className="flex items-center gap-3 text-gray-700">
-                <div className="p-2 rounded-full bg-gray-50">
-                  <FiMapPin className="text-[#189D91] w-5 h-5" />
+              <div className="flex items-center gap-2 text-white">
+                <div className="p-1.5 rounded-full bg-white/10">
+                  <FiMapPin className="text-white w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] lg:text-[11px] font-medium text-gray-400 leading-none">Delivering to</span>
-                  <button className="flex items-center gap-1 text-[12px] lg:text-[13px] font-bold text-gray-800 mt-0.5 group">
-                    Kolkata - <span className="">{pincode}</span> <FiChevronDown className="text-gray-400 group-hover:text-[#189D91] transition-colors" size={14} />
+                  <span className="text-[10px] lg:text-[10.5px] font-medium text-white/60 leading-none">Delivering to</span>
+                  <button className="flex items-center gap-1 text-[11px] lg:text-[12px] font-bold text-white mt-0.5 group">
+                    Kolkata - <span className="">{pincode}</span> <FiChevronDown className="text-white/40 group-hover:text-white transition-colors" size={12} />
                   </button>
                 </div>
               </div>
 
               {/* Delivery Time */}
-              <div className="flex items-center gap-3 text-gray-700">
-                <div className="p-2 rounded-full bg-gray-50">
-                  <FiTruck className="text-[#189D91] w-5 h-5" />
+              <div className="flex items-center gap-2 text-white border-l border-white/10 pl-4">
+                <div className="p-1.5 rounded-full bg-white/10">
+                  <FiTruck className="text-white w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] lg:text-[11px] font-medium text-gray-400 leading-none">Delivery in</span>
-                  <span className="text-[12px] lg:text-[13px] font-bold text-[#FF6B35] mt-0.5">
+                  <span className="text-[10px] lg:text-[10.5px] font-medium text-white/60 leading-none">Delivery in</span>
+                  <span className="text-[11px] lg:text-[12px] font-bold text-teal-200 mt-0.5">
                     {getDeliveryEstimate(pincode).time}
                   </span>
                 </div>
@@ -173,27 +174,27 @@ const Navbar = () => {
 
             <div className="flex items-center gap-4 lg:gap-6 shrink-0">
               {/* Become a Seller */}
-              <Link to="/seller/join" className="flex items-center gap-3 group">
-                <div className="p-2.5 rounded-xl bg-gray-50 group-hover:bg-[#189D91]/5 transition-colors">
-                  <AiOutlineShop className="text-gray-800 w-6 h-6 group-hover:text-[#189D91]" />
+              <Link to="/seller/join" className="flex items-center gap-2.5 group">
+                <div className="p-2 rounded-xl bg-white/10 group-hover:bg-white/20 transition-colors">
+                  <AiOutlineShop className="text-white w-5 h-5" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[12px] lg:text-[13px] font-bold text-gray-800 leading-tight">Become a Seller</span>
-                  <span className="text-[11px] lg:text-[12px] font-bold text-[#189D91]">Join Now</span>
+                  <span className="text-[11px] lg:text-[12px] font-bold text-white leading-tight">Become a Seller</span>
+                  <span className="text-[10px] lg:text-[11px] font-bold text-teal-200">Join Now</span>
                 </div>
               </Link>
 
               {/* Bulk Order */}
               <button
                 onClick={() => setIsBulkModalOpen(true)}
-                className="flex items-center gap-3 group border-l border-gray-100 pl-4 lg:pl-6"
+                className="flex items-center gap-2.5 group border-l border-white/10 pl-4 lg:pl-6"
               >
-                <div className="p-2.5 rounded-xl bg-gray-50 group-hover:bg-[#189D91]/5 transition-colors text-left">
-                  <FiFileText className="text-gray-800 w-5 h-5 group-hover:text-[#189D91]" />
+                <div className="p-2 rounded-xl bg-white/10 group-hover:bg-white/20 transition-colors text-left">
+                  <FiFileText className="text-white w-4 h-4" />
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-[12px] lg:text-[13px] font-bold text-gray-800 leading-tight">Bulk Order</span>
-                  <span className="text-[11px] lg:text-[12px] font-bold text-[#189D91]">Get Best Price</span>
+                  <span className="text-[11px] lg:text-[12px] font-bold text-white leading-tight">Bulk Order</span>
+                  <span className="text-[10px] lg:text-[11px] font-bold text-teal-200">Get Best Price</span>
                 </div>
               </button>
             </div>

@@ -33,6 +33,7 @@ const AddProduct = () => {
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
+    hsnCode: '',
     description: '',
     price: '',
     discountPrice: '',
@@ -73,6 +74,7 @@ const AddProduct = () => {
         ...prev,
         name: item.name || '',
         sku: item.sku || '',
+        hsnCode: item.hsnCode || '',
         description: item.description || '',
         category: item.category || '',
         subcategory: item.subcategory || '',
@@ -193,7 +195,7 @@ const AddProduct = () => {
         setSuccess(true);
         // Reset form
         setFormData({
-          name: '', sku: '', description: '', price: '', discountPrice: '',
+          name: '', sku: '', hsnCode: '', description: '', price: '', discountPrice: '',
           category: '', subcategory: '', brand: '', material: '',
           dimensions: '', thickness: '', color: '', unit: 'piece', unitValue: '1',
           countInStock: '', images: [], videoUrl: ''
@@ -315,6 +317,16 @@ const AddProduct = () => {
                   <input 
                     type="text" placeholder="e.g. WH-MAR-001"
                     value={formData.sku} onChange={(e) => setFormData({...formData, sku: e.target.value})}
+                    readOnly={selection === 'catalog'}
+                    className={`w-full px-6 py-4.5 rounded-2xl border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm ${selection === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">HSN Code</label>
+                  <input 
+                    type="text" placeholder="e.g. 6802"
+                    value={formData.hsnCode} onChange={(e) => setFormData({...formData, hsnCode: e.target.value})}
                     readOnly={selection === 'catalog'}
                     className={`w-full px-6 py-4.5 rounded-2xl border-2 border-transparent focus:border-warm-sand/20 focus:bg-white transition-all font-medium text-sm ${selection === 'catalog' ? 'bg-soft-oatmeal/20 cursor-not-allowed opacity-70' : 'bg-soft-oatmeal/5'}`}
                   />

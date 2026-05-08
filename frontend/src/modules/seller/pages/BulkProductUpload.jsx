@@ -6,19 +6,19 @@ import Button from '../../../shared/components/Button';
 const BulkProductUpload = () => {
   const [activeTab, setActiveTab] = useState('excel');
   const [manualProducts, setManualProducts] = useState([
-    { name: '', brand: '', category: '', price: '', stock: '', imageLink: '', description: '' }
+    { name: '', sku: '', hsnCode: '', brand: '', category: '', price: '', stock: '', imageLink: '', description: '' }
   ]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const addRow = () => {
-    setManualProducts([...manualProducts, { name: '', brand: '', category: '', price: '', stock: '', imageLink: '', description: '' }]);
+    setManualProducts([...manualProducts, { name: '', sku: '', hsnCode: '', brand: '', category: '', price: '', stock: '', imageLink: '', description: '' }]);
   };
 
   const removeRow = (index) => {
     const updated = manualProducts.filter((_, i) => i !== index);
-    setManualProducts(updated.length ? updated : [{ name: '', brand: '', category: '', price: '', stock: '', imageLink: '', description: '' }]);
+    setManualProducts(updated.length ? updated : [{ name: '', sku: '', hsnCode: '', brand: '', category: '', price: '', stock: '', imageLink: '', description: '' }]);
   };
 
   const handleInputChange = (index, field, value) => {
@@ -119,6 +119,8 @@ const BulkProductUpload = () => {
                   <thead>
                     <tr className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] border-b border-gray-50">
                       <th className="pb-6 pr-4">Product Details</th>
+                      <th className="pb-6 px-4">SKU</th>
+                      <th className="pb-6 px-4">HSN</th>
                       <th className="pb-6 px-4">Brand</th>
                       <th className="pb-6 px-4">Category</th>
                       <th className="pb-6 px-4 w-32">Price (INR)</th>
@@ -137,6 +139,24 @@ const BulkProductUpload = () => {
                             className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-xs font-bold text-deep-espresso focus:ring-2 focus:ring-warm-sand/20"
                             value={row.name}
                             onChange={(e) => handleInputChange(idx, 'name', e.target.value)}
+                          />
+                        </td>
+                        <td className="py-5 px-4">
+                          <input
+                            type="text"
+                            placeholder="SKU"
+                            className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-xs font-bold text-deep-espresso focus:ring-2 focus:ring-warm-sand/20"
+                            value={row.sku}
+                            onChange={(e) => handleInputChange(idx, 'sku', e.target.value)}
+                          />
+                        </td>
+                        <td className="py-5 px-4">
+                          <input
+                            type="text"
+                            placeholder="HSN"
+                            className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-xs font-bold text-deep-espresso focus:ring-2 focus:ring-warm-sand/20"
+                            value={row.hsnCode}
+                            onChange={(e) => handleInputChange(idx, 'hsnCode', e.target.value)}
                           />
                         </td>
                         <td className="py-5 px-4">

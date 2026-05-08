@@ -3,11 +3,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiPackage, FiShoppingBag, FiChevronRight, FiClock, FiCheckCircle, FiTruck } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../../shared/utils/api';
+import ReviewFeedbackModal from '../components/ReviewFeedbackModal';
+import ExistingReviewCard from '../components/ExistingReviewCard';
+import { FiMessageCircle } from 'react-icons/fi';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState([]);
   const navigate = useNavigate();
+
+  // Feedback Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeOrder, setActiveOrder] = useState(null);
+  const [activeProduct, setActiveProduct] = useState(null);
+  const [modalInitialData, setModalInitialData] = useState(null);
+
+  const fetchReviews = () => {
+    const savedReviews = JSON.parse(localStorage.getItem('riddha_reviews') || '[]');
+    setReviews(savedReviews);
+  };
 
   const fetchMyOrders = async () => {
     try {
@@ -24,7 +39,15 @@ const Orders = () => {
 
   useEffect(() => {
     fetchMyOrders();
+    fetchReviews();
   }, []);
+
+  const openFeedbackModal = (orderId, product, existingReview = null) => {
+    setActiveOrder(orderId);
+    setActiveProduct(product);
+    setModalInitialData(existingReview);
+    setIsModalOpen(true);
+  };
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -119,23 +142,46 @@ const Orders = () => {
                     </div>
 
                     {/* Order Items */}
-                    <div className="flex flex-wrap gap-2 mb-6">
-                       {order.orderItems.map((item, i) => (
-                          <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-xl p-2 pr-4 border border-gray-100">
-                             <img 
-                               src={item.image} 
-                               alt={item.name} 
-                               className="w-10 h-10 object-cover rounded-lg shadow-sm"
-                             />
-                             <div className="hidden sm:block">
-                                <p className="text-xs font-bold text-gray-900 truncate max-w-[150px]">{item.name}</p>
-                                <p className="text-[10px] text-gray-500 font-medium">Qty: {item.quantity}</p>
-                             </div>
-                             <div className="sm:hidden">
-                                <p className="text-xs font-bold text-gray-900">x{item.quantity}</p>
-                             </div>
-                          </div>
-                       ))}
+                    <div className="space-y-4 mb-6">
+                       {order.orderItems.map((item, i) => {
+                          const existingReview = reviews.find(r => r.orderId === order._id && r.productId === item.product);
+                          
+                          return (
+                            <div key={i} className="flex flex-col">
+                              <div className="flex items-center justify-between gap-4 bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                 <div className="flex items-center gap-3">
+                                   <img 
+                                     src={item.image} 
+                                     alt={item.name} 
+                                     className="w-12 h-12 object-cover rounded-lg shadow-sm"
+                                   />
+                                   <div>
+                                      <p className="text-xs font-bold text-gray-900 truncate max-w-[150px] md:max-w-[250px]">{item.name}</p>
+                                      <p className="text-[10px] text-gray-500 font-medium uppercase tracking-tight">Qty: {item.quantity} • ₹{item.price.toLocaleString()}</p>
+                                   </div>
+                                 </div>
+                                 
+                                 {order.status === 'Delivered' && !existingReview && (
+                                   <button
+                                     onClick={() => openFeedbackModal(order._id, item)}
+                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-teal-600 rounded-lg hover:bg-teal-50 hover:border-teal-200 transition-all text-[10px] font-black uppercase tracking-widest shadow-sm active:scale-95"
+                                   >
+                                     <FiMessageCircle size={12} />
+                                     Give Feedback
+                                   </button>
+                                 )}
+                              </div>
+
+                              {existingReview && (
+                                <ExistingReviewCard 
+                                  review={existingReview} 
+                                  onEdit={() => openFeedbackModal(order._id, item, existingReview)}
+                                  onDelete={fetchReviews}
+                                />
+                              )}
+                            </div>
+                          );
+                       })}
                     </div>
 
                     {/* Footer: Date & Actions */}
@@ -169,8 +215,16 @@ const Orders = () => {
           </div>
         )}
       </div>
-    </motion.div>
 
+      <ReviewFeedbackModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        orderId={activeOrder}
+        product={activeProduct}
+        initialData={modalInitialData}
+        onStatusChange={fetchReviews}
+      />
+    </motion.div>
   );
 };
 

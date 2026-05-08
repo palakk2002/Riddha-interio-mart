@@ -12,9 +12,9 @@ import GiftImg from '../../../assets/promo_giftbox.png';
 const PromoCard = ({ title, items, btnText, bg, textColor, btnColor, img, link }) => (
   <motion.div
     whileHover={{ y: -5 }}
-    className={`${bg} rounded-[20px] md:rounded-[24px] p-3.5 md:p-8 flex items-center justify-between overflow-hidden relative group h-[155px] md:h-[220px] border border-gray-100/50`}
+    className={`${bg} rounded-[20px] md:rounded-[24px] p-4 pb-6 md:p-8 flex items-center justify-between overflow-hidden relative group h-[140px] md:h-[220px] border border-gray-100/50`}
   >
-    <div className="z-10 flex flex-col justify-between h-full max-w-[58%] md:max-w-[60%]">
+    <div className="z-10 flex flex-col justify-between h-full max-w-[54%] md:max-w-[60%]">
       <div className="flex-1">
         <h3 className={`text-[12px] md:text-xl font-black mb-1 md:mb-3 leading-tight ${textColor}`}>{title}</h3>
         {items && (
@@ -26,18 +26,13 @@ const PromoCard = ({ title, items, btnText, bg, textColor, btnColor, img, link }
             ))}
           </ul>
         )}
-        {!items && (
-          <p className="text-gray-600 text-[10px] md:text-xs font-bold leading-relaxed">
-            Refer Your Friends <br /> & Earn Rewards
-          </p>
-        )}
       </div>
 
       <Link
         to={link || "#"}
-        className={`mt-auto w-fit flex items-center gap-1 md:gap-2 px-2 py-1 md:px-5 md:py-2.5 rounded-lg md:rounded-xl text-[8px] md:text-xs font-black bg-white shadow-sm border border-gray-100 hover:shadow-md transition-all ${btnColor}`}
+        className={`mt-auto mb-1 w-fit flex items-center gap-0.5 md:gap-2 px-1.5 py-0.5 md:px-5 md:py-2.5 rounded-lg md:rounded-xl text-[8px] md:text-xs font-black bg-white shadow-sm border border-gray-100 hover:shadow-md transition-all whitespace-nowrap ${btnColor}`}
       >
-        {btnText} <FiArrowRight className="text-[9px] md:text-xs" />
+        {btnText} <FiArrowRight className="text-[8px] md:text-xs" />
       </Link>
     </div>
 
@@ -85,6 +80,7 @@ const PromoGrid = () => {
     },
     {
       title: "Refer & Earn",
+      items: ["Refer Your Friends", "& Earn Rewards"],
       btnText: "Know More",
       bg: "bg-[#F8F4FF]",
       textColor: "text-[#7E57C2]",

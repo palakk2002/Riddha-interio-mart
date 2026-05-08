@@ -61,7 +61,7 @@ const SearchBar = ({ className = '', variant = 'standard' }) => {
                 type="text"
                 readOnly
                 placeholder="Search products or brands..."
-                className="w-full pl-1 md:pl-5 pr-24 py-2.5 md:py-3 bg-transparent focus:outline-none text-gray-700 text-[12px] md:text-sm font-medium cursor-pointer placeholder:text-gray-400"
+                className="w-full pl-1 md:pl-5 pr-24 py-2.5 md:py-1.5 bg-transparent focus:outline-none text-gray-700 text-[12px] md:text-sm font-medium cursor-pointer placeholder:text-gray-400"
               />
               <div className="absolute inset-y-0 right-3 flex items-center gap-2">
                 <button
@@ -80,7 +80,7 @@ const SearchBar = ({ className = '', variant = 'standard' }) => {
                 </button>
               </div>
             </div>
-            <button className="hidden md:flex bg-[#004D40] hover:bg-[#003d33] text-white px-6 py-3.5 transition-colors items-center justify-center">
+            <button className="hidden md:flex bg-[#004D40] hover:bg-[#003d33] text-white px-4 py-2 transition-colors items-center justify-center">
               <FiSearch className="h-5 w-5" />
             </button>
           </div>

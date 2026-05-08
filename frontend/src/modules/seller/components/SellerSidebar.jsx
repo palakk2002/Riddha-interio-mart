@@ -13,7 +13,8 @@ import {
   FiTruck,
   FiLogOut,
   FiNavigation,
-  FiTrendingUp
+  FiTrendingUp,
+  FiStar
 } from 'react-icons/fi';
 
 
@@ -35,6 +36,7 @@ const menuItems = [
     ]
   },
   { path: '/seller/stock-management', icon: FiTrendingUp, label: 'Stock Management' },
+  { path: '/seller/reviews', icon: FiStar, label: 'Reviews & Ratings' },
 ];
 
 const SellerSidebar = ({ isOpen, onClose }) => {

@@ -49,6 +49,7 @@ import CashCollectionPage from './pages/CashCollectionPage';
 import SellerTransactionsPage from './pages/SellerTransactionsPage';
 import ManageSellerListPage from './pages/ManageSellerListPage';
 import ManageDeliveryBoyPage from './pages/ManageDeliveryBoyPage';
+import FeedbackManagement from './pages/FeedbackManagement';
 import { RBACProvider } from './data/RBACContext';
 
 const AdminRoutes = () => {
@@ -144,6 +145,7 @@ const AdminRoutes = () => {
           {/* Settings */}
           <Route element={<ProtectedRoute permission="settings" />}>
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/feedback" element={<FeedbackManagement />} />
           </Route>
 
           {/* Team Management (Admin Only) */}

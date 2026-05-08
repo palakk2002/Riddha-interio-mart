@@ -9,6 +9,9 @@ const ProductSchema = new mongoose.Schema({
   sku: {
     type: String
   },
+  hsnCode: {
+    type: String
+  },
   description: {
     type: String,
     required: [true, 'Please add a description']

@@ -250,8 +250,7 @@ const ProductDetailsPage = () => {
           </div>
         </div>
 
-        {/* Right Column: Details & Info */}
-        <div className="lg:w-[60%] space-y-3">
+        <div className="lg:w-[60%] space-y-2 md:space-y-3">
           <div className="space-y-1.5 px-1">
             <div className="md:hidden text-[#007185] font-medium text-[15px]">
               Brand: {typeof product.brand === 'object' ? product.brand.name : (product.brand || 'Riddha Mart')}
@@ -302,7 +301,7 @@ const ProductDetailsPage = () => {
 
 
           {/* Highlights & Features */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 pt-4">
             <div>
               <h4 className="text-sm font-bold text-gray-500 mb-3 uppercase">Highlights</h4>
               <ul className="space-y-2 list-disc list-inside text-sm text-gray-800">
@@ -352,7 +351,7 @@ const ProductDetailsPage = () => {
             <motion.div
               key={i}
               variants={fadeInUp}
-              className="flex items-center space-x-3 md:space-x-4 py-2.5 md:py-3 px-4 md:px-6 bg-soft-oatmeal/5 border-b border-soft-oatmeal/10 last:border-0 first:rounded-t-xl last:rounded-b-xl md:first:rounded-t-lg md:last:rounded-b-lg"
+              className="flex items-center space-x-3 md:space-x-4 py-1.5 md:py-3 px-4 md:px-6 bg-soft-oatmeal/5 border-b border-soft-oatmeal/10 last:border-0 first:rounded-t-xl last:rounded-b-xl md:first:rounded-t-lg md:last:rounded-b-lg"
             >
               <div className="h-6 w-6 md:h-8 md:w-8 bg-warm-sand/10 rounded-full flex items-center justify-center text-warm-sand flex-shrink-0">
                 <FiCheck className="h-3 w-3 md:h-4 md:w-4" />
@@ -513,7 +512,7 @@ const SpecificationSection = ({ specifications }) => {
               {Object.entries(specifications).map(([key, value], index) => (
                 <div
                   key={key}
-                  className={`flex flex-row py-4 px-6 md:px-8 text-sm md:text-base ${index % 2 === 0 ? 'bg-white' : 'bg-soft-oatmeal/5'}`}
+                  className={`flex flex-row py-2.5 md:py-4 px-6 md:px-8 text-sm md:text-base ${index % 2 === 0 ? 'bg-white' : 'bg-soft-oatmeal/5'}`}
                 >
                   <div className="w-1/3 md:w-1/4 font-bold text-deep-espresso/40 uppercase tracking-[0.1em] text-[10px] md:text-xs">
                     {key}

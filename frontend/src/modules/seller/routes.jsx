@@ -20,6 +20,7 @@ import OrderTracking from './pages/OrderTracking';
 import Notifications from './pages/Notifications';
 import BulkProductUpload from './pages/BulkProductUpload';
 import SellerJoin from './pages/SellerJoin';
+import SellerReviews from './pages/Reviews';
 
 const SellerRoutes = () => {
   return (
@@ -47,6 +48,7 @@ const SellerRoutes = () => {
         <Route path="/catalog" element={<BrowseCatalog />} />
         <Route path="/profile" element={<SellerProfile />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/reviews" element={<SellerReviews />} />
         <Route path="/bulk-upload" element={<BulkProductUpload />} />
       </Route>
     </Routes>

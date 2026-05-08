@@ -29,7 +29,7 @@ import {
   FiShield,
   FiDollarSign
 } from 'react-icons/fi';
-import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { FiCheckCircle, FiXCircle, FiMessageCircle } from 'react-icons/fi';
 import sidebarBg from '../../../assets/seller_sidebar_bg.png';
 
 const menuItems = [
@@ -160,6 +160,7 @@ const menuItems = [
     ]
   },
   { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
+  { path: '/admin/feedback', icon: FiMessageCircle, label: 'Feedback' },
   { path: '/admin/referrals', icon: FiGift, label: 'Referral System' },
   { path: '/admin/team', icon: FiShield, label: 'Team Management' },
 ];
