@@ -107,9 +107,9 @@ const ProductDetailsPage = () => {
     <motion.div
       initial="hidden"
       animate="visible"
-      className="max-w-[1440px] mx-auto px-4 lg:px-8 py-2 md:py-8"
+      className="max-w-[1440px] mx-auto px-4 lg:px-8 py-2 md:py-8 pb-28 md:pb-8"
     >
-      {/* Breadcrumbs */}
+      {/* Breadcrumbs (Desktop) */}
       <nav className="flex items-center gap-2 text-[12px] text-gray-500 mb-4 hidden md:flex">
         <Link to="/" className="hover:text-[#2874f0]">Home</Link>
         <FiChevronRight size={12} />
@@ -118,17 +118,19 @@ const ProductDetailsPage = () => {
         <span className="text-gray-900 truncate max-w-[200px]">{product.name}</span>
       </nav>
 
+
+
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 bg-white p-2 md:p-4 rounded-sm shadow-sm border border-gray-100">
-        
+
         {/* Left Column: Gallery & Action Buttons */}
         <div className="lg:w-[42%] lg:sticky lg:top-24 self-start">
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col items-center lg:items-start gap-3">
             {/* Main Image View */}
-            <div className="relative border border-gray-100 rounded-sm bg-white aspect-[4/3.2] md:aspect-square group cursor-crosshair">
-              {/* Discount Badge */}
-              <div className="absolute top-2 left-2 z-10 bg-white/90 backdrop-blur shadow-sm px-2 py-0.5 rounded text-[11px] font-bold text-green-600 border border-green-100">
-                {Math.round((1 - product.price / product.originalPrice) * 100)}% off
-              </div>
+            <div className="relative border border-gray-100 rounded-sm bg-white h-[380px] w-full md:h-auto md:aspect-square group cursor-crosshair overflow-hidden mx-auto max-w-[400px] md:max-w-none">
+              {/* Share Icon (Mobile) */}
+              <button className="absolute top-4 right-4 z-10 md:hidden p-2 text-gray-600">
+                <FiShare2 size={24} />
+              </button>
 
               <AnimatePresence mode="wait">
                 <motion.div
@@ -136,7 +138,7 @@ const ProductDetailsPage = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="h-full w-full p-2 md:p-6"
+                  className="h-full w-full p-4 md:p-6 flex items-center justify-center"
                 >
                   {allMedia[activeMediaIndex]?.type === 'video' ? (
                     <iframe
@@ -148,13 +150,23 @@ const ProductDetailsPage = () => {
                     />
                   ) : (
                     <img
-                      src={allMedia[activeMediaIndex] || DEFAULT_PRODUCT_IMAGE}
+                      src={allMedia[activeMediaIndex] || (product.images && product.images[0])}
                       alt={product.name}
                       className="h-full w-full object-contain"
                     />
                   )}
                 </motion.div>
               </AnimatePresence>
+
+              {/* Dots Indicator (Mobile) */}
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 md:hidden">
+                {allMedia.map((_, i) => (
+                  <div 
+                    key={i} 
+                    className={`h-2 rounded-full transition-all duration-300 ${activeMediaIndex === i ? 'w-4 bg-[#B12704]' : 'w-2 bg-gray-300'}`}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Thumbnails Row (Now below main image) */}
@@ -179,16 +191,38 @@ const ProductDetailsPage = () => {
 
           {/* Desktop Action Buttons */}
           <div className="hidden lg:flex gap-2 mt-4">
-            <button
-              onClick={() => addToCart(product, 1)}
-              className="flex-1 h-14 bg-[#E91E8B] text-white font-bold rounded-sm shadow-md hover:bg-[#d0197c] transition-colors flex items-center justify-center gap-2 uppercase"
-            >
-              <FiShoppingCart size={18} />
-              Add to Cart
-            </button>
+            {currentQuantity === 0 ? (
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 h-14 bg-[#E91E8B] text-white font-bold rounded-sm shadow-md hover:bg-[#d0197c] transition-colors flex items-center justify-center gap-2 uppercase"
+              >
+                <FiShoppingCart size={18} />
+                Add to Cart
+              </button>
+            ) : (
+              <div className="flex-1 h-14 flex items-center border-2 border-[#E91E8B] rounded-sm overflow-hidden">
+                <button 
+                  onClick={() => updateQuantity(product._id || product.id, Math.max(0, currentQuantity - 1))}
+                  className="flex-1 h-full flex items-center justify-center bg-white text-[#E91E8B] hover:bg-[#E91E8B]/5 transition-colors"
+                >
+                  <FiMinus size={18} />
+                </button>
+                <div className="w-12 h-full flex items-center justify-center font-bold text-[#E91E8B] text-xl border-x border-[#E91E8B]/20">
+                  {currentQuantity}
+                </div>
+                <button 
+                  onClick={() => updateQuantity(product._id || product.id, currentQuantity + 1)}
+                  className="flex-1 h-full flex items-center justify-center bg-white text-[#E91E8B] hover:bg-[#E91E8B]/5 transition-colors"
+                >
+                  <FiPlus size={18} />
+                </button>
+              </div>
+            )}
             <Link
               to="/cart"
-              onClick={() => currentQuantity === 0 && addToCart(product, 1)}
+              onClick={() => {
+                if (currentQuantity === 0) handleAddToCart();
+              }}
               className="flex-1 h-14 bg-[#702D8B] text-white font-bold rounded-sm shadow-md hover:bg-[#602678] transition-colors flex items-center justify-center gap-2 uppercase"
             >
               <FiPlay size={18} />
@@ -202,14 +236,14 @@ const ProductDetailsPage = () => {
               <button
                 key={i}
                 onClick={() => setActiveMediaIndex(i)}
-                className={`h-12 w-12 border-2 rounded transition-all ${activeMediaIndex === i ? 'border-[#2874f0]' : 'border-gray-200'}`}
+                className={`h-12 w-12 border-2 rounded transition-all shrink-0 ${activeMediaIndex === i ? 'border-[#2874f0]' : 'border-gray-200'}`}
               >
                 {media?.type === 'video' ? (
                   <div className="h-full w-full flex items-center justify-center bg-gray-50">
                     <FiPlay className="text-[#2874f0]" size={14} />
                   </div>
                 ) : (
-                  <img src={media} className="h-full w-full object-cover" alt="" />
+                  <img src={media} className="h-full w-full object-contain p-0.5" alt="" />
                 )}
               </button>
             ))}
@@ -217,30 +251,39 @@ const ProductDetailsPage = () => {
         </div>
 
         {/* Right Column: Details & Info */}
-        <div className="lg:w-[60%] space-y-4">
-          <div className="space-y-1">
+        <div className="lg:w-[60%] space-y-3">
+          <div className="space-y-1.5 px-1">
+            <div className="md:hidden text-[#007185] font-medium text-[15px]">
+              Brand: {typeof product.brand === 'object' ? product.brand.name : (product.brand || 'Riddha Mart')}
+            </div>
             <h1 className="text-lg md:text-xl font-medium text-gray-900 leading-tight">{product.name}</h1>
             <div className="flex items-center gap-3">
               <div className="flex items-center bg-[#388e3c] text-white px-1.5 py-0.5 rounded-sm text-[12px] font-bold">
                 4.7 <FaStar className="ml-1 w-2 h-2" />
               </div>
-              <span className="text-sm font-bold text-gray-500">212 Ratings & 45 Reviews</span>
+              <span className="text-sm font-medium text-gray-500">212 Ratings & 45 Reviews</span>
             </div>
           </div>
 
-          <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl md:text-3xl font-bold text-gray-900">₹{product.price}</span>
-              <span className="text-sm md:text-md text-gray-500 line-through">₹{product.originalPrice}</span>
-              <span className="text-sm md:text-md font-bold text-[#388e3c]">
-                {Math.round((1 - product.price / product.originalPrice) * 100)}% off
+          <div className="md:hidden border-b border-gray-100 pb-2" />
+
+          <div className="space-y-1 px-1">
+            <div className="flex items-baseline gap-2">
+              <span className="text-xs font-medium text-[#B12704] align-top mt-1">₹</span>
+              <span className="text-3xl md:text-3xl font-bold text-gray-900 leading-none">{product.price}</span>
+              <span className="text-xs text-gray-500 font-medium">incl. GST</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
+              <span className="text-sm font-bold text-green-700">
+                ({Math.round((1 - product.price / product.originalPrice) * 100)}% off)
               </span>
             </div>
-            <p className="text-[12px] text-gray-500 font-medium">Free delivery</p>
+            <p className="text-[12px] text-gray-500 font-medium md:block hidden">Free delivery</p>
           </div>
 
-          {/* Available Offers */}
-          <div className="space-y-2 border-t border-gray-100 pt-4">
+          {/* Available Offers (Desktop Only) */}
+          <div className="hidden md:block space-y-2 border-t border-gray-100 pt-4">
             <h4 className="text-sm font-bold text-gray-900">Available offers</h4>
             <div className="space-y-2">
               {[
@@ -277,8 +320,8 @@ const ProductDetailsPage = () => {
             </div>
           </div>
 
-          {/* Seller Info */}
-          <div className="flex items-start gap-12 py-6 border-t border-gray-100 mt-6">
+          {/* Seller Info (Desktop Only) */}
+          <div className="hidden md:flex items-start gap-12 py-6 border-t border-gray-100 mt-6">
             <div className="text-sm font-bold text-gray-500 uppercase">Seller</div>
             <div className="space-y-1">
               <div className="flex items-center gap-3">
@@ -387,57 +430,52 @@ const ProductDetailsPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Mobile Action Bar (Fixed at the very bottom) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-soft-oatmeal/10 px-4 py-2.5 pb-6 shadow-[0_-12px_30px_rgba(0,0,0,0.08)]">
-        <div className="flex gap-4 px-1">
+      {/* Mobile Action Bar (Fixed at the very bottom) - Brand Theme */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-100 px-4 py-3 pb-6 flex items-center justify-between gap-3 shadow-[0_-12px_30px_rgba(0,0,0,0.1)]">
+        {/* Left Side: Add to Cart or Quantity Selector */}
+        <div className="flex-1 h-[46px]">
           {currentQuantity === 0 ? (
-            <motion.button
-              whileTap={{ scale: 0.96 }}
-              onClick={() => addToCart(product, 1)}
-              className="flex-1 py-3 bg-[#E91E8B] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all shadow-lg shadow-[#E91E8B]/20"
+            <button
+              onClick={handleAddToCart}
+              className="w-full h-full bg-[#E91E8B] text-white rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-2 shadow-lg shadow-[#E91E8B]/20 active:bg-[#d0197c]"
             >
-              Add To Cart
-            </motion.button>
+              <FiShoppingCart size={16} />
+              Add to Cart
+            </button>
           ) : (
-            <div className="flex-1 flex items-center justify-between bg-white border-2 border-[#E91E8B] text-[#E91E8B] rounded-2xl px-4 h-[46px] shadow-sm">
-              <motion.button
-                whileTap={{ scale: 0.8 }}
-                onClick={() => updateQuantity(product._id || product.id, currentQuantity - 1)}
-                className="h-8 w-8 flex items-center justify-center text-[#E91E8B] bg-[#E91E8B]/10 rounded-lg"
+            <div className="flex items-center border-2 border-[#E91E8B] rounded-xl overflow-hidden h-full w-full">
+              <button 
+                onClick={() => updateQuantity(product._id || product.id, Math.max(0, currentQuantity - 1))}
+                className="flex-1 h-full flex items-center justify-center bg-white text-[#E91E8B] active:bg-[#E91E8B]/10"
               >
-                <FiMinus className="h-4 w-4" />
-              </motion.button>
-              <div className="flex flex-col items-center">
-                <span className="text-base font-black leading-none">{currentQuantity}</span>
-                <span className="text-[7px] uppercase font-bold tracking-tighter">In Cart</span>
+                <FiMinus size={14} />
+              </button>
+              <div className="w-8 h-full flex items-center justify-center font-bold text-[#E91E8B] text-base">
+                {currentQuantity}
               </div>
-              <motion.button
-                whileTap={{ scale: 0.8 }}
+              <button 
                 onClick={() => updateQuantity(product._id || product.id, currentQuantity + 1)}
-                className="h-8 w-8 flex items-center justify-center text-[#E91E8B] bg-[#E91E8B]/10 rounded-lg"
+                className="flex-1 h-full flex items-center justify-center bg-white text-[#E91E8B] active:bg-[#E91E8B]/10"
               >
-                <FiPlus className="h-4 w-4" />
-              </motion.button>
+                <FiPlus size={14} />
+              </button>
             </div>
           )}
-
-          <Link
-            to="/cart"
-            className="flex-1"
-            onClick={() => {
-              if (currentQuantity === 0) {
-                addToCart(product, 1);
-              }
-            }}
-          >
-            <motion.button
-              whileTap={{ scale: 0.96 }}
-              className="w-full py-3 bg-[#702D8B] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-[#702D8B]/20 transition-all border-2 border-[#702D8B]"
-            >
-              Buy Now
-            </motion.button>
-          </Link>
         </div>
+
+        {/* Right Side: Buy Now Button */}
+        <Link
+          to="/cart"
+          className="flex-1 h-[46px]"
+          onClick={() => {
+            if (currentQuantity === 0) handleAddToCart();
+          }}
+        >
+          <button className="w-full h-full bg-[#702D8B] text-white rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-2 shadow-lg shadow-[#702D8B]/20 active:bg-[#602678]">
+            <FiPlay size={16} />
+            Buy Now
+          </button>
+        </Link>
       </div>
     </motion.div>
   );

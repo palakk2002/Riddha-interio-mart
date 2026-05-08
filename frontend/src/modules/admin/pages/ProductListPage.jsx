@@ -299,6 +299,34 @@ const ProductListPage = ({ status }) => {
           </div>
         </div>
       )}
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-deep-espresso/20 backdrop-blur-sm">
+          <div className="bg-white rounded-[40px] p-10 max-w-sm w-full shadow-2xl border border-soft-oatmeal text-center space-y-6">
+            <div className="w-20 h-20 bg-red-50 text-red-600 rounded-[30px] flex items-center justify-center mx-auto mb-2">
+              <LuTrash2 size={40} />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-display font-bold text-deep-espresso">Are you sure?</h3>
+              <p className="text-brand-teal text-sm">This action will permanently remove this product from the inventory. This cannot be undone.</p>
+            </div>
+            <div className="flex gap-4 pt-2">
+              <button 
+                onClick={() => setDeleteId(null)}
+                className="flex-1 px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest text-deep-espresso bg-soft-oatmeal/50 hover:bg-soft-oatmeal/70 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => handleDelete(deleteId)}
+                className="flex-1 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white bg-red-600 hover:bg-red-700 transition-all shadow-xl shadow-red-900/20 active:scale-95"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </PageWrapper>
   );
 };

@@ -101,13 +101,13 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
     >
       <Link
         to={`/products/${productId}`}
-        className={`relative block overflow-hidden shrink-0 ${isList ? 'w-[40%] md:w-full aspect-square md:aspect-auto md:h-40' : 'aspect-[4/3.2] md:aspect-video md:h-40 w-full'
+        className={`relative block overflow-hidden shrink-0 bg-white ${isList ? 'w-[40%] md:w-full aspect-square md:aspect-auto md:h-40' : 'aspect-[4/3.2] md:aspect-video md:h-40 w-full'
           }`}
       >
         <img
           src={productImage}
           alt={product.name}
-          className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
+          className="h-full w-full object-contain md:object-cover object-center transition-transform duration-700 group-hover:scale-110"
         />
 
 

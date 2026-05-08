@@ -13,6 +13,7 @@ const AddInventoryPage = () => {
 
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [imgFiles, setImgFiles] = useState([]); // Array of actual File objects
   const [videoFile, setVideoFile] = useState(null);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -85,6 +86,15 @@ const AddInventoryPage = () => {
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
+    
+    // Limit to 10 images total
+    if (formData.images.length + files.length > 10) {
+      alert('You can upload a maximum of 10 images.');
+      return;
+    }
+
+    setImgFiles(prev => [...prev, ...files]);
+    
     files.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -95,6 +105,29 @@ const AddInventoryPage = () => {
   };
 
   const removeImage = (index) => {
+    // We need to figure out if this is a new file or an existing URL
+    // existing images in formData.images that are strings starting with http are URLs
+    // Base64 starts with data:
+    
+    const imageToRemove = formData.images[index];
+    const isNewFile = imageToRemove.startsWith('data:');
+
+    if (isNewFile) {
+      // Find which index in imgFiles this corresponds to
+      // This is slightly tricky if we just append. 
+      // Let's keep a better mapping or just filter both.
+      
+      // Simpler way: Find the count of 'data:' images before this index
+      let base64CountBefore = 0;
+      for (let i = 0; i < index; i++) {
+        if (formData.images[i].startsWith('data:')) {
+          base64CountBefore++;
+        }
+      }
+      
+      setImgFiles(prev => prev.filter((_, i) => i !== base64CountBefore));
+    }
+
     setFormData(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
@@ -109,22 +142,30 @@ const AddInventoryPage = () => {
     try {
       setLoading(true);
 
+      let finalImages = formData.images.filter(img => img.startsWith('http')); // Keep existing URLs
       let finalVideoUrl = formData.videoUrl;
 
-      // Upload video if selected
-      if (videoFile) {
-        const videoData = new FormData();
-        videoData.append('image', videoFile);
-        const { data: uploadRes } = await api.post('/upload', videoData, {
+      // 1. Bulk Media Upload
+      if (imgFiles.length > 0 || videoFile) {
+        const bulkData = new FormData();
+        imgFiles.forEach(file => bulkData.append('images', file));
+        if (videoFile) bulkData.append('video', videoFile);
+
+        const uploadRes = await api.post('/upload/bulk', bulkData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        finalVideoUrl = uploadRes.url;
+
+        if (uploadRes.data.success) {
+          finalImages = [...finalImages, ...uploadRes.data.images];
+          if (uploadRes.data.videoUrl) finalVideoUrl = uploadRes.data.videoUrl;
+        }
       }
 
       const payload = {
         ...formData,
         price: Number(formData.price),
         countInStock: Number(formData.countInStock),
+        images: finalImages,
         videoUrl: finalVideoUrl,
         isApproved: true, 
         approvalStatus: 'approved',
@@ -176,7 +217,7 @@ const AddInventoryPage = () => {
                         </button>
                      </div>
                    ))}
-                   {formData.images.length < 5 && (
+                   {formData.images.length < 10 && (
                      <div 
                        onClick={() => fileInputRef.current.click()}
                        className="aspect-square bg-soft-oatmeal/10 rounded-xl border-2 border-dashed border-soft-oatmeal flex flex-col items-center justify-center text-warm-sand hover:border-warm-sand hover:text-deep-espresso transition-all cursor-pointer group"

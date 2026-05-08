@@ -8,7 +8,7 @@ const router = express.Router();
 // @route   POST /api/upload/bulk
 // @access  Private
 router.post('/bulk', protect, upload.fields([
-  { name: 'images', maxCount: 5 },
+  { name: 'images', maxCount: 10 },
   { name: 'video', maxCount: 1 }
 ]), (req, res) => {
   try {
