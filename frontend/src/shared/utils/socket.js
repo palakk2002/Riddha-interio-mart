@@ -35,7 +35,8 @@ export function connectSocket({ token } = {}) {
     transports: ['websocket'],
     autoConnect: true,
     reconnection: true,
-    auth: token ? { token } : undefined
+    auth: token ? { token } : undefined,
+    query: token ? { token } : undefined
   });
 
   return socketInstance;

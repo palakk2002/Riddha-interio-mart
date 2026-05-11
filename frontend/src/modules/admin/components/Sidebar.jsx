@@ -27,7 +27,8 @@ import {
   FiMapPin,
   FiGift,
   FiShield,
-  FiDollarSign
+  FiDollarSign,
+  FiZap
 } from 'react-icons/fi';
 import { FiCheckCircle, FiXCircle, FiMessageCircle } from 'react-icons/fi';
 import sidebarBg from '../../../assets/seller_sidebar_bg.png';
@@ -161,6 +162,7 @@ const menuItems = [
   },
   { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
   { path: '/admin/feedback', icon: FiMessageCircle, label: 'Feedback' },
+  { path: '/admin/seller-recommendations', icon: FiZap, label: 'Seller Requests' },
   { path: '/admin/referrals', icon: FiGift, label: 'Referral System' },
   { path: '/admin/team', icon: FiShield, label: 'Team Management' },
 ];
@@ -361,12 +363,17 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="relative z-10 p-6 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 ${role === 'admin' ? 'bg-warm-sand' : 'bg-[#189D91]'} rounded-lg flex items-center justify-center text-white font-bold text-xl`}>
+            <div className={`w-10 h-10 ${role === 'admin' ? 'bg-white/10' : 'bg-[#189D91]'} rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-black/20 border border-white/20`}>
               {role === 'admin' ? 'R' : 'A'}
             </div>
-            <span className="font-display font-bold text-xl tracking-wide uppercase text-white">
-              Riddha <span className={role === 'admin' ? 'text-warm-sand' : 'text-[#189D91]'}>{role === 'admin' ? 'Admin' : 'Assistant'}</span>
-            </span>
+            <div className="flex flex-col">
+              <span className="font-display font-black text-xl tracking-tight uppercase text-white leading-none">
+                Riddha
+              </span>
+              <span className={`text-[10px] font-bold uppercase tracking-[0.2em] leading-none mt-1 ${role === 'admin' ? 'text-white/70' : 'text-[#189D91]'}`}>
+                {role === 'admin' ? 'Admin Panel' : 'Assistant Mode'}
+              </span>
+            </div>
           </div>
           <button onClick={onClose} className="lg:hidden text-white/60 hover:text-white">
             <FiX size={24} />

@@ -403,6 +403,23 @@ exports.getUsers = async (req, res, next) => {
   }
 };
 
+// @desc    Update user (Block/Unblock)
+// @route   PUT /api/auth/admin/users/:id
+// @access  Private/Admin
+exports.updateUser = async (req, res, next) => {
+  try {
+    const User = require('../models/User');
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+    res.status(200).json({ success: true, data: user });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // --- Payment Management ---
 
 // @desc    Get all cash collections from delivery boys

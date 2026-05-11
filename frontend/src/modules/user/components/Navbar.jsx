@@ -437,7 +437,6 @@ const Navbar = () => {
                   {/* Information & Support */}
                   <div className="pb-4 mb-4 border-b border-gray-50">
                     <p className="px-4 mb-2 text-[10px] font-black uppercase tracking-widest text-gray-400/60">Support & Info</p>
-                    <SidebarLink to="/stores" icon={FiMapPin} label="Our Stores" onClick={closeMobile} />
                     <SidebarLink to="/about" icon={FiInfo} label="About Us" onClick={closeMobile} />
                     <SidebarLink to="/contact" icon={FiPhone} label="Contact Us" onClick={closeMobile} />
                   </div>

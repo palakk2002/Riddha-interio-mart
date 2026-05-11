@@ -242,11 +242,11 @@ const SellerLayout = () => {
       
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
         {/* App-like Header */}
-        <header className="h-16 md:h-20 bg-white shadow-sm border-b border-soft-oatmeal px-4 md:px-8 flex items-center justify-between z-30 pt-safe sticky top-0">
+        <header className="h-16 md:h-20 bg-[#bd3b64] lg:bg-white shadow-sm border-b border-[#bd3b64]/10 lg:border-soft-oatmeal px-4 md:px-8 flex items-center justify-between z-30 pt-safe sticky top-0 transition-colors">
           <div className="flex items-center gap-2 md:gap-4 flex-1">
             <button 
               onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(true); }}
-              className="lg:hidden p-2 hover:bg-soft-oatmeal/50 rounded-xl transition-colors text-deep-espresso"
+              className="lg:hidden p-2 hover:bg-white/10 rounded-xl transition-colors text-white"
             >
               <FiMenu size={22} />
             </button>
@@ -256,8 +256,8 @@ const SellerLayout = () => {
           </div>
 
           <div className="lg:hidden flex-1 flex justify-center">
-            <span className="font-display font-black text-xl tracking-tighter text-[#bd3b64] uppercase italic">
-              Riddha<span className="text-deep-espresso">Seller</span>
+            <span className="font-display font-black text-xl tracking-tighter text-white uppercase italic">
+              Riddha<span className="text-white/70">Seller</span>
             </span>
           </div>
 
@@ -265,11 +265,11 @@ const SellerLayout = () => {
             <div className="relative">
               <button 
                 onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); }}
-                className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-soft-oatmeal text-deep-espresso' : 'text-dusty-cocoa hover:bg-soft-oatmeal'}`}
+                className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-white/20 text-white' : 'text-white/70 lg:text-dusty-cocoa hover:bg-white/10 lg:hover:bg-soft-oatmeal'}`}
               >
                 <FiBell size={20} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-warm-sand rounded-full border-2 border-white animate-pulse"></span>
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-white rounded-full border-2 border-[#bd3b64] animate-pulse"></span>
                 )}
               </button>
 
@@ -331,10 +331,10 @@ const SellerLayout = () => {
                   {user?.avatar ? (
                     <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <FiUser size={18} className="text-warm-sand" />
+                    <FiUser size={18} className="text-white lg:text-warm-sand" />
                   )}
                 </div>
-                <FiChevronDown size={12} className={`text-dusty-cocoa transition-transform duration-300 hidden sm:block ${showUserMenu ? 'rotate-180' : ''}`} />
+                <FiChevronDown size={12} className={`text-white/60 lg:text-dusty-cocoa transition-transform duration-300 hidden sm:block ${showUserMenu ? 'rotate-180' : ''}`} />
               </div>
 
               <AnimatePresence>

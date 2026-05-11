@@ -53,6 +53,9 @@ const AdminNotifications = ({ token }) => {
 
     socket.on('connect_error', (err) => {
       console.error('Admin socket connection error:', err.message);
+      if (err.message === 'AUTH_INVALID_TOKEN' || err.message === 'AUTH_TOKEN_REQUIRED' || err.message === 'AUTH_INVALID') {
+        console.warn('Socket authentication failed. This might be due to an expired or invalid token.');
+      }
     });
 
     return () => {

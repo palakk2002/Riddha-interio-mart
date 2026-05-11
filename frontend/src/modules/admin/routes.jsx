@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardPage from './pages/DashboardPage';
@@ -50,6 +50,7 @@ import SellerTransactionsPage from './pages/SellerTransactionsPage';
 import ManageSellerListPage from './pages/ManageSellerListPage';
 import ManageDeliveryBoyPage from './pages/ManageDeliveryBoyPage';
 import FeedbackManagement from './pages/FeedbackManagement';
+import SellerRecommendationManagement from './pages/SellerRecommendationManagement';
 import { RBACProvider } from './data/RBACContext';
 
 const AdminRoutes = () => {
@@ -146,6 +147,7 @@ const AdminRoutes = () => {
           <Route element={<ProtectedRoute permission="settings" />}>
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/feedback" element={<FeedbackManagement />} />
+            <Route path="/seller-recommendations" element={<SellerRecommendationManagement />} />
           </Route>
 
           {/* Team Management (Admin Only) */}
@@ -157,6 +159,7 @@ const AdminRoutes = () => {
 
           {/* Payments */}
           <Route element={<ProtectedRoute permission="payments" />}>
+            <Route path="/payments" element={<Navigate to="/admin/payments/users" replace />} />
             <Route path="/payments/users" element={<UserPaymentsPage />} />
             <Route path="/payments/delivery" element={<CashCollectionPage />} />
             <Route path="/payments/sellers" element={<SellerTransactionsPage />} />

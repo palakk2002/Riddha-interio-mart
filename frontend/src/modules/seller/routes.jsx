@@ -21,6 +21,7 @@ import Notifications from './pages/Notifications';
 import BulkProductUpload from './pages/BulkProductUpload';
 import SellerJoin from './pages/SellerJoin';
 import SellerReviews from './pages/Reviews';
+import Recommendation from './pages/Recommendation';
 
 const SellerRoutes = () => {
   return (
@@ -50,6 +51,7 @@ const SellerRoutes = () => {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/reviews" element={<SellerReviews />} />
         <Route path="/bulk-upload" element={<BulkProductUpload />} />
+        <Route path="/recommendations" element={<Recommendation />} />
       </Route>
     </Routes>
   );

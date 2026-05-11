@@ -17,15 +17,15 @@ const DeliveryBottomNavbar = () => {
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-5 left-4 right-4 z-50">
-      <div className="bg-deep-espresso/90 backdrop-blur-2xl border border-white/10 shadow-[0_15px_35px_rgba(0,0,0,0.3)] px-4 py-3 rounded-[28px] flex justify-between items-center transition-all duration-500">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
+      <div className="bg-white/95 backdrop-blur-2xl border-t border-soft-oatmeal/30 shadow-[0_-5px_20px_rgba(0,27,78,0.1)] px-6 py-3 pb-safe flex justify-between items-center transition-all duration-500">
         {navItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
             className={({ isActive }) =>
               `relative flex flex-col items-center gap-1 group transition-all duration-300 ${
-                isActive ? 'text-warm-sand' : 'text-white/40 hover:text-white/60'
+                isActive ? 'text-deep-espresso' : 'text-deep-espresso/40 hover:text-deep-espresso/60'
               }`
             }
           >
@@ -42,7 +42,7 @@ const DeliveryBottomNavbar = () => {
                 </div>
                 
                 <span className={`text-[8px] font-black uppercase tracking-wider transition-all duration-300 leading-none mt-1 ${
-                  isActive ? 'text-warm-sand' : 'text-white/40'
+                  isActive ? 'text-deep-espresso' : 'text-deep-espresso/40'
                 }`}>
                   {item.name}
                 </span>
@@ -50,7 +50,7 @@ const DeliveryBottomNavbar = () => {
                 {isActive && (
                   <motion.div
                     layoutId="delivery-nav-glow"
-                    className="absolute -bottom-2 w-6 h-1 bg-warm-sand/30 blur-md rounded-full"
+                    className="absolute -top-3 w-6 h-1 bg-deep-espresso rounded-full"
                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   />
                 )}

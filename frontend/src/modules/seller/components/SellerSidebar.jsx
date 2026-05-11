@@ -14,7 +14,8 @@ import {
   FiLogOut,
   FiNavigation,
   FiTrendingUp,
-  FiStar
+  FiStar,
+  FiZap
 } from 'react-icons/fi';
 
 
@@ -37,6 +38,7 @@ const menuItems = [
   },
   { path: '/seller/stock-management', icon: FiTrendingUp, label: 'Stock Management' },
   { path: '/seller/reviews', icon: FiStar, label: 'Reviews & Ratings' },
+  { path: '/seller/recommendations', icon: FiZap, label: 'Feature Requests' },
 ];
 
 const SellerSidebar = ({ isOpen, onClose }) => {
@@ -92,11 +94,11 @@ const SellerSidebar = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="relative z-10 p-6 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-warm-sand rounded-lg flex items-center justify-center text-[#bd3b64] font-bold text-xl">
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-[#bd3b64] font-bold text-xl">
               S
             </div>
             <span className="font-display font-bold text-xl tracking-wide uppercase text-white">
-              Riddha <span className="text-warm-sand">Seller</span>
+              Riddha <span className="text-white/80">Seller</span>
             </span>
           </div>
           <button onClick={onClose} className="lg:hidden text-white/60 hover:text-white">
@@ -167,11 +169,15 @@ const SellerSidebar = ({ isOpen, onClose }) => {
                     : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10'}
                 `}
               >
-                <div className="flex items-center gap-4">
-                  <item.icon size={20} className="transition-transform duration-300" />
-                  <span className="font-medium text-white">{item.label}</span>
-                </div>
-                <FiChevronRight size={16} className="transition-transform duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 text-white/60" />
+                {({ isActive }) => (
+                  <>
+                    <div className="flex items-center gap-4">
+                      <item.icon size={20} className="transition-transform duration-300" />
+                      <span className="font-medium text-white">{item.label}</span>
+                    </div>
+                    <FiChevronRight size={16} className="transition-transform duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 text-white/60" />
+                  </>
+                )}
               </NavLink>
             );
           })}

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PageWrapper from "../components/PageWrapper";
 import api from "../../../shared/utils/api";
 import {
@@ -129,10 +129,19 @@ const OrderListPage = ({ specificStatus }) => {
     }
   };
 
+  const location = useLocation();
+
   useEffect(() => {
     fetchOrders();
     fetchDeliveryBoys();
-  }, []);
+    
+    // Read search param from URL
+    const searchParams = new URLSearchParams(location.search);
+    const search = searchParams.get('search');
+    if (search) {
+      setSearchTerm(search);
+    }
+  }, [location.search]);
 
   const handleAssignClick = (order) => {
     setSelectedOrder(order);

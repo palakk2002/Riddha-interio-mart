@@ -10,6 +10,7 @@ import Wallet from './pages/Wallet';
 import Settings from './pages/Settings';
 import HelpSupport from './pages/HelpSupport';
 import About from './pages/About';
+import Notifications from './pages/Notifications';
 import LoginPage from '../user/pages/LoginPage';
 import SignupPage from '../user/pages/SignupPage';
 
@@ -29,6 +30,7 @@ const DeliveryRoutes = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/help" element={<HelpSupport />} />
         <Route path="/about" element={<About />} />
+        <Route path="/notifications" element={<Notifications />} />
       </Route>
     </Routes>
   );

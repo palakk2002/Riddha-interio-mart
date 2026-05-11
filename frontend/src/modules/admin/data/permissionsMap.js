@@ -18,6 +18,7 @@ export const permissionsMap = {
   REFERRALS: 'referrals',
   TEAM: 'team',
   PAYMENTS: 'payments',
+  SELLER_REQUESTS: 'seller_requests',
 
   // Label to Permission Key mapping (for Sidebar)
   menuMapping: {
@@ -45,7 +46,8 @@ export const permissionsMap = {
     'Settings': 'settings',
     'Referral System': 'referrals',
     'Team Management': 'team',
-    'Payments': 'payments'
+    'Payments': 'payments',
+    'Seller Requests': 'seller_requests'
   }
 };
 
