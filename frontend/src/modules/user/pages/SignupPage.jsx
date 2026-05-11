@@ -350,11 +350,11 @@ const SignupPage = () => {
                           />
                         </div>
                         <div className="space-y-0.5">
-                          <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Trade/Tax Code</label>
+                          <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Taxation Code</label>
                           <input
                             type="text"
                             name="taxationCode"
-                            placeholder={window.innerWidth < 768 ? "Code (Optional)" : "Optional"}
+                            placeholder={window.innerWidth < 768 ? "Taxation Code (Optional)" : "Taxation Code"}
                             value={formData.taxationCode}
                             onChange={handleChange}
                             className="w-full px-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all"

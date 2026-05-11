@@ -7,7 +7,7 @@ import {
 import {
   FiHome, FiGrid, FiShoppingCart, FiUser, FiSearch, FiStar,
   FiBox, FiLayers, FiCheck, FiMail, FiPhone, FiMapPin,
-  FiMenu, FiX, FiChevronRight, FiAward, FiZap, FiTool, FiArrowRight, FiSmartphone,
+  FiMenu, FiX, FiChevronRight, FiChevronDown, FiAward, FiZap, FiTool, FiArrowRight, FiSmartphone,
   FiTarget, FiEye, FiTruck, FiTag, FiSend, FiCheckCircle
 } from 'react-icons/fi';
 import ComingSoonHeader from "../components/ComingSoonHeader";
@@ -117,7 +117,7 @@ const ComingSoonPage = () => {
             {/* Logo Section */}
             <div className="flex flex-col items-center lg:items-start group">
               <div className="flex items-center gap-2">
-                <span className="text-3xl md:text-4xl font-black tracking-tighter text-[#189D91]">Interio</span>
+                <span className="text-3xl md:text-4xl font-black tracking-tighter text-[#189D91]">Riddha</span>
                 <div className="relative">
                   <div className="w-8 h-8 md:w-10 md:h-10 bg-[#311B92] rounded-lg flex items-center justify-center shadow-lg transform rotate-3">
                     <LuSmartphone className="text-white text-xl md:text-2xl" />
@@ -125,7 +125,7 @@ const ComingSoonPage = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3 mt-0.5">
-                <span className="text-lg md:text-xl font-black text-[#311B92] tracking-[0.2em] uppercase">Mega Mart</span>
+                <span className="text-lg md:text-xl font-black text-[#311B92] tracking-[0.2em] uppercase">Interio Mart</span>
               </div>
             </div>
 
@@ -161,45 +161,116 @@ const ComingSoonPage = () => {
 
           </div>
 
-          {/* --- HERO IMAGE OVERLAP (EDITORIAL LAYOUT) --- */}
+          {/* --- SMARTPHONE MOCKUP (REPLACING EDITORIAL IMAGES) --- */}
           <div className="flex-1 relative min-h-[600px] flex items-center justify-center lg:justify-end">
-             {/* Background Large Hero Image */}
-             <motion.div 
-               initial={{ opacity: 0, x: 50 }}
-               animate={{ opacity: 1, x: 0 }}
-               transition={{ duration: 1 }}
-               className="w-full h-[450px] md:h-[600px] lg:w-[90%] relative z-10 rounded-[3.5rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(49,27,146,0.25)] border-8 border-white"
-             >
-                <img src={HeroMain} alt="Luxury Living" className="w-full h-full object-cover" />
-                <div className="absolute top-8 right-8 px-6 py-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-[10px] font-black text-white uppercase tracking-[0.4em]">
-                   Premium Selection // 2026
-                </div>
-             </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="relative w-[260px] md:w-[300px] h-[540px] md:h-[610px] bg-slate-950 rounded-[3rem] border-[8px] md:border-[12px] border-slate-900 shadow-[0_50px_100px_-20px_rgba(49,27,146,0.3)] flex flex-col overflow-hidden"
+            >
+              {/* Dynamic Island */}
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 md:w-24 h-5 md:h-6 bg-slate-950 rounded-full z-50 flex items-center justify-center">
+                 <div className="w-1 h-1 rounded-full bg-white/10 ml-auto mr-3" />
+              </div>
 
-             {/* Foreground Overlapping Image (Using a showcase image) */}
-             <motion.div 
-               initial={{ x: 30, y: -30, opacity: 0 }}
-               animate={{ x: 0, y: 0, opacity: 1 }}
-               transition={{ delay: 0.5, duration: 1 }}
-               className="absolute top-10 -left-10 lg:-left-20 w-48 h-64 md:w-64 md:h-80 z-20 rounded-[2rem] overflow-hidden shadow-2xl border-8 border-white"
-             >
-                <img src={Showcase1} alt="Detail" className="w-full h-full object-cover" />
-             </motion.div>
+              {/* Screen Content */}
+              <div className="flex-1 bg-white overflow-y-auto no-scrollbar relative flex flex-col">
+                {/* Header Area */}
+                <div className="bg-[#189D91] pt-10 pb-4 px-4 space-y-3">
+                  <div className="flex items-center justify-between text-white">
+                    <span className="text-[10px] font-black tracking-tight">Riddha Interio Mart</span>
+                    <div className="flex gap-2">
+                      <FiUser size={12} />
+                      <FiShoppingCart size={12} />
+                      <FiMenu size={12} />
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg flex items-center px-3 py-1.5 shadow-sm">
+                    <FiSearch className="text-slate-300 mr-2" size={10} />
+                    <span className="text-[9px] font-bold text-slate-300">Search products or brands...</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-white/90">
+                    <FiMapPin size={8} />
+                    <span className="text-[8px] font-bold">Delivery in <span className="text-teal-100">4 hours</span></span>
+                    <FiChevronDown size={8} className="ml-auto" />
+                  </div>
+                </div>
 
-             {/* Floating Badge */}
-             <motion.div
-               animate={{ y: [0, -20, 0] }}
-               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-               className="absolute -bottom-10 right-10 z-30 bg-white p-6 rounded-[2rem] shadow-2xl border border-slate-50 flex items-center gap-4"
-             >
-                <div className="w-12 h-12 rounded-full bg-[#189D91] flex items-center justify-center text-white">
-                   <FiStar size={24} />
+                {/* Main Scroll Area */}
+                <div className="flex-1 p-3 space-y-4">
+                  {/* Promo Banner */}
+                  <div className="bg-slate-50 rounded-xl overflow-hidden border border-slate-100 p-3 flex gap-3">
+                    <div className="flex-1 space-y-1">
+                       <span className="text-[6px] font-black text-[#189D91] uppercase tracking-widest">Premium Selection:</span>
+                       <h4 className="text-[10px] font-black text-slate-800 leading-tight">INTERIOR OFFERS</h4>
+                       <p className="text-[7px] font-bold text-slate-400">Curated by Experts</p>
+                    </div>
+                    <div className="w-14 h-10 rounded-lg bg-slate-200 overflow-hidden">
+                       <img src={Showcase1} className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+
+                  {/* Categories Row */}
+                  <div className="flex justify-between px-1">
+                    <PhoneCategory icon={<FiBox />} label="Furniture" color="bg-teal-500" />
+                    <PhoneCategory icon={<FiZap />} label="Lighting" color="bg-[#D12C8D]" />
+                    <PhoneCategory icon={<FiLayers />} label="Wall Panels" color="bg-indigo-600" />
+                    <PhoneCategory icon={<FiGrid />} label="Decor" color="bg-orange-500" />
+                    <PhoneCategory icon={<FiTool />} label="Hardware" color="bg-[#189D91]" />
+                  </div>
+
+                  {/* Designer Favorites Grid */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                       <h4 className="text-[10px] font-black text-slate-800">Designer Favorites</h4>
+                       <span className="text-[7px] font-black text-[#189D91] uppercase">View All</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <PhoneProductCard name="Tuak Master Bed" price="₹34,999" rating="4.7 (212)" img={Showcase2} />
+                      <PhoneProductCard name="Veneer Wall Panel" price="₹3,500/sq.ft" rating="4.9 (189)" img={Showcase3} />
+                      <PhoneProductCard name="Artisan Dining Set" price="₹21,099" rating="4.8 (156)" img={Showcase4} />
+                      <PhoneProductCard name="Designer Bed" price="₹29,999" rating="4.6 (98)" img={Showcase5} />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rated 5.0</p>
-                   <p className="text-sm font-black text-[#311B92]">Luxury Standard</p>
+
+                {/* Bottom Navigation */}
+                <div className="bg-white border-t border-slate-50 flex items-center justify-between px-6 py-2 pb-4">
+                  <div className="flex flex-col items-center text-[#189D91]">
+                    <FiHome size={14} />
+                    <span className="text-[6px] font-bold mt-1">HOME</span>
+                  </div>
+                  <div className="flex flex-col items-center text-slate-400">
+                    <FiGrid size={14} />
+                    <span className="text-[6px] font-bold mt-1 uppercase">Categories</span>
+                  </div>
+                  <div className="flex flex-col items-center text-slate-400">
+                    <FiShoppingCart size={14} />
+                    <span className="text-[6px] font-bold mt-1 uppercase">Cart</span>
+                  </div>
+                  <div className="flex flex-col items-center text-slate-400">
+                    <FiUser size={14} />
+                    <span className="text-[6px] font-bold mt-1 uppercase">Profile</span>
+                  </div>
                 </div>
-             </motion.div>
+              </div>
+            </motion.div>
+
+            {/* Floating Elements Around Phone */}
+            <motion.div
+               animate={{ y: [0, -15, 0], x: [0, 10, 0] }}
+               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+               className="absolute -bottom-10 right-0 z-20 bg-white p-4 rounded-3xl shadow-2xl border border-slate-100 flex items-center gap-3"
+            >
+               <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white">
+                  <FiAward size={20} />
+               </div>
+               <div>
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Big Things</p>
+                  <p className="text-xs font-black text-[#311B92] mt-1">Are On The Way!</p>
+               </div>
+            </motion.div>
           </div>
         </div>
       </main>
