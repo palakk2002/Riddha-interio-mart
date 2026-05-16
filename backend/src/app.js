@@ -5,7 +5,7 @@ const morgan = require('morgan');
 const path = require('path');
 const http = require('http');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
+const { limiter, authLimiter } = require('./middleware/rateLimiter');
 
 const connectDB = require('./config/db');
 
@@ -52,23 +52,6 @@ app.use(cors({
 
 // Set security HTTP headers
 app.use(helmet());
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
-  message: 'Too many requests from this IP, please try again after 15 minutes',
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-});
-
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Limit each IP to 20 auth requests per `window`
-  message: 'Too many auth requests from this IP, please try again after 15 minutes',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 
 // Apply rate limiting to all routes
 app.use('/api', limiter);

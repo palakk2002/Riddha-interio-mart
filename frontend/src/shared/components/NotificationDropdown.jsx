@@ -54,7 +54,7 @@ const NotificationDropdown = ({ isMobile = false }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className={`absolute ${isMobile ? 'right-0 w-80' : 'right-0 w-96'} mt-3 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50`}
+            className={`absolute ${isMobile ? 'right-0 w-80' : 'right-0 w-96'} mt-3 glass rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50`}
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-deep-espresso">Notifications</h3>
