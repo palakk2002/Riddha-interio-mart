@@ -72,6 +72,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/auth/user', userRoutes);
 app.use('/api/auth/admin', adminRoutes);
 app.use('/api/auth/seller', sellerRoutes);
+app.use('/api/seller', sellerRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/auth/delivery', deliveryRoutes);
 app.use('/api/delivery', deliveryRoutes);

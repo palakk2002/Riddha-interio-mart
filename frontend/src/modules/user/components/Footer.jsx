@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiFacebook, FiTwitter, FiInstagram, FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
-import Logo from "../../../assets/WhatsApp Image 2026-05-06 at 3.50.08 PM.jpeg";
+import TransparentLogo from "../../../assets/transparent logo.png";
  
 const Footer = () => {
   const containerVariants = {
@@ -33,7 +33,7 @@ const Footer = () => {
           {/* Brand */}
           <motion.div variants={itemVariants} className="space-y-6">
             <Link to="/" className="inline-block">
-              <img src={Logo} alt="Riddha Interio" className="h-20 w-auto object-contain" />
+              <img src={TransparentLogo} alt="Riddha Interio" className="h-16 w-auto object-contain" />
             </Link>
             <p className="text-sm leading-relaxed text-gray-500 font-medium">
               Transforming your living spaces into luxurious sanctuaries with premium tiles, paints, and designer furniture.

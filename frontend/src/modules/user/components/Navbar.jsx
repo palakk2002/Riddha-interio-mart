@@ -198,7 +198,9 @@ const Navbar = () => {
           {/* Mobile Header Row */}
           <div className="flex md:hidden justify-between items-center h-12 px-1">
             <Link to="/" className="flex-shrink-0">
-              <img src={Logo} alt="Riddha Interio" className="h-8 w-auto object-contain" />
+              <div className="bg-white px-2 py-1 rounded-lg shadow-sm">
+                <img src={TransparentLogo} alt="Riddha Interio" className="h-8 w-auto object-contain" />
+              </div>
             </Link>
             <div className="flex items-center gap-1">
               <Link to="/profile" className="p-2 text-white">
@@ -381,7 +383,7 @@ const Navbar = () => {
               <div className="flex items-center justify-between px-6 py-6 border-b border-gray-100 bg-white">
                 <Link to="/" onClick={closeMobile} className="flex items-center group">
                   <img
-                    src={Logo}
+                    src={TransparentLogo}
                     alt="Riddha Interio"
                     className="h-10 w-auto object-contain bg-white rounded-md px-1 shadow-sm"
                   />

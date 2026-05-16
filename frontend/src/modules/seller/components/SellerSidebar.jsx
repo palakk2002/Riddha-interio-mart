@@ -1,51 +1,60 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  LayoutDashboard, 
+  Package, 
+  ShoppingCart, 
+  Boxes, 
+  Users, 
+  BarChart3, 
+  Wallet, 
+  Star, 
+  Megaphone, 
+  Bell, 
+  Settings, 
+  HelpCircle,
+  ChevronRight,
+  LogOut,
+  X,
+  Menu,
+  PlusCircle,
+  Search,
+  Truck
+} from 'lucide-react';
 import { useUser } from '../../user/data/UserContext';
-import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  FiLayout,
-  FiSearch,
-  FiPlus,
-  FiPackage,
-  FiX,
-  FiChevronRight,
-  FiTruck,
-  FiLogOut,
-  FiNavigation,
-  FiTrendingUp,
-  FiStar,
-  FiZap
-} from 'react-icons/fi';
-
+import logo from '../../../assets/transparent logo.png';
 
 const menuItems = [
-  { path: '/seller', icon: FiLayout, label: 'Dashboard' },
-  { path: '/seller/reports/sales', icon: FiTrendingUp, label: 'Sales Reports' },
-  { path: '/seller/orders', icon: FiPackage, label: 'Manage Orders' },
-  { path: '/seller/orders/track', icon: FiNavigation, label: 'Order Tracking' },
-  { path: '/seller/assign-delivery', icon: FiTruck, label: 'Assign Delivery' },
-  { path: '/seller/catalog', icon: FiSearch, label: 'Browse Catalog' },
+  { path: '/seller/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { 
-    label: 'Product Management', 
-    icon: FiPackage, 
+    label: 'Products', 
+    icon: Package, 
     path: '/seller/my-products',
     children: [
-      { path: '/seller/add-product', icon: FiPlus, label: 'Add New Product' },
-      { path: '/seller/bulk-upload', icon: FiPlus, label: 'Bulk Upload' },
-      { path: '/seller/my-products', icon: FiPackage, label: 'All Products' },
+      { path: '/seller/my-products', label: 'All Products' },
+      { path: '/seller/add-product', label: 'Add New Product' },
+      { path: '/seller/bulk-upload', label: 'Bulk Upload' },
+      { path: '/seller/catalog', label: 'Browse Catalog' },
     ]
   },
-  { path: '/seller/stock-management', icon: FiTrendingUp, label: 'Stock Management' },
-  { path: '/seller/reviews', icon: FiStar, label: 'Reviews & Ratings' },
-  { path: '/seller/recommendations', icon: FiZap, label: 'Feature Requests' },
+  { path: '/seller/orders', icon: ShoppingCart, label: 'Orders' },
+  { path: '/seller/stock-management', icon: Boxes, label: 'Inventory' },
+  { path: '/seller/customers', icon: Users, label: 'Customers' },
+  { path: '/seller/reports/sales', icon: BarChart3, label: 'Analytics' },
+  { path: '/seller/wallet', icon: Wallet, label: 'Wallet' },
+  { path: '/seller/reviews', icon: Star, label: 'Reviews' },
+  { path: '/seller/marketing', icon: Megaphone, label: 'Marketing' },
+  { path: '/seller/notifications', icon: Bell, label: 'Notifications' },
+  { path: '/seller/profile', icon: Settings, label: 'Settings' },
+  { path: '/seller/help', icon: HelpCircle, label: 'Help & Support' },
 ];
 
 const SellerSidebar = ({ isOpen, onClose }) => {
-  const { logout } = useUser();
+  const { user, logout } = useUser();
   const navigate = useNavigate();
-  const [openMenus, setOpenMenus] = React.useState({});
   const location = useLocation();
+  const [openMenus, setOpenMenus] = React.useState({});
 
   React.useEffect(() => {
     const activeMenu = menuItems.find(item => 
@@ -75,7 +84,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] lg:hidden"
           />
         )}
       </AnimatePresence>
@@ -83,47 +92,50 @@ const SellerSidebar = ({ isOpen, onClose }) => {
       {/* Sidebar Content */}
       <aside
         className={`
-          fixed lg:static top-0 left-0 h-screen w-72 lg:shrink-0 bg-[#bd3b64] text-white z-50 flex flex-col shadow-2xl lg:shadow-none overflow-hidden
-          transition-transform duration-300 ease-in-out
+          fixed lg:static top-0 left-0 h-screen w-[280px] lg:shrink-0 bg-white border-r border-slate-200 z-[70] flex flex-col shadow-xl lg:shadow-none transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-        {/* Sidebar Background (Solid) */}
-        <div className="absolute inset-0 z-0 bg-[#bd3b64]"></div>
-
-        {/* Header */}
-        <div className="relative z-10 p-6 flex items-center justify-between border-b border-white/5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-[#bd3b64] font-bold text-xl">
-              S
+        {/* Logo Area */}
+        <div className="p-8 pb-4 flex items-center justify-between">
+          <Link to="/seller/dashboard" className="flex items-center group mx-auto lg:mx-0">
+            <div className="h-16 md:h-20 overflow-hidden transition-transform duration-300 group-hover:scale-105">
+              <img 
+                src={logo} 
+                alt="Riddha Interio Mart" 
+                className="h-full w-auto object-contain"
+              />
             </div>
-            <span className="font-display font-bold text-xl tracking-wide uppercase text-white">
-              Riddha <span className="text-white/80">Seller</span>
-            </span>
-          </div>
-          <button onClick={onClose} className="lg:hidden text-white/60 hover:text-white">
-            <FiX size={24} />
+          </Link>
+          <button onClick={onClose} className="lg:hidden p-2 text-slate-400 hover:text-slate-600 transition-colors">
+            <X size={20} />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="relative z-10 flex-1 p-4 mt-4 space-y-2 overflow-y-auto no-scrollbar">
+        <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto custom-scrollbar">
           {menuItems.map((item) => {
-            if (item.children) {
-              const isMenuOpen = openMenus[item.label];
+            const hasChildren = !!item.children;
+            const isMenuOpen = openMenus[item.label];
+            const isActive = location.pathname === item.path || item.children?.some(c => location.pathname === c.path);
+
+            if (hasChildren) {
               return (
                 <div key={item.label} className="space-y-1">
                   <button
                     onClick={() => toggleMenu(item.label)}
-                    className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-all border border-white/5"
+                    className={`
+                      w-full flex items-center justify-between p-3 rounded-xl transition-all group
+                      ${isActive ? 'bg-seller-light/50 text-seller-primary' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+                    `}
                   >
-                    <div className="flex items-center gap-4">
-                      <item.icon size={20} />
-                      <span className="font-medium">{item.label}</span>
+                    <div className="flex items-center gap-3">
+                      <item.icon size={20} className={`${isActive ? 'text-seller-primary' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                      <span className="font-semibold text-sm">{item.label}</span>
                     </div>
-                    <FiChevronRight 
+                    <ChevronRight 
                       size={16} 
-                      className={`transition-transform duration-300 ${isMenuOpen ? 'rotate-90' : ''}`} 
+                      className={`transition-transform duration-300 ${isMenuOpen ? 'rotate-90' : ''} text-slate-400`} 
                     />
                   </button>
                   
@@ -133,7 +145,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden bg-white/5 rounded-xl ml-4 mt-1 border-l border-white/10"
+                        className="overflow-hidden space-y-1 ml-4 border-l border-slate-100 pl-2"
                       >
                         {item.children.map((child) => (
                           <NavLink
@@ -141,11 +153,10 @@ const SellerSidebar = ({ isOpen, onClose }) => {
                             to={child.path}
                             onClick={() => { if (window.innerWidth < 1024) onClose(); }}
                             className={({ isActive }) => `
-                              flex items-center gap-3 p-3 text-xs font-bold uppercase tracking-widest transition-all
-                              ${isActive ? 'text-white bg-white/10' : 'text-white/40 hover:text-white hover:bg-white/5'}
+                              flex items-center gap-3 p-2.5 rounded-lg text-sm font-medium transition-all
+                              ${isActive ? 'text-seller-primary bg-seller-light/30' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}
                             `}
                           >
-                            <child.icon size={14} />
                             {child.label}
                           </NavLink>
                         ))}
@@ -163,20 +174,18 @@ const SellerSidebar = ({ isOpen, onClose }) => {
                 end={item.path === '/seller'}
                 onClick={() => { if (window.innerWidth < 1024) onClose(); }}
                 className={({ isActive }) => `
-                  flex items-center justify-between p-3.5 rounded-xl transition-all duration-300 group border border-white/5 mb-2
-                  ${isActive
-                    ? 'bg-white/20 text-white shadow-lg border-white/20 scale-[1.02]'
-                    : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10'}
+                  flex items-center gap-3 p-3 rounded-xl transition-all group
+                  ${isActive 
+                    ? 'bg-seller-primary text-white shadow-lg shadow-seller-primary/20' 
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
                 `}
               >
-                {({ isActive }) => (
-                  <>
-                    <div className="flex items-center gap-4">
-                      <item.icon size={20} className="transition-transform duration-300" />
-                      <span className="font-medium text-white">{item.label}</span>
-                    </div>
-                    <FiChevronRight size={16} className="transition-transform duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 text-white/60" />
-                  </>
+                <item.icon size={20} className={`${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                <span className="font-semibold text-sm">{item.label}</span>
+                {item.label === 'Orders' && (
+                   <span className={`ml-auto w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${isActive ? 'bg-white text-seller-primary' : 'bg-seller-primary text-white'}`}>
+                     3
+                   </span>
                 )}
               </NavLink>
             );
@@ -184,16 +193,14 @@ const SellerSidebar = ({ isOpen, onClose }) => {
         </nav>
 
         {/* Footer info and logout */}
-        <div className="relative z-10 p-6 border-t border-white/10 mt-auto">
+        <div className="p-4 mt-auto border-t border-slate-100">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-white/70 hover:bg-white/10 hover:text-white transition-all group mb-4 border border-white/5"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all group"
           >
-            <FiLogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
+            <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
             Sign Out
           </button>
-          <p className="font-medium text-white/80">© 2026 Riddha Interio Mart</p>
-          <p className="mt-1 text-[10px] tracking-wide uppercase">Seller Panel v1.0</p>
         </div>
       </aside>
     </>

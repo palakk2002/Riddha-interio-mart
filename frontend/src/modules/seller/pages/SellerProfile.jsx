@@ -1,6 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PageWrapper from '../components/PageWrapper';
-import { FiUser, FiShoppingBag, FiStar, FiSettings, FiLogOut, FiEdit2, FiMail, FiPhone, FiCheckCircle, FiTrash2, FiSave, FiMapPin, FiCreditCard, FiCamera } from 'react-icons/fi';
+import { 
+  User, 
+  ShoppingBag, 
+  Star, 
+  Settings, 
+  LogOut, 
+  Pencil, 
+  Mail, 
+  Phone, 
+  CheckCircle2, 
+  Trash2, 
+  Save, 
+  MapPin, 
+  CreditCard, 
+  Camera,
+  ShieldCheck,
+  Calendar,
+  ChevronRight,
+  Store,
+  Briefcase
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
@@ -31,7 +51,6 @@ const SellerProfile = () => {
     try {
       setLoading(true);
       const { data } = await api.get('/auth/seller/me');
-      console.log('Profile fetch response:', data);
       if (data.success && data.data) {
         const s = data.data;
         setProfileData({
@@ -84,7 +103,6 @@ const SellerProfile = () => {
       }
     } catch (err) {
       console.error('Update failed:', err);
-      alert(err.response?.data?.error || 'Failed to update profile');
     } finally {
       setIsSaving(false);
     }
@@ -108,16 +126,12 @@ const SellerProfile = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   if (loading) {
     return (
       <PageWrapper>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-12 h-12 border-4 border-red-800/10 border-t-red-800 rounded-full animate-spin" />
+        <div className="py-24 text-center space-y-4">
+           <div className="w-12 h-12 border-4 border-seller-light border-t-seller-primary rounded-full animate-spin mx-auto"></div>
+           <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Loading Profile...</p>
         </div>
       </PageWrapper>
     );
@@ -125,224 +139,223 @@ const SellerProfile = () => {
 
   return (
     <PageWrapper>
-      <div className="max-w-6xl mx-auto space-y-12">
-        {/* Profile Card */}
+      <div className="max-w-6xl mx-auto space-y-10 pb-20">
+        
+        {/* Profile Header Card */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl md:rounded-[48px] overflow-hidden shadow-2xl shadow-soft-oatmeal border border-soft-oatmeal/50 relative mx-1 md:mx-0"
+          className="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-200 relative"
         >
-          {/* Cover Accent */}
-          <div className="h-24 md:h-32 bg-gradient-to-r from-red-900 to-red-700" />
+          {/* Cover Area */}
+          <div className="h-40 bg-slate-900 relative">
+             <div className="absolute top-0 right-0 w-64 h-64 bg-seller-primary/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+             <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-transparent opacity-60"></div>
+          </div>
           
-          <div className="px-6 md:px-8 pb-8 md:pb-12 -mt-12 md:-mt-16 flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
-            <div className="relative">
-              <div className="h-32 w-32 md:h-40 md:w-40 rounded-3xl md:rounded-[40px] bg-white p-1.5 md:p-2 shadow-2xl">
-                <div className="h-full w-full rounded-2xl md:rounded-[32px] overflow-hidden bg-soft-oatmeal flex items-center justify-center relative">
-                  {profileData.avatar ? (
-                    <img src={profileData.avatar} alt="Store" className="w-full h-full object-cover" />
-                  ) : (
-                    <FiUser size={48} className="text-red-800/20" />
-                  )}
-                  {isSaving && (
-                    <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center">
-                      <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <div className="px-10 pb-10 -mt-16 relative z-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
+                <div className="relative group">
+                  <div className="h-40 w-40 rounded-[2.5rem] bg-white p-2 shadow-xl ring-4 ring-white/10 group-hover:ring-seller-primary/20 transition-all duration-500">
+                    <div className="h-full w-full rounded-[2rem] overflow-hidden bg-slate-100 flex items-center justify-center relative">
+                      {profileData.avatar ? (
+                        <img src={profileData.avatar} alt="Shop Avatar" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      ) : (
+                        <Store size={48} className="text-slate-300" />
+                      )}
+                      {isSaving && (
+                        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
+                          <div className="w-6 h-6 border-2 border-seller-light border-t-seller-primary rounded-full animate-spin" />
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+                  <label className="absolute bottom-2 right-2 h-10 w-10 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer hover:bg-seller-primary hover:scale-110 transition-all duration-300">
+                    <Camera size={18} />
+                    <input type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
+                  </label>
+                </div>
+
+                <div className="text-center md:text-left space-y-2 pb-2">
+                  <div className="flex items-center justify-center md:justify-start gap-2">
+                    <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${profileData.tier === 'Premium Seller' ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}`}>
+                      {profileData.tier}
+                    </span>
+                    <span className="flex items-center gap-1.5 px-3 py-1 bg-seller-light/30 text-seller-primary text-[10px] font-bold uppercase tracking-wider rounded-lg border border-seller-primary/10">
+                      <Star size={12} className="fill-current" /> {profileData.rating} Rating
+                    </span>
+                  </div>
+                  <h1 className="text-4xl font-bold text-slate-900 tracking-tight">{profileData.shopName}</h1>
+                  <p className="text-slate-500 font-medium flex items-center justify-center md:justify-start gap-2">
+                    <User size={16} className="text-slate-400" /> {profileData.fullName}
+                  </p>
                 </div>
               </div>
-              <label className="absolute bottom-1 right-1 h-10 w-10 md:h-12 md:w-12 bg-white text-red-800 rounded-xl md:rounded-2xl flex items-center justify-center shadow-xl border border-soft-oatmeal cursor-pointer hover:bg-red-800 hover:text-white transition-all active:scale-90">
-                <FiCamera className="text-lg md:text-xl" />
-                <input type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
-              </label>
-            </div>
 
-            <div className="flex-1 pb-2 md:pb-4 text-center md:text-left">
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 mb-3 md:mb-4">
-                <span className={`px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] shadow-sm ${profileData.tier === 'Premium Seller' ? 'bg-orange-500 text-white' : 'bg-red-800 text-white'}`}>
-                  {profileData.tier}
-                </span>
-                <span className="flex items-center gap-1.5 px-3 py-1 md:px-4 md:py-1.5 bg-yellow-500/10 text-yellow-600 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-yellow-500/10">
-                  <FiStar size={10} md:size={12} fill="currentColor" /> {profileData.rating} Rating
-                </span>
+              <div className="flex flex-col gap-3 w-full md:w-auto">
+                 <button 
+                   onClick={() => setIsEditing(!isEditing)}
+                   className={`px-8 py-4 rounded-2xl font-bold text-sm transition-all border ${isEditing ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-seller-primary text-white border-seller-primary shadow-lg shadow-seller-primary/20 hover:bg-seller-dark'}`}
+                 >
+                   {isEditing ? 'Cancel Editing' : 'Edit Profile'}
+                 </button>
+                 <div className="flex items-center justify-center md:justify-end gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <Calendar size={12} /> Joined {profileData.joinDate}
+                 </div>
               </div>
-              <h1 className="text-2xl md:text-6xl font-display font-black text-deep-espresso tracking-tight">{profileData.shopName}</h1>
-              <p className="text-red-800 font-bold text-xs md:text-sm mt-1 md:mt-2 uppercase tracking-[0.2em] md:tracking-[0.3em] flex items-center justify-center md:justify-start gap-2 md:gap-3">
-                <FiUser size={12} md:size={14} /> {profileData.fullName}
-              </p>
             </div>
-
-            <button 
-              onClick={() => setIsEditing(!isEditing)}
-              className="mb-2 md:mb-4 px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl bg-soft-oatmeal/20 text-red-800 font-black uppercase tracking-widest text-[9px] md:text-[10px] hover:bg-red-800 hover:text-white transition-all border border-red-800/10 w-full md:w-auto"
-            >
-              {isEditing ? 'Discard Changes' : 'Manage Profile'}
-            </button>
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Main Content Areas */}
-          <div className="lg:col-span-2 space-y-12">
+        {/* Content Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          
+          {/* Main Info / Form */}
+          <div className="lg:col-span-2">
             <AnimatePresence mode="wait">
               {isEditing ? (
                 <motion.div 
-                  key="edit"
+                  key="edit-form"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm"
+                  className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-8"
                 >
-                  <h3 className="text-lg md:text-xl font-bold text-deep-espresso mb-6 md:mb-8 flex items-center gap-3">
-                    <FiEdit2 className="text-red-800 shrink-0" /> Evolution of Identity
-                  </h3>
-                  <form onSubmit={handleSave} className="space-y-6 md:space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                       <div className="space-y-2">
-                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Shop Essence</label>
-                         <input 
+                  <div className="flex items-center gap-3 pb-2 border-b border-slate-50">
+                     <div className="w-10 h-10 bg-seller-light/40 rounded-xl flex items-center justify-center text-seller-primary">
+                        <Pencil size={20} />
+                     </div>
+                     <h3 className="text-xl font-bold text-slate-900 tracking-tight">Personal & Business Info</h3>
+                  </div>
+                  
+                  <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Shop Name</label>
+                        <input 
                            type="text" 
                            value={profileData.shopName}
                            onChange={(e) => setProfileData({...profileData, shopName: e.target.value})}
-                           placeholder="Ex: Golden Threads"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
-                         />
-                       </div>
-                       <div className="space-y-2">
-                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Owner's Name</label>
-                         <input 
+                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Owner's Full Name</label>
+                        <input 
                            type="text" 
                            value={profileData.fullName}
                            onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
-                           placeholder="Full Name"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
-                         />
-                       </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                      <div className="space-y-2">
-                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Email Conduit</label>
-                         <input 
+                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Email Address</label>
+                        <input 
                            type="email" 
                            value={profileData.email}
                            onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                           placeholder="Email"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
-                         />
-                       </div>
-                       <div className="space-y-2">
-                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Primary Contact</label>
-                         <input 
+                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Phone Number</label>
+                        <input 
                            type="tel" 
                            value={profileData.phone}
                            onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                           placeholder="Phone"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
-                         />
-                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                       <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Physical HQ (Address)</label>
-                       <textarea 
-                         value={profileData.shopAddress}
-                         onChange={(e) => setProfileData({...profileData, shopAddress: e.target.value})}
-                         placeholder="Store Address"
-                         className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none h-24 md:h-32 resize-none text-sm"
-                       />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                       <div className="space-y-2">
-                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">GST-IN Credentials</label>
-                         <input 
+                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                        />
+                     </div>
+                     <div className="space-y-2 md:col-span-2">
+                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Store Address</label>
+                        <textarea 
+                           value={profileData.shopAddress}
+                           onChange={(e) => setProfileData({...profileData, shopAddress: e.target.value})}
+                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none h-32 resize-none"
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">GSTIN Number</label>
+                        <input 
                            type="text" 
                            value={profileData.gstNumber}
                            onChange={(e) => setProfileData({...profileData, gstNumber: e.target.value})}
-                           placeholder="GST Code"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
-                         />
-                       </div>
-                       <div className="space-y-2">
-                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Personal Taxation (PAN)</label>
-                         <input 
+                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">PAN Card Number</label>
+                        <input 
                            type="text" 
                            value={profileData.panNumber}
                            onChange={(e) => setProfileData({...profileData, panNumber: e.target.value})}
-                           placeholder="PAN Card Number"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
-                         />
-                       </div>
-                    </div>
-
-                    <div className="flex gap-4 pt-2 md:pt-4">
-                       <button 
-                         type="submit" 
-                         disabled={isSaving}
-                         className="flex-1 py-4 md:py-5 bg-red-800 text-white rounded-2xl md:rounded-[24px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-[9px] md:text-[10px] shadow-2xl shadow-red-800/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 md:gap-4"
-                       >
-                         {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <FiSave className="text-lg md:text-xl" />}
-                         {isSaving ? 'Processing...' : 'Commit Updates'}
-                       </button>
-                    </div>
+                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                        />
+                     </div>
+                     <div className="md:col-span-2 pt-4">
+                        <button 
+                           type="submit" 
+                           disabled={isSaving}
+                           className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold text-sm shadow-xl shadow-slate-900/10 hover:bg-slate-800 transition-all flex items-center justify-center gap-3"
+                        >
+                           {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={20} />}
+                           {isSaving ? 'Saving Changes...' : 'Update Information'}
+                        </button>
+                     </div>
                   </form>
                 </motion.div>
               ) : (
                 <motion.div 
-                  key="view"
+                  key="view-info"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="space-y-12"
+                  className="space-y-8"
                 >
-                  <div className="grid grid-cols-2 gap-4 md:gap-8">
-                     <div className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm flex flex-col justify-between group hover:border-red-800/20 transition-all">
-                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-red-800 text-white flex items-center justify-center shadow-2xl shadow-red-800/20 shrink-0">
-                           <FiShoppingBag size={24} md:size={28} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-seller-primary/20 transition-all">
+                        <div className="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-900/10 shrink-0">
+                           <ShoppingBag size={26} />
                         </div>
-                        <div className="mt-6 md:mt-8">
-                           <p className="text-[8px] md:text-[10px] font-black text-red-800 uppercase tracking-widest mb-1">Established</p>
-                           <p className="text-lg md:text-2xl font-black text-deep-espresso">{profileData.joinDate}</p>
+                        <div className="mt-8">
+                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Sales</p>
+                           <h4 className="text-2xl font-bold text-slate-900 tracking-tight">₹1.2M+</h4>
                         </div>
                      </div>
-                     <div className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm flex flex-col justify-between group hover:border-red-800/20 transition-all">
-                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-deep-espresso text-white flex items-center justify-center shadow-2xl shadow-deep-espresso/20 shrink-0">
-                           <FiShoppingBag size={24} md:size={28} />
+                     <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-seller-primary/20 transition-all">
+                        <div className="w-14 h-14 rounded-2xl bg-seller-primary text-white flex items-center justify-center shadow-lg shadow-seller-primary/20 shrink-0">
+                           <ShieldCheck size={26} />
                         </div>
-                        <div className="mt-6 md:mt-8">
-                           <p className="text-[8px] md:text-[10px] font-black text-red-800 uppercase tracking-widest mb-1">Seller Tier</p>
-                           <p className="text-lg md:text-2xl font-black text-deep-espresso">{profileData.tier.split(' ')[0]}</p>
+                        <div className="mt-8">
+                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Identity Status</p>
+                           <h4 className="text-2xl font-bold text-slate-900 tracking-tight">Verified</h4>
                         </div>
                      </div>
                   </div>
 
-                  <div className="bg-white p-8 md:p-12 rounded-[2rem] md:rounded-[48px] border border-soft-oatmeal shadow-sm overflow-hidden relative">
-                    <div className="absolute top-0 right-0 p-8 md:p-12 opacity-5 pointer-events-none">
-                      <FiShoppingBag size={120} md:size={200} className="text-red-800" />
-                    </div>
-                    
-                    <h2 className="text-xl md:text-2xl font-black text-deep-espresso mb-8 md:mb-10 flex items-center gap-3 md:gap-4">
-                      <div className="w-1.5 md:w-2 h-6 md:h-8 bg-red-800 rounded-full" /> Business Identity
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-16">
-                       {[
-                         { label: 'Merchant Email', value: profileData.email, icon: <FiMail /> },
-                         { label: 'Secure Phone', value: profileData.phone, icon: <FiPhone /> },
-                         { label: 'Global GST-IN', value: profileData.gstNumber, icon: <FiCheckCircle /> },
-                         { label: 'Permanent Account', value: profileData.panNumber, icon: <FiCreditCard /> },
-                         { label: 'Physical HQ', value: profileData.shopAddress, icon: <FiMapPin />, full: true },
-                       ].map((field, i) => (
-                         <div key={i} className={`${field.full ? 'md:col-span-2' : ''} space-y-2`}>
-                            <p className="text-[10px] font-black text-red-800 uppercase tracking-widest flex items-center gap-2">
-                              {field.icon} {field.label}
-                            </p>
-                            <p className="text-lg font-bold text-deep-espresso break-words">
-                              {field.value || 'Credentials Required'}
-                            </p>
-                         </div>
-                       ))}
-                    </div>
+                  <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-10">
+                     <h3 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+                        <div className="w-1.5 h-6 bg-seller-primary rounded-full" />
+                        Business Profile Details
+                     </h3>
+                     
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
+                        {[
+                          { label: 'Merchant Email', value: profileData.email, icon: <Mail size={18} /> },
+                          { label: 'Contact Phone', value: profileData.phone, icon: <Phone size={18} /> },
+                          { label: 'Registered GSTIN', value: profileData.gstNumber, icon: <CheckCircle2 size={18} /> },
+                          { label: 'PAN Identity', value: profileData.panNumber, icon: <CreditCard size={18} /> },
+                          { label: 'Primary Warehouse', value: profileData.shopAddress, icon: <MapPin size={18} />, full: true },
+                        ].map((field, i) => (
+                          <div key={i} className={`${field.full ? 'md:col-span-2' : ''} space-y-1.5`}>
+                             <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-wider">
+                                {field.icon} {field.label}
+                             </div>
+                             <p className="text-base font-bold text-slate-900 leading-relaxed">
+                                {field.value || 'Not provided'}
+                             </p>
+                          </div>
+                        ))}
+                     </div>
                   </div>
                 </motion.div>
               )}
@@ -350,34 +363,51 @@ const SellerProfile = () => {
           </div>
 
           {/* Quick Actions Sidebar */}
-          <div className="space-y-6 md:space-y-8">
-            <div className="bg-white p-8 md:p-10 rounded-[2rem] md:rounded-[40px] border border-soft-oatmeal shadow-sm">
-               <h3 className="text-lg md:text-xl font-bold text-deep-espresso mb-6 md:mb-8">Quick Actions</h3>
-               <div className="space-y-3 md:space-y-4">
-                  <button 
-                    onClick={() => setIsEditing(!isEditing)} 
-                    className={`w-full flex items-center justify-between p-4 md:p-5 rounded-2xl transition-all font-bold group ${isEditing ? 'bg-red-800 text-white' : 'bg-soft-oatmeal/10 hover:bg-soft-oatmeal/30 text-deep-espresso'}`}
-                  >
-                     <div className="flex items-center gap-4">
-                        <FiEdit2 className={isEditing ? 'text-white' : 'text-red-800'} />
-                        <span className="text-xs md:text-sm uppercase tracking-widest font-black">
-                          {isEditing ? 'Stop Editing' : 'Edit Profile'}
-                        </span>
-                     </div>
-                  </button>
-                  <button 
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-3 md:gap-4 p-5 md:p-6 rounded-[20px] md:rounded-[24px] bg-red-50 text-red-900 hover:bg-red-900 hover:text-white transition-all font-black text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] mt-6 md:mt-8 shadow-xl shadow-red-900/5"
-                  >
-                     <FiLogOut /> Logout
-                  </button>
+          <div className="space-y-8">
+            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+               <h3 className="text-lg font-bold text-slate-900 mb-2">Merchant Tools</h3>
+               <div className="space-y-3">
+                  {[
+                    { label: 'Store Analytics', icon: <BarChart3 size={18} />, path: '/seller/reports/sales' },
+                    { label: 'Wallet & Payouts', icon: <CreditCard size={18} />, path: '/seller/wallet' },
+                    { label: 'Account Settings', icon: <Settings size={18} />, path: '/seller/settings' },
+                  ].map((tool, i) => (
+                    <button 
+                      key={i}
+                      onClick={() => navigate(tool.path)}
+                      className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-all group"
+                    >
+                       <div className="flex items-center gap-4">
+                          <div className="text-slate-400 group-hover:text-seller-primary transition-colors">
+                             {tool.icon}
+                          </div>
+                          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">{tool.label}</span>
+                       </div>
+                       <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  ))}
                </div>
+               
+               <button 
+                 onClick={() => logout()}
+                 className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all font-bold text-xs uppercase tracking-widest mt-4"
+               >
+                  <LogOut size={18} /> Sign Out
+               </button>
             </div>
 
-            <div className="bg-red-900/5 p-8 md:p-10 rounded-[2rem] md:rounded-[40px] border border-red-900/10">
-               <h3 className="text-base md:text-lg font-black text-red-900 uppercase tracking-widest mb-4">Merchant Support</h3>
-               <p className="text-[10px] md:text-xs text-red-900/60 font-bold leading-relaxed mb-6 md:mb-8 uppercase tracking-tighter">Our specialists are available 24/7 to ensure your storefront maintains its prestige status.</p>
-               <button className="w-full py-4 bg-red-900 text-white rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-[10px]">Contact Liaison</button>
+            <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden group">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-seller-primary/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-seller-primary/40 transition-colors"></div>
+               <div className="relative z-10 space-y-4">
+                  <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-seller-primary">
+                     <ShieldCheck size={26} />
+                  </div>
+                  <h4 className="text-xl font-bold tracking-tight">Need Assistance?</h4>
+                  <p className="text-xs text-white/60 leading-relaxed font-medium">Our merchant support specialists are here to help you grow your business 24/7.</p>
+                  <button className="w-full py-4 bg-seller-primary rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-seller-primary/20 hover:bg-seller-dark transition-all">
+                     Contact Support
+                  </button>
+               </div>
             </div>
           </div>
         </div>
@@ -387,4 +417,3 @@ const SellerProfile = () => {
 };
 
 export default SellerProfile;
-

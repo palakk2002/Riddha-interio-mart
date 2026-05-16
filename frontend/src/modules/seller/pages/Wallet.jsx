@@ -1,11 +1,28 @@
 import React, { useState } from 'react';
 import PageWrapper from '../components/PageWrapper';
-import { LuWallet, LuTrendingUp, LuArrowUpRight, LuArrowDownLeft, LuSearch, LuFilter } from 'react-icons/lu';
-import { FiDollarSign } from 'react-icons/fi';
+import { 
+  Wallet as WalletIcon, 
+  TrendingUp, 
+  ArrowUpRight, 
+  ArrowDownLeft, 
+  Search, 
+  Filter,
+  DollarSign,
+  ChevronRight,
+  Download,
+  CreditCard,
+  Plus,
+  History,
+  X,
+  AlertCircle,
+  Clock
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const initialTransactions = [
-  { id: 1, type: 'Order Payment', amount: 15499, status: 'Completed', date: '2024-04-14', isPositive: true },
-  { id: 2, type: 'Withdrawal', amount: 10000, status: 'Pending', date: '2024-04-12', isPositive: false },
+  { id: 1, type: 'Order Settlement', amount: 15499, status: 'Completed', date: '2024-04-14', isPositive: true },
+  { id: 2, type: 'Funds Withdrawal', amount: 10000, status: 'Pending', date: '2024-04-12', isPositive: false },
+  { id: 3, type: 'Order Settlement', amount: 8250, status: 'Completed', date: '2024-04-10', isPositive: true },
 ];
 
 const Wallet = () => {
@@ -64,88 +81,158 @@ const Wallet = () => {
     setWithdrawAmount('');
     setError('');
   };
+
   return (
     <PageWrapper>
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 md:px-0 text-center md:text-left">
+      <div className="max-w-7xl mx-auto space-y-8 pb-10">
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1">
-            <h1 className="text-2xl md:text-4xl font-display font-bold text-deep-espresso">My Wallet</h1>
-            <p className="text-warm-sand text-[10px] md:text-sm font-bold uppercase tracking-widest leading-relaxed">Track your earnings and payout history.</p>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Financial Overview</h1>
+            <p className="text-sm font-medium text-slate-500">Manage your earnings, payouts and transaction history</p>
           </div>
-          <button 
-            onClick={() => setShowWithdrawModal(true)}
-            className="w-full md:w-auto flex items-center justify-center gap-2 bg-red-800 text-white px-8 py-3.5 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-deep-espresso transition-all shadow-xl shadow-red-900/20 active:scale-95"
-          >
-            Withdraw Funds
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-4 md:px-0">
-          <div className="bg-white p-6 rounded-2xl border border-soft-oatmeal shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
-              <FiDollarSign size={24} />
-            </div>
-            <div>
-              <p className="text-[10px] text-warm-sand font-black uppercase tracking-widest">Total Earnings</p>
-              <h4 className="text-xl md:text-2xl font-black text-deep-espresso">₹85,000</h4>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-soft-oatmeal shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-brand-pink-light flex items-center justify-center text-brand-pink shrink-0">
-              <LuWallet size={24} />
-            </div>
-            <div>
-              <p className="text-[10px] text-warm-sand font-black uppercase tracking-widest">Wallet Balance</p>
-              <h4 className="text-xl md:text-2xl font-black text-deep-espresso">₹{balance.toLocaleString()}</h4>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-soft-oatmeal shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
-              <LuTrendingUp size={24} />
-            </div>
-            <div>
-              <p className="text-[10px] text-warm-sand font-black uppercase tracking-widest">Pending Payout</p>
-              <h4 className="text-xl md:text-2xl font-black text-deep-espresso">₹5,000</h4>
-            </div>
+          
+          <div className="flex items-center gap-3">
+             <button className="p-3 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+                <Download size={20} />
+             </button>
+             <button 
+               onClick={() => setShowWithdrawModal(true)}
+               className="flex items-center gap-2 px-6 py-3 bg-seller-primary text-white rounded-xl font-bold text-sm hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20"
+             >
+               <Plus size={18} />
+               Withdraw Funds
+             </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-soft-oatmeal shadow-md overflow-hidden">
-          <div className="p-6 border-b border-soft-oatmeal">
-            <h3 className="text-lg font-bold text-deep-espresso">Recent Transactions</h3>
+        {/* Financial KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Main Balance Card - Premium Gradient */}
+          <div className="md:col-span-1 bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-900/20 group">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-seller-primary/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-seller-primary/30 transition-colors"></div>
+             <div className="relative z-10 flex flex-col h-full justify-between">
+                <div className="flex items-center justify-between mb-8">
+                   <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center">
+                      <WalletIcon size={24} />
+                   </div>
+                   <div className="flex flex-col items-end">
+                      <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Wallet Status</span>
+                      <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1">
+                         <div className="w-1 h-1 rounded-full bg-emerald-400"></div> Verified
+                      </span>
+                   </div>
+                </div>
+                <div>
+                   <p className="text-sm font-medium text-white/60 mb-1">Available Balance</p>
+                   <h2 className="text-4xl font-bold tracking-tight">₹{balance.toLocaleString()}</h2>
+                </div>
+                <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between">
+                   <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Next Payout</span>
+                      <span className="text-xs font-bold text-white/80 mt-0.5">Apr 20, 2024</span>
+                   </div>
+                   <button className="text-xs font-bold text-seller-primary hover:text-white transition-colors flex items-center gap-1">
+                      Details <ChevronRight size={14} />
+                   </button>
+                </div>
+             </div>
+          </div>
+
+          {/* Secondary Stats */}
+          <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
+             <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm group hover:shadow-md transition-all">
+                <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 transition-transform">
+                   <TrendingUp size={26} />
+                </div>
+                <div>
+                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Gross Revenue</p>
+                   <h3 className="text-3xl font-bold text-slate-900 tracking-tight">₹85,000</h3>
+                   <div className="flex items-center gap-2 mt-4">
+                      <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold">
+                         <ArrowUpRight size={12} /> +14.2%
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">vs. last month</span>
+                   </div>
+                </div>
+             </div>
+
+             <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm group hover:shadow-md transition-all">
+                <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 mb-6 group-hover:scale-110 transition-transform">
+                   <History size={26} />
+                </div>
+                <div>
+                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Processing Payouts</p>
+                   <h3 className="text-3xl font-bold text-slate-900 tracking-tight">₹5,000</h3>
+                   <div className="flex items-center gap-2 mt-4 text-[11px] font-bold text-slate-500">
+                      <Clock size={14} className="text-amber-500" /> Expected in 48 hours
+                   </div>
+                </div>
+             </div>
+          </div>
+        </div>
+
+        {/* Transaction History */}
+        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
+          <div className="p-8 border-b border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+               <History className="text-slate-400" size={20} />
+               <h3 className="text-lg font-bold text-slate-900">Recent Transactions</h3>
+            </div>
+            <div className="flex items-center gap-3">
+               <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <input type="text" placeholder="Search..." className="pl-9 pr-4 py-2 bg-slate-50 border-none rounded-xl text-xs font-semibold focus:ring-2 focus:ring-seller-primary/10 w-40 md:w-64" />
+               </div>
+               <button className="p-2.5 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 transition-colors">
+                  <Filter size={18} />
+               </button>
+            </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-soft-oatmeal/20 border-b border-soft-oatmeal">
+            <table className="w-full text-left">
+              <thead className="bg-slate-50/50 border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Type</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Amount</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Status</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Date</th>
+                  <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Transaction Details</th>
+                  <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Reference ID</th>
+                  <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Amount</th>
+                  <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                  <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-soft-oatmeal/50">
+              <tbody className="divide-y divide-slate-100">
                 {transactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-soft-oatmeal/5 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className={`flex items-center gap-2 ${transaction.isPositive ? 'text-green-600' : 'text-red-600'} font-bold text-sm`}>
-                        {transaction.isPositive ? <LuArrowDownLeft size={16} /> : <LuArrowUpRight size={16} />}
-                        {transaction.type}
+                  <tr key={transaction.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-4">
+                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${transaction.isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                            {transaction.isPositive ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
+                         </div>
+                         <div>
+                            <p className="text-sm font-bold text-slate-900 group-hover:text-seller-primary transition-colors">{transaction.type}</p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{transaction.isPositive ? 'Credit' : 'Debit'}</p>
+                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-black text-deep-espresso text-sm">
-                      ₹{transaction.amount.toLocaleString()}
+                    <td className="px-8 py-5">
+                       <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">TXN-{transaction.id}</span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                    <td className="px-8 py-5 font-bold text-slate-900">
+                      <span className={transaction.isPositive ? 'text-emerald-600' : 'text-slate-900'}>
+                         {transaction.isPositive ? '+' : '-'} ₹{transaction.amount.toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="px-8 py-5">
+                      <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl border ${
                         transaction.status === 'Completed' 
-                          ? 'text-green-700 bg-green-50 border-green-700/10' 
-                          : 'text-amber-700 bg-amber-50 border-amber-700/10'
+                          ? 'text-emerald-600 bg-emerald-50 border-emerald-100' 
+                          : 'text-amber-600 bg-amber-50 border-amber-100'
                       }`}>
                         {transaction.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs text-deep-espresso/70 font-medium">{transaction.date}</td>
+                    <td className="px-8 py-5 text-right text-[11px] text-slate-500 font-bold uppercase tracking-widest">{transaction.date}</td>
                   </tr>
                 ))}
               </tbody>
@@ -154,56 +241,85 @@ const Wallet = () => {
         </div>
 
         {/* Withdrawal Modal */}
-        {showWithdrawModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-deep-espresso/20 backdrop-blur-sm">
-            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-soft-oatmeal animate-in fade-in zoom-in duration-300">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl md:text-2xl font-display font-bold text-deep-espresso">Withdraw Funds</h3>
-                <LuWallet size={24} className="text-warm-sand" />
-              </div>
-
-              <div className="bg-soft-oatmeal/10 p-4 rounded-2xl mb-6 flex items-center justify-between border border-soft-oatmeal/50">
-                <p className="text-xs font-bold text-warm-sand uppercase tracking-widest">Available Balance</p>
-                <p className="text-lg font-black text-deep-espresso">₹{balance.toLocaleString()}</p>
-              </div>
-
-              <form onSubmit={handleWithdraw} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand">Amount to Withdraw (₹)</label>
-                  <input 
-                    type="number" 
-                    required 
-                    placeholder="Enter amount"
-                    value={withdrawAmount}
-                    onChange={(e) => setWithdrawAmount(e.target.value)}
-                    className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all font-bold text-deep-espresso"
-                  />
-                  {error && <p className="text-xs text-red-600 font-bold">{error}</p>}
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setShowWithdrawModal(false);
-                      setError('');
-                      setWithdrawAmount('');
-                    }}
-                    className="flex-1 px-6 py-3.5 rounded-xl font-bold text-deep-espresso bg-soft-oatmeal/30 hover:bg-soft-oatmeal/50 transition-all text-sm"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit"
-                    className="flex-1 px-6 py-3.5 rounded-xl font-bold text-white bg-red-800 hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20 text-sm"
-                  >
-                    Confirm
+        <AnimatePresence>
+          {showWithdrawModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+                onClick={() => setShowWithdrawModal(false)}
+              />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="bg-white rounded-[2.5rem] p-10 max-w-md w-full shadow-2xl relative z-10 border border-slate-100"
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <div className="space-y-1">
+                    <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Withdraw Funds</h3>
+                    <p className="text-sm font-medium text-slate-500">Secure payout to your linked account</p>
+                  </div>
+                  <button onClick={() => setShowWithdrawModal(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
+                    <X size={24} className="text-slate-400" />
                   </button>
                 </div>
-              </form>
+
+                <div className="bg-slate-900 rounded-[2rem] p-6 mb-8 text-white relative overflow-hidden">
+                   <div className="absolute top-0 right-0 w-20 h-20 bg-seller-primary/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                   <div className="relative z-10 flex items-center justify-between">
+                      <div>
+                         <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Current Balance</p>
+                         <p className="text-2xl font-bold">₹{balance.toLocaleString()}</p>
+                      </div>
+                      <CreditCard className="text-white/20" size={32} />
+                   </div>
+                </div>
+
+                <form onSubmit={handleWithdraw} className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider ml-1">Amount to Withdraw (₹)</label>
+                    <div className="relative">
+                       <div className="absolute left-5 top-1/2 -translate-y-1/2 font-bold text-slate-400">₹</div>
+                       <input 
+                        type="number" 
+                        required 
+                        placeholder="Enter amount"
+                        value={withdrawAmount}
+                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                        className="w-full bg-slate-50 border-none rounded-2xl pl-10 pr-5 py-4 text-sm font-bold focus:ring-2 focus:ring-seller-primary/20 transition-all"
+                      />
+                    </div>
+                    {error && (
+                       <div className="flex items-center gap-2 mt-2 text-red-600 px-1">
+                          <AlertCircle size={14} />
+                          <p className="text-xs font-bold">{error}</p>
+                       </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <button 
+                      type="button"
+                      onClick={() => setShowWithdrawModal(false)}
+                      className="flex-1 px-6 py-4 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit"
+                      className="flex-1 px-6 py-4 rounded-2xl font-bold text-white bg-seller-primary hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20"
+                    >
+                      Process Payout
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
             </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
       </div>
     </PageWrapper>
   );

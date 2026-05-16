@@ -1,7 +1,24 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUploadCloud, FiPlus, FiTrash2, FiFileText, FiCheckCircle, FiPackage, FiShoppingBag } from 'react-icons/fi';
-import Button from '../../../shared/components/Button';
+import { 
+  UploadCloud, 
+  Plus, 
+  Trash2, 
+  FileText, 
+  CheckCircle2, 
+  Package, 
+  ShoppingBag,
+  FileSpreadsheet,
+  Zap,
+  Info,
+  ChevronRight,
+  ArrowRight,
+  X,
+  PlusCircle,
+  Database,
+  SearchCode
+} from 'lucide-react';
+import PageWrapper from '../components/PageWrapper';
 
 const BulkProductUpload = () => {
   const [activeTab, setActiveTab] = useState('excel');
@@ -32,7 +49,7 @@ const BulkProductUpload = () => {
     setIsUploading(true);
     let progress = 0;
     const interval = setInterval(() => {
-      progress += 10;
+      progress += 5;
       setUploadProgress(progress);
       if (progress >= 100) {
         clearInterval(interval);
@@ -42,177 +59,212 @@ const BulkProductUpload = () => {
           setTimeout(() => setIsSuccess(false), 3000);
         }, 500);
       }
-    }, 200);
+    }, 100);
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 md:mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 px-4 md:px-0">
-          <div className="text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-warm-sand/10 rounded-full text-[9px] md:text-[10px] font-black text-warm-sand uppercase tracking-widest mb-3 md:mb-4">
-              <FiShoppingBag /> Seller Dashboard
-            </div>
-            <h1 className="text-3xl md:text-4xl font-black text-deep-espresso tracking-tighter uppercase italic">
-              Bulk <span className="text-warm-sand">Inventory</span>
-            </h1>
-            <p className="text-gray-400 font-bold uppercase tracking-widest text-[9px] md:text-[10px] mt-2 leading-relaxed">Scale your business by uploading your entire catalog at once.</p>
+    <PageWrapper>
+      <div className="max-w-7xl mx-auto space-y-8 pb-10">
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Bulk Inventory Sync</h1>
+            <p className="text-sm font-medium text-slate-500">Scale your storefront by uploading entire catalogs at once</p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+             <div className="bg-white px-5 py-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                <div className="text-right">
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Batch Limit</p>
+                   <p className="text-xl font-bold text-slate-900">1,000 Items</p>
+                </div>
+                <div className="w-10 h-10 bg-seller-primary/10 rounded-xl flex items-center justify-center text-seller-primary">
+                   <Zap size={20} />
+                </div>
+             </div>
           </div>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-8 px-4 md:px-0">
+        <div className="flex items-center gap-1 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm w-full md:w-fit overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('excel')}
-            className={`w-full md:w-auto px-6 md:px-8 py-3.5 md:py-4 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all border-2 ${activeTab === 'excel' ? 'bg-deep-espresso text-white border-deep-espresso shadow-xl shadow-black/10' : 'bg-white text-gray-400 border-gray-100 hover:border-warm-sand'}`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === 'excel' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
           >
-            Import Spreadsheet
+            <FileSpreadsheet size={16} /> Import Spreadsheet
           </button>
           <button
             onClick={() => setActiveTab('manual')}
-            className={`w-full md:w-auto px-6 md:px-8 py-3.5 md:py-4 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all border-2 ${activeTab === 'manual' ? 'bg-deep-espresso text-white border-deep-espresso shadow-xl shadow-black/10' : 'bg-white text-gray-400 border-gray-100 hover:border-warm-sand'}`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === 'manual' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
           >
-            Manual Batch Entry
+            <Zap size={16} /> Manual Batch Entry
           </button>
         </div>
 
         <AnimatePresence mode="wait">
           {activeTab === 'excel' ? (
             <motion.div
-              key="excel"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="bg-white rounded-[2rem] p-10 md:p-20 border border-gray-100 shadow-sm text-center"
+              key="excel-upload"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="bg-white rounded-[2.5rem] p-12 md:p-24 border border-slate-200 shadow-sm flex flex-col items-center text-center"
             >
-              <div className="max-w-md mx-auto">
-                <FiUploadCloud className="text-5xl md:text-6xl text-gray-100 mx-auto mb-6 md:mb-8" />
-                <h2 className="text-xl md:text-2xl font-black text-deep-espresso uppercase italic mb-3 md:mb-4">Fast Import</h2>
-                <p className="text-gray-400 text-[10px] md:text-xs font-bold uppercase tracking-widest leading-relaxed mb-8 md:mb-12">
-                  Upload your Excel or CSV file. We will automatically map your products to our premium catalog.
-                </p>
+              <div className="max-w-md w-full space-y-10">
+                <div className="relative group mx-auto">
+                   <div className="absolute inset-0 bg-seller-primary/10 rounded-full blur-3xl group-hover:bg-seller-primary/20 transition-colors"></div>
+                   <div className="relative w-24 h-24 bg-slate-900 rounded-[2rem] flex items-center justify-center text-white shadow-2xl mx-auto">
+                      <UploadCloud size={40} />
+                   </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Import Fast, Scale Faster</h2>
+                  <p className="text-sm font-medium text-slate-500 leading-relaxed">
+                    Upload your Excel or CSV file. Our engine will automatically validate and map your data to our global catalog.
+                  </p>
+                </div>
 
-                <div className="space-y-4 md:space-y-6">
+                <div className="space-y-6">
                   <div className="relative group">
                     <input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-10" />
-                    <div className="w-full h-16 md:h-20 rounded-xl md:rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center font-black text-[10px] md:text-xs uppercase tracking-widest text-gray-400 group-hover:border-warm-sand group-hover:text-warm-sand transition-all">
-                      Drop File Here
+                    <div className="w-full h-32 rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-2 group-hover:border-seller-primary group-hover:bg-seller-light/5 transition-all">
+                       <Plus size={24} className="text-slate-300 group-hover:text-seller-primary transition-colors" />
+                       <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Drop File or Click to Browse</span>
                     </div>
                   </div>
-                  <button className="text-[9px] md:text-[10px] font-black text-warm-sand uppercase tracking-[0.2em] flex items-center justify-center gap-2 mx-auto hover:text-deep-espresso transition-colors">
-                    <FiFileText /> Get Inventory Template
-                  </button>
+                  
+                  <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                     <button className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
+                        <FileText size={16} /> Download Template
+                     </button>
+                     <div className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                        <Info size={14} /> Supports .XLSX, .CSV
+                     </div>
+                  </div>
                 </div>
               </div>
             </motion.div>
           ) : (
             <motion.div
-              key="manual"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="bg-white rounded-[2rem] p-6 md:p-10 border border-gray-100 shadow-sm overflow-hidden"
+              key="manual-upload"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col"
             >
-              <div className="overflow-x-auto -mx-6 md:-mx-10 px-6 md:px-10">
-                <table className="w-full text-left min-w-[1200px]">
+              <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                 <h3 className="text-lg font-bold text-slate-900 flex items-center gap-3">
+                    <div className="w-1.5 h-6 bg-seller-primary rounded-full" />
+                    Batch Processing Engine
+                 </h3>
+                 <div className="flex items-center gap-3">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                       {manualProducts.length} Items Loaded
+                    </span>
+                 </div>
+              </div>
+
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left min-w-[1400px]">
                   <thead>
-                    <tr className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] border-b border-gray-50">
-                      <th className="pb-6 pr-4">Product Details</th>
-                      <th className="pb-6 px-4">SKU</th>
-                      <th className="pb-6 px-4">HSN</th>
-                      <th className="pb-6 px-4">Brand</th>
-                      <th className="pb-6 px-4">Category</th>
-                      <th className="pb-6 px-4 w-32">Price (INR)</th>
-                      <th className="pb-6 px-4 w-24">Stock</th>
-                      <th className="pb-6 px-4">Image Reference</th>
-                      <th className="pb-6 pl-4 w-12"></th>
+                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                      <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Product Title</th>
+                      <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">SKU</th>
+                      <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">HSN</th>
+                      <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Brand</th>
+                      <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Category</th>
+                      <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider w-40">Price (INR)</th>
+                      <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider w-32">Stock</th>
+                      <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Asset Link</th>
+                      <th className="px-8 py-5 text-right w-20"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-slate-100">
                     {manualProducts.map((row, idx) => (
-                      <tr key={idx} className="group">
-                        <td className="py-5 pr-4">
+                      <tr key={idx} className="hover:bg-slate-50/30 transition-colors">
+                        <td className="px-8 py-5">
                           <input
                             type="text"
-                            placeholder="Product Title"
-                            className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-xs font-bold text-deep-espresso focus:ring-2 focus:ring-warm-sand/20"
+                            placeholder="e.g. Marble Slab"
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-seller-primary/10 transition-all"
                             value={row.name}
                             onChange={(e) => handleInputChange(idx, 'name', e.target.value)}
                           />
                         </td>
-                        <td className="py-5 px-4">
+                        <td className="px-8 py-5">
                           <input
                             type="text"
                             placeholder="SKU"
-                            className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-xs font-bold text-deep-espresso focus:ring-2 focus:ring-warm-sand/20"
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-seller-primary/10 transition-all"
                             value={row.sku}
                             onChange={(e) => handleInputChange(idx, 'sku', e.target.value)}
                           />
                         </td>
-                        <td className="py-5 px-4">
+                        <td className="px-8 py-5">
                           <input
                             type="text"
                             placeholder="HSN"
-                            className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-xs font-bold text-deep-espresso focus:ring-2 focus:ring-warm-sand/20"
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-seller-primary/10 transition-all"
                             value={row.hsnCode}
                             onChange={(e) => handleInputChange(idx, 'hsnCode', e.target.value)}
                           />
                         </td>
-                        <td className="py-5 px-4">
+                        <td className="px-8 py-5">
                           <input
                             type="text"
                             placeholder="Brand"
-                            className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-xs font-bold text-deep-espresso focus:ring-2 focus:ring-warm-sand/20"
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-seller-primary/10 transition-all"
                             value={row.brand}
                             onChange={(e) => handleInputChange(idx, 'brand', e.target.value)}
                           />
                         </td>
-                        <td className="py-5 px-4">
+                        <td className="px-8 py-5">
                           <select
-                            className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-xs font-bold text-deep-espresso focus:ring-2 focus:ring-warm-sand/20"
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3.5 text-xs font-bold text-slate-600 focus:ring-2 focus:ring-seller-primary/10 transition-all"
                             value={row.category}
                             onChange={(e) => handleInputChange(idx, 'category', e.target.value)}
                           >
-                            <option value="">Category</option>
-                            <option value="furniture">Furniture</option>
-                            <option value="decor">Decor</option>
-                            <option value="lighting">Lighting</option>
+                            <option value="">Select Category</option>
+                            <option value="tiles">Tiles & Slabs</option>
+                            <option value="faucets">Faucets</option>
+                            <option value="sanitary">Sanitaryware</option>
                           </select>
                         </td>
-                        <td className="py-5 px-4">
+                        <td className="px-8 py-5">
                           <input
                             type="number"
                             placeholder="0.00"
-                            className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-xs font-bold text-deep-espresso focus:ring-2 focus:ring-warm-sand/20"
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3.5 text-xs font-bold text-emerald-600 focus:ring-2 focus:ring-seller-primary/10 transition-all"
                             value={row.price}
                             onChange={(e) => handleInputChange(idx, 'price', e.target.value)}
                           />
                         </td>
-                        <td className="py-5 px-4">
+                        <td className="px-8 py-5">
                           <input
                             type="number"
                             placeholder="0"
-                            className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-xs font-bold text-deep-espresso focus:ring-2 focus:ring-warm-sand/20"
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-seller-primary/10 transition-all"
                             value={row.stock}
                             onChange={(e) => handleInputChange(idx, 'stock', e.target.value)}
                           />
                         </td>
-                        <td className="py-5 px-4">
+                        <td className="px-8 py-5">
                           <input
                             type="text"
-                            placeholder="URL"
-                            className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-xs font-bold text-deep-espresso focus:ring-2 focus:ring-warm-sand/20"
+                            placeholder="Image URL"
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3.5 text-xs font-bold text-slate-400 focus:ring-2 focus:ring-seller-primary/10 transition-all"
                             value={row.imageLink}
                             onChange={(e) => handleInputChange(idx, 'imageLink', e.target.value)}
                           />
                         </td>
-                        <td className="py-5 pl-4 text-right">
+                        <td className="px-8 py-5 text-right">
                           <button
                             onClick={() => removeRow(idx)}
-                            className="p-2 text-gray-200 hover:text-red-400 transition-colors"
+                            className="p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                           >
-                            <FiTrash2 />
+                            <Trash2 size={16} />
                           </button>
                         </td>
                       </tr>
@@ -221,65 +273,66 @@ const BulkProductUpload = () => {
                 </table>
               </div>
 
-              <div className="mt-8 md:mt-10 flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8 pt-6 md:pt-8 border-t border-gray-50">
+              <div className="p-8 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-6">
                 <button
                   onClick={addRow}
-                  className="flex items-center gap-3 text-[9px] md:text-[10px] font-black text-warm-sand uppercase tracking-[0.2em] hover:text-deep-espresso transition-colors"
+                  className="flex items-center gap-2.5 px-6 py-4 bg-white border border-slate-200 rounded-2xl text-[11px] font-bold text-slate-900 uppercase tracking-widest hover:border-seller-primary transition-all shadow-sm"
                 >
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-warm-sand/10 flex items-center justify-center">
-                    <FiPlus />
-                  </div>
+                  <PlusCircle size={18} className="text-seller-primary" />
                   Add Product Row
                 </button>
 
-                <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto">
-                  <div className="text-right hidden md:block">
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Batch Size</p>
-                    <p className="text-xl font-black text-deep-espresso italic">{manualProducts.length} Items</p>
+                <div className="flex items-center gap-6 w-full md:w-auto">
+                  <div className="text-right hidden sm:block">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Queue Size</p>
+                    <p className="text-xl font-bold text-slate-900 tracking-tight">{manualProducts.length} Items</p>
                   </div>
-                  <Button
+                  <button
                     onClick={handleBulkSubmit}
                     disabled={isUploading}
-                    className="flex-1 md:flex-none h-14 md:h-16 px-10 md:px-16 rounded-xl md:rounded-2xl font-black uppercase tracking-widest shadow-2xl shadow-warm-sand/20 relative overflow-hidden text-[9px] md:text-[10px]"
+                    className="flex-1 sm:flex-none h-16 px-12 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-xl shadow-slate-900/10 hover:bg-seller-primary transition-all relative overflow-hidden min-w-[200px]"
                   >
-                    {isUploading ? `Processing ${uploadProgress}%` : 'Submit Batch'}
+                    <span className="relative z-10">{isUploading ? `Syncing ${uploadProgress}%` : 'Finalize & Submit'}</span>
                     {isUploading && (
                       <motion.div
-                        className="absolute bottom-0 left-0 h-1 bg-white/40"
+                        className="absolute bottom-0 left-0 h-1.5 bg-seller-primary"
                         initial={{ width: 0 }}
                         animate={{ width: `${uploadProgress}%` }}
                       />
                     )}
-                  </Button>
+                  </button>
                 </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Success Feedback */}
+        {/* Success Feedback Overlay */}
         <AnimatePresence>
           {isSuccess && (
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 50 }}
-              className="fixed bottom-10 right-10 z-[100]"
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.9 }}
+              className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100]"
             >
-              <div className="bg-deep-espresso text-white p-6 rounded-3xl shadow-2xl border border-white/10 flex items-center gap-5">
-                <div className="w-12 h-12 bg-warm-sand rounded-2xl flex items-center justify-center text-deep-espresso text-2xl">
-                  <FiCheckCircle />
+              <div className="bg-slate-900 text-white px-8 py-5 rounded-3xl shadow-2xl flex items-center gap-5 border border-white/10 backdrop-blur-xl">
+                <div className="w-12 h-12 bg-seller-primary rounded-2xl flex items-center justify-center text-white shadow-lg">
+                  <CheckCircle2 size={26} />
                 </div>
                 <div>
-                  <p className="font-black uppercase tracking-widest text-[10px] text-warm-sand">Batch Received</p>
-                  <p className="text-sm font-bold opacity-80">Syncing with marketplace...</p>
+                  <p className="font-bold uppercase tracking-widest text-[11px] text-seller-primary">Sync Initiated</p>
+                  <p className="text-sm font-medium text-white/80 mt-0.5">Processing your batch in the background...</p>
                 </div>
+                <button onClick={() => setIsSuccess(false)} className="ml-4 p-2 hover:bg-white/10 rounded-lg transition-colors">
+                   <X size={16} className="text-white/40" />
+                </button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </PageWrapper>
   );
 };
 

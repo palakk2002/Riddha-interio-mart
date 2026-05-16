@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useUser } from '../data/UserContext';
 import { FiArrowLeft, FiUser, FiLock, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
 import { FaGoogle, FaFacebookF, FaXTwitter } from 'react-icons/fa6';
 import Button from '../../../shared/components/Button';
 import LOGIN_BG from '../../../assets/login_bg_fretshop.png';
 import api from '../../../shared/utils/api';
+import logo from '../../../assets/transparent logo.png';
 
 const LoginPage = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [rbacRole, setRbacRole] = useState('admin'); // 'admin' or 'assistant'
+  const [rbacRole, setRbacRole] = useState('admin');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
@@ -27,9 +28,10 @@ const LoginPage = () => {
     return 'user';
   };
 
+  const role = getRole();
+
   const getSignupPath = () => {
-    const role = getRole();
-    if (role === 'admin') return null; // No signup for admin
+    if (role === 'admin') return null;
     if (role === 'seller') return '/seller/signup';
     if (role === 'delivery') return '/delivery/signup';
     return '/signup';
@@ -41,7 +43,6 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const role = getRole();
       const authPath = role === 'admin' 
         ? '/auth/admin/login' 
         : role === 'seller' 
@@ -57,10 +58,7 @@ const LoginPage = () => {
 
       if (response.data.success) {
         const { token, user } = response.data;
-        
         login({ ...user, token });
-
-        // Navigate based on role
         if (role === 'admin') navigate('/admin/dashboard');
         else if (role === 'seller') navigate('/seller/dashboard');
         else if (role === 'delivery') navigate('/delivery/dashboard');
@@ -91,232 +89,196 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
-      {/* Desktop Background Layer */}
-      <div className="hidden md:block absolute inset-0 z-0">
+    <div className="min-h-screen bg-slate-50 flex font-sans">
+      {/* Left Section - Branding & Visuals */}
+      <div className="hidden lg:flex flex-1 relative items-center justify-center overflow-hidden bg-slate-900">
         <img
           src={LOGIN_BG}
-          alt="Luxury Showroom"
-          className="w-full h-full object-cover"
+          alt="Luxury Interior"
+          className="absolute inset-0 w-full h-full object-cover opacity-40 scale-105"
         />
-        <div className="absolute inset-0 bg-black/45 backdrop-blur-[1px]" />
-      </div>
-
-      {/* Main Content Container */}
-      <div className="relative z-10 flex flex-col md:flex-row min-h-screen">
-        {/* Left Section (Desktop Branding) */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-slate-900 via-slate-900/40 to-transparent" />
+        
         <motion.div
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className="hidden md:flex flex-1 items-center justify-center p-20"
+          className="relative z-10 max-w-xl w-full p-8"
         >
-          <div className="max-w-2xl space-y-6">
-            <h1 className="text-[140px] font-display font-black text-white italic leading-none drop-shadow-2xl">
-              Riddha
-            </h1>
-            <p className="text-2xl font-medium text-white/70 italic tracking-wider ml-4">
-              Interio Mart
-            </p>
-          </div>
-        </motion.div>
-
-        {/* Right Section / Form Section */}
-        <div className="flex-1 flex flex-col min-h-screen">
-          {/* Mobile Header Image (Only on Mobile) */}
-          <div className="md:hidden relative h-[32vh] min-h-[220px] w-full overflow-hidden">
-            <img
-              src={LOGIN_BG}
-              alt="Luxury Interior"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/10" />
-
-            <button
-              onClick={() => navigate(-1)}
-              className="absolute top-6 left-6 h-10 w-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 shadow-lg active:scale-90 transition-all z-20"
-            >
-              <FiArrowLeft className="h-5 w-5" />
-            </button>
-
-            {/* Curve Effect */}
-            <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none">
-              <svg viewBox="0 0 1440 320" className="absolute bottom-[-1px] left-0 w-full h-[120%] rotate-180" preserveAspectRatio="none">
-                <path fill="#ffffff" fillOpacity="1" d="M0,160L48,176C96,192,192,224,288,229.3C384,235,480,213,576,192C672,171,768,149,864,154.7C960,160,1056,192,1152,192C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-              </svg>
+          <div className="relative overflow-hidden bg-white/[0.03] backdrop-blur-3xl rounded-[3.5rem] p-16 border border-white/10 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] group">
+            {/* Ambient Glows */}
+            <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#189D91]/20 rounded-full blur-[80px] pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-pink-500/10 rounded-full blur-[80px] pointer-events-none" />
+            
+            <div className="relative z-10">
+                <img 
+                  src={logo} 
+                  alt="Riddha Logo" 
+                  className="w-full h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)] transform transition-transform duration-700 group-hover:scale-[1.02]" 
+                />
+                
+                <div className="mt-12 space-y-4">
+                    <div className="flex items-center gap-3">
+                        <div className="h-[1px] w-8 bg-gradient-to-r from-[#189D91] to-transparent" />
+                        <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.6em] leading-none italic">
+                            Premium Quality Supply
+                        </p>
+                    </div>
+                    <h2 className="text-3xl font-display font-black text-white tracking-tighter leading-tight drop-shadow-lg">
+                        India's Largest <br/>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/60">Interior Supply Hub</span>
+                    </h2>
+                    <div className="pt-2">
+                        <p className="text-white/30 text-[10px] font-bold leading-relaxed max-w-[280px]">
+                            Curating the finest collection of luxury interiors for over a decade.
+                        </p>
+                    </div>
+                </div>
             </div>
           </div>
+        </motion.div>
+      </div>
 
-          {/* Form Area Wrapper */}
-          <div className="flex-1 flex items-center justify-center p-6 md:p-12 lg:p-24 relative">
-            {/* Desktop Back Button */}
-            <button
-              onClick={() => navigate(-1)}
-              className="hidden md:flex absolute top-10 right-10 flex items-center gap-2 group text-white/50 hover:text-white transition-all font-bold text-xs tracking-widest uppercase z-50"
-            >
-              <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-              Back
-            </button>
-
-            {/* Form Card */}
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="w-full max-w-[560px] md:max-w-md bg-white md:bg-white/10 md:backdrop-blur-3xl md:border md:border-white/20 py-5 px-8 md:p-12 rounded-[50px] md:rounded-[40px] shadow-2xl md:shadow-none relative mx-auto"
-            >
-              {/* Login Header */}
-              <div className="hidden md:flex justify-between items-center mb-10">
-                <h2 className="text-3xl font-display font-bold text-white">Log In</h2>
-                <div className="flex gap-2 text-[10px] font-black uppercase tracking-wider">
-                  <span className="text-white border-b border-white pb-0.5 pointer-events-none">Log In</span>
-                  {getSignupPath() && (
-                    <span className="text-white/40 hover:text-white cursor-pointer transition-colors" onClick={() => navigate(getSignupPath())}>Sign Up</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Mobile Header (Visible only on mobile) */}
-              <div className="md:hidden text-center space-y-2 mb-12 w-full pt-4">
-                <h1 className="text-4xl font-display font-black text-deep-espresso tracking-tight">Welcome Back</h1>
-                <p className="text-gray-400 font-black text-[10px] tracking-[0.2em] uppercase">
-                  Login to your account
-                </p>
-              </div>
-
-              {/* Role Selection for Admin */}
-              {getRole() === 'admin' && (
-                <div className="mb-8">
-                  <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 backdrop-blur-md">
-                    <button
-                      type="button"
-                      onClick={() => setRbacRole('admin')}
-                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${rbacRole === 'admin' ? 'bg-white text-deep-espresso shadow-lg scale-100' : 'text-white/40 hover:text-white scale-95'}`}
-                    >
-                      Super Admin
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRbacRole('assistant')}
-                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${rbacRole === 'assistant' ? 'bg-[#189D91] text-white shadow-lg scale-100' : 'text-white/40 hover:text-white scale-95'}`}
-                    >
-                      Assistant
-                    </button>
-                  </div>
-                  <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest text-center mt-3 italic">Choose your workspace to continue</p>
-                </div>
-              )}
-
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex flex-col items-center gap-2 text-center"
-                  >
-                    <span className="text-red-500 text-[10px] font-bold uppercase tracking-wider">{error}</span>
-                    {unverifiedEmail && (
-                      <button 
-                        onClick={handleResendAndVerify}
-                        className="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors mt-2"
-                      >
-                        Verify Email Now
-                      </button>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <form onSubmit={handleLogin} className="space-y-6">
-                <div className="space-y-5">
-                  <div className="space-y-1">
-                    <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-2 ml-1">Email</label>
-                    <div className="relative group">
-                      <FiUser className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-5 w-5" />
-                      <input
-                        type="text"
-                        placeholder={window.innerWidth < 768 ? "Email ID" : "Enter your email"}
-                        value={identifier}
-                        onChange={(e) => setIdentifier(e.target.value)}
-                        className="w-full md:pl-6 pl-16 pr-6 py-5 md:py-4 rounded-full md:rounded-2xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-bold transition-all md:text-white placeholder:text-gray-400 md:placeholder:text-white/40"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-2 ml-1">Password</label>
-                    <div className="relative group">
-                      <FiLock className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-5 w-5" />
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        placeholder={window.innerWidth < 768 ? "••••••" : "••••••••"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full md:pl-6 pl-16 pr-14 py-5 md:py-4 rounded-full md:rounded-2xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-bold transition-all md:text-white placeholder:text-gray-400 md:placeholder:text-white/40"
-                      />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 md:text-white/50 hover:text-white">
-                        {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-4 w-4 opacity-50" />}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between px-2">
-                  <button type="button" onClick={() => setRememberMe(!rememberMe)} className="hidden md:flex items-center gap-2 group">
-                    <div className={`h-4 w-4 rounded-md border-2 flex items-center justify-center transition-all ${rememberMe ? 'bg-white border-white' : 'border-white/30 group-hover:border-white/50'}`}>
-                      {rememberMe && <FiCheck className="text-deep-espresso text-[10px] stroke-[4]" />}
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 group-hover:text-white">Remember Me</span>
-                  </button>
-                  <button type="button" onClick={() => navigate('/forgot-password')} className="text-[10px] font-black text-gray-400 md:text-white/40 uppercase tracking-widest hover:text-[#189D91] md:hover:text-white mx-auto md:mx-0">
-                    Forgot Password?
-                  </button>
-                </div>
-
-                <div className="flex flex-col md:flex-row items-center gap-6 pt-4">
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className={`w-full md:w-auto md:ml-auto h-16 md:h-12 px-10 rounded-full md:rounded-xl ${(getRole() === 'admin' && rbacRole === 'admin') ? 'bg-deep-espresso md:bg-white text-white md:text-deep-espresso' : 'bg-[#189D91] text-white'} hover:bg-black md:hover:bg-warm-sand md:hover:text-white font-black text-sm md:text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#189D91]/20 transition-all active:scale-[0.98] ${loading ? 'opacity-50' : ''}`}
-                  >
-                    {loading ? 'Logging In...' : 'Log In'}
-                  </Button>
-                </div>
-
-                {/* Social Logins - Desktop Only */}
-                {getRole() !== 'admin' && (
-                  <div className="hidden md:block pt-10 border-t border-white/10">
-                    <div className="flex items-center gap-4 mb-8">
-                      <div className="flex-1 h-[1px] bg-white/10"></div>
-                      <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">OR</span>
-                      <div className="flex-1 h-[1px] bg-white/10"></div>
-                    </div>
-                    <div className="flex justify-center items-center gap-8">
-                      {[FaGoogle, FaFacebookF, FaXTwitter].map((Icon, idx) => (
-                        <button key={idx} type="button" className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-deep-espresso transition-all hover:scale-110 active:scale-90">
-                          <Icon size={20} />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {getSignupPath() && (
-                  <p className="hidden md:block text-center text-[10px] font-black text-white/50 uppercase tracking-widest mt-8">
-                    Don't have an account? <span onClick={() => navigate(getSignupPath())} className="text-white cursor-pointer border-b border-white/30 pb-0.5 hover:text-white/100 transition-colors">Sign up</span>
-                  </p>
-                )}
-
-                {/* Mobile Sign Up Link */}
-                {getSignupPath() && (
-                  <p className="md:hidden text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-4">
-                    Don't have account? <span onClick={() => navigate(getSignupPath())} className="text-[#189D91] cursor-pointer font-black border-b border-[#189D91]/30 pb-0.5 ml-1">SIGN UP</span>
-                  </p>
-                )}
-              </form>
-            </motion.div>
+      {/* Right Section - Login Form */}
+      <div className="flex-1 flex flex-col justify-center bg-white relative">
+        <div className="max-w-md w-full mx-auto px-8 md:px-0">
+          {/* Header */}
+          <div className="mb-10 flex items-center justify-between">
+            <div>
+                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Log In</h1>
+                <p className="text-sm font-medium text-slate-500 mt-1 capitalize">Access your {role} panel</p>
+            </div>
+            <Link to="/" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all border border-slate-100">
+                <FiArrowLeft size={18} />
+            </Link>
           </div>
+
+          {/* Role Selection for Admin */}
+          {role === 'admin' && (
+            <div className="mb-8 p-1.5 bg-slate-50 rounded-2xl border border-slate-100 flex">
+              <button
+                onClick={() => setRbacRole('admin')}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${rbacRole === 'admin' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                Super Admin
+              </button>
+              <button
+                onClick={() => setRbacRole('assistant')}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${rbacRole === 'assistant' ? 'bg-[#189D91] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                Assistant
+              </button>
+            </div>
+          )}
+
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="mb-8 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col items-center gap-3"
+              >
+                <span className="text-rose-600 text-[10px] font-bold uppercase tracking-wider text-center leading-relaxed">{error}</span>
+                {unverifiedEmail && (
+                  <button onClick={handleResendAndVerify} className="bg-rose-600 text-white px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-rose-700 transition-colors">
+                    Verify Email
+                  </button>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email ID</label>
+                <div className="relative group">
+                  <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#189D91] transition-colors" size={18} />
+                  <input
+                    type="text"
+                    placeholder="name@example.com"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:border-[#189D91] focus:ring-4 focus:ring-[#189D91]/5 outline-none transition-all font-semibold text-slate-800 placeholder:text-slate-300"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center px-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Password</label>
+                    <button type="button" onClick={() => navigate('/forgot-password')} className="text-[9px] font-black text-[#189D91] uppercase tracking-widest hover:underline">Forgot?</button>
+                </div>
+                <div className="relative group">
+                  <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#189D91] transition-colors" size={18} />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:border-[#189D91] focus:ring-4 focus:ring-[#189D91]/5 outline-none transition-all font-semibold text-slate-800 placeholder:text-slate-300"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-600">
+                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 px-1">
+              <button 
+                type="button" 
+                onClick={() => setRememberMe(!rememberMe)} 
+                className="flex items-center gap-2.5 group"
+              >
+                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${rememberMe ? 'bg-[#189D91] border-[#189D91]' : 'border-slate-200 bg-white group-hover:border-slate-300'}`}>
+                  {rememberMe && <FiCheck className="text-white text-xs stroke-[4]" />}
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-600 transition-colors">Remember Me</span>
+              </button>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-slate-200 transition-all active:scale-[0.98] mt-4"
+            >
+              {loading ? 'Authenticating...' : 'Sign In Now'}
+            </Button>
+
+            {/* Social Logins */}
+            {role !== 'admin' && (
+              <div className="pt-8">
+                <div className="relative flex items-center justify-center mb-8">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-100"></div>
+                  </div>
+                  <span className="relative px-4 bg-white text-[9px] font-black text-slate-300 uppercase tracking-widest">Or Continue With</span>
+                </div>
+                <div className="flex justify-center gap-4">
+                  {[FaGoogle, FaFacebookF, FaXTwitter].map((Icon, idx) => (
+                    <button key={idx} type="button" className="w-12 h-12 rounded-xl border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-200 transition-all hover:scale-105 active:scale-95">
+                      <Icon size={18} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {getSignupPath() && (
+              <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest mt-8">
+                Don't have an account? <Link to={getSignupPath()} className="text-[#189D91] hover:underline ml-1">Create Account</Link>
+              </p>
+            )}
+          </form>
+        </div>
+
+        {/* Footer info */}
+        <div className="absolute bottom-8 left-0 right-0 text-center">
+            <p className="text-[9px] font-black text-slate-200 uppercase tracking-[0.3em] italic">
+                © {new Date().getFullYear()} Riddha Interio Mart. All Rights Reserved.
+            </p>
         </div>
       </div>
     </div>
