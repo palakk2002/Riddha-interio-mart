@@ -36,7 +36,7 @@ export const NotificationProvider = ({ children }) => {
     if (user && user.token) {
       fetchNotifications();
 
-      const newSocket = io(process.env.REACT_APP_API_URL || 'http://localhost:5000', {
+      const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
         auth: { token: user.token }
       });
 

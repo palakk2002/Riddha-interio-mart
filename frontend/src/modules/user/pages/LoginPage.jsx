@@ -14,6 +14,7 @@ const LoginPage = () => {
   const [rbacRole, setRbacRole] = useState('admin'); // 'admin' or 'assistant'
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [error, setError] = useState('');
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const { login, loading, setLoading } = useUser();
   const navigate = useNavigate();
