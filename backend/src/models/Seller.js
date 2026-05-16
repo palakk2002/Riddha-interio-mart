@@ -34,6 +34,10 @@ const SellerSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  hsnNumber: {
+    type: String,
+    default: ""
+  },
   avatar: {
     type: String,
     default: ""

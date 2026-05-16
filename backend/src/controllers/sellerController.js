@@ -7,13 +7,23 @@ const checkEmailExists = require('../utils/checkEmailExists');
 // @access  Public
 exports.registerSeller = async (req, res, next) => {
   try {
-    const { fullName, email, password, shopName, shopAddress, phone } = req.body;
+    const { fullName, email, password, shopName, shopAddress, phone, gstNumber, panNumber, hsnNumber } = req.body;
 
     if (await checkEmailExists(email)) {
       return res.status(400).json({ success: false, error: 'Email already registered' });
     }
 
-    const seller = await Seller.create({ fullName, email, password, shopName, shopAddress, phone });
+    const seller = await Seller.create({ 
+      fullName, 
+      email, 
+      password, 
+      shopName, 
+      shopAddress, 
+      phone,
+      gstNumber: gstNumber || "",
+      panNumber: panNumber || "",
+      hsnNumber: hsnNumber || ""
+    });
     sendTokenResponse(seller, 201, res);
   } catch (err) {
     next(err);
@@ -52,7 +62,7 @@ exports.getSellerMe = async (req, res, next) => {
 // @desc    Update Seller Profile
 exports.updateSellerProfile = async (req, res, next) => {
   try {
-    const { fullName, email, phone, shopName, shopAddress, avatar, gstNumber, panNumber } = req.body;
+    const { fullName, email, phone, shopName, shopAddress, avatar, gstNumber, panNumber, hsnNumber } = req.body;
     
     const seller = await Seller.findById(req.user.id);
     if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
@@ -73,7 +83,8 @@ exports.updateSellerProfile = async (req, res, next) => {
       shopAddress: shopAddress || seller.shopAddress,
       avatar: avatar || seller.avatar,
       gstNumber: gstNumber !== undefined ? gstNumber : seller.gstNumber,
-      panNumber: panNumber !== undefined ? panNumber : seller.panNumber
+      panNumber: panNumber !== undefined ? panNumber : seller.panNumber,
+      hsnNumber: hsnNumber !== undefined ? hsnNumber : seller.hsnNumber
     };
 
     const updatedSeller = await Seller.findByIdAndUpdate(req.user.id, fieldsToUpdate, {

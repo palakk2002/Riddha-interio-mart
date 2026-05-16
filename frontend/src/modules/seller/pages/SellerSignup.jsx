@@ -16,6 +16,9 @@ const SellerSignup = () => {
     phone: '',
     shopName: '',
     shopAddress: '',
+    gstNumber: '',
+    panNumber: '',
+    hsnNumber: '',
     password: '',
     confirmPassword: '',
     referralCode: ''
@@ -52,6 +55,9 @@ const SellerSignup = () => {
         phone: formData.phone,
         shopName: formData.shopName,
         shopAddress: formData.shopAddress,
+        gstNumber: formData.gstNumber,
+        panNumber: formData.panNumber,
+        hsnNumber: formData.hsnNumber,
         password: formData.password,
         referralCode: formData.referralCode
       });
@@ -98,13 +104,13 @@ const SellerSignup = () => {
       >
         <div className="relative z-10 w-full max-w-sm space-y-12">
           <Link to="/" className="inline-block">
-            <img src={logo} alt="Logo" className="h-16 md:h-20 w-auto object-contain" />
+            <img src={logo} alt="Logo" className="h-24 md:h-28 w-auto object-contain" />
           </Link>
 
           <div className="space-y-6">
-            <h1 className="text-6xl font-black text-slate-900 leading-tight tracking-tighter">
+            <h1 className="text-6xl font-semibold text-slate-900 leading-tight tracking-tighter">
               Join the <br />
-              <span className="text-[#E36666] italic font-serif">Family.</span>
+              <span className="text-[#E36666] font-serif">Family.</span>
             </h1>
             <p className="text-slate-400 font-medium text-lg leading-relaxed">
               Scale your interior business with India's most trusted partner network.
@@ -117,8 +123,8 @@ const SellerSignup = () => {
                    <FiCheckCircle size={24} />
                 </div>
                 <div>
-                   <p className="text-xs font-black uppercase tracking-widest text-slate-400">Trusted By</p>
-                   <p className="text-xl font-black text-slate-900">5000+ Sellers</p>
+                   <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Trusted By</p>
+                   <p className="text-xl font-semibold text-slate-900">5000+ Sellers</p>
                 </div>
              </div>
           </div>
@@ -134,18 +140,18 @@ const SellerSignup = () => {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full h-full md:h-auto md:max-w-[580px] flex flex-col px-6 py-8 md:p-0"
+          className="w-full h-full md:h-auto md:max-w-[650px] flex flex-col px-6 py-8 md:p-0"
         >
-          {/* Mobile Logo - Increased size */}
-          <div className="md:hidden flex justify-center mb-8">
-            <img src={logo} alt="Logo" className="h-14 w-auto object-contain" />
+          {/* Mobile Logo */}
+          <div className="md:hidden flex justify-center mb-10">
+            <img src={logo} alt="Logo" className="h-24 w-auto object-contain" />
           </div>
 
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl md:text-2xl font-black text-slate-900 tracking-tight">
+          <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0">
+            <h2 className="text-2xl md:text-2xl font-semibold text-slate-900 tracking-tight text-center md:text-left">
               {step === 'signup' ? 'Create Account' : 'Verify Email'}
             </h2>
-            <Link to="/seller/login-form" className="text-xs font-black uppercase tracking-widest text-[#E36666] hover:underline underline-offset-4">
+            <Link to="/seller/login-form" className="text-xs font-semibold uppercase tracking-widest text-[#E36666] hover:underline underline-offset-4">
               Sign In
             </Link>
           </div>
@@ -154,17 +160,18 @@ const SellerSignup = () => {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="mb-4 p-3 bg-red-50 rounded-xl border border-red-100 text-red-500 text-[10px] font-bold text-center uppercase tracking-widest"
+              className="mb-4 p-3 bg-red-50 rounded-xl border border-red-100 text-red-500 text-[10px] font-semibold text-center uppercase tracking-widest"
             >
               {error}
             </motion.div>
           )}
 
           {step === 'signup' ? (
-            <form onSubmit={handleSignup} className="flex-1 flex flex-col space-y-4 md:space-y-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-2">
+            <form onSubmit={handleSignup} className="flex-1 flex flex-col space-y-4 md:space-y-3">
+              {/* Personal & Shop Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                 <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
+                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
                   <div className="relative group">
                     <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
                     <input
@@ -172,14 +179,14 @@ const SellerSignup = () => {
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleChange}
-                      placeholder="Name"
-                      className="w-full pl-12 pr-4 py-4 md:py-2 md:pl-8 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-bold text-slate-700 transition-all"
+                      placeholder="Enter full name"
+                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
                       required
                     />
                   </div>
                 </div>
                 <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 ml-1">Email</label>
+                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
                   <div className="relative group">
                     <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
                     <input
@@ -187,17 +194,18 @@ const SellerSignup = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="Email"
-                      className="w-full pl-12 pr-4 py-4 md:py-2 md:pl-8 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-bold text-slate-700 transition-all"
+                      placeholder="Enter email"
+                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
                       required
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-2">
+              {/* Shop & Phone Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                 <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 ml-1">Shop Name</label>
+                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Shop Name</label>
                   <div className="relative group">
                     <FiShoppingBag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
                     <input
@@ -205,14 +213,14 @@ const SellerSignup = () => {
                       name="shopName"
                       value={formData.shopName}
                       onChange={handleChange}
-                      placeholder="Shop"
-                      className="w-full pl-12 pr-4 py-4 md:py-2 md:pl-8 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-bold text-slate-700 transition-all"
+                      placeholder="Enter shop name"
+                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
                       required
                     />
                   </div>
                 </div>
                 <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone</label>
+                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Phone Number</label>
                   <div className="relative group">
                     <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
                     <input
@@ -220,32 +228,74 @@ const SellerSignup = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      placeholder="Phone"
-                      className="w-full pl-12 pr-4 py-4 md:py-2 md:pl-8 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-bold text-slate-700 transition-all"
+                      placeholder="Enter phone"
+                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
                       required
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Business Identification (GST, PAN, HSN) */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3">
+                <div className="space-y-1 md:space-y-0.5">
+                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">GST Number</label>
+                  <input
+                    type="text"
+                    name="gstNumber"
+                    value={formData.gstNumber}
+                    onChange={handleChange}
+                    placeholder="GSTIN"
+                    className="w-full px-4 py-4 md:py-2.5 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                    required
+                  />
+                </div>
+                <div className="space-y-1 md:space-y-0.5">
+                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">PAN Number</label>
+                  <input
+                    type="text"
+                    name="panNumber"
+                    value={formData.panNumber}
+                    onChange={handleChange}
+                    placeholder="PAN"
+                    className="w-full px-4 py-4 md:py-2.5 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                    required
+                  />
+                </div>
+                <div className="space-y-1 md:space-y-0.5">
+                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">HSN Number</label>
+                  <input
+                    type="text"
+                    name="hsnNumber"
+                    value={formData.hsnNumber}
+                    onChange={handleChange}
+                    placeholder="HSN"
+                    className="w-full px-4 py-4 md:py-2.5 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Address */}
               <div className="space-y-1 md:space-y-0.5">
-                <label className="text-[10px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 ml-1">Shop Address</label>
+                <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Business Address</label>
                 <div className="relative group">
                   <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
                   <input
                     name="shopAddress"
                     value={formData.shopAddress}
                     onChange={handleChange}
-                    placeholder="Business Address"
-                    className="w-full pl-12 pr-4 py-4 md:py-2 md:pl-8 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-bold text-slate-700 transition-all"
+                    placeholder="Full Business Address"
+                    className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
                     required
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 md:gap-2">
+              {/* Password Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                 <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
+                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Password</label>
                   <div className="relative group">
                     <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
                     <input
@@ -254,7 +304,7 @@ const SellerSignup = () => {
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="••••••••"
-                      className="w-full pl-12 pr-10 py-4 md:py-2 md:pl-8 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-bold text-slate-700 transition-all"
+                      className="w-full pl-12 pr-10 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
                       required
                     />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300">
@@ -263,7 +313,7 @@ const SellerSignup = () => {
                   </div>
                 </div>
                 <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 ml-1">Confirm</label>
+                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Confirm Password</label>
                   <div className="relative group">
                     <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
                     <input
@@ -272,45 +322,47 @@ const SellerSignup = () => {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       placeholder="••••••••"
-                      className="w-full pl-12 pr-4 py-4 md:py-2 md:pl-8 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-bold text-slate-700 transition-all"
+                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
                       required
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-1 md:space-y-0.5">
-                <label className="text-[10px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 ml-1">Referral (Optional)</label>
-                <div className="relative group">
-                  <FiGift className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
-                  <input
-                    type="text"
-                    name="referralCode"
-                    value={formData.referralCode}
-                    onChange={handleChange}
-                    placeholder="RIDDHA-123"
-                    className="w-full pl-12 pr-4 py-4 md:py-2 md:pl-8 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-bold text-slate-700 transition-all"
-                  />
+              {/* Referral & Terms */}
+              <div className="flex flex-col md:flex-row items-center gap-4 py-2">
+                <div className="w-full md:w-1/2 space-y-1 md:space-y-0.5">
+                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Referral (Optional)</label>
+                  <div className="relative group">
+                    <FiGift className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
+                    <input
+                      type="text"
+                      name="referralCode"
+                      value={formData.referralCode}
+                      onChange={handleChange}
+                      placeholder="RIDDHA-123"
+                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                    />
+                  </div>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-3 py-2 md:py-1">
-                <input 
-                  type="checkbox" 
-                  checked={agreeTerms} 
-                  onChange={(e) => setAgreeTerms(e.target.checked)} 
-                  className="w-5 h-5 md:w-3.5 md:h-3.5 accent-[#E36666] rounded cursor-pointer"
-                />
-                <label className="text-[11px] md:text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none cursor-pointer">
-                  I agree to the <span className="text-slate-900 underline decoration-[#E36666]/30">Terms</span>
-                </label>
+                <div className="w-full md:w-1/2 flex items-center gap-3">
+                  <input 
+                    type="checkbox" 
+                    checked={agreeTerms} 
+                    onChange={(e) => setAgreeTerms(e.target.checked)} 
+                    className="w-5 h-5 md:w-4 md:h-4 accent-[#E36666] rounded cursor-pointer"
+                  />
+                  <label className="text-[11px] md:text-[9px] font-semibold text-slate-400 uppercase tracking-widest leading-none cursor-pointer">
+                    I agree to the <span className="text-slate-900 underline decoration-[#E36666]/30">Terms & Conditions</span>
+                  </label>
+                </div>
               </div>
 
               <motion.button
                 whileTap={{ scale: 0.99 }}
                 type="submit"
                 disabled={loading}
-                className="w-full py-5 md:py-3 bg-[#E36666] text-white rounded-2xl md:rounded-lg font-black text-xs md:text-[9px] uppercase tracking-[0.2em] shadow-xl shadow-[#E36666]/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-auto md:mt-0"
+                className="w-full py-5 md:py-3.5 bg-[#E36666] text-white rounded-2xl md:rounded-xl font-semibold text-xs md:text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-[#E36666]/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-4"
               >
                 {loading ? 'Creating...' : (
                   <>Create Account <FiArrowLeft className="rotate-180 size-4 md:size-2.5" /></>
@@ -321,17 +373,17 @@ const SellerSignup = () => {
             <form onSubmit={handleVerifyOtp} className="space-y-8">
                <div className="text-center space-y-2">
                   <p className="text-slate-400 font-medium">We've sent a verification code to</p>
-                  <p className="text-slate-900 font-black">{registeredEmail}</p>
+                  <p className="text-slate-900 font-bold">{registeredEmail}</p>
                </div>
                
                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 flex justify-center">Enter 6-Digit OTP</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1 flex justify-center">Enter 6-Digit OTP</label>
                   <input
                     type="text"
                     maxLength={6}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    className="w-full text-center text-4xl font-black tracking-[0.5em] py-6 rounded-2xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-slate-700 transition-all"
+                    className="w-full text-center text-4xl font-bold tracking-[0.5em] py-6 rounded-2xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-slate-700 transition-all"
                     required
                   />
                </div>
@@ -347,7 +399,7 @@ const SellerSignup = () => {
                </motion.button>
 
                <p className="text-center text-xs font-bold text-slate-400 uppercase tracking-widest">
-                  Didn't get the code? <button type="button" className="text-[#E36666] font-black hover:underline">Resend OTP</button>
+                  Didn't get the code? <button type="button" className="text-[#E36666] font-bold hover:underline">Resend OTP</button>
                </p>
             </form>
           )}

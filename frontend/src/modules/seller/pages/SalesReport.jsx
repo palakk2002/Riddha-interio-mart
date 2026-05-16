@@ -69,25 +69,32 @@ const SalesReport = () => {
     <PageWrapper>
       <div className="max-w-4xl mx-auto pb-20 space-y-6">
         
-        {/* Mobile-Style Header (Same as Img) */}
-        <div className="bg-seller-primary text-white p-6 pb-12 rounded-b-[2.5rem] -mx-4 md:-mx-0 md:rounded-[2.5rem] md:mt-4 shadow-xl shadow-seller-primary/10">
-           <div className="flex items-center justify-between mb-8">
-              <button onClick={() => navigate(-1)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+        {/* Professional White Analytics Header */}
+        <div className="bg-white p-6 pb-12 rounded-b-[2.5rem] -mx-4 md:-mx-0 md:rounded-[2.5rem] md:mt-4 border border-slate-100 shadow-2xl shadow-slate-200/40 relative overflow-hidden group">
+           <div className="absolute top-0 right-0 w-64 h-64 bg-seller-primary/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
+           
+           <div className="relative z-10 flex items-center justify-between mb-8">
+              <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
                  <ChevronLeft size={24} />
               </button>
-              <h1 className="text-xl font-bold tracking-tight">Seller Analytics</h1>
-              <div className="w-10" /> {/* Spacer */}
+              <h1 className="text-xl font-semibold text-slate-900 tracking-tight uppercase">Merchant <span className="text-seller-primary font-semibold">Analytics</span></h1>
+              <div className="w-10" />
            </div>
            
-           {/* Search / Action Bar */}
-           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 flex items-center justify-between border border-white/20">
+           {/* Simple & Professional Action Bar */}
+           <div className="relative z-10 bg-slate-50 rounded-2xl p-4 flex items-center justify-between border border-slate-100 group-hover:border-seller-primary/30 transition-all">
               <div className="flex items-center gap-3">
-                 <FileText size={20} className="text-white/60" />
-                 <span className="text-xs font-bold uppercase tracking-widest text-white/80">Generate data report</span>
+                 <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-seller-primary shadow-sm">
+                    <FileText size={18} />
+                 </div>
+                 <div className="space-y-0.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-900 leading-none">Generate data report</span>
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest">Full ecosystem performance export</p>
+                 </div>
               </div>
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                 <Plus size={16} />
-              </div>
+              <button className="w-10 h-10 rounded-full bg-seller-primary text-white flex items-center justify-center shadow-lg shadow-seller-primary/20 hover:scale-105 active:scale-95 transition-all">
+                 <Plus size={18} />
+              </button>
            </div>
         </div>
 
@@ -159,7 +166,7 @@ const SalesReport = () => {
 
            {/* Category Contribution (Donut Chart) */}
            <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-2xl shadow-slate-200/50 border border-slate-100">
-              <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 mb-6">Category contribution</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-widest text-slate-900 mb-6">Category contribution</h3>
               <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                  <div className="w-full h-48 md:h-56 max-w-[240px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -189,7 +196,7 @@ const SalesReport = () => {
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
                           <div className="space-y-0.5">
                              <p className="text-[10px] font-black text-slate-900 leading-none">{item.name}</p>
-                             <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">₹{item.value}k Sales</p>
+                             <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest">₹{item.value}k Sales</p>
                           </div>
                        </div>
                     ))}
@@ -199,7 +206,7 @@ const SalesReport = () => {
 
            {/* Best Selling Products */}
            <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-2xl shadow-slate-200/50 border border-slate-100 space-y-6">
-              <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Best-selling products</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-widest text-slate-900">Best-selling products</h3>
               
               <div className="space-y-4">
                  {bestSellers.map((product) => (
@@ -213,8 +220,8 @@ const SalesReport = () => {
                              <img src={product.image} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                           </div>
                           <div className="space-y-1">
-                             <h4 className="text-sm font-black text-slate-900 leading-tight">{product.name}</h4>
-                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total {product.price}</p>
+                             <h4 className="text-sm font-semibold text-slate-900 leading-tight">{product.name}</h4>
+                             <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Total {product.price}</p>
                              <div className="flex items-center gap-1.5">
                                 <Star size={10} className="text-amber-500 fill-amber-500" />
                                 <span className="text-[10px] font-black text-slate-900">{product.rating}</span>

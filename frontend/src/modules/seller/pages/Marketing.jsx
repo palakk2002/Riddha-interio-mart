@@ -161,40 +161,40 @@ const Marketing = () => {
 
            </div>
 
-           {/* Performance Sidebar */}
+           {/* Performance Sidebar - Professional White Card */}
            <div className="space-y-8">
-              <div className="bg-gradient-to-br from-seller-primary via-[#D63384] to-[#B6256B] rounded-[2.5rem] p-8 text-white relative overflow-hidden group shadow-2xl shadow-seller-primary/30">
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-[60px] -mr-20 -mt-20"></div>
-                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/10 rounded-full blur-[40px] -ml-16 -mb-16"></div>
-                  
-                  <div className="relative z-10 space-y-6">
-                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
-                           <BarChart3 size={20} className="text-white" />
-                        </div>
-                        <h3 className="text-lg font-black tracking-tight uppercase italic !text-white">Analytics</h3>
-                     </div>
-                     <div className="space-y-5">
-                        {[
-                          { label: 'Marketing ROI', val: '4.2x', trend: '+12%' },
-                          { label: 'Avg conversion', val: '5.8%', trend: '+0.4%' },
-                          { label: 'Cust. Acquisition', val: '₹142', trend: '-₹12' },
-                        ].map((stat, i) => (
-                          <div key={i} className="flex items-center justify-between pb-4 border-b border-white/10 last:border-0 last:pb-0">
-                             <div>
-                                <p className="text-[9px] font-black !text-white/90 uppercase tracking-[0.15em] mb-1.5">{stat.label}</p>
-                                <p className="text-lg font-black tracking-tight !text-white">{stat.val}</p>
-                             </div>
-                             <div className="flex flex-col items-end gap-1">
-                                <span className="text-[10px] font-black text-white bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-sm">{stat.trend}</span>
-                                <div className="w-8 h-1 bg-white/20 rounded-full overflow-hidden">
-                                   <div className="h-full bg-white" style={{ width: '60%' }}></div>
-                                </div>
-                             </div>
-                          </div>
-                        ))}
-                     </div>
-                  </div>
+               <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-2xl shadow-slate-200/40 relative overflow-hidden group">
+                   <div className="absolute top-0 right-0 w-40 h-40 bg-seller-primary/5 rounded-full blur-[60px] -mr-20 -mt-20"></div>
+                   <div className="absolute bottom-0 left-0 w-32 h-32 bg-slate-50 rounded-full blur-[40px] -ml-16 -mb-16"></div>
+                   
+                   <div className="relative z-10 space-y-6">
+                      <div className="flex items-center gap-3">
+                         <div className="w-10 h-10 bg-seller-primary/10 rounded-xl flex items-center justify-center border border-seller-primary/10">
+                            <BarChart3 size={20} className="text-seller-primary" />
+                         </div>
+                         <h3 className="text-lg font-black tracking-tight uppercase italic text-slate-900">Analytics</h3>
+                      </div>
+                      <div className="space-y-5">
+                         {[
+                           { label: 'Marketing ROI', val: '4.2x', trend: '+12%', color: 'text-emerald-500' },
+                           { label: 'Avg conversion', val: '5.8%', trend: '+0.4%', color: 'text-emerald-500' },
+                           { label: 'Cust. Acquisition', val: '₹142', trend: '-₹12', color: 'text-emerald-500' },
+                         ].map((stat, i) => (
+                           <div key={i} className="flex items-center justify-between pb-4 border-b border-slate-50 last:border-0 last:pb-0">
+                              <div>
+                                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1.5">{stat.label}</p>
+                                 <p className="text-lg font-black tracking-tight text-slate-900">{stat.val}</p>
+                              </div>
+                              <div className="flex flex-col items-end gap-1">
+                                 <span className={`text-[10px] font-black ${stat.color} bg-white border border-slate-100 px-2 py-0.5 rounded-md shadow-sm`}>{stat.trend}</span>
+                                 <div className="w-8 h-1 bg-slate-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-seller-primary" style={{ width: '60%' }}></div>
+                                 </div>
+                              </div>
+                           </div>
+                         ))}
+                      </div>
+                   </div>
                </div>
 
                <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-2xl shadow-slate-200/40 relative overflow-hidden group">

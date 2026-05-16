@@ -14,7 +14,7 @@ import {
   LuActivity,
   LuExternalLink,
   LuChevronRight,
-  LuVerified
+  LuBadgeCheck
 } from 'react-icons/lu';
 import { FiEdit2 } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -213,7 +213,7 @@ const Profile = () => {
                 
                 <h3 className="text-3xl font-black text-white tracking-tight uppercase italic">{profile.name}</h3>
                 <div className="inline-flex items-center gap-2 mt-3 px-5 py-2 bg-white/5 rounded-full text-[10px] font-black text-[#D63384] uppercase tracking-[0.2em] border border-white/5">
-                  <LuVerified size={14} /> Certified Operative
+                  <LuBadgeCheck size={14} /> Certified Operative
                 </div>
                 
                 <div className="mt-12 pt-12 border-t border-white/5 space-y-8">
@@ -452,7 +452,7 @@ const Profile = () => {
                       <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{doc.label}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                       <LuVerified className="text-emerald-500" size={16} />
+                       <LuBadgeCheck className="text-emerald-500" size={16} />
                        <LuChevronRight className="text-slate-600 group-hover:text-white transition-colors" size={14} />
                     </div>
                   </div>

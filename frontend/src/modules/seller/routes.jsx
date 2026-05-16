@@ -25,6 +25,7 @@ const SellerReviews = React.lazy(() => import('./pages/Reviews'));
 const Recommendation = React.lazy(() => import('./pages/Recommendation'));
 const Customers = React.lazy(() => import('./pages/Customers'));
 const Marketing = React.lazy(() => import('./pages/Marketing'));
+const HelpCenter = React.lazy(() => import('./pages/HelpCenter'));
 
 const SellerRoutes = () => {
   return (
@@ -58,6 +59,7 @@ const SellerRoutes = () => {
         <Route path="/recommendations" element={<Recommendation />} />
         <Route path="/customers" element={<Customers />} />
         <Route path="/marketing" element={<Marketing />} />
+        <Route path="/help" element={<HelpCenter />} />
       </Route>
     </Routes>
   );

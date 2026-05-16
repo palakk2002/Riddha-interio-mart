@@ -49,13 +49,13 @@ const SellerLoginForm = () => {
       >
         <div className="relative z-10 w-full max-w-sm space-y-12">
           <Link to="/" className="inline-block">
-            <img src={logo} alt="Logo" className="h-16 md:h-20 w-auto object-contain" />
+            <img src={logo} alt="Logo" className="h-24 md:h-28 w-auto object-contain" />
           </Link>
 
           <div className="space-y-6">
-            <h1 className="text-6xl font-black text-slate-900 leading-tight tracking-tighter">
+            <h1 className="text-6xl font-semibold text-slate-900 leading-tight tracking-tighter">
               Welcome <br />
-              <span className="text-[#E36666] italic font-serif">Back.</span>
+              <span className="text-[#E36666] font-serif">Back.</span>
             </h1>
             <p className="text-slate-400 font-medium text-lg leading-relaxed">
               Access your seller dashboard and manage your business operations seamlessly.
@@ -68,8 +68,8 @@ const SellerLoginForm = () => {
                    <FiShield size={24} />
                 </div>
                 <div>
-                   <p className="text-xs font-black uppercase tracking-widest text-slate-400">Secure Access</p>
-                   <p className="text-xl font-black text-slate-900">Partner Portal</p>
+                   <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Secure Access</p>
+                   <p className="text-xl font-semibold text-slate-900">Partner Portal</p>
                 </div>
              </div>
           </div>
@@ -89,19 +89,19 @@ const SellerLoginForm = () => {
         >
           {/* Mobile Logo */}
           <div className="md:hidden flex justify-center mb-10">
-            <img src={logo} alt="Logo" className="h-14 w-auto object-contain" />
+            <img src={logo} alt="Logo" className="h-24 w-auto object-contain" />
           </div>
 
-          <div className="mb-8">
-            <h2 className="text-3xl md:text-2xl font-black text-slate-900 tracking-tight mb-1">Sign In</h2>
-            <p className="text-slate-400 font-bold text-xs md:text-[8px] uppercase tracking-widest">Enter credentials to continue</p>
+          <div className="mb-8 text-center md:text-left">
+            <h2 className="text-3xl md:text-2xl font-semibold text-slate-900 tracking-tight mb-1">Sign In</h2>
+            <p className="text-slate-400 font-semibold text-xs md:text-[8px] uppercase tracking-widest">Enter credentials to continue</p>
           </div>
 
           {error && (
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="mb-6 p-3 bg-red-50 rounded-xl border border-red-100 text-red-500 text-[10px] md:text-[8px] font-bold text-center uppercase tracking-widest"
+              className="mb-6 p-3 bg-red-50 rounded-xl border border-red-100 text-red-500 text-[10px] md:text-[8px] font-semibold text-center uppercase tracking-widest"
             >
               {error}
             </motion.div>
@@ -109,7 +109,7 @@ const SellerLoginForm = () => {
 
           <form onSubmit={handleLogin} className="flex-1 flex flex-col space-y-6 md:space-y-3">
             <div className="space-y-1 md:space-y-0.5">
-              <label className="text-[10px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
+              <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
               <div className="relative group">
                 <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
                 <input
@@ -117,7 +117,7 @@ const SellerLoginForm = () => {
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   placeholder="seller@example.com"
-                  className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-8 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-bold text-slate-700 transition-all"
+                  className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-8 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
                   required
                 />
               </div>
@@ -125,8 +125,8 @@ const SellerLoginForm = () => {
 
             <div className="space-y-1 md:space-y-0.5">
               <div className="flex justify-between items-center ml-1">
-                <label className="text-[10px] md:text-[8px] font-black uppercase tracking-widest text-slate-400">Password</label>
-                <Link to="/forgot-password" size="sm" className="text-[10px] md:text-[8px] font-black uppercase tracking-widest text-[#E36666] hover:underline underline-offset-4">
+                <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400">Password</label>
+                <Link to="/forgot-password" size="sm" className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-[#E36666] hover:underline underline-offset-4">
                   Forgot?
                 </Link>
               </div>
@@ -137,7 +137,7 @@ const SellerLoginForm = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-12 py-4 md:py-2.5 md:pl-8 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-bold text-slate-700 transition-all"
+                  className="w-full pl-12 pr-12 py-4 md:py-2.5 md:pl-8 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
                   required
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300">
@@ -150,7 +150,7 @@ const SellerLoginForm = () => {
               whileTap={{ scale: 0.99 }}
               type="submit"
               disabled={loading}
-              className="w-full py-5 md:py-3.5 bg-[#E36666] text-white rounded-2xl md:rounded-lg font-black text-xs md:text-[9px] uppercase tracking-[0.2em] shadow-xl shadow-[#E36666]/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-auto md:mt-0"
+              className="w-full py-5 md:py-3.5 bg-[#E36666] text-white rounded-2xl md:rounded-lg font-semibold text-xs md:text-[9px] uppercase tracking-[0.2em] shadow-xl shadow-[#E36666]/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-auto md:mt-0"
             >
               {loading ? 'Authenticating...' : (
                 <>Login to Dashboard <FiArrowLeft className="rotate-180 size-4 md:size-2.5" /></>
@@ -159,10 +159,10 @@ const SellerLoginForm = () => {
           </form>
 
           <div className="mt-8 text-center space-y-4 md:space-y-3">
-             <p className="text-xs md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                New here? <Link to="/seller/signup" className="text-[#E36666] font-black border-b border-[#E36666]/30 pb-0.5 ml-1">Join Now</Link>
+             <p className="text-xs md:text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+                New here? <Link to="/seller/signup" className="text-[#E36666] font-semibold border-b border-[#E36666]/30 pb-0.5 ml-1">Join Now</Link>
              </p>
-             <Link to="/seller/login" className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-all font-bold text-[10px] md:text-[8px] uppercase tracking-widest">
+             <Link to="/seller/login" className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-all font-semibold text-[10px] md:text-[8px] uppercase tracking-widest">
                 <FiArrowLeft size={12} md:size={10} /> Back to Welcome
              </Link>
           </div>

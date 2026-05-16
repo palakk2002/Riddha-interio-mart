@@ -66,7 +66,7 @@ const Notifications = () => {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 px-4 md:px-0">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Notification Center</h1>
+            <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Notification Center</h1>
             <p className="text-sm font-medium text-slate-500">Stay synchronized with your store's latest events</p>
           </div>
           
@@ -87,7 +87,7 @@ const Notifications = () => {
             </button>
             <button
               onClick={markAllAsRead}
-              className="flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-50 transition-all text-xs uppercase tracking-widest shadow-sm"
+              className="flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-all text-xs uppercase tracking-widest shadow-sm"
             >
               <CheckCheck size={18} />
               Mark All Read
@@ -99,13 +99,13 @@ const Notifications = () => {
         <div className="flex items-center gap-1 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm w-fit mx-4 md:mx-0">
           <button
             onClick={() => setActiveFilter('all')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${activeFilter === 'all' ? 'bg-seller-primary text-white shadow-lg shadow-seller-primary/20' : 'text-slate-500 hover:text-slate-900'}`}
+            className={`px-6 py-2.5 rounded-xl text-xs font-semibold transition-all ${activeFilter === 'all' ? 'bg-seller-primary text-white shadow-lg shadow-seller-primary/20' : 'text-slate-500 hover:text-slate-900'}`}
           >
             All Activity
           </button>
           <button
             onClick={() => setActiveFilter('unread')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${activeFilter === 'unread' ? 'bg-seller-primary text-white shadow-lg shadow-seller-primary/20' : 'text-slate-500 hover:text-slate-900'}`}
+            className={`px-6 py-2.5 rounded-xl text-xs font-semibold transition-all ${activeFilter === 'unread' ? 'bg-seller-primary text-white shadow-lg shadow-seller-primary/20' : 'text-slate-500 hover:text-slate-900'}`}
           >
             Unread Only
           </button>
@@ -135,7 +135,7 @@ const Notifications = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start gap-4">
                       <div className="space-y-1">
-                        <h3 className={`text-base font-bold transition-colors ${notification.status === 'unread' ? 'text-slate-900' : 'text-slate-500'}`}>
+                        <h3 className={`text-base font-semibold transition-colors ${notification.status === 'unread' ? 'text-slate-900' : 'text-slate-500'}`}>
                           {notification.title}
                         </h3>
                         <p className={`text-sm line-clamp-2 leading-relaxed ${notification.status === 'unread' ? 'text-slate-700' : 'text-slate-400'}`}>
@@ -144,7 +144,7 @@ const Notifications = () => {
                       </div>
                       
                       <div className="flex items-center gap-4 shrink-0">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg">
+                        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg">
                           <Clock size={12} />
                           {notification.time}
                         </span>
@@ -165,7 +165,7 @@ const Notifications = () => {
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200">
                 <Inbox size={40} />
               </div>
-              <h3 className="text-xl font-bold text-slate-900">All caught up!</h3>
+              <h3 className="text-xl font-semibold text-slate-900">All caught up!</h3>
               <p className="text-slate-500 text-sm mt-2 max-w-xs mx-auto">Your notification inbox is empty. We'll alert you as soon as something happens.</p>
             </div>
           )}
@@ -193,10 +193,10 @@ const Notifications = () => {
               <div className="p-10 space-y-8">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-seller-primary uppercase tracking-widest mb-1">
+                    <div className="flex items-center gap-2 text-[10px] font-semibold text-seller-primary uppercase tracking-widest mb-1">
                        <Bell size={12} /> Merchant Alert
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{selectedNotification.title}</h2>
+                    <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">{selectedNotification.title}</h2>
                   </div>
                   <button 
                     onClick={() => setSelectedNotification(null)}
@@ -215,12 +215,12 @@ const Notifications = () => {
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-2 text-slate-400">
                     <Clock size={16} />
-                    <span className="text-[11px] font-bold uppercase tracking-widest">{selectedNotification.time}</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-widest">{selectedNotification.time}</span>
                   </div>
                   <div className="flex gap-4">
                     <button 
                       onClick={() => setSelectedNotification(null)}
-                      className="px-6 py-3.5 rounded-2xl bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-widest hover:bg-slate-200 transition-colors"
+                      className="px-6 py-3.5 rounded-2xl bg-slate-100 text-slate-600 text-xs font-semibold uppercase tracking-widest hover:bg-slate-200 transition-colors"
                     >
                       Dismiss
                     </button>
@@ -230,7 +230,7 @@ const Notifications = () => {
                           navigate(selectedNotification.link);
                           setSelectedNotification(null);
                         }}
-                        className="px-8 py-3.5 rounded-2xl bg-seller-primary text-white text-xs font-bold uppercase tracking-widest hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20 flex items-center gap-2"
+                        className="px-8 py-3.5 rounded-2xl bg-seller-primary text-white text-xs font-semibold uppercase tracking-widest hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20 flex items-center gap-2"
                       >
                         Action <ChevronRight size={16} />
                       </button>

@@ -93,19 +93,19 @@ const Dashboard = () => {
         
         {/* Mobile Quick Command Center (Visible only on mobile) */}
         <div className="lg:hidden space-y-4">
-           {/* Strategic Health Check */}
-           <div className="bg-gradient-to-br from-[#E36666] via-[#D64F4F] to-[#B93E3E] rounded-[2rem] p-5 text-white relative overflow-hidden shadow-xl shadow-seller-primary/20">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+           {/* Strategic Health Check - Professional White Card */}
+           <div className="bg-white rounded-[2rem] p-5 border border-slate-100 relative overflow-hidden shadow-2xl shadow-slate-200/40">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-seller-primary/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
               <div className="relative z-10 flex items-center justify-between">
                  <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                       <CheckCircle2 size={14} className="text-white" />
-                       <span className="text-[9px] font-black uppercase tracking-[0.2em]">Operational Health</span>
+                       <CheckCircle2 size={14} className="text-seller-primary" />
+                       <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-[0.2em]">Operational Health</span>
                     </div>
-                    <h3 className="text-lg font-black tracking-tight">Your store is 94% optimized</h3>
-                    <p className="text-[9px] text-white/70 font-bold uppercase tracking-widest">Deploy 3 more listings to reach Elite Tier</p>
+                    <h3 className="text-lg font-semibold text-slate-900 tracking-tight">Your store is <span className="text-seller-primary font-semibold">94% optimized</span></h3>
+                    <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-widest leading-relaxed">Deploy 3 more listings to reach Elite Tier</p>
                  </div>
-                 <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
+                 <div className="w-10 h-10 bg-seller-primary/10 rounded-xl flex items-center justify-center text-seller-primary border border-seller-primary/10">
                     <TrendingUp size={18} />
                  </div>
               </div>
@@ -127,7 +127,7 @@ const Dashboard = () => {
                    <div className={`w-12 h-12 rounded-xl ${action.color} flex items-center justify-center shadow-sm active:scale-90 transition-all`}>
                       <action.icon size={20} />
                    </div>
-                   <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{action.label}</span>
+                   <span className="text-[8px] font-semibold text-slate-500 uppercase tracking-widest">{action.label}</span>
                 </button>
               ))}
            </div>
@@ -136,8 +136,8 @@ const Dashboard = () => {
         {/* Dashboard Hero Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-0.5">
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Merchant Intelligence</h1>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest opacity-60">Real-time business monitoring</p>
+            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Merchant Intelligence</h1>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest opacity-60">Real-time business monitoring</p>
           </div>
           
           <div className="flex items-center gap-2">
@@ -146,7 +146,7 @@ const Dashboard = () => {
                 <button
                   key={range}
                   onClick={() => setTimeRange(range)}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${timeRange === range ? 'bg-seller-primary text-white shadow-md' : 'text-slate-400 hover:text-seller-primary'}`}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-widest transition-all ${timeRange === range ? 'bg-seller-primary text-white shadow-md' : 'text-slate-400 hover:text-seller-primary'}`}
                 >
                   {range}
                 </button>
@@ -159,7 +159,7 @@ const Dashboard = () => {
             
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-xl">
                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-               <span className="text-[9px] font-black text-emerald-700 uppercase tracking-widest">Operational</span>
+               <span className="text-[9px] font-semibold text-emerald-700 uppercase tracking-widest">Operational</span>
             </div>
           </div>
         </div>
@@ -198,7 +198,7 @@ const Dashboard = () => {
           <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Revenue Analytics</h3>
+                <h3 className="text-lg font-semibold text-slate-900">Revenue Analytics</h3>
                 <p className="text-sm text-slate-500">Daily performance trends</p>
               </div>
               <button className="p-2 hover:bg-slate-50 rounded-lg text-slate-400 transition-colors">
@@ -210,7 +210,7 @@ const Dashboard = () => {
               {loading ? (
                 <div className="w-full h-full flex items-center justify-center space-y-4 flex-col">
                   <div className="w-10 h-10 border-4 border-seller-light border-t-seller-primary rounded-full animate-spin"></div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Generating Insights...</p>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Generating Insights...</p>
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
@@ -258,7 +258,7 @@ const Dashboard = () => {
 
           {/* Order Status Donut */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 flex flex-col">
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Order Status</h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Order Status</h3>
             <p className="text-sm text-slate-500 mb-8">Distribution of fulfillment</p>
             
             <div className="h-[250px] w-full relative mb-6">
@@ -283,8 +283,8 @@ const Dashboard = () => {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-3xl font-bold text-slate-900">{stats.totalOrders}</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total</span>
+                <span className="text-3xl font-semibold text-slate-900">{stats.totalOrders}</span>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Total</span>
               </div>
             </div>
 
@@ -295,7 +295,7 @@ const Dashboard = () => {
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></div>
                     <span className="text-sm font-semibold text-slate-600">{item.name}</span>
                   </div>
-                  <span className="text-sm font-bold text-slate-900">{item.value}</span>
+                  <span className="text-sm font-semibold text-slate-900">{item.value}</span>
                 </div>
               ))}
             </div>
@@ -308,10 +308,10 @@ const Dashboard = () => {
           <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
              <div className="p-8 border-b border-slate-100 flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Top Selling Products</h3>
+                  <h3 className="text-lg font-semibold text-slate-900">Top Selling Products</h3>
                   <p className="text-sm text-slate-500">Based on recent sales volume</p>
                 </div>
-                <button className="text-sm font-bold text-seller-primary hover:underline flex items-center gap-1 group">
+                <button className="text-sm font-semibold text-seller-primary hover:underline flex items-center gap-1 group">
                   View All <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </button>
              </div>
@@ -319,9 +319,9 @@ const Dashboard = () => {
                 <table className="w-full text-left">
                   <thead className="bg-slate-50/50">
                     <tr>
-                      <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Product</th>
-                      <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Sold</th>
-                      <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Revenue</th>
+                      <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Product</th>
+                      <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Sold</th>
+                      <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Revenue</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -333,16 +333,16 @@ const Dashboard = () => {
                                 <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                              </div>
                              <div className="min-w-0">
-                                <p className="text-sm font-bold text-slate-900 truncate">{product.name}</p>
+                                <p className="text-sm font-semibold text-slate-900 truncate">{product.name}</p>
                                 <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Fashion & Style</p>
                              </div>
                           </div>
                         </td>
                         <td className="px-8 py-4 text-center">
-                          <span className="text-sm font-bold text-slate-700">{product.totalQuantity}</span>
+                          <span className="text-sm font-semibold text-slate-700">{product.totalQuantity}</span>
                         </td>
                         <td className="px-8 py-4 text-right">
-                          <p className="text-sm font-bold text-slate-900">₹{product.totalRevenue.toLocaleString()}</p>
+                          <p className="text-sm font-semibold text-slate-900">₹{product.totalRevenue.toLocaleString()}</p>
                         </td>
                       </tr>
                     )) : [1,2,3].map(i => (
@@ -360,7 +360,7 @@ const Dashboard = () => {
           {/* Low Stock Alerts */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
             <div className="p-8 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-900">Inventory Alerts</h3>
+              <h3 className="text-lg font-semibold text-slate-900">Inventory Alerts</h3>
               <p className="text-sm text-slate-500">Low stock notifications</p>
             </div>
             
@@ -371,7 +371,7 @@ const Dashboard = () => {
                      <CheckCircle2 size={32} />
                    </div>
                    <div>
-                      <p className="text-sm font-bold text-slate-900">All items in stock</p>
+                      <p className="text-sm font-semibold text-slate-900">All items in stock</p>
                       <p className="text-xs text-slate-500 mt-1">Your inventory looks healthy.</p>
                    </div>
                  </div>
@@ -381,10 +381,10 @@ const Dashboard = () => {
                     <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-slate-900 truncate">{product.name}</p>
+                    <p className="text-sm font-semibold text-slate-900 truncate">{product.name}</p>
                     <div className="flex items-center gap-2 mt-1">
                        <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                       <span className="text-[11px] font-bold text-red-600 uppercase tracking-wider">{product.countInStock} Remaining</span>
+                       <span className="text-[11px] font-semibold text-red-600 uppercase tracking-wider">{product.countInStock} Remaining</span>
                     </div>
                   </div>
                   <button className="p-2 text-slate-400 hover:text-seller-primary hover:bg-seller-light/30 rounded-lg transition-colors">
@@ -393,11 +393,28 @@ const Dashboard = () => {
                 </div>
               ))}
             </div>
+
+            {/* Newsletter/Sync Card - Professional White Design */}
+            <div className="bg-white rounded-[2.5rem] p-8 text-slate-900 relative overflow-hidden group mb-8 border border-slate-100 shadow-xl shadow-slate-200/40">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-seller-primary/5 rounded-full blur-2xl -mr-12 -mt-12"></div>
+              <h4 className="text-lg font-semibold mb-2 relative z-10">Stay Synchronized!</h4>
+              <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mb-6 relative z-10 leading-relaxed max-w-[200px]">
+                 Get real-time market updates and trend alerts.
+              </p>
+              <div className="relative z-10">
+                 <input 
+                   type="email" 
+                   placeholder="Email address"
+                   className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-xs placeholder-slate-400 focus:outline-none focus:bg-white transition-all mb-3 text-slate-700"
+                 />
+                 <button className="w-full py-3 bg-seller-primary text-white rounded-xl font-semibold text-[10px] uppercase tracking-widest hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20">Subscribe Now</button>
+              </div>
+            </div>
             
             <div className="p-6 border-t border-slate-100 bg-slate-50/50">
               <button 
                 onClick={() => navigate('/seller/product/stock')}
-                className="w-full py-4 rounded-2xl bg-seller-primary text-white font-bold text-xs uppercase tracking-widest hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20"
+                className="w-full py-4 rounded-2xl bg-seller-primary text-white font-semibold text-xs uppercase tracking-widest hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20"
               >
                 Manage Inventory
               </button>

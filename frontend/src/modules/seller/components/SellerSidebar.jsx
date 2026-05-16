@@ -97,9 +97,9 @@ const SellerSidebar = ({ isOpen, onClose }) => {
         `}
       >
         {/* Logo Area */}
-        <div className="pt-2 px-6 pb-1 flex items-center justify-between">
+        <div className="pt-2 px-6 pb-2 flex items-center justify-between">
           <Link to="/seller/dashboard" className="flex items-center group mx-auto lg:mx-0">
-            <div className="h-20 md:h-24 overflow-hidden transition-transform duration-300 group-hover:scale-105">
+            <div className="h-24 md:h-28 overflow-hidden transition-transform duration-300 group-hover:scale-105">
               <img 
                 src={logo} 
                 alt="Riddha Interio Mart" 
@@ -113,7 +113,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 px-4 pt-2 pb-10 space-y-1 overflow-y-auto custom-scrollbar">
           {menuItems.map((item) => {
             const hasChildren = !!item.children;
             const isMenuOpen = openMenus[item.label];
@@ -183,7 +183,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
                 <item.icon size={20} className={`${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 <span className="font-semibold text-sm">{item.label}</span>
                 {item.label === 'Orders' && (
-                   <span className={`ml-auto w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${isActive ? 'bg-white text-seller-primary' : 'bg-seller-primary text-white'}`}>
+                   <span className={`ml-auto w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${isActive ? 'bg-white text-seller-primary' : 'bg-seller-primary text-white'}`}>
                      3
                    </span>
                 )}
@@ -196,7 +196,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
         <div className="p-4 mt-auto border-t border-slate-100">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all group"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all group"
           >
             <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
             Sign Out

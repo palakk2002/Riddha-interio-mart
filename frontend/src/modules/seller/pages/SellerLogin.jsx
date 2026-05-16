@@ -29,7 +29,7 @@ const SellerLogin = () => {
         
         {/* Branding on Image */}
         <div className="absolute top-12 left-12 z-20 hidden md:block">
-           <img src={logo} alt="Logo" className="h-16 brightness-0 invert" />
+           <img src={logo} alt="Logo" className="h-24 brightness-0 invert" />
         </div>
 
         {/* Floating Value Proposition (Web Only) */}
@@ -40,17 +40,17 @@ const SellerLogin = () => {
              transition={{ delay: 0.8 }}
              className="bg-white/10 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/20 max-w-xl shadow-2xl"
            >
-              <h2 className="text-4xl font-black text-white leading-tight mb-4">
+              <h2 className="text-4xl font-bold text-white leading-tight mb-4">
                 The future of <span className="text-[#E36666]">Interior Materials</span> starts here.
               </h2>
               <div className="flex gap-8">
                  <div className="flex flex-col">
-                    <span className="text-2xl font-black text-[#E36666]">5000+</span>
+                    <span className="text-2xl font-bold text-[#E36666]">5000+</span>
                     <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Active Sellers</span>
                  </div>
                  <div className="w-px h-10 bg-white/10" />
                  <div className="flex flex-col">
-                    <span className="text-2xl font-black text-[#E36666]">Pan-India</span>
+                    <span className="text-2xl font-bold text-[#E36666]">Pan-India</span>
                     <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Delivery Network</span>
                  </div>
               </div>
@@ -64,9 +64,9 @@ const SellerLogin = () => {
         animate={{ opacity: 1, x: 0 }}
         className="w-full md:w-[45%] min-h-screen bg-[#FDF8F8] flex flex-col justify-center items-center p-8 md:p-20 relative"
       >
-        {/* Mobile Logo */}
-        <div className="absolute top-8 left-8 md:hidden">
-           <img src={logo} alt="Logo" className="h-10" />
+        {/* Mobile Logo - Centered and Professional */}
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 md:hidden">
+           <img src={logo} alt="Logo" className="h-24 object-contain" />
         </div>
 
         <div className="w-full max-w-[420px] flex flex-col items-center text-center">
@@ -77,7 +77,7 @@ const SellerLogin = () => {
             <div className="w-2 h-2 bg-slate-200 rounded-full" />
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 leading-[1.1] mb-6 tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 leading-[1.1] mb-6 tracking-tight">
             Join India's Largest <br />
             <span className="text-[#E36666]">Interior Materials</span> <br />
             Market.
@@ -92,7 +92,7 @@ const SellerLogin = () => {
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate('/seller/signup')}
-              className="w-full py-6 bg-[#E36666] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#E36666]/30 transition-all flex items-center justify-center gap-3"
+              className="w-full py-6 bg-[#E36666] text-white rounded-2xl font-bold text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#E36666]/30 transition-all flex items-center justify-center gap-3"
             >
               Join as a Seller <ArrowRight size={18} />
             </motion.button>
@@ -101,7 +101,7 @@ const SellerLogin = () => {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               onClick={() => navigate('/seller/login-form')}
-              className="w-full py-6 border-2 border-slate-200 text-slate-900 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-50 transition-all flex items-center justify-center gap-3"
+              className="w-full py-6 border-2 border-slate-200 text-slate-900 rounded-2xl font-bold text-xs uppercase tracking-[0.2em] hover:bg-slate-50 transition-all flex items-center justify-center gap-3"
             >
               Login to Dashboard
             </motion.button>

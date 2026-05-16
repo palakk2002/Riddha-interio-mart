@@ -62,7 +62,7 @@ const StockManagement = () => {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Inventory Health</h1>
+            <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Inventory Health</h1>
             <p className="text-sm font-medium text-slate-500">Monitor stock levels and replenishment needs</p>
           </div>
           
@@ -74,7 +74,7 @@ const StockManagement = () => {
              >
                <RefreshCcw size={20} />
              </button>
-             <button className="flex items-center gap-2 px-6 py-3 bg-seller-primary text-white rounded-xl font-bold text-sm hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20">
+             <button className="flex items-center gap-2 px-6 py-3 bg-seller-primary text-white rounded-xl font-semibold text-sm hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20">
                <Plus size={18} />
                Add Stock
              </button>
@@ -88,8 +88,8 @@ const StockManagement = () => {
               <Package size={26} />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-1">Total Catalog Items</p>
-              <h3 className="text-2xl font-bold text-slate-900">{stats.totalItems}</h3>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400 mb-1">Total Catalog Items</p>
+              <h3 className="text-2xl font-semibold text-slate-900">{stats.totalItems}</h3>
             </div>
           </div>
 
@@ -98,8 +98,8 @@ const StockManagement = () => {
               <Zap size={26} />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-amber-600/60 mb-1">Low Stock Alerts</p>
-              <h3 className="text-2xl font-bold text-amber-600">{stats.lowStock}</h3>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-amber-600/60 mb-1">Low Stock Alerts</p>
+              <h3 className="text-2xl font-semibold text-amber-600">{stats.lowStock}</h3>
             </div>
           </div>
 
@@ -108,8 +108,8 @@ const StockManagement = () => {
               <TrendingDown size={26} />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-red-600/60 mb-1">Out of Stock</p>
-              <h3 className="text-2xl font-bold text-red-600">{stats.outOfStock}</h3>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-red-600/60 mb-1">Out of Stock</p>
+              <h3 className="text-2xl font-semibold text-red-600">{stats.outOfStock}</h3>
             </div>
           </div>
         </div>
@@ -129,7 +129,7 @@ const StockManagement = () => {
             </div>
             <div className="hidden lg:flex items-center gap-1.5 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
                <BarChart3 size={14} className="text-slate-400" />
-               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{filteredProducts.length} results</span>
+               <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{filteredProducts.length} results</span>
             </div>
           </div>
 
@@ -142,7 +142,7 @@ const StockManagement = () => {
               <button
                 key={f.id}
                 onClick={() => setFilter(f.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${filter === f.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${filter === f.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 <f.icon size={14} />
                 {f.label}
@@ -156,7 +156,7 @@ const StockManagement = () => {
           {loading ? (
             <div className="py-24 text-center space-y-4">
                <div className="w-12 h-12 border-4 border-seller-light border-t-seller-primary rounded-full animate-spin mx-auto"></div>
-               <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Analyzing Stock Levels...</p>
+               <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Analyzing Stock Levels...</p>
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="py-24 text-center space-y-4">
@@ -164,7 +164,7 @@ const StockManagement = () => {
                 <Package size={40} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">No inventory matches</h3>
+                <h3 className="text-lg font-semibold text-slate-900">No inventory matches</h3>
                 <p className="text-sm text-slate-500 mt-1 max-w-xs mx-auto">Try adjusting your filters or search terms to find specific stock items.</p>
               </div>
             </div>
@@ -173,10 +173,10 @@ const StockManagement = () => {
               <table className="w-full text-left">
                 <thead className="bg-slate-50/50 border-b border-slate-100">
                   <tr>
-                    <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Product Details</th>
-                    <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Category</th>
-                    <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">Health Status</th>
-                    <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Available Stock</th>
+                    <th className="px-8 py-5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Product Details</th>
+                    <th className="px-8 py-5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Category</th>
+                    <th className="px-8 py-5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider text-center">Health Status</th>
+                    <th className="px-8 py-5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider text-right">Available Stock</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -196,9 +196,9 @@ const StockManagement = () => {
                               />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-bold text-slate-900 group-hover:text-seller-primary transition-colors truncate">{product.name}</p>
+                              <p className="text-sm font-semibold text-slate-900 group-hover:text-seller-primary transition-colors truncate">{product.name}</p>
                               <div className="flex items-center gap-2 mt-1.5">
-                                <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">
+                                <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">
                                   {product.sku || 'N/A'}
                                 </span>
                                 <span className="text-[10px] font-semibold text-slate-400 italic truncate">
@@ -214,17 +214,17 @@ const StockManagement = () => {
                         <td className="px-8 py-6 text-center">
                           <div className="flex justify-center">
                             {isOut ? (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-bold uppercase tracking-wider border border-red-100">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-semibold uppercase tracking-wider border border-red-100">
                                 <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                                 Out of Stock
                               </span>
                             ) : isLow ? (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-bold uppercase tracking-wider border border-amber-100">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-semibold uppercase tracking-wider border border-amber-100">
                                 <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                                 Low Stock
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-bold uppercase tracking-wider border border-emerald-100">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-semibold uppercase tracking-wider border border-emerald-100">
                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                 Healthy
                               </span>
@@ -232,12 +232,12 @@ const StockManagement = () => {
                           </div>
                         </td>
                         <td className="px-8 py-6 text-right">
-                          <div className={`text-2xl font-bold tracking-tight ${isOut ? 'text-red-600' : isLow ? 'text-amber-500' : 'text-slate-900'}`}>
+                          <div className={`text-2xl font-semibold tracking-tight ${isOut ? 'text-red-600' : isLow ? 'text-amber-500' : 'text-slate-900'}`}>
                             {product.countInStock}
-                            <span className="text-[11px] font-bold text-slate-400 ml-2 uppercase tracking-widest">Units</span>
+                            <span className="text-[11px] font-semibold text-slate-400 ml-2 uppercase tracking-widest">Units</span>
                           </div>
-                          {isLow && <p className="text-[10px] font-bold text-amber-600/70 mt-1 uppercase">Needs Restock</p>}
-                          {isOut && <p className="text-[10px] font-bold text-red-600 mt-1 uppercase">Sold Out</p>}
+                          {isLow && <p className="text-[10px] font-semibold text-amber-600/70 mt-1 uppercase">Needs Restock</p>}
+                          {isOut && <p className="text-[10px] font-semibold text-red-600 mt-1 uppercase">Sold Out</p>}
                         </td>
                       </tr>
                     );
@@ -250,10 +250,10 @@ const StockManagement = () => {
         
         {/* Footer info */}
         <div className="flex items-center justify-between px-4 py-2 opacity-50">
-           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Merchant Inventory Management System v1.0</p>
+           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Merchant Inventory Management System v1.0</p>
            <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Live Sync Active</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Live Sync Active</span>
            </div>
         </div>
       </div>

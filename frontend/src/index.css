@@ -15,9 +15,9 @@
   --color-brand-purple: #240046;
   --color-brand-teal: #189D91;
   
-  --color-seller-primary: #D63384;
-  --color-seller-dark: #B6256B;
-  --color-seller-light: #FCE7F3;
+  --color-seller-primary: #E36666;
+  --color-seller-dark: #C24F4F;
+  --color-seller-light: #FFF1F1;
   --color-seller-bg: #F8FAFC;
 
   --radius-xl: 12px;
@@ -179,12 +179,13 @@
 .seller-theme h2,
 .seller-theme h3,
 .seller-theme h4 {
-  font-family: var(--font-display) !important;
-  font-weight: 800 !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 700 !important;
   text-transform: none !important;
   font-style: normal !important;
   letter-spacing: -0.02em !important;
-  line-height: 1.1 !important;
+  line-height: 1.2 !important;
+  color: #0f172a !important; /* Professional Slate 900 */
 }
 
 .seller-theme p {

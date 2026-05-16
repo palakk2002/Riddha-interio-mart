@@ -184,14 +184,14 @@ const SellerProfile = () => {
 
                 <div className="text-center md:text-left space-y-0.5 md:space-y-1 pb-1 flex-1">
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-1">
-                    <span className="px-2.5 py-0.5 bg-seller-primary/10 text-seller-primary text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-lg border border-seller-primary/10">
+                    <span className="px-2.5 py-0.5 bg-seller-primary/10 text-seller-primary text-[8px] md:text-[9px] font-bold uppercase tracking-widest rounded-lg border border-seller-primary/10">
                       {profileData.tier}
                     </span>
-                    <span className="flex items-center gap-1 px-2.5 py-0.5 bg-slate-900 text-white text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-lg">
+                    <span className="flex items-center gap-1 px-2.5 py-0.5 bg-slate-900 text-white text-[8px] md:text-[9px] font-bold uppercase tracking-widest rounded-lg">
                       <CheckCircle2 size={10} /> Verified
                     </span>
                   </div>
-                  <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter leading-none">{profileData.shopName}</h1>
+                  <h1 className="text-2xl md:text-4xl font-bold text-slate-900 tracking-tighter leading-none">{profileData.shopName}</h1>
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 text-slate-400 font-bold text-[9px] md:text-[10px] uppercase tracking-widest">
                     <p className="flex items-center gap-1.5">
                        <User size={12} className="text-seller-primary" /> {profileData.fullName}
@@ -206,11 +206,11 @@ const SellerProfile = () => {
               <div className="flex flex-col gap-2 w-full md:w-auto md:pb-1">
                   <button 
                     onClick={() => setIsEditing(!isEditing)}
-                    className={`px-8 py-3 rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all border shadow-lg ${isEditing ? 'bg-slate-50 text-slate-500 border-slate-200 shadow-slate-100' : 'bg-seller-primary text-white border-seller-primary hover:bg-seller-dark active:scale-95'}`}
+                    className={`px-8 py-3 rounded-xl font-bold text-[9px] md:text-[10px] uppercase tracking-widest transition-all border shadow-lg ${isEditing ? 'bg-slate-50 text-slate-500 border-slate-200 shadow-slate-100' : 'bg-seller-primary text-white border-seller-primary hover:bg-seller-dark active:scale-95'}`}
                   >
                     {isEditing ? 'Discard' : 'Manage Profile'}
                   </button>
-                 <p className="text-[8px] md:text-[9px] font-black text-slate-400 text-center md:text-right uppercase tracking-widest opacity-60">
+                 <p className="text-[8px] md:text-[9px] font-bold text-slate-400 text-center md:text-right uppercase tracking-widest opacity-60">
                     <Calendar size={10} className="inline mr-1" /> Member Since {profileData.joinDate}
                  </p>
               </div>
@@ -435,23 +435,7 @@ const SellerProfile = () => {
                </button>
             </div>
 
-            <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-[#923333] rounded-[2rem] md:rounded-[2.2rem] p-7 md:p-8 text-white relative overflow-hidden group shadow-2xl border border-white/5">
-               <div className="absolute top-0 right-0 w-40 h-40 bg-seller-primary/30 rounded-full blur-[60px] -mr-20 -mt-20 group-hover:bg-seller-primary/50 transition-all duration-1000"></div>
-               <div className="absolute bottom-0 left-0 w-32 h-32 bg-seller-primary/10 rounded-full blur-[50px] -ml-16 -mb-16"></div>
-               
-               <div className="relative z-10 space-y-5">
-                  <div className="w-11 h-11 bg-seller-primary/20 backdrop-blur-md rounded-xl flex items-center justify-center text-seller-primary border border-seller-primary/30 shadow-inner">
-                     <HelpCircle size={22} />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="text-lg font-black tracking-tight leading-none text-white">Support Terminal</h4>
-                    <p className="text-[8px] text-seller-primary/80 leading-relaxed font-black uppercase tracking-[0.2em]">Priority 24/7 Enterprise Access</p>
-                  </div>
-                  <button className="w-full py-3.5 bg-seller-primary text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl shadow-seller-primary/40 hover:bg-seller-dark hover:scale-[1.02] active:scale-95 transition-all border border-seller-primary/30">
-                     Initiate Support Ticket
-                  </button>
-               </div>
-            </div>
+
           </div>
         </div>
       </div>
