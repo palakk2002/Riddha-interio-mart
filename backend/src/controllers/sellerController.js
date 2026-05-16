@@ -7,22 +7,31 @@ const checkEmailExists = require('../utils/checkEmailExists');
 // @access  Public
 exports.registerSeller = async (req, res, next) => {
   try {
-    const { fullName, email, password, shopName, shopAddress, phone, gstNumber, panNumber, hsnNumber } = req.body;
+    const { fullName, email, phone, shopName, shopAddress, password, gstNumber, panNumber, hsnNumber } = req.body;
 
-    if (await checkEmailExists(email)) {
-      return res.status(400).json({ success: false, error: 'Email already registered' });
+    // Handle uploaded documents
+    const gstDoc = req.files && req.files.gstDoc ? req.files.gstDoc[0].path : undefined;
+    const panDoc = req.files && req.files.panDoc ? req.files.panDoc[0].path : undefined;
+    const shopDoc = req.files && req.files.shopDoc ? req.files.shopDoc[0].path : undefined;
+
+    const sellerExists = await Seller.findOne({ email });
+    if (sellerExists) {
+      return res.status(400).json({ success: false, error: 'Seller already exists' });
     }
 
-    const seller = await Seller.create({ 
-      fullName, 
-      email, 
-      password, 
-      shopName, 
-      shopAddress, 
+    const seller = await Seller.create({
+      fullName,
+      email,
       phone,
-      gstNumber: gstNumber || "",
-      panNumber: panNumber || "",
-      hsnNumber: hsnNumber || ""
+      shopName,
+      shopAddress,
+      password,
+      gstNumber,
+      panNumber,
+      hsnNumber,
+      gstDoc,
+      panDoc,
+      shopDoc
     });
     sendTokenResponse(seller, 201, res);
   } catch (err) {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
-import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiPhone, FiMapPin, FiShoppingBag, FiGift, FiArrowLeft, FiCheckCircle } from 'react-icons/fi';
+import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiPhone, FiMapPin, FiShoppingBag, FiGift, FiArrowLeft, FiCheckCircle, FiFileText } from 'react-icons/fi';
 import api from '../../../shared/utils/api';
 import logo from '../../../assets/transparent_logo.png';
 import warehouseImg from '../../../assets/seller_onboarding_warehouse_1778923798789.png';
@@ -23,6 +23,11 @@ const SellerSignup = () => {
     confirmPassword: '',
     referralCode: ''
   });
+  const [docs, setDocs] = useState({
+    gstDoc: null,
+    panDoc: null,
+    shopDoc: null
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
@@ -31,6 +36,10 @@ const SellerSignup = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFileChange = (e) => {
+    setDocs({ ...docs, [e.target.name]: e.target.files[0] });
   };
 
   const handleSignup = async (e) => {
@@ -47,19 +56,23 @@ const SellerSignup = () => {
       return;
     }
 
+    // Check if documents are uploaded
+    if (!docs.gstDoc || !docs.panDoc || !docs.shopDoc) {
+      setError('Please upload all required business documents');
+      return;
+    }
+
     setLoading(true);
+
+    const signupData = new FormData();
+    Object.keys(formData).forEach(key => signupData.append(key, formData[key]));
+    Object.keys(docs).forEach(key => signupData.append(key, docs[key]));
+
     try {
-      const response = await api.post('/auth/seller/register', {
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        shopName: formData.shopName,
-        shopAddress: formData.shopAddress,
-        gstNumber: formData.gstNumber,
-        panNumber: formData.panNumber,
-        hsnNumber: formData.hsnNumber,
-        password: formData.password,
-        referralCode: formData.referralCode
+      const response = await api.post('/auth/seller/register', signupData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
       if (response.data.success) {
@@ -100,7 +113,7 @@ const SellerSignup = () => {
       <motion.div 
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
-        className="hidden md:flex w-[40%] bg-[#FDF8F8] flex-col items-center justify-center p-16 relative overflow-hidden"
+        className="hidden md:flex w-[35%] bg-[#FDF8F8] flex-col items-center justify-center p-16 relative overflow-hidden"
       >
         <div className="relative z-10 w-full max-w-sm space-y-12">
           <Link to="/" className="inline-block">
@@ -136,11 +149,11 @@ const SellerSignup = () => {
       </motion.div>
 
       {/* Right Section: Form */}
-      <div className="flex-1 min-h-screen bg-white flex flex-col items-center justify-start md:justify-center p-0 md:p-8 overflow-hidden">
+      <div className="flex-1 min-h-screen bg-white flex flex-col items-center justify-start md:justify-center p-0 md:p-8 overflow-y-auto">
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full h-full md:h-auto md:max-w-[650px] flex flex-col px-6 py-8 md:p-0"
+          className="w-full md:max-w-[700px] flex flex-col px-6 py-12 md:py-8"
         >
           {/* Mobile Logo */}
           <div className="md:hidden flex justify-center mb-10">
@@ -149,7 +162,7 @@ const SellerSignup = () => {
 
           <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0">
             <h2 className="text-2xl md:text-2xl font-semibold text-slate-900 tracking-tight text-center md:text-left">
-              {step === 'signup' ? 'Create Account' : 'Verify Email'}
+              {step === 'signup' ? 'Seller Registration' : 'Verify Email'}
             </h2>
             <Link to="/seller/login-form" className="text-xs font-semibold uppercase tracking-widest text-[#E36666] hover:underline underline-offset-4">
               Sign In
@@ -167,194 +180,244 @@ const SellerSignup = () => {
           )}
 
           {step === 'signup' ? (
-            <form onSubmit={handleSignup} className="flex-1 flex flex-col space-y-4 md:space-y-3">
-              {/* Personal & Shop Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
-                <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
-                  <div className="relative group">
-                    <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
+            <form onSubmit={handleSignup} className="flex-1 flex flex-col space-y-6 md:space-y-4">
+              {/* Section 1: Identity */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-4 bg-[#E36666] rounded-full" />
+                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Merchant Identity</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
+                  <div className="space-y-1 md:space-y-0.5">
+                    <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
+                    <div className="relative group">
+                      <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        placeholder="Legal name"
+                        className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1 md:space-y-0.5">
+                    <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
+                    <div className="relative group">
+                      <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="Business email"
+                        className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
+                  <div className="space-y-1 md:space-y-0.5">
+                    <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Shop Name</label>
+                    <div className="relative group">
+                      <FiShoppingBag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
+                      <input
+                        type="text"
+                        name="shopName"
+                        value={formData.shopName}
+                        onChange={handleChange}
+                        placeholder="Store name"
+                        className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1 md:space-y-0.5">
+                    <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Phone Number</label>
+                    <div className="relative group">
+                      <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="Direct contact"
+                        className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Business & Compliance */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-4 bg-[#E36666] rounded-full" />
+                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Compliance & Documents</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3">
+                  <div className="space-y-1 md:space-y-0.5">
+                    <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">GST Number</label>
                     <input
                       type="text"
-                      name="fullName"
-                      value={formData.fullName}
+                      name="gstNumber"
+                      value={formData.gstNumber}
                       onChange={handleChange}
-                      placeholder="Enter full name"
-                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                      placeholder="GSTIN"
+                      className="w-full px-4 py-4 md:py-2.5 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
                       required
                     />
                   </div>
-                </div>
-                <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
-                  <div className="relative group">
-                    <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="Enter email"
-                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Shop & Phone Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
-                <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Shop Name</label>
-                  <div className="relative group">
-                    <FiShoppingBag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
+                  <div className="space-y-1 md:space-y-0.5">
+                    <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">PAN Number</label>
                     <input
                       type="text"
-                      name="shopName"
-                      value={formData.shopName}
+                      name="panNumber"
+                      value={formData.panNumber}
                       onChange={handleChange}
-                      placeholder="Enter shop name"
-                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                      placeholder="PAN"
+                      className="w-full px-4 py-4 md:py-2.5 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
                       required
                     />
                   </div>
-                </div>
-                <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Phone Number</label>
-                  <div className="relative group">
-                    <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="Enter phone"
-                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Business Identification (GST, PAN, HSN) */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3">
-                <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">GST Number</label>
-                  <input
-                    type="text"
-                    name="gstNumber"
-                    value={formData.gstNumber}
-                    onChange={handleChange}
-                    placeholder="GSTIN"
-                    className="w-full px-4 py-4 md:py-2.5 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
-                    required
-                  />
-                </div>
-                <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">PAN Number</label>
-                  <input
-                    type="text"
-                    name="panNumber"
-                    value={formData.panNumber}
-                    onChange={handleChange}
-                    placeholder="PAN"
-                    className="w-full px-4 py-4 md:py-2.5 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
-                    required
-                  />
-                </div>
-                <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">HSN Number</label>
-                  <input
-                    type="text"
-                    name="hsnNumber"
-                    value={formData.hsnNumber}
-                    onChange={handleChange}
-                    placeholder="HSN"
-                    className="w-full px-4 py-4 md:py-2.5 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Address */}
-              <div className="space-y-1 md:space-y-0.5">
-                <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Business Address</label>
-                <div className="relative group">
-                  <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
-                  <input
-                    name="shopAddress"
-                    value={formData.shopAddress}
-                    onChange={handleChange}
-                    placeholder="Full Business Address"
-                    className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Password Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
-                <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Password</label>
-                  <div className="relative group">
-                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="••••••••"
-                      className="w-full pl-12 pr-10 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
-                      required
-                    />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300">
-                      {showPassword ? <FiEyeOff size={16} md:size={12} /> : <FiEye size={16} md:size={12} />}
-                    </button>
-                  </div>
-                </div>
-                <div className="space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Confirm Password</label>
-                  <div className="relative group">
-                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      placeholder="••••••••"
-                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Referral & Terms */}
-              <div className="flex flex-col md:flex-row items-center gap-4 py-2">
-                <div className="w-full md:w-1/2 space-y-1 md:space-y-0.5">
-                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Referral (Optional)</label>
-                  <div className="relative group">
-                    <FiGift className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
+                  <div className="space-y-1 md:space-y-0.5">
+                    <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">HSN Number</label>
                     <input
                       type="text"
-                      name="referralCode"
-                      value={formData.referralCode}
+                      name="hsnNumber"
+                      value={formData.hsnNumber}
                       onChange={handleChange}
-                      placeholder="RIDDHA-123"
-                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                      placeholder="HSN"
+                      className="w-full px-4 py-4 md:py-2.5 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                      required
                     />
                   </div>
                 </div>
-                <div className="w-full md:w-1/2 flex items-center gap-3">
-                  <input 
-                    type="checkbox" 
-                    checked={agreeTerms} 
-                    onChange={(e) => setAgreeTerms(e.target.checked)} 
-                    className="w-5 h-5 md:w-4 md:h-4 accent-[#E36666] rounded cursor-pointer"
-                  />
-                  <label className="text-[11px] md:text-[9px] font-semibold text-slate-400 uppercase tracking-widest leading-none cursor-pointer">
-                    I agree to the <span className="text-slate-900 underline decoration-[#E36666]/30">Terms & Conditions</span>
-                  </label>
+
+                {/* File Uploads */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 ml-1">GST Certificate</label>
+                    <label className="relative flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-100 rounded-2xl bg-[#FDF8F8] hover:bg-white hover:border-[#E36666]/20 transition-all cursor-pointer group">
+                      <FiFileText className={`size-6 ${docs.gstDoc ? 'text-emerald-500' : 'text-slate-300'} mb-1`} />
+                      <span className="text-[10px] font-semibold text-slate-400 text-center truncate w-full px-2">
+                        {docs.gstDoc ? docs.gstDoc.name : 'Upload PDF/JPG'}
+                      </span>
+                      <input type="file" name="gstDoc" onChange={handleFileChange} className="hidden" accept=".pdf,.jpg,.jpeg,.png" required />
+                    </label>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 ml-1">PAN Card Doc</label>
+                    <label className="relative flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-100 rounded-2xl bg-[#FDF8F8] hover:bg-white hover:border-[#E36666]/20 transition-all cursor-pointer group">
+                      <FiFileText className={`size-6 ${docs.panDoc ? 'text-emerald-500' : 'text-slate-300'} mb-1`} />
+                      <span className="text-[10px] font-semibold text-slate-400 text-center truncate w-full px-2">
+                        {docs.panDoc ? docs.panDoc.name : 'Upload PDF/JPG'}
+                      </span>
+                      <input type="file" name="panDoc" onChange={handleFileChange} className="hidden" accept=".pdf,.jpg,.jpeg,.png" required />
+                    </label>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Shop Establishment</label>
+                    <label className="relative flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-100 rounded-2xl bg-[#FDF8F8] hover:bg-white hover:border-[#E36666]/20 transition-all cursor-pointer group">
+                      <FiFileText className={`size-6 ${docs.shopDoc ? 'text-emerald-500' : 'text-slate-300'} mb-1`} />
+                      <span className="text-[10px] font-semibold text-slate-400 text-center truncate w-full px-2">
+                        {docs.shopDoc ? docs.shopDoc.name : 'Upload PDF/JPG'}
+                      </span>
+                      <input type="file" name="shopDoc" onChange={handleFileChange} className="hidden" accept=".pdf,.jpg,.jpeg,.png" required />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="space-y-1 md:space-y-0.5">
+                  <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Business Address</label>
+                  <div className="relative group">
+                    <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
+                    <input
+                      name="shopAddress"
+                      value={formData.shopAddress}
+                      onChange={handleChange}
+                      placeholder="Full operating address"
+                      className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Security */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-4 bg-[#E36666] rounded-full" />
+                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Security & Credentials</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
+                  <div className="space-y-1 md:space-y-0.5">
+                    <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Password</label>
+                    <div className="relative group">
+                      <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="••••••••"
+                        className="w-full pl-12 pr-10 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                        required
+                      />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300">
+                        {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-1 md:space-y-0.5">
+                    <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Confirm Password</label>
+                    <div className="relative group">
+                      <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        placeholder="••••••••"
+                        className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row items-center gap-4 pt-2">
+                  <div className="w-full md:w-1/2 space-y-1 md:space-y-0.5">
+                    <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Referral (Optional)</label>
+                    <div className="relative group">
+                      <FiGift className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 size-4 md:size-3" />
+                      <input
+                        type="text"
+                        name="referralCode"
+                        value={formData.referralCode}
+                        onChange={handleChange}
+                        placeholder="RIDDHA-123"
+                        className="w-full pl-12 pr-4 py-4 md:py-2.5 md:pl-9 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
+                      />
+                    </div>
+                  </div>
+                  <div className="w-full md:w-1/2 flex items-center gap-3 mt-4 md:mt-2">
+                    <input 
+                      type="checkbox" 
+                      checked={agreeTerms} 
+                      onChange={(e) => setAgreeTerms(e.target.checked)} 
+                      className="w-5 h-5 md:w-4 md:h-4 accent-[#E36666] rounded cursor-pointer"
+                    />
+                    <label className="text-[11px] md:text-[9px] font-semibold text-slate-400 uppercase tracking-widest leading-none cursor-pointer">
+                      I agree to the <span className="text-slate-900 underline decoration-[#E36666]/30">Terms & Conditions</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 

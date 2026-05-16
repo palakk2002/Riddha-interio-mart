@@ -123,7 +123,7 @@ const SalesReport = () => {
 
               {/* Multi-Line Chart */}
               <div className="h-64 w-full">
-                 <ResponsiveContainer width="100%" height="100%">
+                 <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                     <AreaChart data={chartData}>
                        <defs>
                           <linearGradient id="colorMain" x1="0" y1="0" x2="0" y2="1">
@@ -169,7 +169,7 @@ const SalesReport = () => {
               <h3 className="text-sm font-semibold uppercase tracking-widest text-slate-900 mb-6">Category contribution</h3>
               <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                  <div className="w-full h-48 md:h-56 max-w-[240px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                        <PieChart>
                           <Pie
                             data={pieData}

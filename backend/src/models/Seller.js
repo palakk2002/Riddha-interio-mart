@@ -36,6 +36,19 @@ const SellerSchema = new mongoose.Schema({
   },
   hsnNumber: {
     type: String,
+    trim: true
+  },
+  gstDoc: {
+    type: String
+  },
+  panDoc: {
+    type: String
+  },
+  shopDoc: {
+    type: String
+  },
+  status: {
+    type: String,
     default: ""
   },
   avatar: {

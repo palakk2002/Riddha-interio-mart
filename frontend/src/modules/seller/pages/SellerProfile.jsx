@@ -141,7 +141,7 @@ const SellerProfile = () => {
       <PageWrapper>
         <div className="py-24 text-center space-y-4">
            <div className="w-12 h-12 border-4 border-seller-light border-t-seller-primary rounded-full animate-spin mx-auto"></div>
-           <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Loading Profile...</p>
+           <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Loading Profile...</p>
         </div>
       </PageWrapper>
     );
@@ -184,15 +184,15 @@ const SellerProfile = () => {
 
                 <div className="text-center md:text-left space-y-0.5 md:space-y-1 pb-1 flex-1">
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-1">
-                    <span className="px-2.5 py-0.5 bg-seller-primary/10 text-seller-primary text-[8px] md:text-[9px] font-bold uppercase tracking-widest rounded-lg border border-seller-primary/10">
+                    <span className="px-2.5 py-0.5 bg-seller-primary/10 text-seller-primary text-[8px] md:text-[9px] font-semibold uppercase tracking-widest rounded-lg border border-seller-primary/10">
                       {profileData.tier}
                     </span>
-                    <span className="flex items-center gap-1 px-2.5 py-0.5 bg-slate-900 text-white text-[8px] md:text-[9px] font-bold uppercase tracking-widest rounded-lg">
+                    <span className="flex items-center gap-1 px-2.5 py-0.5 bg-slate-900 text-white text-[8px] md:text-[9px] font-semibold uppercase tracking-widest rounded-lg">
                       <CheckCircle2 size={10} /> Verified
                     </span>
                   </div>
-                  <h1 className="text-2xl md:text-4xl font-bold text-slate-900 tracking-tighter leading-none">{profileData.shopName}</h1>
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 text-slate-400 font-bold text-[9px] md:text-[10px] uppercase tracking-widest">
+                  <h1 className="text-2xl md:text-4xl font-semibold text-slate-900 tracking-tighter leading-none">{profileData.shopName}</h1>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 text-slate-400 font-semibold text-[9px] md:text-[10px] uppercase tracking-widest">
                     <p className="flex items-center gap-1.5">
                        <User size={12} className="text-seller-primary" /> {profileData.fullName}
                     </p>
@@ -206,11 +206,11 @@ const SellerProfile = () => {
               <div className="flex flex-col gap-2 w-full md:w-auto md:pb-1">
                   <button 
                     onClick={() => setIsEditing(!isEditing)}
-                    className={`px-8 py-3 rounded-xl font-bold text-[9px] md:text-[10px] uppercase tracking-widest transition-all border shadow-lg ${isEditing ? 'bg-slate-50 text-slate-500 border-slate-200 shadow-slate-100' : 'bg-seller-primary text-white border-seller-primary hover:bg-seller-dark active:scale-95'}`}
+                    className={`px-8 py-3 rounded-xl font-semibold text-[9px] md:text-[10px] uppercase tracking-widest transition-all border shadow-lg ${isEditing ? 'bg-slate-50 text-slate-500 border-slate-200 shadow-slate-100' : 'bg-seller-primary text-white border-seller-primary hover:bg-seller-dark active:scale-95'}`}
                   >
                     {isEditing ? 'Discard' : 'Manage Profile'}
                   </button>
-                 <p className="text-[8px] md:text-[9px] font-bold text-slate-400 text-center md:text-right uppercase tracking-widest opacity-60">
+                 <p className="text-[8px] md:text-[9px] font-semibold text-slate-400 text-center md:text-right uppercase tracking-widest opacity-60">
                     <Calendar size={10} className="inline mr-1" /> Member Since {profileData.joinDate}
                  </p>
               </div>
@@ -236,12 +236,12 @@ const SellerProfile = () => {
                      <div className="w-10 h-10 bg-seller-light/40 rounded-xl flex items-center justify-center text-seller-primary">
                         <Pencil size={20} />
                      </div>
-                     <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight">Personal & Business Info</h3>
+                     <h3 className="text-lg md:text-xl font-semibold text-slate-900 tracking-tight">Personal & Business Info</h3>
                   </div>
                   
                   <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">Shop Name</label>
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Shop Name</label>
                         <input 
                            type="text" 
                            value={profileData.shopName}
@@ -250,7 +250,7 @@ const SellerProfile = () => {
                         />
                      </div>
                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">Full Name</label>
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Full Name</label>
                         <input 
                            type="text" 
                            value={profileData.fullName}
@@ -259,7 +259,7 @@ const SellerProfile = () => {
                         />
                      </div>
                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">Email Address</label>
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Email Address</label>
                         <input 
                            type="email" 
                            value={profileData.email}
@@ -268,7 +268,7 @@ const SellerProfile = () => {
                         />
                      </div>
                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">Phone Number</label>
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Phone Number</label>
                         <input 
                            type="tel" 
                            value={profileData.phone}
@@ -277,7 +277,7 @@ const SellerProfile = () => {
                         />
                      </div>
                      <div className="space-y-1.5 md:col-span-2">
-                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">Store Address</label>
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Store Address</label>
                         <textarea 
                            value={profileData.shopAddress}
                            onChange={(e) => setProfileData({...profileData, shopAddress: e.target.value})}
@@ -285,7 +285,7 @@ const SellerProfile = () => {
                         />
                      </div>
                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">GSTIN Number</label>
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">GSTIN Number</label>
                         <input 
                            type="text" 
                            value={profileData.gstNumber}
@@ -294,7 +294,7 @@ const SellerProfile = () => {
                         />
                      </div>
                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">PAN Card Number</label>
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">PAN Card Number</label>
                         <input 
                            type="text" 
                            value={profileData.panNumber}
@@ -306,7 +306,7 @@ const SellerProfile = () => {
                          <button 
                             type="submit" 
                             disabled={isSaving}
-                            className="w-full py-4 bg-seller-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-seller-primary/20 hover:bg-seller-dark transition-all flex items-center justify-center gap-3"
+                            className="w-full py-4 bg-seller-primary text-white rounded-xl font-semibold text-[10px] uppercase tracking-widest shadow-xl shadow-seller-primary/20 hover:bg-seller-dark transition-all flex items-center justify-center gap-3"
                          >
                            {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
                            {isSaving ? 'Processing...' : 'Apply Changes'}
@@ -333,8 +333,8 @@ const SellerProfile = () => {
                              {stat.icon}
                           </div>
                           <div className="text-center md:text-left">
-                             <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
-                             <h4 className="text-sm md:text-xl font-black text-slate-900 tracking-tight leading-none">{stat.value}</h4>
+                             <p className="text-[8px] md:text-[9px] font-semibold text-slate-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
+                             <h4 className="text-sm md:text-xl font-semibold text-slate-900 tracking-tight leading-none">{stat.value}</h4>
                           </div>
                        </div>
                      ))}
@@ -342,7 +342,7 @@ const SellerProfile = () => {
 
                   {/* Merchant Details Card - High Density */}
                   <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8 relative overflow-hidden">
-                     <h3 className="text-base md:text-lg font-black text-slate-900 tracking-tight flex items-center gap-3">
+                     <h3 className="text-base md:text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-3">
                         <div className="w-1.5 h-5 md:h-6 bg-seller-primary rounded-full" />
                         Merchant Identification
                      </h3>
@@ -356,10 +356,10 @@ const SellerProfile = () => {
                           { label: 'Primary Fulfillment Center', value: profileData.shopAddress, icon: <MapPin size={14} />, full: true },
                         ].map((field, i) => (
                           <div key={i} className={`${field.full ? 'md:col-span-2' : ''} space-y-1`}>
-                             <div className="flex items-center gap-2 text-slate-400 font-black text-[8px] md:text-[9px] uppercase tracking-widest">
+                             <div className="flex items-center gap-2 text-slate-400 font-semibold text-[8px] md:text-[9px] uppercase tracking-widest">
                                 {field.icon} {field.label}
                              </div>
-                             <p className="text-[12px] md:text-sm font-black text-slate-900 truncate">
+                             <p className="text-[12px] md:text-sm font-semibold text-slate-900 truncate">
                                 {field.value || 'N/A'}
                              </p>
                           </div>
@@ -370,10 +370,10 @@ const SellerProfile = () => {
                   {/* Compliance Section - High Fidelity */}
                   <div className="bg-slate-50/50 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200/50 space-y-6">
                      <div className="flex items-center justify-between">
-                        <h3 className="text-[10px] md:text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <h3 className="text-[10px] md:text-xs font-semibold text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2">
                            <Lock size={14} className="text-seller-primary" /> Security & Compliance
                         </h3>
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-600 text-[7px] md:text-[8px] font-black uppercase tracking-widest rounded-md border border-emerald-200/50">Lvl 3 Secure</span>
+                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-600 text-[7px] md:text-[8px] font-semibold uppercase tracking-widest rounded-md border border-emerald-200/50">Lvl 3 Secure</span>
                      </div>
                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         {[
@@ -384,8 +384,8 @@ const SellerProfile = () => {
                           <div key={i} className="bg-white px-4 py-3.5 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3">
                              <div className="text-seller-primary opacity-60 shrink-0">{item.icon}</div>
                              <div>
-                                <p className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">{item.title}</p>
-                                <p className="text-[9px] md:text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">{item.val}</p>
+                                <p className="text-[7px] md:text-[8px] font-semibold text-slate-400 uppercase tracking-widest leading-none mb-0.5">{item.title}</p>
+                                <p className="text-[9px] md:text-[10px] font-semibold text-slate-900 uppercase tracking-widest leading-none">{item.val}</p>
                              </div>
                           </div>
                         ))}
@@ -400,8 +400,8 @@ const SellerProfile = () => {
           <div className="space-y-6">
             <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.2rem] border border-slate-100 shadow-xl shadow-slate-200/20 space-y-6">
                <div className="space-y-0.5">
-                 <h3 className="text-base md:text-lg font-black text-slate-900 tracking-tight">Merchant Hub</h3>
-                 <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">System Control</p>
+                 <h3 className="text-base md:text-lg font-semibold text-slate-900 tracking-tight">Merchant Hub</h3>
+                 <p className="text-[8px] md:text-[9px] font-semibold text-slate-400 uppercase tracking-widest">System Control</p>
                </div>
                
                <div className="grid grid-cols-1 gap-1.5">
@@ -420,7 +420,7 @@ const SellerProfile = () => {
                           <div className={`w-8 h-8 rounded-lg ${tool.color} flex items-center justify-center transition-transform group-hover:scale-110`}>
                              {tool.icon}
                           </div>
-                          <span className="text-[9px] md:text-[10px] font-black text-slate-700 uppercase tracking-widest">{tool.label}</span>
+                          <span className="text-[9px] md:text-[10px] font-semibold text-slate-700 uppercase tracking-widest">{tool.label}</span>
                        </div>
                        <ChevronRight size={14} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
                     </button>
@@ -429,7 +429,7 @@ const SellerProfile = () => {
                
                <button 
                  onClick={() => logout()}
-                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-800 text-white hover:bg-slate-700 transition-all font-black text-[9px] uppercase tracking-widest mt-2 shadow-xl shadow-slate-900/10"
+                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-800 text-white hover:bg-slate-700 transition-all font-semibold text-[9px] uppercase tracking-widest mt-2 shadow-xl shadow-slate-900/10"
                >
                   <LogOut size={14} /> Terminate Session
                </button>

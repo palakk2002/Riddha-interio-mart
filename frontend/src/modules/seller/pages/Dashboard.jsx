@@ -213,7 +213,7 @@ const Dashboard = () => {
                   <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Generating Insights...</p>
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                   <AreaChart data={revenueTrends.length > 0 ? revenueTrends : [
                     { date: '01 May', revenue: 4000 },
                     { date: '05 May', revenue: 3000 },
@@ -262,7 +262,7 @@ const Dashboard = () => {
             <p className="text-sm text-slate-500 mb-8">Distribution of fulfillment</p>
             
             <div className="h-[250px] w-full relative mb-6">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <PieChart>
                   <Pie
                     data={pieData}
