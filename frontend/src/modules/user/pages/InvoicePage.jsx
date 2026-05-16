@@ -75,12 +75,23 @@ const InvoicePage = () => {
           >
             <FiPrinter /> Print Invoice
           </Button>
-          <Button
-            onClick={handlePrint}
-            className="flex items-center gap-2 h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-warm-sand/20"
-          >
-            <FiDownload /> Download Invoice
-          </Button>
+          {order.invoiceUrl ? (
+            <a 
+              href={order.invoiceUrl} 
+              target="_blank" 
+              rel="noreferrer"
+              className="flex items-center gap-2 bg-deep-espresso text-white h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-warm-sand transition-all"
+            >
+              <FiDownload /> Download Official PDF
+            </a>
+          ) : (
+            <Button
+              onClick={handlePrint}
+              className="flex items-center gap-2 h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-warm-sand/20"
+            >
+              <FiDownload /> Download Invoice
+            </Button>
+          )}
         </div>
       </div>
 
@@ -209,13 +220,25 @@ const InvoicePage = () => {
 
       {/* Action Button (Mobile Friendly) */}
       <div className="max-w-4xl mx-auto mt-8 px-6 pb-12 print:hidden">
-        <Button
-          onClick={handlePrint}
-          className="w-full h-14 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-warm-sand/20 flex items-center justify-center gap-3"
-        >
-          <FiDownload className="text-lg" />
-          Download Invoice
-        </Button>
+        {order.invoiceUrl ? (
+          <a
+            href={order.invoiceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="w-full h-14 bg-deep-espresso text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-warm-sand/20 flex items-center justify-center gap-3 hover:bg-warm-sand transition-all"
+          >
+            <FiDownload className="text-lg" />
+            Download Official PDF
+          </a>
+        ) : (
+          <Button
+            onClick={handlePrint}
+            className="w-full h-14 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-warm-sand/20 flex items-center justify-center gap-3"
+          >
+            <FiDownload className="text-lg" />
+            Download Invoice
+          </Button>
+        )}
       </div>
     </div>
   );

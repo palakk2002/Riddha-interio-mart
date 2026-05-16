@@ -2,16 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../data/CartContext';
-import { FiShoppingCart, FiArrowLeft, FiTruck, FiShield, FiRotateCcw, FiPlus, FiMinus, FiShare2, FiCheck, FiChevronDown, FiChevronUp, FiPlay, FiStar, FiSettings, FiPackage, FiInfo, FiBox, FiCpu, FiExternalLink, FiMaximize, FiMapPin, FiChevronRight } from 'react-icons/fi';
+import { FiShoppingCart, FiArrowLeft, FiTruck, FiShield, FiRotateCcw, FiPlus, FiMinus, FiShare2, FiCheck, FiChevronDown, FiChevronUp, FiPlay, FiStar, FiSettings, FiPackage, FiInfo, FiBox, FiCpu, FiExternalLink, FiMaximize, FiMapPin, FiChevronRight, FiHeart } from 'react-icons/fi';
 import { FaStar } from 'react-icons/fa';
 import Button from '../../../shared/components/Button';
 import ProductCard from '../components/ProductCard';
+import ReviewSection from '../components/ReviewSection';
+import { useWishlist } from '../data/WishlistContext';
 import api from '../../../shared/utils/api';
 import { getDeliveryEstimate } from '../../../shared/utils/delivery';
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
   const { addToCart, updateQuantity, getItemQuantity } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -127,10 +130,22 @@ const ProductDetailsPage = () => {
           <div className="flex flex-col items-center lg:items-start gap-3">
             {/* Main Image View */}
             <div className="relative border border-gray-100 rounded-sm bg-white h-[380px] w-full md:h-auto md:aspect-square group cursor-crosshair overflow-hidden mx-auto max-w-[400px] md:max-w-none">
-              {/* Share Icon (Mobile) */}
-              <button className="absolute top-4 right-4 z-10 md:hidden p-2 text-gray-600">
-                <FiShare2 size={24} />
-              </button>
+              
+              {/* Top Right Action Buttons (Share & Wishlist) */}
+              <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                <button className="md:hidden p-2 text-gray-600 bg-white/80 backdrop-blur-md rounded-full shadow-sm">
+                  <FiShare2 size={20} />
+                </button>
+                <button 
+                  onClick={() => toggleWishlist(product)}
+                  className="p-2 bg-white/80 backdrop-blur-md rounded-full shadow-sm hover:scale-110 active:scale-90 transition-all duration-300"
+                >
+                  <FiHeart 
+                    size={20} 
+                    className={`transition-colors duration-300 ${isInWishlist(product?._id || product?.id) ? 'text-red-500 fill-red-500' : 'text-gray-500'}`} 
+                  />
+                </button>
+              </div>
 
               <AnimatePresence mode="wait">
                 <motion.div
@@ -258,9 +273,9 @@ const ProductDetailsPage = () => {
             <h1 className="text-lg md:text-xl font-medium text-gray-900 leading-tight">{product.name}</h1>
             <div className="flex items-center gap-3">
               <div className="flex items-center bg-[#388e3c] text-white px-1.5 py-0.5 rounded-sm text-[12px] font-bold">
-                4.7 <FaStar className="ml-1 w-2 h-2" />
+                {product.averageRating || '0.0'} <FaStar className="ml-1 w-2 h-2" />
               </div>
-              <span className="text-sm font-medium text-gray-500">212 Ratings & 45 Reviews</span>
+              <span className="text-sm font-medium text-gray-500">{product.totalReviews || 0} Ratings & Reviews</span>
             </div>
           </div>
 
@@ -375,6 +390,15 @@ const ProductDetailsPage = () => {
       {/* Vendor Details (Enhancement) */}
       <motion.section variants={fadeInUp} className="mb-8 md:mb-10">
         <VendorInfo product={product} />
+      </motion.section>
+
+      {/* Reviews & Ratings Section */}
+      <motion.section variants={fadeInUp} className="mb-8 md:mb-10">
+        <ReviewSection 
+          productId={product._id || product.id} 
+          averageRating={product.averageRating || 0} 
+          totalReviews={product.totalReviews || 0} 
+        />
       </motion.section>
 
       {/* AR Modal Placeholder */}

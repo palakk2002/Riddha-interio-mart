@@ -8,6 +8,9 @@ import LOGIN_BG from '../../../assets/login_bg_fretshop.png';
 import api from '../../../shared/utils/api';
 
 const SignupPage = () => {
+  const [step, setStep] = useState('signup'); // 'signup' or 'otp'
+  const [otp, setOtp] = useState('');
+  const [registeredEmail, setRegisteredEmail] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -120,12 +123,52 @@ const SignupPage = () => {
       });
 
       if (response.data.success) {
-        navigate(getLoginPath());
+        setRegisteredEmail(formData.email);
+        setStep('otp');
+        setError('');
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    if (!otp) {
+      setError('Please enter the OTP sent to your email.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await api.post(`/auth/verify-email`, {
+        email: registeredEmail,
+        otp
+      });
+
+      if (response.data.success) {
+        navigate(getLoginPath());
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Verification failed. Invalid OTP.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      const res = await api.post('/auth/resend-otp', { email: registeredEmail });
+      if (res.data.success) {
+        alert('A new OTP has been sent to your email.');
+      }
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to resend OTP.');
     }
   };
 
@@ -283,187 +326,223 @@ const SignupPage = () => {
                   </div>
                 )}
 
-                <form onSubmit={handleSignup} className="space-y-3 max-h-[60vh] md:max-h-none overflow-y-auto pr-2 custom-scrollbar">
-                  {/* Basic Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-0.5">
-                      <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Full Name</label>
-                      <div className="relative group">
-                        <FiUser className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
-                        <input
-                          type="text"
-                          name="fullName"
-                          placeholder={window.innerWidth < 768 ? "Full Name" : ""}
-                          value={formData.fullName}
-                          onChange={handleChange}
-                          className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all"
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-0.5">
-                      <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Email</label>
-                      <div className="relative group">
-                        <FiMail className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
-                        <input
-                          type="email"
-                          name="email"
-                          placeholder={window.innerWidth < 768 ? "Email ID" : ""}
-                          value={formData.email}
-                          onChange={handleChange}
-                          className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Enterpriser Fields */}
-                  {getRole() === 'user' && userType === 'enterpriser' && (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                {step === 'signup' ? (
+                  <form onSubmit={handleSignup} className="space-y-3 max-h-[60vh] md:max-h-none overflow-y-auto pr-2 custom-scrollbar">
+                    {/* Basic Info */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="space-y-0.5">
-                        <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Shop / Business Name</label>
+                        <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Full Name</label>
                         <div className="relative group">
-                          <FiShoppingBag className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
+                          <FiUser className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
                           <input
                             type="text"
-                            name="shopName"
-                            placeholder={window.innerWidth < 768 ? "Business Name" : "e.g. Riddha Designs"}
-                            value={formData.shopName}
+                            name="fullName"
+                            placeholder={window.innerWidth < 768 ? "Full Name" : ""}
+                            value={formData.fullName}
                             onChange={handleChange}
                             className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all"
                             required
                           />
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div className="space-y-0.5">
-                          <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">GST Number</label>
+                      <div className="space-y-0.5">
+                        <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Email</label>
+                        <div className="relative group">
+                          <FiMail className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
                           <input
-                            type="text"
-                            name="gstNumber"
-                            placeholder={window.innerWidth < 768 ? "GST Number" : "22AAAAA0000A1Z5"}
-                            value={formData.gstNumber}
+                            type="email"
+                            name="email"
+                            placeholder={window.innerWidth < 768 ? "Email ID" : ""}
+                            value={formData.email}
                             onChange={handleChange}
-                            className="w-full px-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all"
+                            className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all"
                             required
                           />
                         </div>
-                        <div className="space-y-0.5">
-                          <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Trade/Tax Code</label>
-                          <input
-                            type="text"
-                            name="taxationCode"
-                            placeholder={window.innerWidth < 768 ? "Code (Optional)" : "Optional"}
-                            value={formData.taxationCode}
-                            onChange={handleChange}
-                            className="w-full px-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all"
-                          />
-                        </div>
                       </div>
-                    </motion.div>
-                  )}
+                    </div>
 
-                  {/* Seller Fields */}
-                  {getRole() === 'seller' && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Shop Name</label>
+                    {/* Enterpriser Fields */}
+                    {getRole() === 'user' && userType === 'enterpriser' && (
+                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                        <div className="space-y-0.5">
+                          <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Shop / Business Name</label>
                           <div className="relative group">
-                            <FiShoppingBag className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-5 w-5" />
-                            <input type="text" name="shopName" placeholder={window.innerWidth < 768 ? "Shop Name" : ""} value={formData.shopName} onChange={handleChange} className="w-full md:pl-10 pl-16 pr-6 py-4 md:py-3.5 rounded-full md:rounded-xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all" />
+                            <FiShoppingBag className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
+                            <input
+                              type="text"
+                              name="shopName"
+                              placeholder={window.innerWidth < 768 ? "Business Name" : "e.g. Riddha Designs"}
+                              value={formData.shopName}
+                              onChange={handleChange}
+                              className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all"
+                              required
+                            />
                           </div>
                         </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="space-y-0.5">
+                            <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">GST Number</label>
+                            <input
+                              type="text"
+                              name="gstNumber"
+                              placeholder={window.innerWidth < 768 ? "GST Number" : "22AAAAA0000A1Z5"}
+                              value={formData.gstNumber}
+                              onChange={handleChange}
+                              className="w-full px-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-0.5">
+                            <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Trade/Tax Code</label>
+                            <input
+                              type="text"
+                              name="taxationCode"
+                              placeholder={window.innerWidth < 768 ? "Code (Optional)" : "Optional"}
+                              value={formData.taxationCode}
+                              onChange={handleChange}
+                              className="w-full px-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all"
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Seller Fields */}
+                    {getRole() === 'seller' && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Shop Name</label>
+                            <div className="relative group">
+                              <FiShoppingBag className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-5 w-5" />
+                              <input type="text" name="shopName" placeholder={window.innerWidth < 768 ? "Shop Name" : ""} value={formData.shopName} onChange={handleChange} className="w-full md:pl-10 pl-16 pr-6 py-4 md:py-3.5 rounded-full md:rounded-xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all" />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Phone</label>
+                            <div className="relative group">
+                              <FiPhone className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-5 w-5" />
+                              <input type="tel" name="phone" placeholder={window.innerWidth < 768 ? "Phone Number" : ""} value={formData.phone} onChange={handleChange} className="w-full md:pl-10 pl-16 pr-6 py-4 md:py-3.5 rounded-full md:rounded-xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Shop Address</label>
+                          <div className="relative group">
+                            <FiMapPin className="md:hidden absolute left-6 top-8 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-5 w-5" />
+                            <textarea name="shopAddress" placeholder={window.innerWidth < 768 ? "Shop Address" : ""} value={formData.shopAddress} onChange={handleChange} rows="2" className="w-full md:pl-10 pl-16 pr-6 py-4 md:py-3.5 rounded-3xl md:rounded-xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all resize-none"></textarea>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Delivery Fields */}
+                    {getRole() === 'delivery' && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-4">
                         <div className="space-y-1">
                           <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Phone</label>
                           <div className="relative group">
-                            <FiPhone className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-5 w-5" />
-                            <input type="tel" name="phone" placeholder={window.innerWidth < 768 ? "Phone Number" : ""} value={formData.phone} onChange={handleChange} className="w-full md:pl-10 pl-16 pr-6 py-4 md:py-3.5 rounded-full md:rounded-xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all" />
+                            <FiPhone className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#189D91]/40 h-5 w-5" />
+                            <input type="tel" name="phone" placeholder={window.innerWidth < 768 ? "Phone Number" : ""} value={formData.phone} onChange={handleChange} className="w-full md:pl-6 pl-16 pr-6 py-4 md:py-3.5 rounded-full md:rounded-xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:outline-none text-sm md:text-white font-bold transition-all" />
                           </div>
                         </div>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Shop Address</label>
-                        <div className="relative group">
-                          <FiMapPin className="md:hidden absolute left-6 top-8 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-5 w-5" />
-                          <textarea name="shopAddress" placeholder={window.innerWidth < 768 ? "Shop Address" : ""} value={formData.shopAddress} onChange={handleChange} rows="2" className="w-full md:pl-10 pl-16 pr-6 py-4 md:py-3.5 rounded-3xl md:rounded-xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all resize-none"></textarea>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Vehicle Type</label>
+                            <select name="vehicleType" value={formData.vehicleType} onChange={handleChange} className="w-full px-6 py-4 rounded-full md:rounded-xl bg-blue-50/50 md:bg-deep-espresso border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:outline-none text-sm md:text-white font-bold transition-all appearance-none">
+                              <option value="Bike">Bike</option>
+                              <option value="Van">Van</option>
+                              <option value="Truck">Truck</option>
+                            </select>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Vehicle No.</label>
+                            <input type="text" name="vehicleNumber" placeholder={window.innerWidth < 768 ? "Vehicle Number" : ""} value={formData.vehicleNumber} onChange={handleChange} className="w-full px-6 py-4 rounded-full md:rounded-xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:outline-none text-sm md:text-white font-bold transition-all" />
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  )}
+                      </motion.div>
+                    )}
 
-                  {/* Delivery Fields */}
-                  {getRole() === 'delivery' && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-4">
-                      <div className="space-y-1">
-                        <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Phone</label>
-                        <div className="relative group">
-                          <FiPhone className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#189D91]/40 h-5 w-5" />
-                          <input type="tel" name="phone" placeholder={window.innerWidth < 768 ? "Phone Number" : ""} value={formData.phone} onChange={handleChange} className="w-full md:pl-6 pl-16 pr-6 py-4 md:py-3.5 rounded-full md:rounded-xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:outline-none text-sm md:text-white font-bold transition-all" />
-                        </div>
+                    {/* Password Fields */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                      <div className="space-y-0.5 relative group">
+                        <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Password</label>
+                        <FiLock className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
+                        <input type={showPassword ? "text" : "password"} name="password" placeholder={window.innerWidth < 768 ? "Password" : ""} value={formData.password} onChange={handleChange} className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all" />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 md:text-white/40">{showPassword ? <FiEyeOff className="h-4 w-4" /> : <FiEye className="h-4 w-4 opacity-50" />}</button>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Vehicle Type</label>
-                          <select name="vehicleType" value={formData.vehicleType} onChange={handleChange} className="w-full px-6 py-4 rounded-full md:rounded-xl bg-blue-50/50 md:bg-deep-espresso border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:outline-none text-sm md:text-white font-bold transition-all appearance-none">
-                            <option value="Bike">Bike</option>
-                            <option value="Van">Van</option>
-                            <option value="Truck">Truck</option>
-                          </select>
-                        </div>
-                        <div className="space-y-1">
-                          <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Vehicle No.</label>
-                          <input type="text" name="vehicleNumber" placeholder={window.innerWidth < 768 ? "Vehicle Number" : ""} value={formData.vehicleNumber} onChange={handleChange} className="w-full px-6 py-4 rounded-full md:rounded-xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:outline-none text-sm md:text-white font-bold transition-all" />
-                        </div>
+                      <div className="space-y-0.5 relative group">
+                        <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Confirm</label>
+                        <FiLock className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
+                        <input type={showPassword ? "text" : "password"} name="confirmPassword" placeholder={window.innerWidth < 768 ? "Confirm Password" : ""} value={formData.confirmPassword} onChange={handleChange} className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all" />
                       </div>
-                    </motion.div>
-                  )}
+                      <div className="space-y-0.5 relative group md:col-span-2">
+                        <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Referral Code (Optional)</label>
+                        <FiGift className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
+                        <input 
+                          type="text" 
+                          name="referralCode" 
+                          placeholder={window.innerWidth < 768 ? "Referral Code (Optional)" : "e.g. RIDDHA-123"} 
+                          value={formData.referralCode || ''} 
+                          onChange={handleChange} 
+                          className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all" 
+                        />
+                      </div>
+                    </div>
 
-                  {/* Password Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                    <div className="space-y-0.5 relative group">
-                      <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Password</label>
-                      <FiLock className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
-                      <input type={showPassword ? "text" : "password"} name="password" placeholder={window.innerWidth < 768 ? "Password" : ""} value={formData.password} onChange={handleChange} className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all" />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 md:text-white/40">{showPassword ? <FiEyeOff className="h-4 w-4" /> : <FiEye className="h-4 w-4 opacity-50" />}</button>
+                    <div className="flex items-center gap-2 pt-2 px-1">
+                      <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="accent-[#189D91] md:accent-warm-sand h-3.5 w-3.5" />
+                      <label className="text-[8px] md:text-[9px] font-bold text-gray-400 md:text-white/60 uppercase tracking-widest leading-none">I agree to the Terms & Conditions</label>
                     </div>
-                    <div className="space-y-0.5 relative group">
-                      <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Confirm</label>
-                      <FiLock className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
-                      <input type={showPassword ? "text" : "password"} name="confirmPassword" placeholder={window.innerWidth < 768 ? "Confirm Password" : ""} value={formData.confirmPassword} onChange={handleChange} className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all" />
+
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className={`w-full h-14 md:h-11 mt-2 rounded-full md:rounded-lg bg-[#189D91] md:bg-warm-sand hover:bg-black md:hover:bg-white text-white md:text-white md:hover:text-deep-espresso font-black text-xs md:text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-[#189D91]/20 transition-all active:scale-[0.98] ${loading ? 'opacity-50' : ''}`}
+                    >
+                      {loading ? 'Creating...' : 'Create Account'}
+                    </Button>
+
+                    <p className="md:hidden text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-4">
+                      Already have account? <span onClick={() => navigate(getLoginPath())} className="text-[#189D91] cursor-pointer font-black border-b border-[#189D91]/30 pb-0.5 ml-1">LOG IN</span>
+                    </p>
+                  </form>
+                ) : (
+                  <form onSubmit={handleVerifyOtp} className="space-y-4">
+                    <div className="text-center mb-6">
+                      <h3 className="text-xl md:text-2xl font-black text-deep-espresso md:text-white mb-2">Verify Your Email</h3>
+                      <p className="text-sm text-gray-500 md:text-white/70">
+                        We've sent a 6-digit OTP to <strong>{registeredEmail}</strong>.
+                      </p>
                     </div>
-                    <div className="space-y-0.5 relative group md:col-span-2">
-                      <label className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/60 ml-1">Referral Code (Optional)</label>
-                      <FiGift className="md:hidden absolute left-5 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-4 w-4" />
-                      <input 
-                        type="text" 
-                        name="referralCode" 
-                        placeholder={window.innerWidth < 768 ? "Referral Code (Optional)" : "e.g. RIDDHA-123"} 
-                        value={formData.referralCode || ''} 
-                        onChange={handleChange} 
-                        className="w-full md:pl-5 pl-12 pr-5 py-3 md:py-2.5 rounded-full md:rounded-lg bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-white font-bold transition-all" 
+                    
+                    <div className="space-y-1">
+                      <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 ml-1">Enter OTP</label>
+                      <input
+                        type="text"
+                        maxLength={6}
+                        placeholder="6-digit OTP"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        className="w-full text-center tracking-[0.5em] text-2xl py-4 rounded-xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-warm-sand/50 focus:bg-white md:focus:bg-white/20 focus:outline-none md:text-white font-bold transition-all"
+                        required
                       />
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-2 pt-2 px-1">
-                    <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="accent-[#189D91] md:accent-warm-sand h-3.5 w-3.5" />
-                    <label className="text-[8px] md:text-[9px] font-bold text-gray-400 md:text-white/60 uppercase tracking-widest leading-none">I agree to the Terms & Conditions</label>
-                  </div>
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className={`w-full h-14 md:h-12 mt-2 rounded-xl bg-[#189D91] md:bg-warm-sand hover:bg-black md:hover:bg-white text-white md:hover:text-deep-espresso font-black text-xs md:text-sm uppercase tracking-[0.2em] shadow-xl transition-all ${loading ? 'opacity-50' : ''}`}
+                    >
+                      {loading ? 'Verifying...' : 'Verify Email'}
+                    </Button>
 
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className={`w-full h-14 md:h-11 mt-2 rounded-full md:rounded-lg bg-[#189D91] md:bg-warm-sand hover:bg-black md:hover:bg-white text-white md:text-white md:hover:text-deep-espresso font-black text-xs md:text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-[#189D91]/20 transition-all active:scale-[0.98] ${loading ? 'opacity-50' : ''}`}
-                  >
-                    {loading ? 'Creating...' : 'Create Account'}
-                  </Button>
-
-                  <p className="md:hidden text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-4">
-                    Already have account? <span onClick={() => navigate(getLoginPath())} className="text-[#189D91] cursor-pointer font-black border-b border-[#189D91]/30 pb-0.5 ml-1">LOG IN</span>
-                  </p>
-                </form>
+                    <p className="text-center text-[10px] font-bold text-gray-500 md:text-white/60 uppercase tracking-widest mt-6">
+                      Didn't receive it? <button type="button" onClick={handleResendOtp} className="text-[#189D91] md:text-warm-sand cursor-pointer font-black border-b border-[#189D91]/30 md:border-warm-sand/30 pb-0.5 ml-1 hover:text-black md:hover:text-white transition-colors">RESEND OTP</button>
+                    </p>
+                  </form>
+                )}
               </div>
             </motion.div>
           </div>

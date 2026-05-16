@@ -29,6 +29,7 @@ import SearchBar from "./SearchBar";
 import api from '../../../shared/utils/api';
 import { getDeliveryEstimate } from '../../../shared/utils/delivery';
 import BulkOrderModal from "./BulkOrderModal";
+import NotificationDropdown from "../../../shared/components/NotificationDropdown";
 import Logo from "../../../assets/WhatsApp Image 2026-05-06 at 3.50.08 PM.jpeg";
 import TransparentLogo from "../../../assets/transparent logo.png";
 
@@ -209,6 +210,7 @@ const Navbar = () => {
               <Link to="/profile" className="p-2 text-white">
                 <FiUser className="h-6 w-6" />
               </Link>
+              {user && <NotificationDropdown isMobile={true} />}
               <Link to="/cart" className="p-2 text-white relative">
                 <FiShoppingCart className="h-6 w-6" />
                 {cartCount > 0 && <span className="absolute top-1 right-1 bg-[#FF6B35] text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-[#189D91]">{cartCount}</span>}
@@ -302,6 +304,12 @@ const Navbar = () => {
                 </span>
               )}
             </Link>
+
+            {user && (
+              <div className="flex items-center border-l border-gray-100 pl-4">
+                <NotificationDropdown />
+              </div>
+            )}
           </div>
         </div>
 

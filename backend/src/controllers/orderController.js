@@ -3,16 +3,19 @@ const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Admin = require('../models/Admin');
 const Seller = require('../models/Seller');
+const paginate = require('../utils/paginate');
 const { 
   notifySellerNewOrder, 
   notifyAdminNewOrder, 
   notifyDeliveryAssignment, 
   notifySellerDeliveryResponse,
   notifyAdminDeliveryResponse,
-  notifyUserOrderStatus
+  notifyUserOrderStatus,
+  notifyLowStock
 } = require('../socket');
+const { processInvoiceAsync } = require('../utils/invoiceService');
 
-// @desc    Create new order
+// @desc    Create new order(s) handling multi-seller cart
 // @route   POST /api/orders
 // @access  Private
 exports.addOrderItems = async (req, res) => {
@@ -20,105 +23,145 @@ exports.addOrderItems = async (req, res) => {
     orderItems,
     shippingAddress,
     paymentMethod,
-    itemsPrice,
-    shippingPrice,
-    totalPrice,
     businessDetails
   } = req.body;
 
-  if (orderItems && orderItems.length === 0) {
+  if (!orderItems || orderItems.length === 0) {
     return res.status(400).json({ success: false, message: 'No order items' });
-  } else {
-    try {
-      // Enrich items with correct seller and sellerType from DB
-      const enrichedItems = await Promise.all(orderItems.map(async (item) => {
-        const product = await Product.findById(item.product);
-        let sType = 'Seller';
-        if (product) {
-          sType = product.sellerType || (product.brand ? 'Admin' : 'Seller'); // Heuristic for old products
-        }
-        return {
-          ...item,
-          seller: product ? product.seller : (item.seller || item.productSeller),
-          sellerType: product ? (product.sellerType || 'Seller') : (item.sellerType || 'Seller')
+  }
+
+  try {
+    // 1. Stock Validation (Fail-Fast: if any item is out of stock, fail entire order)
+    for (const item of orderItems) {
+      const product = await Product.findById(item.product);
+      if (!product) {
+        return res.status(404).json({ success: false, message: `Product not found: ${item.name}` });
+      }
+      if (product.countInStock < item.quantity) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Insufficient stock for ${item.name}. Available: ${product.countInStock}` 
+        });
+      }
+    }
+
+    // 2. Group items by Seller
+    const groupedItems = {};
+    for (const item of orderItems) {
+      const product = await Product.findById(item.product);
+      
+      const sId = product.seller.toString();
+      const sType = product.sellerType || (product.brand ? 'Admin' : 'Seller');
+      
+      if (!groupedItems[sId]) {
+        groupedItems[sId] = {
+          seller: sId,
+          sellerType: sType,
+          items: [],
+          itemsPrice: 0,
+          shippingPrice: 0,
+          totalPrice: 0
         };
-      }));
+      }
+      
+      const enrichedItem = {
+        name: item.name,
+        quantity: item.quantity,
+        image: item.image,
+        price: item.price,
+        product: item.product,
+        seller: sId,
+        sellerType: sType
+      };
 
-      const primarySeller = enrichedItems[0].seller;
-      const primarySellerType = enrichedItems[0].sellerType;
+      groupedItems[sId].items.push(enrichedItem);
+      const lineTotal = item.price * item.quantity;
+      groupedItems[sId].itemsPrice += lineTotal;
+      groupedItems[sId].totalPrice += lineTotal;
+    }
 
+    // 3. Create Orders and Deduct Stock
+    const createdOrders = [];
+    for (const sellerId in groupedItems) {
+      const group = groupedItems[sellerId];
+      
       const order = new Order({
-        orderItems: enrichedItems,
+        orderItems: group.items,
         user: req.user.id,
-        seller: primarySeller,
-        sellerType: primarySellerType,
+        seller: group.seller,
+        sellerType: group.sellerType,
         shippingAddress,
         paymentMethod,
-        itemsPrice,
-        shippingPrice,
-        totalPrice,
+        itemsPrice: group.itemsPrice,
+        shippingPrice: group.shippingPrice,
+        totalPrice: group.totalPrice,
         isPaid: true,
         paidAt: Date.now(),
         status: 'Processing',
         businessDetails
       });
 
-      const createdOrder = await order.save();
+      const savedOrder = await order.save();
+      createdOrders.push(savedOrder);
 
-      // Clear the cart after order is placed
-      await Cart.findOneAndUpdate({ user: req.user.id }, { items: [] });
+      // Deduct stock (Atomic)
+      for (const item of group.items) {
+        const updatedProduct = await Product.findOneAndUpdate(
+          { _id: item.product, countInStock: { $gte: item.quantity } },
+          { $inc: { countInStock: -item.quantity } },
+          { new: true }
+        );
 
-        // Real-time notify owners (Sellers and/or Admins)
-        try {
-          console.log('--- Order Notification Debug ---');
-          const sellersToNotify = new Set();
-          let isAdminNotified = false;
-
-          createdOrder.orderItems.forEach(item => {
-            console.log(`Checking Item: ${item.name}, SellerType: ${item.sellerType}, SellerID: ${item.seller}`);
-            if (item.sellerType === 'Admin') {
-              isAdminNotified = true;
-            } else if (item.sellerType === 'Seller') {
-              sellersToNotify.add(String(item.seller));
-            }
-          });
-
-          const payload = {
-            orderId: String(createdOrder._id),
-            totalPrice: createdOrder.totalPrice,
-            itemsCount: (createdOrder.orderItems || []).reduce((sum, item) => sum + (item.quantity || 0), 0),
-            status: createdOrder.status,
-            createdAt: createdOrder.createdAt,
-            customerName: req.user?.fullName,
-            shippingCity: createdOrder.shippingAddress?.city
-          };
-
-          console.log('Notification Payload:', payload);
-
-          // Notify specific sellers
-          for (const sellerId of sellersToNotify) {
-            console.log(`Emitting to Seller Room: seller:${sellerId}`);
-            notifySellerNewOrder(sellerId, payload);
-          }
-
-          // Notify all admins if any admin-owned product was sold
-          if (isAdminNotified) {
-            console.log('Emitting to Admin Room: role:admin');
-            notifyAdminNewOrder(null, payload);
-          }
-          console.log('--- End Notification Debug ---');
-        } catch (e) {
-          console.error('Socket notify failed:', e.message);
+        if (!updatedProduct) {
+          throw new Error(`Race condition: Insufficient stock for ${item.name} during checkout.`);
         }
 
-      res.status(201).json({
-        success: true,
-        data: createdOrder
-      });
-    } catch (error) {
-      console.error('Order creation error:', error);
-      res.status(500).json({ success: false, message: error.message });
+        // Low stock alert
+        if (updatedProduct.countInStock <= 5) {
+          notifyLowStock(updatedProduct.seller, {
+            productId: updatedProduct._id,
+            name: updatedProduct.name,
+            remainingStock: updatedProduct.countInStock
+          });
+        }
+      }
+
+      // Notify seller
+      try {
+        const payload = {
+          orderId: String(savedOrder._id),
+          totalPrice: savedOrder.totalPrice,
+          itemsCount: savedOrder.orderItems.reduce((sum, i) => sum + i.quantity, 0),
+          status: savedOrder.status,
+          createdAt: savedOrder.createdAt,
+          customerName: req.user?.fullName,
+          shippingCity: savedOrder.shippingAddress?.city
+        };
+
+        if (group.sellerType === 'Admin') {
+          notifyAdminNewOrder(null, payload);
+        } else {
+          notifySellerNewOrder(group.seller, payload);
+        }
+      } catch (e) {
+        console.error('Socket notify failed:', e.message);
+      }
+
+      // Fire and forget invoice generation (Asynchronous)
+      processInvoiceAsync(savedOrder._id, req.user.id);
     }
+
+    // Clear cart
+    await Cart.findOneAndUpdate({ user: req.user.id }, { items: [] });
+
+    res.status(201).json({
+      success: true,
+      data: createdOrders // Return array of orders
+    });
+
+  } catch (error) {
+    console.error('Order creation error:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -150,10 +193,15 @@ exports.getOrderById = async (req, res) => {
 // @access  Private
 exports.getMyOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user.id }).sort('-createdAt');
+    const result = await paginate(Order, { user: req.user.id }, req);
     res.status(200).json({
       success: true,
-      data: orders
+      count: result.data.length,
+      totalResults: result.totalResults,
+      totalPages: result.totalPages,
+      page: result.page,
+      limit: result.limit,
+      data: result.data
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -188,23 +236,30 @@ exports.getOrders = async (req, res) => {
       query.status = { $in: ['Processing', 'Shipped', 'Delivered'] };
     }
 
-    const orders = await Order.find(query)
-      .populate('user', 'fullName email')
-      .populate({
-        path: 'seller',
+    const populateOptions = [
+      { path: 'user', select: 'fullName email' },
+      { 
+        path: 'seller', 
         select: 'shopName fullName email',
         transform: (doc, id) => {
           if (!doc && id) return { _id: id, shopName: 'Riddha Mart (Admin)', fullName: 'Riddha Mart' };
-          if (doc && !doc.shopName) return { ...doc.toObject(), shopName: 'Riddha Mart (Official)' };
+          if (doc && !doc.shopName) return { ...doc, shopName: 'Riddha Mart (Official)' };
           return doc;
         }
-      })
-      .populate('deliveryBoy', 'fullName email phone')
-      .sort('-createdAt');
+      },
+      { path: 'deliveryBoy', select: 'fullName email phone' }
+    ];
+
+    const result = await paginate(Order, query, req, populateOptions);
 
     res.status(200).json({
       success: true,
-      data: orders
+      count: result.data.length,
+      totalResults: result.totalResults,
+      totalPages: result.totalPages,
+      page: result.page,
+      limit: result.limit,
+      data: result.data
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -244,6 +299,15 @@ exports.updateOrderStatus = async (req, res) => {
         order.deliveredAt = Date.now();
         order.status = 'Delivered';
         order.deliveryStatus = 'Delivered';
+      }
+
+      if (newStatus === 'Cancelled') {
+        // Restore stock
+        for (const item of order.orderItems) {
+          await Product.findByIdAndUpdate(item.product, {
+            $inc: { countInStock: item.quantity }
+          });
+        }
       }
 
       const updatedOrder = await order.save();

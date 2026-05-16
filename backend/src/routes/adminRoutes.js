@@ -22,11 +22,17 @@ const {
   searchOrders
 } = require('../controllers/adminController');
 const { protect, authorize } = require('../middleware/auth');
+const { check } = require('express-validator');
+const { validate } = require('../middleware/validationMiddleware');
 
 const router = express.Router();
 
 router.post('/register', registerAdmin);
-router.post('/login', loginAdmin);
+router.post('/login', [
+  check('email', 'Please include a valid email').isEmail(),
+  check('password', 'Password is required').exists(),
+  validate
+], loginAdmin);
 router.get('/me', protect, getAdminMe);
 router.put('/profile', protect, updateAdminProfile);
 

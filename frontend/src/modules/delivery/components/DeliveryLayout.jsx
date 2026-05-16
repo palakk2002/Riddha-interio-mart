@@ -2,12 +2,10 @@ import React from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import DeliverySidebar from './DeliverySidebar';
 import DeliveryBottomNavbar from './DeliveryBottomNavbar';
-import { LuMenu, LuBell, LuUser, LuChevronDown, LuTruck, LuCheck, LuX } from 'react-icons/lu';
+import { LuMenu, LuUser, LuChevronDown, LuTruck, LuCheck, LuX } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../user/data/UserContext';
-import { connectSocket, disconnectSocket } from '../../../shared/utils/socket';
-import { playNotificationSound, primeNotificationAudio, isSoundEnabled } from '../../../shared/utils/notificationSound';
-import { getDeliveryNotifications, setDeliveryNotifications, prependDeliveryNotification } from '../utils/deliveryNotifications';
+import NotificationDropdown from '../../../shared/components/NotificationDropdown';
 import api from '../../../shared/utils/api';
 
 const notifications = [
@@ -18,8 +16,6 @@ const notifications = [
 
 const DeliveryLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
-  const [showNotifications, setShowNotifications] = React.useState(false);
-  const [notifications, setNotifications] = React.useState(() => getDeliveryNotifications());
   const [showUserMenu, setShowUserMenu] = React.useState(false);
   const [assignmentRequest, setAssignmentRequest] = React.useState(null);
   const [approvalNotification, setApprovalNotification] = React.useState(null);
@@ -27,20 +23,6 @@ const DeliveryLayout = () => {
   const { user, setUser, logout } = useUser();
   const [updatingStatus, setUpdatingStatus] = React.useState(false);
   const navigate = useNavigate();
-
-  const unreadCount = notifications.filter(n => n.status === 'unread').length;
-
-  const markAsRead = (id) => {
-    const updated = notifications.map(n => n.id === id ? { ...n, status: 'read' } : n);
-    setNotifications(updated);
-    setDeliveryNotifications(updated);
-  };
-
-  React.useEffect(() => {
-    const sync = () => setNotifications(getDeliveryNotifications());
-    window.addEventListener('delivery_notifications_updated', sync);
-    return () => window.removeEventListener('delivery_notifications_updated', sync);
-  }, []);
 
   const status = user?.status || 'Offline';
 
@@ -125,7 +107,6 @@ const DeliveryLayout = () => {
     <div 
       className="flex h-screen w-full bg-white text-deep-espresso overflow-hidden delivery-theme" 
       onClick={() => {
-        setShowNotifications(false);
         setShowUserMenu(false);
       }}
     >
@@ -313,55 +294,7 @@ const DeliveryLayout = () => {
               </button>
             )}
 
-            <div className="relative">
-              <button 
-                onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); }}
-                className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-soft-oatmeal text-deep-espresso' : 'text-dusty-cocoa hover:bg-soft-oatmeal'}`}
-              >
-                <LuBell size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-[#001B4E] rounded-full border-2 border-white animate-pulse"></span>
-                )}
-              </button>
-
-              <AnimatePresence>
-                {showNotifications && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-soft-oatmeal overflow-hidden z-50"
-                  >
-                    <div className="p-4 border-b border-soft-oatmeal flex items-center justify-between bg-soft-oatmeal/10">
-                      <h3 className="font-bold text-sm">Notifications</h3>
-                      <span className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">{unreadCount} New</span>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto custom-scrollbar">
-                      {notifications.map((n) => (
-                        <div 
-                          key={n.id} 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            markAsRead(n.id);
-                            if (n.link) {
-                              navigate(n.link);
-                              setShowNotifications(false);
-                            }
-                          }}
-                          className={`p-4 border-b border-soft-oatmeal/50 hover:bg-soft-oatmeal/20 transition-colors cursor-pointer group ${n.status === 'unread' ? 'bg-warm-sand/5' : ''}`}
-                        >
-                          <div className="flex justify-between items-start mb-1">
-                            <h4 className="text-sm font-bold text-deep-espresso">{n.title}</h4>
-                            <span className="text-[10px] text-warm-sand uppercase font-medium">{n.time}</span>
-                          </div>
-                          <p className="text-xs text-dusty-cocoa line-clamp-2">{n.message}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <NotificationDropdown isMobile={false} />
             <div className="h-8 w-[1px] bg-soft-oatmeal mx-2"></div>
             <div className="relative">
               <div 

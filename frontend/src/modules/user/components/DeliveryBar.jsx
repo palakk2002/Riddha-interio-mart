@@ -64,4 +64,4 @@ const DeliveryBar = () => {
   );
 };
 
-export default DeliveryBar;
+export default React.memo(DeliveryBar);

@@ -1,35 +1,63 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
-import { LuPackage, LuClock, LuCheck, LuTrendingUp, LuWallet } from 'react-icons/lu';
-import { initialAvailableOrders, initialMyOrders, earningsData } from '../data/deliveryData';
-
+import { LuPackage, LuClock, LuCheck, LuTrendingUp, LuWallet, LuPercent } from 'react-icons/lu';
 import api from '../../../shared/utils/api';
 import { useUser } from '../../user/data/UserContext';
 
 const Dashboard = () => {
   const { user, setUser } = useUser();
-  const [updating, setUpdating] = React.useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
+  const [analytics, setAnalytics] = useState({
+    stats: {
+      totalAssigned: 0,
+      completedDeliveries: 0,
+      pendingDeliveries: 0,
+      rejectedDeliveries: 0
+    },
+    earnings: {
+      totalEarnings: 0,
+      codToDeposit: 0
+    },
+    performance: {
+      successRate: 0,
+      avgDeliveryTimeHours: 0
+    },
+    recentDeliveries: []
+  });
+
   const partnerStatus = user?.status || 'Offline';
 
-  React.useEffect(() => {
-    const syncProfile = async () => {
-      try {
-        const { data } = await api.get('/delivery/me');
-        if (data.success) {
-          // IMPORTANT: Preserve the existing token when updating user profile data
-          setUser(prev => ({ 
-            ...prev, 
-            ...data.data,
-            token: prev?.token // Explicitly keep the token
-          }));
-        }
-      } catch (err) {
-        console.error('Failed to sync partner profile:', err);
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      // Fetch Profile Status
+      const { data: profileData } = await api.get('/delivery/me');
+      if (profileData.success) {
+        setUser(prev => ({ 
+          ...prev, 
+          ...profileData.data,
+          token: prev?.token 
+        }));
       }
-    };
-    syncProfile();
+
+      // Fetch Analytics
+      const { data: analyticsData } = await api.get('/delivery/analytics');
+      if (analyticsData.success) {
+        setAnalytics(analyticsData.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch dashboard data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
   }, []);
 
   const toggleStatus = async () => {
@@ -51,11 +79,7 @@ const Dashboard = () => {
     }
   };
 
-  const recentDeliveries = [
-    ...initialMyOrders,
-    { id: "ORD-1122", customerName: "Anjali Devi", status: "Delivered", dateTime: "05 Apr, 06:15 PM" },
-    { id: "ORD-4433", customerName: "Karan Johar", status: "Delivered", dateTime: "05 Apr, 02:40 PM" },
-  ].slice(0, 5);
+  const { stats, earnings, performance, recentDeliveries } = analytics;
 
   return (
     <PageWrapper>
@@ -89,26 +113,26 @@ const Dashboard = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard 
-            label="Total Orders" 
-            value="156" 
+            label="Total Assigned" 
+            value={loading ? '-' : stats.totalAssigned} 
             icon={LuPackage} 
             color="bg-warm-sand" 
           />
           <StatCard 
-            label="Pending" 
-            value={initialMyOrders.length} 
+            label="Active Pending" 
+            value={loading ? '-' : stats.pendingDeliveries} 
             icon={LuClock} 
             color="bg-soft-oatmeal" 
           />
           <StatCard 
             label="Completed" 
-            value="142" 
+            value={loading ? '-' : stats.completedDeliveries} 
             icon={LuCheck} 
             color="bg-dusty-cocoa" 
           />
           <StatCard 
-            label="Earnings" 
-            value={`₹${earningsData.total}`} 
+            label="Total Earnings" 
+            value={loading ? '-' : `₹${earnings.totalEarnings.toLocaleString()}`} 
             icon={LuWallet} 
             color="bg-deep-espresso" 
           />
@@ -116,66 +140,95 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Deliveries */}
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-soft-oatmeal overflow-hidden">
+          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-soft-oatmeal overflow-hidden flex flex-col">
             <div className="p-6 border-b border-soft-oatmeal flex items-center justify-between">
               <h3 className="text-xl font-display font-bold flex items-center gap-2 text-deep-espresso">
                 <LuTrendingUp className="text-warm-sand" /> Recent Deliveries
               </h3>
-              <button className="text-xs font-bold text-warm-sand uppercase tracking-wider hover:text-deep-espresso transition-colors">
-                View All
-              </button>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto flex-1">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-soft-oatmeal/10">
                     <th className="px-6 py-4 text-[10px] font-bold text-warm-sand uppercase tracking-widest">Order ID</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-warm-sand uppercase tracking-widest">Customer</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-warm-sand uppercase tracking-widest">Status</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-warm-sand uppercase tracking-widest">Time</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-warm-sand uppercase tracking-widest">Date Assigned</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-soft-oatmeal/50">
-                  {recentDeliveries.map((order) => (
-                    <tr key={order.id} className="hover:bg-soft-oatmeal/5 transition-colors group">
-                      <td className="px-6 py-4 text-sm font-bold text-deep-espresso">{order.id}</td>
-                      <td className="px-6 py-4 text-sm text-dusty-cocoa">{order.customerName}</td>
-                      <td className="px-6 py-4">
-                        <StatusBadge status={order.status} />
+                  {loading ? (
+                    <tr>
+                      <td colSpan="4" className="px-6 py-8 text-center text-xs font-bold text-warm-sand uppercase tracking-widest">
+                        Loading deliveries...
                       </td>
-                      <td className="px-6 py-4 text-xs text-warm-sand font-medium">{order.dateTime}</td>
                     </tr>
-                  ))}
+                  ) : recentDeliveries.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="px-6 py-8 text-center text-xs font-bold text-warm-sand uppercase tracking-widest">
+                        No deliveries assigned yet
+                      </td>
+                    </tr>
+                  ) : (
+                    recentDeliveries.map((order) => (
+                      <tr key={order.id} className="hover:bg-soft-oatmeal/5 transition-colors group">
+                        <td className="px-6 py-4 text-sm font-bold text-deep-espresso">#{order.id}</td>
+                        <td className="px-6 py-4 text-sm text-dusty-cocoa">{order.customerName}</td>
+                        <td className="px-6 py-4">
+                          <StatusBadge status={order.status} />
+                        </td>
+                        <td className="px-6 py-4 text-xs text-warm-sand font-medium">
+                          {new Date(order.dateTime).toLocaleString('en-IN', {
+                            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                          })}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
 
-          {/* Quick Stats/Tip */}
+          {/* Performance & Cash to Deposit */}
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-deep-espresso to-dusty-cocoa rounded-2xl p-8 text-white relative overflow-hidden shadow-xl">
+            <div className="bg-gradient-to-br from-[#001B4E] to-[#002b7a] rounded-2xl p-8 text-white relative overflow-hidden shadow-xl">
               <div className="relative z-10">
-                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6 backdrop-blur-md border border-white/10">
-                  <LuCheck size={24} className="text-warm-sand" />
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10">
+                    <LuPercent size={24} className="text-[#A29A88]" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-display font-bold leading-tight">Success Rate</h3>
+                    <p className="text-white/60 text-xs font-bold tracking-widest uppercase mt-1">Performance Matrix</p>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-display font-bold mb-4 leading-tight">Partner Tip</h3>
-                <p className="text-soft-oatmeal/80 text-sm leading-relaxed">
-                  Completing 5 more deliveries today will unlock a bonus of ₹200! Keep up the great work.
-                </p>
+                
+                <div className="flex items-end justify-between">
+                  <span className="text-5xl font-black">{performance.successRate}%</span>
+                  <span className="text-sm font-bold text-[#A29A88] uppercase tracking-wider">{stats.completedDeliveries} / {stats.totalAssigned}</span>
+                </div>
+                
+                <div className="mt-6 pt-6 border-t border-white/10">
+                   <p className="text-white/80 text-xs leading-relaxed font-medium">
+                     Average delivery time: <span className="font-bold text-white">{performance.avgDeliveryTimeHours} hours</span>
+                   </p>
+                </div>
               </div>
-              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-warm-sand/20 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#A29A88]/20 rounded-full blur-3xl"></div>
             </div>
 
-            <div className="bg-warm-sand/10 border border-warm-sand/20 rounded-2xl p-6">
-              <h4 className="text-sm font-bold text-deep-espresso mb-4 uppercase tracking-wider">Today's Goal</h4>
-              <div className="space-y-4">
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="font-bold text-deep-espresso">Deliveries</span>
-                  <span className="text-warm-sand">3/8</span>
-                </div>
-                <div className="h-2 bg-soft-oatmeal rounded-full overflow-hidden">
-                  <div className="h-full bg-warm-sand w-[37.5%] rounded-full shadow-sm"></div>
-                </div>
+            <div className="bg-rose-50 border border-rose-100 rounded-2xl p-6 relative overflow-hidden">
+              <h4 className="text-xs font-black text-rose-900 mb-2 uppercase tracking-widest flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+                Action Required
+              </h4>
+              <h3 className="text-xl font-display font-bold text-rose-950 mb-1">COD Collections</h3>
+              <p className="text-xs text-rose-700/80 mb-4">Amount to be deposited at the hub</p>
+              
+              <div className="bg-white rounded-xl p-4 border border-rose-100/50 flex justify-between items-center shadow-sm">
+                 <span className="font-bold text-dusty-cocoa text-sm">Pending Deposit</span>
+                 <span className="font-black text-rose-600 text-lg">₹{earnings.codToDeposit.toLocaleString()}</span>
               </div>
             </div>
           </div>

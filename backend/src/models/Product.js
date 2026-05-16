@@ -69,7 +69,8 @@ const ProductSchema = new mongoose.Schema({
   countInStock: {
     type: Number,
     required: true,
-    default: 0
+    default: 0,
+    index: true
   },
   seller: {
     type: mongoose.Schema.ObjectId,
@@ -100,6 +101,14 @@ const ProductSchema = new mongoose.Schema({
     enum: ['new', 'catalog'],
     default: 'new'
   },
+  averageRating: {
+    type: Number,
+    default: 0
+  },
+  totalReviews: {
+    type: Number,
+    default: 0
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -107,5 +116,9 @@ const ProductSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+ProductSchema.index({ seller: 1, countInStock: 1 });
+ProductSchema.index({ seller: 1, createdAt: -1 });
+ProductSchema.index({ name: 'text', description: 'text', category: 'text' });
 
 module.exports = mongoose.model('Product', ProductSchema);

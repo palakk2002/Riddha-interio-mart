@@ -1,44 +1,48 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import ProductListingPage from './pages/ProductListingPage';
-import ProductDetailsPage from './pages/ProductDetailsPage';
-import CategoryDetailPage from './pages/CategoryDetailPage';
-import CategoriesPage from './pages/CategoriesPage';
-import CartPage from './pages/CartPage';
-import Profile from './pages/Profile';
-import Shop from './pages/Shop';
-import Orders from './pages/Orders';
-import Stores from './pages/Stores';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Cancellation from './pages/Cancellation';
-import Returns from './pages/Returns';
-import Refund from './pages/Refund';
-import Terms from './pages/Terms';
-import CheckoutPage from './pages/CheckoutPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import AddressPage from './pages/AddressPage';
-import PaymentPage from './pages/PaymentPage';
-import OrderSuccessPage from './pages/OrderSuccessPage';
-import OrderTrackingPage from './pages/OrderTrackingPage';
-import EditProfile from './pages/EditProfile';
-import BrandPage from './pages/BrandPage';
-import SearchEntryPage from './pages/SearchEntryPage';
-import SearchProductsPage from './pages/SearchProductsPage';
-import InvoicePage from './pages/InvoicePage';
-import ReferralRewardsPage from './pages/ReferralRewardsPage';
-import ComingSoonPage from './pages/ComingSoonPage';
-import ComingSoonSubPage from './pages/ComingSoonSubPage';
-import ComingSoonAboutPage from './pages/ComingSoonAboutPage';
-import ComingSoonServicesPage from './pages/ComingSoonServicesPage';
-import ComingSoonCategoriesPage from './pages/ComingSoonCategoriesPage';
-import ComingSoonShopPage from './pages/ComingSoonShopPage';
-import ComingSoonContactPage from './pages/ComingSoonContactPage';
-import ContractorRegistration from './pages/ContractorRegistration';
-import DesignerRegistration from './pages/DesignerRegistration';
-import BuilderRegistration from './pages/BuilderRegistration';
+const HomePage = React.lazy(() => import('./pages/HomePage'));;
+const ProductListingPage = React.lazy(() => import('./pages/ProductListingPage'));;
+const ProductDetailsPage = React.lazy(() => import('./pages/ProductDetailsPage'));;
+const CategoryDetailPage = React.lazy(() => import('./pages/CategoryDetailPage'));;
+const CategoriesPage = React.lazy(() => import('./pages/CategoriesPage'));;
+const CartPage = React.lazy(() => import('./pages/CartPage'));;
+const Profile = React.lazy(() => import('./pages/Profile'));;
+const Shop = React.lazy(() => import('./pages/Shop'));;
+const Orders = React.lazy(() => import('./pages/Orders'));;
+const Stores = React.lazy(() => import('./pages/Stores'));;
+const About = React.lazy(() => import('./pages/About'));;
+const Contact = React.lazy(() => import('./pages/Contact'));;
+const Cancellation = React.lazy(() => import('./pages/Cancellation'));;
+const Returns = React.lazy(() => import('./pages/Returns'));;
+const Refund = React.lazy(() => import('./pages/Refund'));;
+const Terms = React.lazy(() => import('./pages/Terms'));;
+const CheckoutPage = React.lazy(() => import('./pages/CheckoutPage'));;
+const LoginPage = React.lazy(() => import('./pages/LoginPage'));;
+const SignupPage = React.lazy(() => import('./pages/SignupPage'));;
+const VerifyEmailPage = React.lazy(() => import('./pages/VerifyEmailPage'));;
+const ForgotPasswordPage = React.lazy(() => import('./pages/ForgotPasswordPage'));;
+const AddressPage = React.lazy(() => import('./pages/AddressPage'));;
+const PaymentPage = React.lazy(() => import('./pages/PaymentPage'));;
+const OrderSuccessPage = React.lazy(() => import('./pages/OrderSuccessPage'));;
+const OrderTrackingPage = React.lazy(() => import('./pages/OrderTrackingPage'));;
+const EditProfile = React.lazy(() => import('./pages/EditProfile'));;
+const BrandPage = React.lazy(() => import('./pages/BrandPage'));;
+const SearchEntryPage = React.lazy(() => import('./pages/SearchEntryPage'));;
+const SearchProductsPage = React.lazy(() => import('./pages/SearchProductsPage'));;
+const InvoicePage = React.lazy(() => import('./pages/InvoicePage'));;
+const ReferralRewardsPage = React.lazy(() => import('./pages/ReferralRewardsPage'));;
+const ComingSoonPage = React.lazy(() => import('./pages/ComingSoonPage'));;
+const ComingSoonSubPage = React.lazy(() => import('./pages/ComingSoonSubPage'));;
+const ComingSoonAboutPage = React.lazy(() => import('./pages/ComingSoonAboutPage'));;
+const ComingSoonServicesPage = React.lazy(() => import('./pages/ComingSoonServicesPage'));;
+const ComingSoonCategoriesPage = React.lazy(() => import('./pages/ComingSoonCategoriesPage'));;
+const ComingSoonShopPage = React.lazy(() => import('./pages/ComingSoonShopPage'));;
+const ComingSoonContactPage = React.lazy(() => import('./pages/ComingSoonContactPage'));;
+const ContractorRegistration = React.lazy(() => import('./pages/ContractorRegistration'));;
+const DesignerRegistration = React.lazy(() => import('./pages/DesignerRegistration'));;
+const BuilderRegistration = React.lazy(() => import('./pages/BuilderRegistration'));;
+const WishlistPage = React.lazy(() => import('./pages/WishlistPage'));;
+const NotificationPage = React.lazy(() => import('./pages/NotificationPage'));;
 
 const UserRoutes = () => {
   return (
@@ -60,6 +64,7 @@ const UserRoutes = () => {
       <Route path="/categories" element={<CategoriesPage />} />
       <Route path="/category/:slug" element={<CategoryDetailPage />} />
       <Route path="/cart" element={<CartPage />} />
+      <Route path="/wishlist" element={<WishlistPage />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/referral-rewards" element={<ReferralRewardsPage />} />
       <Route path="/shop" element={<Shop />} />
@@ -74,6 +79,8 @@ const UserRoutes = () => {
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/address" element={<AddressPage />} />
       <Route path="/payment" element={<PaymentPage />} />
       <Route path="/order-success" element={<OrderSuccessPage />} />
@@ -83,6 +90,7 @@ const UserRoutes = () => {
       <Route path="/search" element={<SearchEntryPage />} />
       <Route path="/search-results" element={<SearchProductsPage />} />
       <Route path="/order/invoice/:id" element={<InvoicePage />} />
+      <Route path="/notifications" element={<NotificationPage />} />
     </Routes>
   );
 };

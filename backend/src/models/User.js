@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const UserSchema = new mongoose.Schema({
   fullName: {
@@ -52,8 +53,14 @@ const UserSchema = new mongoose.Schema({
     minlength: 6,
     select: false
   },
-  resetPasswordToken: String,
-  resetPasswordExpire: Date,
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
+  emailVerificationOtp: String,
+  emailVerificationOtpExpire: Date,
+  resetPasswordOtp: String,
+  resetPasswordOtpExpire: Date,
   createdAt: {
     type: Date,
     default: Date.now
@@ -69,7 +76,7 @@ UserSchema.pre('save', async function() {
 
 // Sign JWT and return
 UserSchema.methods.getSignedJwtToken = function() {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: this._id, role: this.role || 'user' }, process.env.JWT_SECRET, {
     expiresIn: '30d'
   });
 };
@@ -78,5 +85,29 @@ UserSchema.methods.getSignedJwtToken = function() {
 UserSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+// Generate and hash OTP
+UserSchema.methods.getVerificationOtp = function() {
+  // Generate 6 digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Hash OTP and set to emailVerificationOtp field
+  this.emailVerificationOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+  // Set expire to 10 minutes
+  this.emailVerificationOtpExpire = Date.now() + 10 * 60 * 1000;
+
+  return otp;
+};
+
+UserSchema.methods.getResetPasswordOtp = function() {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  this.resetPasswordOtp = crypto.createHash('sha256').update(otp).digest('hex');
+  this.resetPasswordOtpExpire = Date.now() + 10 * 60 * 1000;
+  return otp;
+};
+
+UserSchema.index({ email: 1 });
+UserSchema.index({ role: 1 });
 
 module.exports = mongoose.model('User', UserSchema);

@@ -14,7 +14,7 @@ const LoginPage = () => {
   const [rbacRole, setRbacRole] = useState('admin'); // 'admin' or 'assistant'
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-  const [error, setError] = useState('');
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const { login, loading, setLoading } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
@@ -66,7 +66,24 @@ const LoginPage = () => {
         else navigate('/cart');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Invalid credentials. Please try again.');
+      if (err.response?.data?.unverified) {
+        setUnverifiedEmail(err.response.data.email);
+        setError('Please verify your email to continue.');
+      } else {
+        setError(err.response?.data?.error || 'Invalid credentials. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendAndVerify = async () => {
+    try {
+      setLoading(true);
+      await api.post('/auth/resend-otp', { email: unverifiedEmail });
+      navigate('/verify-email', { state: { email: unverifiedEmail } });
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to resend OTP');
     } finally {
       setLoading(false);
     }
@@ -195,9 +212,17 @@ const LoginPage = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-[10px] font-bold uppercase tracking-wider text-center"
+                    className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex flex-col items-center gap-2 text-center"
                   >
-                    {error}
+                    <span className="text-red-500 text-[10px] font-bold uppercase tracking-wider">{error}</span>
+                    {unverifiedEmail && (
+                      <button 
+                        onClick={handleResendAndVerify}
+                        className="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors mt-2"
+                      >
+                        Verify Email Now
+                      </button>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -243,7 +268,7 @@ const LoginPage = () => {
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 group-hover:text-white">Remember Me</span>
                   </button>
-                  <button type="button" className="text-[10px] font-black text-gray-400 md:text-white/40 uppercase tracking-widest hover:text-[#189D91] md:hover:text-white mx-auto md:mx-0">
+                  <button type="button" onClick={() => navigate('/forgot-password')} className="text-[10px] font-black text-gray-400 md:text-white/40 uppercase tracking-widest hover:text-[#189D91] md:hover:text-white mx-auto md:mx-0">
                     Forgot Password?
                   </button>
                 </div>

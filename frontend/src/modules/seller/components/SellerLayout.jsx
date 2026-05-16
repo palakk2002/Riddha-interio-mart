@@ -3,175 +3,22 @@ import { Outlet, useNavigate, Link } from 'react-router-dom';
 import SellerSidebar from './SellerSidebar';
 import SellerBottomNavbar from './SellerBottomNavbar';
 import { useUser } from '../../user/data/UserContext';
-import { FiMenu, FiBell, FiUser, FiLogOut, FiChevronDown, FiCheck, FiX } from 'react-icons/fi';
+import { FiMenu, FiUser, FiLogOut, FiChevronDown, FiCheck, FiX } from 'react-icons/fi';
+import NotificationDropdown from '../../../shared/components/NotificationDropdown';
 import { motion, AnimatePresence } from 'framer-motion';
-import { connectSocket, disconnectSocket } from '../../../shared/utils/socket';
-import { playNotificationSound, primeNotificationAudio, isSoundEnabled } from '../../../shared/utils/notificationSound';
-import { getSellerNotifications, setSellerNotifications, prependSellerNotification } from '../utils/sellerNotifications';
 
 const SellerLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState(null);
-  const [notifications, setNotifications] = useState(() => {
-    return getSellerNotifications();
-  });
   const [toast, setToast] = useState(null);
-  
-  // Update notifications state from localStorage periodically or when dropdown opens
-  useEffect(() => {
-    const sync = () => setNotifications(getSellerNotifications());
-    window.addEventListener('storage', sync);
-    window.addEventListener('seller_notifications_updated', sync);
-    return () => {
-      window.removeEventListener('storage', sync);
-      window.removeEventListener('seller_notifications_updated', sync);
-    };
-  }, []);
-
-  const unreadCount = notifications.filter(n => n.status === 'unread').length;
-
-  const markAsRead = (id) => {
-    const updated = notifications.map(n => n.id === id ? { ...n, status: 'read' } : n);
-    setNotifications(updated);
-    setSellerNotifications(updated);
-  };
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { logout, user } = useUser();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    disconnectSocket();
     navigate('/seller/login');
   };
-
-  // Prime notification audio on first user interaction (browser requirement)
-  useEffect(() => {
-    const onFirstGesture = () => {
-      primeNotificationAudio();
-      window.removeEventListener('pointerdown', onFirstGesture);
-      window.removeEventListener('keydown', onFirstGesture);
-    };
-    window.addEventListener('pointerdown', onFirstGesture);
-    window.addEventListener('keydown', onFirstGesture);
-    return () => {
-      window.removeEventListener('pointerdown', onFirstGesture);
-      window.removeEventListener('keydown', onFirstGesture);
-    };
-  }, []);
-
-  // Real-time new order notifications (seller)
-  useEffect(() => {
-    if (!user?.token || user?.role !== 'seller') return;
-
-    const socket = connectSocket({ token: user.token });
-
-    const onNewOrder = async (payload) => {
-      const shortId = String(payload?.orderId || '').slice(-8).toUpperCase();
-      const amount = Number(payload?.totalPrice || 0);
-      const customer = payload?.customerName || 'a customer';
-      const city = payload?.shippingCity ? ` • ${payload.shippingCity}` : '';
-
-      const message = `New order #${shortId} for ₹${amount.toLocaleString()} from ${customer}${city}.`;
-
-      setToast({
-        orderId: payload?.orderId,
-        title: 'New Order Received',
-        message,
-        type: 'order'
-      });
-
-      prependSellerNotification({
-        id: Date.now() + Math.random(),
-        title: 'New Order Received',
-        message,
-        time: 'Just now',
-        status: 'unread',
-        type: 'warning',
-        link: payload?.orderId ? `/seller/order/${payload.orderId}` : '/seller/orders'
-      });
-
-      if (isSoundEnabled()) {
-        await playNotificationSound();
-      }
-
-      if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate([90, 40, 90]);
-      }
-
-      window.dispatchEvent(new CustomEvent('seller:new-order', { detail: payload }));
-    };
-
-    const onProductApprovalUpdate = async (payload) => {
-      const message = payload.message || `Your product status has been updated.`;
-      
-      setToast({
-        title: 'Product Status Update',
-        message,
-        type: payload.status === 'approved' ? 'success' : 'danger'
-      });
-
-      prependSellerNotification({
-        id: Date.now() + Math.random(),
-        title: 'Product Status Update',
-        message,
-        time: 'Just now',
-        status: 'unread',
-        type: payload.status === 'approved' ? 'success' : 'danger',
-        link: '/seller/my-products'
-      });
-
-      if (isSoundEnabled()) {
-        await playNotificationSound();
-      }
-
-      window.dispatchEvent(new CustomEvent('seller:product-approval', { detail: payload }));
-    };
-
-    const onDeliveryResponse = async (payload) => {
-      const status = payload?.status; // 'Accepted' or 'Rejected'
-      const orderId = String(payload?.orderId || '').slice(-8).toUpperCase();
-      const partner = payload?.deliveryBoyName || 'Delivery Partner';
-
-      const message = status === 'Accepted' 
-        ? `${partner} has accepted the delivery for order #${orderId}.`
-        : `${partner} has rejected the delivery for order #${orderId}. Please assign another partner.`;
-
-      setToast({
-        orderId: payload?.orderId,
-        title: status === 'Accepted' ? 'Delivery Accepted' : 'Delivery Rejected',
-        message,
-        type: status === 'Accepted' ? 'success' : 'danger'
-      });
-
-      prependSellerNotification({
-        id: Date.now() + Math.random(),
-        title: status === 'Accepted' ? 'Delivery Accepted' : 'Delivery Rejected',
-        message,
-        time: 'Just now',
-        status: 'unread',
-        type: status === 'Accepted' ? 'success' : 'danger',
-        link: payload?.orderId ? `/seller/order/${payload.orderId}` : '/seller/orders'
-      });
-
-      if (isSoundEnabled()) {
-        await playNotificationSound();
-      }
-
-      window.dispatchEvent(new CustomEvent('delivery:response_received', { detail: payload }));
-    };
-
-    socket.on('order:new', onNewOrder);
-    socket.on('product:approval_update', onProductApprovalUpdate);
-    socket.on('delivery:response', onDeliveryResponse);
-
-    return () => {
-      socket.off('order:new', onNewOrder);
-      socket.off('product:approval_update', onProductApprovalUpdate);
-      socket.off('delivery:response', onDeliveryResponse);
-    };
-  }, [user?.token, user?.role]);
 
   useEffect(() => {
     if (!toast) return;
@@ -183,7 +30,6 @@ const SellerLayout = () => {
     <div 
       className="seller-theme flex h-screen w-full bg-white text-deep-espresso overflow-hidden" 
       onClick={() => {
-        setShowNotifications(false);
         setShowUserMenu(false);
       }}
     >
@@ -262,61 +108,7 @@ const SellerLayout = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="relative">
-              <button 
-                onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); }}
-                className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-soft-oatmeal text-deep-espresso' : 'text-dusty-cocoa hover:bg-soft-oatmeal'}`}
-              >
-                <FiBell size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-warm-sand rounded-full border-2 border-white animate-pulse"></span>
-                )}
-              </button>
-
-              <AnimatePresence>
-                {showNotifications && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-soft-oatmeal overflow-hidden z-50"
-                  >
-                    <div className="p-4 border-b border-soft-oatmeal flex items-center justify-between bg-soft-oatmeal/10">
-                      <h3 className="font-bold text-sm">Notifications</h3>
-                      <span className="text-[10px] font-bold text-warm-sand uppercase tracking-wider">{unreadCount} New</span>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto custom-scrollbar">
-                      {notifications.slice(0, 4).map((n) => (
-                        <div 
-                          key={n.id} 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            markAsRead(n.id);
-                            setShowNotifications(false);
-                            setSelectedNotification(n);
-                          }}
-                          className={`p-4 border-b border-soft-oatmeal/50 hover:bg-soft-oatmeal/20 transition-colors cursor-pointer group ${n.status === 'unread' ? 'bg-warm-sand/5' : ''}`}
-                        >
-                          <div className="flex justify-between items-start mb-1">
-                            <h4 className={`text-sm font-bold transition-all ${n.status === 'unread' ? 'text-deep-espresso' : 'text-warm-sand'}`}>{n.title}</h4>
-                            <span className="text-[10px] text-warm-sand uppercase font-medium">{n.time}</span>
-                          </div>
-                          <p className="text-xs text-dusty-cocoa line-clamp-2">{n.message}</p>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="p-3 text-center bg-soft-oatmeal/5">
-                      <button 
-                        onClick={() => navigate('/seller/notifications')}
-                        className="text-[10px] font-bold text-warm-sand uppercase tracking-widest hover:text-deep-espresso transition-colors"
-                      >
-                        View All Notifications
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <NotificationDropdown isMobile={false} />
             <div className="h-8 w-[1px] bg-soft-oatmeal mx-2"></div>
             <div className="relative">
               <div 

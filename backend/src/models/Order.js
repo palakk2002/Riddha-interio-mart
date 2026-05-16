@@ -38,6 +38,15 @@ const OrderSchema = new mongoose.Schema({
         required: true,
         enum: ['Seller', 'Admin'],
         default: 'Seller'
+      },
+      returnStatus: {
+        type: String,
+        enum: ['None', 'Requested', 'Approved', 'Rejected', 'Received', 'Completed'],
+        default: 'None'
+      },
+      returnRequest: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Return'
       }
     }
   ],
@@ -116,9 +125,16 @@ const OrderSchema = new mongoose.Schema({
   isCashDeposited: {
     type: Boolean,
     default: false
+  },
+  invoiceUrl: {
+    type: String
   }
 }, {
   timestamps: true
 });
+
+OrderSchema.index({ seller: 1, createdAt: -1, status: 1 });
+OrderSchema.index({ 'orderItems.product': 1 }); // Useful for top products aggregation if needed
+OrderSchema.index({ deliveryBoy: 1, deliveryStatus: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Order', OrderSchema);

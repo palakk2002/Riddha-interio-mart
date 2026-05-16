@@ -6,11 +6,21 @@ import Button from '../../../shared/components/Button';
 
 const OrderSuccessPage = () => {
   const navigate = useNavigate();
-  const [orderId, setOrderId] = useState('');
+  const [orderIds, setOrderIds] = useState([]);
 
   useEffect(() => {
-    const savedId = localStorage.getItem('last_order_id');
-    setOrderId(savedId || 'RD-PAYMENT-SUCCESS');
+    try {
+      const savedIds = localStorage.getItem('last_order_ids');
+      if (savedIds) {
+        setOrderIds(JSON.parse(savedIds));
+      } else {
+        // Fallback for old single order logic
+        const oldId = localStorage.getItem('last_order_id');
+        if (oldId) setOrderIds([oldId]);
+      }
+    } catch (e) {
+      setOrderIds(['RD-PAYMENT-SUCCESS']);
+    }
   }, []);
 
   return (
@@ -32,10 +42,17 @@ const OrderSuccessPage = () => {
         transition={{ delay: 0.4 }}
         className="space-y-4 max-w-sm"
       >
-        <h1 className="text-3xl font-display font-black text-gray-900 tracking-tight uppercase">Order Placed!</h1>
+        <h1 className="text-3xl font-display font-black text-gray-900 tracking-tight uppercase">
+          {orderIds.length > 1 ? 'Orders Placed!' : 'Order Placed!'}
+        </h1>
         <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.1em] leading-relaxed px-4">
-          Your payment was successful and your order <span className="text-[#189D91] font-black">#{orderId}</span> has been confirmed.
+          Your payment was successful and your {orderIds.length > 1 ? 'orders have' : 'order has'} been confirmed.
         </p>
+        <div className="flex flex-col gap-1 mt-2">
+          {orderIds.map(id => (
+            <span key={id} className="text-[#189D91] font-black">#{id}</span>
+          ))}
+        </div>
       </motion.div>
 
       {/* Order Info Card */}

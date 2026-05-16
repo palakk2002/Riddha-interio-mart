@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
+import ErrorBoundary from './shared/components/ErrorBoundary';
+import GlobalLoader from './shared/components/GlobalLoader';
 import Navbar from './modules/user/components/Navbar';
 import Footer from './modules/user/components/Footer';
 import BottomNavbar from './modules/user/components/BottomNavbar';
@@ -71,12 +73,16 @@ function App() {
       )}
 
       <main className="flex-grow">
-        <Routes>
-          <Route path="/admin/*" element={<AdminRoutes />} />
-          <Route path="/seller/*" element={<SellerRoutes />} />
-          <Route path="/delivery/*" element={<DeliveryRoutes />} />
-          <Route path="/*" element={<UserRoutes />} />
-        </Routes>
+        <ErrorBoundary>
+          <Suspense fallback={<GlobalLoader />}>
+            <Routes>
+              <Route path="/admin/*" element={<AdminRoutes />} />
+              <Route path="/seller/*" element={<SellerRoutes />} />
+              <Route path="/delivery/*" element={<DeliveryRoutes />} />
+              <Route path="/*" element={<UserRoutes />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </main>
       {!isDashboardLayout && <Footer />}
       {!isDashboardLayout && !isProductPage && <BottomNavbar />}

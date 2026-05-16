@@ -72,4 +72,7 @@ SellerSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+SellerSchema.index({ email: 1 });
+SellerSchema.index({ isVerified: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Seller', SellerSchema);

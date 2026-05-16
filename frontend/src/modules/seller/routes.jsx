@@ -1,26 +1,26 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import SellerLayout from './components/SellerLayout';
-import Dashboard from './pages/Dashboard';
-import BrowseCatalog from './pages/BrowseCatalog';
-import AddProduct from './pages/AddProduct';
-import MyProducts from './pages/MyProducts';
-import Orders from './pages/Orders';
-import AssignDeliveryBoy from './pages/AssignDeliveryBoy';
-import Taxes from './pages/Taxes';
-import StockManagement from './pages/StockManagement';
-import Wallet from './pages/Wallet';
-import SalesReport from './pages/SalesReport';
-import ReturnOrders from './pages/ReturnOrders';
-import OrderDetail from './pages/OrderDetail';
-import LoginPage from '../user/pages/LoginPage';
-import SignupPage from '../user/pages/SignupPage';
-import SellerProfile from './pages/SellerProfile';
-import OrderTracking from './pages/OrderTracking';
-import Notifications from './pages/Notifications';
-import BulkProductUpload from './pages/BulkProductUpload';
-import SellerJoin from './pages/SellerJoin';
-import SellerReviews from './pages/Reviews';
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));;
+const BrowseCatalog = React.lazy(() => import('./pages/BrowseCatalog'));;
+const AddProduct = React.lazy(() => import('./pages/AddProduct'));;
+const MyProducts = React.lazy(() => import('./pages/MyProducts'));;
+const Orders = React.lazy(() => import('./pages/Orders'));;
+const AssignDeliveryBoy = React.lazy(() => import('./pages/AssignDeliveryBoy'));;
+const Taxes = React.lazy(() => import('./pages/Taxes'));;
+const StockManagement = React.lazy(() => import('./pages/StockManagement'));;
+const Wallet = React.lazy(() => import('./pages/Wallet'));;
+const SalesReport = React.lazy(() => import('./pages/SalesReport'));;
+const ReturnOrders = React.lazy(() => import('./pages/ReturnOrders'));;
+const OrderDetail = React.lazy(() => import('./pages/OrderDetail'));;
+const LoginPage = React.lazy(() => import('../user/pages/LoginPage'));;
+const SignupPage = React.lazy(() => import('../user/pages/SignupPage'));;
+const SellerProfile = React.lazy(() => import('./pages/SellerProfile'));;
+const OrderTracking = React.lazy(() => import('./pages/OrderTracking'));;
+const Notifications = React.lazy(() => import('./pages/Notifications'));;
+const BulkProductUpload = React.lazy(() => import('./pages/BulkProductUpload'));;
+const SellerJoin = React.lazy(() => import('./pages/SellerJoin'));;
+const SellerReviews = React.lazy(() => import('./pages/Reviews'));;
 
 const SellerRoutes = () => {
   return (
