@@ -15,6 +15,7 @@ const {
   updateAssistant,
   deleteAssistant,
   getUsers,
+  updateUser,
   deleteUser,
   getCashCollections,
   confirmCashDeposit,
@@ -53,6 +54,7 @@ router.post('/assistants', protect, authorize('admin'), createAssistant);
 router.put('/assistants/:id', protect, authorize('admin'), updateAssistant);
 router.delete('/assistants/:id', protect, authorize('admin'), deleteAssistant);
 router.get('/users', protect, authorize('admin'), getUsers);
+router.put('/users/:id', protect, authorize('admin'), updateUser);
 router.delete('/users/:id', protect, authorize('admin'), deleteUser);
 
 // Payment Management

@@ -1,55 +1,56 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
-const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));;
-const CatalogPage = React.lazy(() => import('./pages/CatalogPage'));;
-const CategoriesPage = React.lazy(() => import('./pages/CategoriesPage'));;
-const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));;
-const ManageCategories = React.lazy(() => import('./pages/ManageCategories'));;
-const ManageFeaturedProducts = React.lazy(() => import('./pages/ManageFeaturedProducts'));;
-const AddFeaturedProductPage = React.lazy(() => import('./pages/AddFeaturedProductPage'));;
-const ManageHeroBanner = React.lazy(() => import('./pages/ManageHeroBanner'));;
-const ManagePromoBanner = React.lazy(() => import('./pages/ManagePromoBanner'));;
-const ManageSection = React.lazy(() => import('./pages/ManageSection'));;
-const ManageFavouriteCategories = React.lazy(() => import('./pages/ManageFavouriteCategories'));;
-const ManageCategoryGrid = React.lazy(() => import('./pages/ManageCategoryGrid'));;
-const ManageBrands = React.lazy(() => import('./pages/ManageBrands'));;
-const LoginPage = React.lazy(() => import('../user/pages/LoginPage'));;
-const SignupPage = React.lazy(() => import('../user/pages/SignupPage'));;
-const AdminProfile = React.lazy(() => import('./pages/AdminProfile'));;
-const AnalyticsPage = React.lazy(() => import('./pages/AnalyticsPage'));;
-const ActivityPage = React.lazy(() => import('./pages/ActivityPage'));;
-const ReferralManagement = React.lazy(() => import('./pages/ReferralManagement'));;
-const OrderTracking = React.lazy(() => import('./pages/OrderTracking'));;
-const AddProductPage = React.lazy(() => import('./pages/AddProductPage'));;
-const EditProductPage = React.lazy(() => import('./pages/EditProductPage'));;
-const AddCategoryPage = React.lazy(() => import('./pages/AddCategoryPage'));;
-const EditCategoryPage = React.lazy(() => import('./pages/EditCategoryPage'));;
-const AddCategoryGridItemPage = React.lazy(() => import('./pages/AddCategoryGridItemPage'));;
-const AddBrandPage = React.lazy(() => import('./pages/AddBrandPage'));;
-const PendingSellers = React.lazy(() => import('./pages/PendingSellers'));;
-const ActiveSellers = React.lazy(() => import('./pages/ActiveSellers'));;
-const OrderListPage = React.lazy(() => import('./pages/OrderListPage'));;
-const OrderDetailPage = React.lazy(() => import('./pages/OrderDetailPage'));;
-const ProductListPage = React.lazy(() => import('./pages/ProductListPage'));;
-const AddInventoryPage = React.lazy(() => import('./pages/AddInventoryPage'));;
-const EditInventoryPage = React.lazy(() => import('./pages/EditInventoryPage'));;
-const ManageDeliveries = React.lazy(() => import('./pages/ManageDeliveries'));;
-const AssignDeliveryPage = React.lazy(() => import('./pages/DeliveryAssignment'));;
-const AddProductFlowPage = React.lazy(() => import('./pages/AddProductFlowPage'));;
-const StockManagement = React.lazy(() => import('./pages/StockManagement'));;
-const BulkProductUpload = React.lazy(() => import('./pages/BulkProductUpload'));;
-const BulkOrdersPage = React.lazy(() => import('./pages/BulkOrdersPage'));;
-const TeamManagementPage = React.lazy(() => import('./pages/TeamManagementPage'));;
-const CreateAssistantPage = React.lazy(() => import('./pages/CreateAssistantPage'));;
-const ManageUserPage = React.lazy(() => import('./pages/ManageUserPage'));;
-const UserPaymentsPage = React.lazy(() => import('./pages/UserPaymentsPage'));;
-const CashCollectionPage = React.lazy(() => import('./pages/CashCollectionPage'));;
-const SellerTransactionsPage = React.lazy(() => import('./pages/SellerTransactionsPage'));;
-const ManageSellerListPage = React.lazy(() => import('./pages/ManageSellerListPage'));;
-const ManageDeliveryBoyPage = React.lazy(() => import('./pages/ManageDeliveryBoyPage'));;
-const FeedbackManagement = React.lazy(() => import('./pages/FeedbackManagement'));;
+const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
+const CatalogPage = React.lazy(() => import('./pages/CatalogPage'));
+const CategoriesPage = React.lazy(() => import('./pages/CategoriesPage'));
+const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
+const ManageCategories = React.lazy(() => import('./pages/ManageCategories'));
+const ManageFeaturedProducts = React.lazy(() => import('./pages/ManageFeaturedProducts'));
+const AddFeaturedProductPage = React.lazy(() => import('./pages/AddFeaturedProductPage'));
+const ManageHeroBanner = React.lazy(() => import('./pages/ManageHeroBanner'));
+const ManagePromoBanner = React.lazy(() => import('./pages/ManagePromoBanner'));
+const ManageSection = React.lazy(() => import('./pages/ManageSection'));
+const ManageFavouriteCategories = React.lazy(() => import('./pages/ManageFavouriteCategories'));
+const ManageCategoryGrid = React.lazy(() => import('./pages/ManageCategoryGrid'));
+const ManageBrands = React.lazy(() => import('./pages/ManageBrands'));
+const LoginPage = React.lazy(() => import('../user/pages/LoginPage'));
+const SignupPage = React.lazy(() => import('../user/pages/SignupPage'));
+const AdminProfile = React.lazy(() => import('./pages/AdminProfile'));
+const AnalyticsPage = React.lazy(() => import('./pages/AnalyticsPage'));
+const ActivityPage = React.lazy(() => import('./pages/ActivityPage'));
+const ReferralManagement = React.lazy(() => import('./pages/ReferralManagement'));
+const OrderTracking = React.lazy(() => import('./pages/OrderTracking'));
+const AddProductPage = React.lazy(() => import('./pages/AddProductPage'));
+const EditProductPage = React.lazy(() => import('./pages/EditProductPage'));
+const AddCategoryPage = React.lazy(() => import('./pages/AddCategoryPage'));
+const EditCategoryPage = React.lazy(() => import('./pages/EditCategoryPage'));
+const AddCategoryGridItemPage = React.lazy(() => import('./pages/AddCategoryGridItemPage'));
+const AddBrandPage = React.lazy(() => import('./pages/AddBrandPage'));
+const PendingSellers = React.lazy(() => import('./pages/PendingSellers'));
+const ActiveSellers = React.lazy(() => import('./pages/ActiveSellers'));
+const OrderListPage = React.lazy(() => import('./pages/OrderListPage'));
+const OrderDetailPage = React.lazy(() => import('./pages/OrderDetailPage'));
+const ProductListPage = React.lazy(() => import('./pages/ProductListPage'));
+const AddInventoryPage = React.lazy(() => import('./pages/AddInventoryPage'));
+const EditInventoryPage = React.lazy(() => import('./pages/EditInventoryPage'));
+const ManageDeliveries = React.lazy(() => import('./pages/ManageDeliveries'));
+const AssignDeliveryPage = React.lazy(() => import('./pages/DeliveryAssignment'));
+const AddProductFlowPage = React.lazy(() => import('./pages/AddProductFlowPage'));
+const StockManagement = React.lazy(() => import('./pages/StockManagement'));
+const BulkProductUpload = React.lazy(() => import('./pages/BulkProductUpload'));
+const BulkOrdersPage = React.lazy(() => import('./pages/BulkOrdersPage'));
+const TeamManagementPage = React.lazy(() => import('./pages/TeamManagementPage'));
+const CreateAssistantPage = React.lazy(() => import('./pages/CreateAssistantPage'));
+const ManageUserPage = React.lazy(() => import('./pages/ManageUserPage'));
+const UserPaymentsPage = React.lazy(() => import('./pages/UserPaymentsPage'));
+const CashCollectionPage = React.lazy(() => import('./pages/CashCollectionPage'));
+const SellerTransactionsPage = React.lazy(() => import('./pages/SellerTransactionsPage'));
+const ManageSellerListPage = React.lazy(() => import('./pages/ManageSellerListPage'));
+const ManageDeliveryBoyPage = React.lazy(() => import('./pages/ManageDeliveryBoyPage'));
+const FeedbackManagement = React.lazy(() => import('./pages/FeedbackManagement'));
+const SellerRecommendationManagement = React.lazy(() => import('./pages/SellerRecommendationManagement'));
 import { RBACProvider } from './data/RBACContext';
 
 const AdminRoutes = () => {
@@ -146,6 +147,7 @@ const AdminRoutes = () => {
           <Route element={<ProtectedRoute permission="settings" />}>
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/feedback" element={<FeedbackManagement />} />
+            <Route path="/seller-recommendations" element={<SellerRecommendationManagement />} />
           </Route>
 
           {/* Team Management (Admin Only) */}
@@ -157,6 +159,7 @@ const AdminRoutes = () => {
 
           {/* Payments */}
           <Route element={<ProtectedRoute permission="payments" />}>
+            <Route path="/payments" element={<Navigate to="/admin/payments/users" replace />} />
             <Route path="/payments/users" element={<UserPaymentsPage />} />
             <Route path="/payments/delivery" element={<CashCollectionPage />} />
             <Route path="/payments/sellers" element={<SellerTransactionsPage />} />

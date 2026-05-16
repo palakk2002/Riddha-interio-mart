@@ -24,24 +24,44 @@ function initSocket(httpServer) {
         typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
           ? authHeader.slice('Bearer '.length)
           : null;
-      const token =
+      
+      let token =
         socket.handshake.auth?.token ||
         bearerToken ||
         socket.handshake.query?.token;
 
-      if (!token) return next(new Error('auth/token_required'));
+      // Handle case where token itself might have "Bearer " prefix from frontend
+      if (token && token.startsWith('Bearer ')) {
+        token = token.slice(7);
+      }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      socket.user = { id: decoded.id, role: decoded.role || 'user' };
+      if (!token) {
+        console.error('[Socket Auth] No token provided');
+        return next(new Error('AUTH_TOKEN_REQUIRED'));
+      }
+
+      const secret = process.env.JWT_SECRET || 'your_jwt_secret_key_here';
+      console.log(`[Socket Auth] Attempting verification. Token length: ${token.length}, Secret exists: ${!!process.env.JWT_SECRET}`);
+
+      try {
+        const decoded = jwt.verify(token, secret);
+        socket.user = { id: decoded.id, role: decoded.role || 'user' };
+        console.log(`[Socket Auth] Success! User ID: ${decoded.id}, Role: ${decoded.role}`);
+      } catch (jwtErr) {
+        console.error('[Socket Auth] JWT Verification failed:', jwtErr.message);
+        return next(new Error('AUTH_INVALID'));
+      }
 
       // Allow 'admin', 'seller', 'delivery', and 'user' roles
       if (!['seller', 'admin', 'delivery', 'user'].includes(socket.user.role)) {
-        return next(new Error('auth/role_not_allowed'));
+        console.error(`[Socket Auth] Role ${socket.user.role} not allowed`);
+        return next(new Error('AUTH_ROLE_NOT_ALLOWED'));
       }
 
       return next();
     } catch (err) {
-      return next(new Error('auth/invalid_token'));
+      console.error('[Socket Auth] Invalid token:', err.message);
+      return next(new Error('AUTH_INVALID'));
     }
   });
 

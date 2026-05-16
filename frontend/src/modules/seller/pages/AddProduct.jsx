@@ -227,8 +227,8 @@ const AddProduct = () => {
               className="py-10 md:py-20 flex flex-col items-center justify-center space-y-8 md:space-y-12"
             >
               <div className="text-center space-y-3 md:space-y-4">
-                <h1 className="text-3xl md:text-6xl font-display font-bold text-deep-espresso tracking-tight">Add Product</h1>
-                <p className="text-warm-sand font-black uppercase tracking-[0.3em] text-[10px] md:text-xs">How would you like to list your product?</p>
+                <h1 className="text-3xl md:text-6xl font-display font-bold text-black tracking-tight">Add Product</h1>
+                <p className="text-black font-black uppercase tracking-[0.3em] text-[10px] md:text-xs">How would you like to list your product?</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full max-w-4xl px-4">
@@ -240,11 +240,11 @@ const AddProduct = () => {
                     <LuPlus size={32} md:size={40} />
                   </div>
                   <div>
-                    <h3 className="text-xl md:text-2xl font-bold text-deep-espresso">Add New Product</h3>
-                    <p className="text-warm-sand/60 text-xs md:text-sm font-medium mt-2 leading-relaxed">Create a completely new product listing. Requires Admin approval.</p>
+                    <h3 className="text-xl md:text-2xl font-bold text-black">Add New Product</h3>
+                    <p className="text-black/60 text-xs md:text-sm font-medium mt-2 leading-relaxed">Create a completely new product listing. Requires Admin approval.</p>
                   </div>
                   <div className="pt-2 md:pt-4">
-                    <span className="px-5 py-2.5 md:px-6 md:py-3 bg-soft-oatmeal/20 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest text-warm-sand group-hover:bg-warm-sand/10 transition-colors">Start New Entry</span>
+                    <span className="px-5 py-2.5 md:px-6 md:py-3 bg-soft-oatmeal/20 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest text-black group-hover:bg-black/10 transition-colors">Start New Entry</span>
                   </div>
                 </button>
 
@@ -256,11 +256,11 @@ const AddProduct = () => {
                     <LuTags size={32} md:size={40} />
                   </div>
                   <div>
-                    <h3 className="text-xl md:text-2xl font-bold text-deep-espresso">Add From Catalog</h3>
-                    <p className="text-warm-sand/60 text-xs md:text-sm font-medium mt-2 leading-relaxed">List a product that already exists in the catalog. Instant approval.</p>
+                    <h3 className="text-xl md:text-2xl font-bold text-black">Add From Catalog</h3>
+                    <p className="text-black/60 text-xs md:text-sm font-medium mt-2 leading-relaxed">List a product that already exists in the catalog. Instant approval.</p>
                   </div>
                   <div className="pt-2 md:pt-4">
-                    <span className="px-5 py-2.5 md:px-6 md:py-3 bg-soft-oatmeal/20 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest text-warm-sand group-hover:bg-warm-sand/10 transition-colors">Select From Catalog</span>
+                    <span className="px-5 py-2.5 md:px-6 md:py-3 bg-soft-oatmeal/20 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest text-black group-hover:bg-black/10 transition-colors">Select From Catalog</span>
                   </div>
                 </Link>
               </div>
@@ -274,16 +274,16 @@ const AddProduct = () => {
             >
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-soft-oatmeal/30 px-4 md:px-0">
                 <div className="space-y-2 text-center md:text-left">
-                  <button 
+                    <button 
                     onClick={() => setSelection(null)}
-                    className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-warm-sand hover:text-deep-espresso transition-colors flex items-center justify-center md:justify-start gap-2 mb-2 w-full md:w-auto"
+                    className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-black hover:text-black transition-colors flex items-center justify-center md:justify-start gap-2 mb-2 w-full md:w-auto"
                   >
                     ← Back to selection
                   </button>
-                  <h1 className="text-2xl md:text-5xl font-display font-bold text-deep-espresso tracking-tight">
+                  <h1 className="text-2xl md:text-5xl font-display font-bold text-black tracking-tight">
                     {selection === 'new' ? 'Create New Listing' : 'Catalog Listing'}
                   </h1>
-                  <p className="text-warm-sand font-medium uppercase tracking-[0.2em] text-[9px] md:text-[10px]">Merchant Inventory Portal • {selection === 'new' ? 'Approval Required' : 'Instant Approval'}</p>
+                  <p className="text-black font-medium uppercase tracking-[0.2em] text-[9px] md:text-[10px]">Merchant Inventory Portal • {selection === 'new' ? 'Approval Required' : 'Instant Approval'}</p>
                 </div>
               </div>
 
@@ -298,12 +298,12 @@ const AddProduct = () => {
                 <div className="w-10 h-10 md:w-12 md:h-12 bg-soft-oatmeal/10 rounded-xl md:rounded-2xl flex items-center justify-center text-warm-sand">
                   <LuBox size={20} md:size={24} />
                 </div>
-                <h3 className="text-lg md:text-xl font-bold text-deep-espresso">General Information</h3>
+                <h3 className="text-lg md:text-xl font-bold text-black">General Information</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3 md:col-span-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Product Title</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black pl-1">Product Title</label>
                   <input 
                     required type="text" placeholder="e.g. Premium White Marble Slabs"
                     value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -313,7 +313,7 @@ const AddProduct = () => {
                 </div>
                 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">SKU / Model Number</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black pl-1">SKU / Model Number</label>
                   <input 
                     type="text" placeholder="e.g. WH-MAR-001"
                     value={formData.sku} onChange={(e) => setFormData({...formData, sku: e.target.value})}
@@ -323,7 +323,7 @@ const AddProduct = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">HSN Code</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black pl-1">HSN Code</label>
                   <input 
                     type="text" placeholder="e.g. 6802"
                     value={formData.hsnCode} onChange={(e) => setFormData({...formData, hsnCode: e.target.value})}
@@ -333,7 +333,7 @@ const AddProduct = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Brand / Manufacturer</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black pl-1">Brand / Manufacturer</label>
                   <select 
                     required
                     value={formData.brand} onChange={(e) => setFormData({...formData, brand: e.target.value})}
@@ -348,7 +348,7 @@ const AddProduct = () => {
                 </div>
 
                 <div className="space-y-3 md:col-span-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Description</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black pl-1">Description</label>
                   <textarea 
                     required rows="4" placeholder="Highlight the quality, finish, and best uses..."
                     value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})}
@@ -365,12 +365,12 @@ const AddProduct = () => {
                 <div className="w-10 h-10 md:w-12 md:h-12 bg-soft-oatmeal/10 rounded-xl md:rounded-2xl flex items-center justify-center text-warm-sand">
                   <LuTags size={20} md:size={24} />
                 </div>
-                <h3 className="text-lg md:text-xl font-bold text-deep-espresso">Detailed Specifications</h3>
+                <h3 className="text-lg md:text-xl font-bold text-black">Detailed Specifications</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <div className="space-y-3 relative">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Category</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black pl-1">Category</label>
                     <div className="relative group">
                        <input 
                          type="text"
@@ -415,7 +415,7 @@ const AddProduct = () => {
                     </div>
                  </div>
                  <div className="space-y-3 relative">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Subcategory</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black pl-1">Subcategory</label>
                     <div className="relative group">
                        <input 
                          type="text"
@@ -458,7 +458,7 @@ const AddProduct = () => {
                     </div>
                  </div>
                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Material</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black pl-1">Material</label>
                     <input 
                       type="text" placeholder="e.g. High Grade Ceramic"
                       value={formData.material} onChange={(e) => setFormData({...formData, material: e.target.value})}
@@ -467,7 +467,7 @@ const AddProduct = () => {
                     />
                  </div>
                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Dimensions</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black pl-1">Dimensions</label>
                     <input 
                       type="text" placeholder="e.g. 600 x 600 mm"
                       value={formData.dimensions} onChange={(e) => setFormData({...formData, dimensions: e.target.value})}
@@ -476,7 +476,7 @@ const AddProduct = () => {
                     />
                  </div>
                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Thickness</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black pl-1">Thickness</label>
                     <input 
                       type="text" placeholder="e.g. 10 mm"
                       value={formData.thickness} onChange={(e) => setFormData({...formData, thickness: e.target.value})}
@@ -485,7 +485,7 @@ const AddProduct = () => {
                     />
                  </div>
                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand pl-1">Color / Finish</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black pl-1">Color / Finish</label>
                     <input 
                       type="text" placeholder="e.g. Glossy White"
                       value={formData.color} onChange={(e) => setFormData({...formData, color: e.target.value})}
@@ -502,19 +502,19 @@ const AddProduct = () => {
              
              {/* Pricing Card */}
              <div className="bg-white rounded-3xl md:rounded-[40px] border border-soft-oatmeal p-6 md:p-10 shadow-sm space-y-6 md:space-y-8">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand border-b border-soft-oatmeal pb-4">Pricing & Inventory</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black border-b border-soft-oatmeal pb-4">Pricing & Inventory</h3>
                 
                 <div className="space-y-6">
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Base Price (Rs.)</label>
+                      <label className="text-[10px] font-black text-black/60 uppercase tracking-widest">Base Price (Rs.)</label>
                       <input 
                         required type="number" placeholder="0.00"
                         value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})}
-                        className="w-full px-6 py-4 rounded-xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 transition-all font-bold text-deep-espresso"
+                        className="w-full px-6 py-4 rounded-xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-black/20 transition-all font-bold text-black"
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Discounted Price (Optional)</label>
+                      <label className="text-[10px] font-black text-black/60 uppercase tracking-widest">Discounted Price (Optional)</label>
                       <input 
                         type="number" placeholder="Enter special price"
                         value={formData.discountPrice} onChange={(e) => setFormData({...formData, discountPrice: e.target.value})}
@@ -523,7 +523,7 @@ const AddProduct = () => {
                    </div>
                    <div className="grid grid-cols-2 gap-4 pt-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Unit</label>
+                        <label className="text-[10px] font-black text-black/60 uppercase tracking-widest">Unit</label>
                         <select 
                           value={formData.unit} onChange={(e) => setFormData({...formData, unit: e.target.value})}
                           className="w-full px-4 py-3.5 rounded-xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-warm-sand/20 transition-all text-xs font-bold"
@@ -543,7 +543,7 @@ const AddProduct = () => {
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Unit Value (Qty)</label>
+                        <label className="text-[10px] font-black text-black/60 uppercase tracking-widest">Unit Value (Qty)</label>
                         <input 
                           type="text" placeholder="e.g. 5 or 50"
                           value={formData.unitValue} onChange={(e) => setFormData({...formData, unitValue: e.target.value})}
@@ -551,7 +551,7 @@ const AddProduct = () => {
                         />
                       </div>
                       <div className="space-y-2 col-span-2">
-                        <label className="text-[10px] font-black text-warm-sand/60 uppercase tracking-widest">Stock Qty</label>
+                        <label className="text-[10px] font-black text-black/60 uppercase tracking-widest">Stock Qty</label>
                         <input 
                           required type="number" placeholder="0"
                           value={formData.countInStock} onChange={(e) => setFormData({...formData, countInStock: e.target.value})}
@@ -565,8 +565,8 @@ const AddProduct = () => {
              {/* Media Card */}
              <div className="bg-white rounded-3xl md:rounded-[40px] border border-soft-oatmeal p-6 md:p-10 shadow-sm space-y-6 md:space-y-8 md:sticky md:top-24">
                 <div className="flex items-center justify-between border-b border-soft-oatmeal pb-4">
-                   <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">Media Assets</h3>
-                   <span className="text-[9px] font-bold text-warm-sand px-2 py-1 bg-soft-oatmeal/10 rounded-full">{formData.images.length} / 5</span>
+                   <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black">Media Assets</h3>
+                   <span className="text-[9px] font-bold text-black px-2 py-1 bg-soft-oatmeal/10 rounded-full">{formData.images.length} / 5</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -588,7 +588,7 @@ const AddProduct = () => {
                        className="aspect-square bg-soft-oatmeal/5 rounded-2xl border-2 border-dashed border-soft-oatmeal flex flex-col items-center justify-center text-warm-sand hover:bg-white hover:border-warm-sand hover:text-deep-espresso transition-all cursor-pointer group"
                      >
                         <LuImage size={24} className="opacity-40 group-hover:opacity-100 transition-opacity" />
-                        <span className="text-[8px] font-black uppercase tracking-widest mt-2">Add Media</span>
+                        <span className="text-[8px] font-black uppercase tracking-widest mt-2 text-black">Add Media</span>
                      </div>
                    )}
                 </div>
@@ -597,7 +597,7 @@ const AddProduct = () => {
                 <div className="pt-4 space-y-6">
                    <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand flex items-center gap-2">
+                         <label className="text-[10px] font-black uppercase tracking-widest text-black flex items-center gap-2">
                             <LuVideo size={14} /> Product Video
                          </label>
                          {selection !== 'catalog' && (
@@ -607,7 +607,7 @@ const AddProduct = () => {
                            />
                          )}
                          {selection !== 'catalog' && (
-                           <label htmlFor="video-upload" className="text-[10px] font-black text-deep-espresso uppercase tracking-widest hover:underline cursor-pointer">
+                           <label htmlFor="video-upload" className="text-[10px] font-black text-black uppercase tracking-widest hover:underline cursor-pointer">
                               {videoFile ? 'Change Video' : 'Upload Video File'}
                            </label>
                          )}
@@ -650,7 +650,7 @@ const AddProduct = () => {
                      {success ? 'Listing Published' : (isSubmitting ? 'Updating Database' : 'Confirm Listing')}
                    </button>
                    
-                   <div className="text-[9px] text-center text-warm-sand/50 font-bold uppercase tracking-[0.15em] leading-relaxed">
+                   <div className="text-[9px] text-center text-black/50 font-bold uppercase tracking-[0.15em] leading-relaxed">
                       By publishing, you agree that your store follows our merchant policies.
                    </div>
                 </div>

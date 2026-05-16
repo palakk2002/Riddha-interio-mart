@@ -41,21 +41,27 @@ const AdminLayoutContent = () => {
       
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
         {/* Header */}
-        <header className="h-16 md:h-20 bg-white shadow-sm border-b border-soft-oatmeal px-4 md:px-6 flex items-center justify-between z-30">
+        <header className={`h-16 md:h-20 shadow-sm border-b px-4 md:px-6 flex items-center justify-between z-30 transition-colors ${role === 'admin' ? 'bg-[#240046] lg:bg-white border-[#240046]/10 lg:border-soft-oatmeal' : 'bg-[#189D91] lg:bg-white border-[#189D91]/10 lg:border-soft-oatmeal'}`}>
           <div className="flex items-center gap-4">
             <button 
               onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(true); }}
-              className={`lg:hidden p-2 rounded-lg transition-colors ${role === 'admin' ? 'hover:bg-purple-100 text-[#240046]' : 'hover:bg-teal-100 text-[#189D91]'}`}
+              className={`lg:hidden p-2 rounded-lg transition-colors text-white ${role === 'admin' ? 'hover:bg-white/10' : 'hover:bg-white/10'}`}
             >
               <FiMenu size={24} />
             </button>
             <div className="flex flex-col">
-              <h2 className="text-sm font-black text-deep-espresso hidden sm:block uppercase tracking-tight">
+              <h2 className="text-sm font-black text-deep-espresso hidden lg:block uppercase tracking-tight">
                 {role === 'admin' ? 'Super Admin' : 'Assistant'} <span className={`italic ${role === 'admin' ? 'text-brand-purple' : 'text-[#189D91]'}`}>Workspace</span>
               </h2>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hidden sm:block">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hidden lg:block">
                 {role === 'admin' ? 'Full System Control' : 'Standard Operations Mode'}
               </p>
+              
+              {/* Mobile Branding */}
+              <div className="lg:hidden flex flex-col">
+                <span className="text-white text-sm font-black uppercase tracking-tighter italic leading-none">RIDDHA <span className="text-white">ADMIN</span></span>
+                <span className="text-[8px] text-white/60 font-bold uppercase tracking-[0.2em] mt-1">{role === 'admin' ? 'Master Control' : 'Ops Mode'}</span>
+              </div>
             </div>
             
             {/* Demo Mode Switcher */}
@@ -95,7 +101,7 @@ const AdminLayoutContent = () => {
                     <FiUser size={20} />
                   )}
                 </div>
-                <FiChevronDown size={14} className={`text-dusty-cocoa transition-transform duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
+                <FiChevronDown size={14} className={`text-white/60 lg:text-dusty-cocoa transition-transform duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
               </button>
 
               {showUserMenu && (

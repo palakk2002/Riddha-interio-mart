@@ -262,17 +262,22 @@ const DeliveryLayout = () => {
       
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
         {/* Header */}
-        <header className="h-20 bg-white shadow-sm border-b border-soft-oatmeal px-6 flex items-center justify-between z-30">
+        <header className="h-20 bg-deep-espresso lg:bg-white shadow-sm border-b border-white/5 lg:border-soft-oatmeal px-6 flex items-center justify-between z-30">
           <div className="flex items-center gap-4">
             <button 
               onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(true); }}
-              className="lg:hidden p-2 hover:bg-soft-oatmeal rounded-lg transition-colors"
+              className="lg:hidden p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
             >
               <LuMenu size={24} />
             </button>
-            <h2 className="text-sm font-medium text-warm-sand hidden sm:block">
+            <h2 className="text-sm font-medium text-warm-sand hidden lg:block">
               Welcome back, <span className="font-bold text-deep-espresso">Partner!</span>
             </h2>
+            {/* Mobile Title */}
+            <div className="lg:hidden flex items-center gap-2">
+              <LuTruck className="text-white" size={20} />
+              <span className="text-white font-display font-black uppercase italic tracking-tight">Riddha <span className="text-white/80">Seller</span></span>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
@@ -283,11 +288,11 @@ const DeliveryLayout = () => {
                 disabled={updatingStatus}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-all group ${
                   status === 'Available' 
-                    ? 'bg-[#001B4E]/5 border-[#001B4E]/10 text-[#001B4E] shadow-sm shadow-[#001B4E]/10' 
+                    ? 'bg-white/10 lg:bg-[#001B4E]/5 border-white/20 lg:border-[#001B4E]/10 text-white lg:text-[#001B4E] shadow-sm' 
                     : 'bg-soft-oatmeal/20 border-soft-oatmeal/40 text-warm-sand grayscale'
                 }`}
               >
-                <div className={`w-2 h-2 rounded-full ${status === 'Available' ? 'bg-[#001B4E] animate-pulse' : 'bg-warm-sand'}`} />
+                <div className={`w-2 h-2 rounded-full ${status === 'Available' ? 'bg-white lg:bg-[#001B4E] animate-pulse' : 'bg-warm-sand'}`} />
                 <span className="text-[10px] font-black uppercase tracking-widest">
                   {updatingStatus ? 'Syncing...' : status === 'Available' ? 'Online' : 'Offline'}
                 </span>

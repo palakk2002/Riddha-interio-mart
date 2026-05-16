@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
+import { useNavigate } from 'react-router-dom';
 import { LuSearch, LuFilter, LuUser, LuMail, LuPhone, LuBuilding2, LuClipboardCheck, LuShoppingBag, LuShieldCheck, LuShieldAlert } from 'react-icons/lu';
 import { FiMoreVertical } from 'react-icons/fi';
 import api from '../../../shared/utils/api';
@@ -84,7 +85,7 @@ const ManageUserPage = ({ type }) => {
           </button>
         </div>
 
-        <div className="bg-white rounded-3xl border border-soft-oatmeal shadow-md overflow-hidden min-h-[400px]">
+        <div className="bg-white rounded-3xl border border-soft-oatmeal shadow-md min-h-[400px]">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <div className="w-10 h-10 border-4 border-warm-sand border-t-transparent rounded-full animate-spin"></div>
@@ -99,7 +100,7 @@ const ManageUserPage = ({ type }) => {
               <p className="text-warm-sand text-sm mt-1">Try adjusting your search or filters.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-visible">
               <table className="w-full text-left border-collapse">
                 <thead className="bg-soft-oatmeal/20 border-b border-soft-oatmeal">
                   <tr>
@@ -114,8 +115,8 @@ const ManageUserPage = ({ type }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-soft-oatmeal/50">
-                  {filteredUsers.map((user) => (
-                    <tr key={user._id} className="hover:bg-soft-oatmeal/5 transition-colors group">
+                  {filteredUsers.map((user, index) => (
+                    <tr key={user._id} className={`hover:bg-soft-oatmeal/5 transition-colors group ${activeMenu === user._id ? 'relative z-[40]' : ''}`}>
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-4">
                           <div className={`w-12 h-12 rounded-2xl ${user.isBlocked ? 'bg-red-100 text-red-700' : type === 'enterpriser' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'} flex items-center justify-center font-bold text-lg`}>
@@ -189,12 +190,13 @@ const ManageUserPage = ({ type }) => {
                         >
                           <FiMoreVertical size={18} />
                         </button>
-
+ 
                         {activeMenu === user._id && (
                           <>
                             <div className="fixed inset-0 z-10" onClick={() => setActiveMenu(null)}></div>
-                            <div className="absolute right-6 top-16 w-48 bg-white rounded-2xl shadow-2xl border border-soft-oatmeal py-2 z-20 overflow-hidden animate-in fade-in zoom-in duration-200 text-left">
+                            <div className={`absolute right-6 ${index >= filteredUsers.length - 3 && filteredUsers.length > 3 ? 'bottom-full mb-2 origin-bottom' : 'top-16 origin-top'} w-48 bg-white rounded-2xl shadow-2xl border border-soft-oatmeal py-2 z-20 overflow-hidden animate-in fade-in zoom-in duration-200 text-left`}>
                               <button 
+                                onClick={() => navigate(`/admin/orders/all?search=${user.fullName}`)}
                                 className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-widest text-deep-espresso hover:bg-soft-oatmeal transition-colors flex items-center gap-3"
                               >
                                 View Orders

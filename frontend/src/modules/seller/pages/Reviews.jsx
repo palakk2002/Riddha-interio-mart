@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiStar, FiMessageSquare, FiTrendingUp, FiUsers, FiFilter, FiCalendar } from 'react-icons/fi';
+import toast from 'react-hot-toast';
 
 const SellerReviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -44,6 +45,29 @@ const SellerReviews = () => {
         </h1>
         <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">Monitor your premium brand reputation</p>
       </div>
+
+      {/* Suggestion CTA */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-gradient-to-r from-[#bd3b64] to-[#8a2b49] p-8 rounded-[40px] shadow-xl text-white flex flex-col md:flex-row items-center justify-between gap-6"
+      >
+        <div className="flex items-center gap-6">
+          <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-md">
+            <FiMessageSquare size={32} />
+          </div>
+          <div>
+            <h2 className="text-xl font-black uppercase italic tracking-tight">Have an Idea for Riddha?</h2>
+            <p className="text-white/70 text-xs font-medium mt-1">Suggest new features or improvements directly to the admin team.</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => window.location.href = '/seller/recommendations'}
+          className="bg-white text-[#bd3b64] px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-warm-sand transition-all shadow-lg active:scale-95 whitespace-nowrap"
+        >
+          Give Recommendation
+        </button>
+      </motion.div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -149,6 +173,40 @@ const SellerReviews = () => {
           )}
         </div>
       </div>
+
+      {/* Direct Feedback Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white p-10 rounded-[40px] border border-gray-100 shadow-sm"
+      >
+        <div className="flex flex-col md:flex-row gap-10">
+          <div className="md:w-1/3">
+            <h3 className="text-xl font-black uppercase italic tracking-tight text-gray-900 mb-4">Send Feedback <span className="text-[#bd3b64]">Directly</span></h3>
+            <p className="text-gray-400 text-xs font-medium leading-relaxed">
+              If you have any suggestions, issues, or recommendations for the platform, please share them here. Our admin team reviews every submission.
+            </p>
+            <div className="mt-8 p-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+               <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Response Time</p>
+               <p className="text-[11px] font-bold text-gray-700 mt-1">Usually within 24-48 hours</p>
+            </div>
+          </div>
+          <div className="flex-1 space-y-4">
+             <textarea 
+               placeholder="Write your recommendation or feedback for the admin here..."
+               className="w-full h-40 bg-gray-50 border border-gray-100 focus:border-[#bd3b64] focus:bg-white rounded-[32px] p-8 outline-none text-sm font-medium transition-all resize-none"
+             ></textarea>
+             <button 
+               onClick={() => {
+                 toast.success('Your feedback has been sent to the admin!');
+               }}
+               className="w-full md:w-auto px-12 py-4 bg-gray-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-[#bd3b64] transition-all shadow-lg active:scale-95"
+             >
+               Send to Admin
+             </button>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 };

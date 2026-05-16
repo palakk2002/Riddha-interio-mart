@@ -50,7 +50,7 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
               <div className="w-8 h-8 bg-warm-sand rounded-lg flex items-center justify-center text-white">
                 <FiPackage size={20} />
               </div>
-              <span className="font-display font-bold text-xl tracking-tight text-white">Riddha<span className="text-warm-sand">Delivery</span></span>
+              <span className="font-display font-bold text-xl tracking-tight text-white">Riddha<span className="text-white/80 ml-1">Seller</span></span>
             </Link>
           </div>
 
@@ -62,10 +62,10 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
                 to={item.path}
                 onClick={onClose}
                 className={({ isActive }) => `
-                  flex items-center gap-4 px-6 py-4 rounded-xl text-sm font-bold transition-all duration-300 group
+                  flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-bold transition-all duration-300 group border
                   ${isActive 
-                    ? 'bg-white/15 text-white border-l-4 border-blue-400 shadow-lg' 
-                    : 'text-white/70 hover:bg-white/5 hover:text-white'}
+                    ? 'bg-white/20 text-white border-white/20 shadow-2xl shadow-black/20 scale-[1.02]' 
+                    : 'bg-white/5 text-white/70 border-white/5 hover:bg-white/10 hover:text-white hover:border-white/20 hover:scale-[1.02]'}
                 `}
               >
                 {({ isActive }) => (
@@ -82,7 +82,7 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
           <div className="p-4 border-t border-white/5">
             <button 
               onClick={handleLogout}
-              className="w-full flex items-center gap-4 px-6 py-4 rounded-xl text-sm font-bold text-white hover:bg-white/10 transition-colors group"
+              className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-bold text-white/70 bg-white/5 border border-white/5 hover:bg-white/10 hover:text-white hover:border-white/10 transition-all duration-300 group"
             >
               <FiLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
               Sign Out

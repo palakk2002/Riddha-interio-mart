@@ -133,11 +133,13 @@ const Navbar = () => {
           <div className="hidden md:flex items-center justify-between py-1 md:py-0.5 gap-4 lg:gap-6">
             <div className="flex items-center gap-6 lg:gap-8 shrink-0">
               <Link to="/" className="flex items-center">
-                <img
-                  src={TransparentLogo}
-                  alt="Riddha Interio"
-                  className="h-14 lg:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300"
-                />
+                <div className="bg-white p-0 h-12 lg:h-14 overflow-hidden flex items-center justify-center rounded-md">
+                  <img
+                    src={TransparentLogo}
+                    alt="Riddha Interio"
+                    className="h-20 lg:h-24 w-auto object-contain hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
               </Link>
 
               {/* Delivery Location */}
@@ -445,7 +447,6 @@ const Navbar = () => {
                   {/* Information & Support */}
                   <div className="pb-4 mb-4 border-b border-gray-50">
                     <p className="px-4 mb-2 text-[10px] font-black uppercase tracking-widest text-gray-400/60">Support & Info</p>
-                    <SidebarLink to="/stores" icon={FiMapPin} label="Our Stores" onClick={closeMobile} />
                     <SidebarLink to="/about" icon={FiInfo} label="About Us" onClick={closeMobile} />
                     <SidebarLink to="/contact" icon={FiPhone} label="Contact Us" onClick={closeMobile} />
                   </div>

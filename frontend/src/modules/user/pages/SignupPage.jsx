@@ -359,6 +359,7 @@ const SignupPage = () => {
                             required
                           />
                         </div>
+
                       </div>
                     </div>
 

@@ -125,7 +125,7 @@ const DashboardPage = () => {
               animate={{ opacity: 1, x: 0 }}
               className="text-4xl md:text-5xl font-display font-black text-[#240046] tracking-tight"
             >
-              Control <span className="text-brand-teal">Center</span>
+              Riddha <span className="text-brand-teal">Admin</span>
             </motion.h1>
             <p className="text-xs font-black text-gray-400 uppercase tracking-[0.3em]">
                Unified Business Intelligence & Operational Oversight
