@@ -74,7 +74,7 @@ const StockManagement = () => {
              >
                <RefreshCcw size={20} />
              </button>
-             <button className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10">
+             <button className="flex items-center gap-2 px-6 py-3 bg-seller-primary text-white rounded-xl font-bold text-sm hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20">
                <Plus size={18} />
                Add Stock
              </button>

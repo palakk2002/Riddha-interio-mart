@@ -633,17 +633,17 @@ const AddProduct = () => {
                    )}
 
                    <button 
-                     type="submit"
-                     disabled={isSubmitting || success}
-                     className={`w-full py-5 rounded-[2rem] font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 ${
-                       success 
-                       ? 'bg-emerald-500 text-white' 
-                       : 'bg-slate-900 text-white hover:bg-seller-primary shadow-slate-900/10'
-                     }`}
-                   >
-                     {isSubmitting ? <Clock size={18} className="animate-spin" /> : (success ? <Check size={18} /> : <Plus size={18} />)}
-                     {success ? 'Listing Success' : (isSubmitting ? 'Syncing...' : 'Finalize Listing')}
-                   </button>
+                      type="submit"
+                      disabled={isSubmitting || success}
+                      className={`w-full py-5 rounded-[2rem] font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 ${
+                        success 
+                        ? 'bg-emerald-500 text-white' 
+                        : 'bg-seller-primary text-white hover:bg-seller-dark shadow-seller-primary/20'
+                      }`}
+                    >
+                      {isSubmitting ? <Clock size={18} className="animate-spin" /> : (success ? <Check size={18} /> : <Plus size={18} />)}
+                      {success ? 'Listing Success' : (isSubmitting ? 'Syncing...' : 'Finalize Listing')}
+                    </button>
                    
                    <p className="text-[9px] text-center text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
                       Syncing this product will make it visible to customers globally upon validation.

@@ -90,13 +90,13 @@ const BulkProductUpload = () => {
         <div className="flex items-center gap-1 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm w-full md:w-fit overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('excel')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === 'excel' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === 'excel' ? 'bg-seller-primary text-white shadow-lg shadow-seller-primary/20' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
           >
             <FileSpreadsheet size={16} /> Import Spreadsheet
           </button>
           <button
             onClick={() => setActiveTab('manual')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === 'manual' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === 'manual' ? 'bg-seller-primary text-white shadow-lg shadow-seller-primary/20' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
           >
             <Zap size={16} /> Manual Batch Entry
           </button>
@@ -114,7 +114,7 @@ const BulkProductUpload = () => {
               <div className="max-w-md w-full space-y-10">
                 <div className="relative group mx-auto">
                    <div className="absolute inset-0 bg-seller-primary/10 rounded-full blur-3xl group-hover:bg-seller-primary/20 transition-colors"></div>
-                   <div className="relative w-24 h-24 bg-slate-900 rounded-[2rem] flex items-center justify-center text-white shadow-2xl mx-auto">
+                   <div className="relative w-24 h-24 bg-seller-primary rounded-[2rem] flex items-center justify-center text-white shadow-2xl mx-auto shadow-seller-primary/20">
                       <UploadCloud size={40} />
                    </div>
                 </div>
@@ -290,12 +290,12 @@ const BulkProductUpload = () => {
                   <button
                     onClick={handleBulkSubmit}
                     disabled={isUploading}
-                    className="flex-1 sm:flex-none h-16 px-12 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-xl shadow-slate-900/10 hover:bg-seller-primary transition-all relative overflow-hidden min-w-[200px]"
+                    className="flex-1 sm:flex-none h-16 px-12 bg-seller-primary text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-xl shadow-seller-primary/30 hover:bg-seller-dark transition-all relative overflow-hidden min-w-[200px]"
                   >
                     <span className="relative z-10">{isUploading ? `Syncing ${uploadProgress}%` : 'Finalize & Submit'}</span>
                     {isUploading && (
                       <motion.div
-                        className="absolute bottom-0 left-0 h-1.5 bg-seller-primary"
+                        className="absolute bottom-0 left-0 h-1.5 bg-white/20"
                         initial={{ width: 0 }}
                         animate={{ width: `${uploadProgress}%` }}
                       />
@@ -316,7 +316,7 @@ const BulkProductUpload = () => {
               exit={{ opacity: 0, y: 50, scale: 0.9 }}
               className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100]"
             >
-              <div className="bg-slate-900 text-white px-8 py-5 rounded-3xl shadow-2xl flex items-center gap-5 border border-white/10 backdrop-blur-xl">
+              <div className="bg-seller-primary text-white px-8 py-5 rounded-3xl shadow-2xl flex items-center gap-5 border border-white/10 backdrop-blur-xl">
                 <div className="w-12 h-12 bg-seller-primary rounded-2xl flex items-center justify-center text-white shadow-lg">
                   <CheckCircle2 size={26} />
                 </div>

@@ -184,7 +184,7 @@ const BrowseCatalog = () => {
                            ) : (
                              <button
                                onClick={() => navigate(`/seller/product/add?catalogId=${product._id}`)}
-                               className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-seller-primary transition-all shadow-md group/btn"
+                               className="inline-flex items-center gap-2 px-5 py-2.5 bg-seller-primary text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-seller-dark transition-all shadow-md group/btn shadow-seller-primary/20"
                              >
                                Add to Shop
                                <PlusCircle size={16} className="group-hover/btn:rotate-90 transition-transform" />

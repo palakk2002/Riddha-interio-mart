@@ -35,13 +35,13 @@ const Marketing = () => {
 
   return (
     <PageWrapper>
-      <div className="max-w-6xl mx-auto space-y-8 pb-20 px-4 md:px-0">
+      <div className="max-w-6xl mx-auto space-y-6 pb-20 px-4 md:px-0">
         
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-1">
-            <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Growth Center</h1>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Deploying advanced merchant marketing strategies</p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="space-y-0.5">
+            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Growth Center</h1>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Deploying advanced merchant marketing strategies</p>
           </div>
           
           <button className="flex items-center gap-2 px-8 py-4 bg-seller-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-seller-primary/20 hover:bg-seller-dark transition-all">
@@ -52,13 +52,13 @@ const Marketing = () => {
         {/* Marketing Hub Tabs */}
         <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm w-fit">
            {['Campaigns', 'Coupons', 'Intelligence'].map(tab => (
-             <button 
-               key={tab}
-               onClick={() => setActiveTab(tab)}
-               className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
-             >
-                {tab}
-             </button>
+              <button 
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-primary text-white shadow-lg shadow-seller-primary/20' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                 {tab}
+              </button>
            ))}
         </div>
 
@@ -163,14 +163,18 @@ const Marketing = () => {
 
            {/* Performance Sidebar */}
            <div className="space-y-8">
-              <div className="bg-gradient-to-br from-[#E36666] via-[#D64F4F] to-[#B93E3E] rounded-[2.5rem] p-8 text-white relative overflow-hidden group shadow-2xl shadow-seller-primary/20">
+              <div className="bg-gradient-to-br from-seller-primary via-[#D63384] to-[#B6256B] rounded-[2.5rem] p-8 text-white relative overflow-hidden group shadow-2xl shadow-seller-primary/30">
                   <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-[60px] -mr-20 -mt-20"></div>
+                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/10 rounded-full blur-[40px] -ml-16 -mb-16"></div>
+                  
                   <div className="relative z-10 space-y-6">
                      <div className="flex items-center gap-3">
-                        <BarChart3 size={20} className="text-white" />
-                        <h3 className="text-lg font-black tracking-tight">Analytics</h3>
+                        <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
+                           <BarChart3 size={20} className="text-white" />
+                        </div>
+                        <h3 className="text-lg font-black tracking-tight uppercase italic !text-white">Analytics</h3>
                      </div>
-                     <div className="space-y-4">
+                     <div className="space-y-5">
                         {[
                           { label: 'Marketing ROI', val: '4.2x', trend: '+12%' },
                           { label: 'Avg conversion', val: '5.8%', trend: '+0.4%' },
@@ -178,10 +182,15 @@ const Marketing = () => {
                         ].map((stat, i) => (
                           <div key={i} className="flex items-center justify-between pb-4 border-b border-white/10 last:border-0 last:pb-0">
                              <div>
-                                <p className="text-[8px] font-black text-white/60 uppercase tracking-widest mb-1">{stat.label}</p>
-                                <p className="text-sm font-black">{stat.val}</p>
+                                <p className="text-[9px] font-black !text-white/90 uppercase tracking-[0.15em] mb-1.5">{stat.label}</p>
+                                <p className="text-lg font-black tracking-tight !text-white">{stat.val}</p>
                              </div>
-                             <span className="text-[10px] font-black text-white">{stat.trend}</span>
+                             <div className="flex flex-col items-end gap-1">
+                                <span className="text-[10px] font-black text-white bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-sm">{stat.trend}</span>
+                                <div className="w-8 h-1 bg-white/20 rounded-full overflow-hidden">
+                                   <div className="h-full bg-white" style={{ width: '60%' }}></div>
+                                </div>
+                             </div>
                           </div>
                         ))}
                      </div>
@@ -218,7 +227,7 @@ const Marketing = () => {
                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest max-w-sm">Your brand visibility has increased by 14% in the last 30 days. Deploy more flash sales to capture the current trend.</p>
               </div>
            </div>
-           <button className="px-10 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all">
+           <button className="px-10 py-4 bg-seller-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20">
               Analyze Trends
            </button>
         </div>

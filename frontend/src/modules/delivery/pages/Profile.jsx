@@ -1,11 +1,27 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
-import { LuUser, LuPhone, LuTruck, LuShieldCheck, LuMapPin, LuLogOut, LuMail, LuFileText, LuSave, LuX } from 'react-icons/lu';
+import { 
+  LuUser, 
+  LuPhone, 
+  LuTruck, 
+  LuShieldCheck, 
+  LuMapPin, 
+  LuLogOut, 
+  LuMail, 
+  LuFileText, 
+  LuSave, 
+  LuX,
+  LuActivity,
+  LuExternalLink,
+  LuChevronRight,
+  LuVerified
+} from 'react-icons/lu';
 import { FiEdit2 } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
 import { uploadImage } from '../../../shared/utils/upload';
+import { toast } from 'react-hot-toast';
 
 const Profile = () => {
   const { logout, user: currentUser, setUser } = useUser();
@@ -52,19 +68,21 @@ const Profile = () => {
 
   const toggleOnline = async () => {
     const nextStatus = profile.isOnline ? 'Offline' : 'Available';
+    const loadingToast = toast.loading(`Switching Signal: ${nextStatus}`);
     try {
       setProfile(prev => ({ ...prev, isOnline: !prev.isOnline }));
       await api.put('/delivery/status', { status: nextStatus });
+      toast.success(`Signal Synchronized: ${nextStatus}`, { id: loadingToast });
     } catch (err) {
-       console.error('Failed to update status:', err);
-       // Revert UI if API fails
        setProfile(prev => ({ ...prev, isOnline: prev.isOnline }));
+       toast.error('Signal Sync Failure', { id: loadingToast });
     }
   };
 
   const handleSave = async (e) => {
     if (e) e.preventDefault();
     setIsSaving(true);
+    const loadingToast = toast.loading('Synchronizing Profile Matrix...');
     try {
       const { data } = await api.put('/auth/delivery/profile', {
         fullName: profile.name,
@@ -77,10 +95,10 @@ const Profile = () => {
       if (data.success && data.data) {
         setIsEditing(false);
         setUser({ ...currentUser, name: data.data.fullName, avatar: data.data.avatar });
+        toast.success('Matrix Synchronized', { id: loadingToast });
       }
     } catch (err) {
-      console.error('Update failed:', err);
-      alert(err.response?.data?.error || 'Failed to update profile');
+      toast.error(err.response?.data?.error || 'Sync Failure', { id: loadingToast });
     } finally {
       setIsSaving(false);
     }
@@ -89,13 +107,15 @@ const Profile = () => {
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    const loadingToast = toast.loading('Uploading Biometric Asset...');
     try {
       const url = await uploadImage(file);
       setProfile(prev => ({ ...prev, avatar: url }));
       await api.put('/auth/delivery/profile', { avatar: url });
       setUser({ ...currentUser, avatar: url });
+      toast.success('Asset Verified', { id: loadingToast });
     } catch (err) {
-      console.error('Upload failed:', err);
+      toast.error('Asset Upload Failed', { id: loadingToast });
     }
   };
 
@@ -103,8 +123,8 @@ const Profile = () => {
     return (
       <PageWrapper>
         <div className="flex flex-col items-center justify-center py-40">
-          <div className="w-12 h-12 border-4 border-soft-oatmeal border-t-warm-sand rounded-full animate-spin mb-4" />
-          <p className="text-xs font-black uppercase tracking-widest text-warm-sand">Syncing with Central...</p>
+           <LuActivity className="text-[#D63384] animate-pulse mb-4" size={48} />
+           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Synchronizing Identity Protocol...</p>
         </div>
       </PageWrapper>
     );
@@ -112,36 +132,45 @@ const Profile = () => {
 
   return (
     <PageWrapper>
-      <div className="max-w-5xl mx-auto space-y-8">
-        {/* Header Section */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-0.5">
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-deep-espresso">My Profile</h1>
-            <p className="text-[10px] text-warm-sand font-black uppercase tracking-widest">Partner ID: {currentUser?.id?.slice(-8).toUpperCase()}</p>
+      <div className="max-w-[1400px] mx-auto space-y-10 pb-20">
+        
+        {/* Command Header */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+          <div className="space-y-3">
+             <div className="flex items-center gap-3">
+                <div className="w-1.5 h-10 bg-[#D63384] rounded-full"></div>
+                <div>
+                   <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase italic">Partner <span className="text-[#D63384]">Protocol</span></h1>
+                   <p className="text-slate-400 font-black text-[10px] uppercase tracking-[0.3em] mt-1">Registry ID: {currentUser?.id?.slice(-12).toUpperCase()}</p>
+                </div>
+             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            {/* Availability Toggle */}
-            <div className={`px-6 py-3 rounded-2xl border transition-all duration-500 flex items-center gap-6 ${
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Real-time Signal Toggle */}
+            <div className={`px-8 py-4 rounded-3xl border transition-all duration-500 flex items-center gap-8 ${
               profile.isOnline 
-                ? 'bg-[#001B4E]/5 border-[#001B4E]/10 shadow-lg shadow-[#001B4E]/10' 
-                : 'bg-white border-soft-oatmeal'
+                ? 'bg-slate-900 border-slate-800 shadow-2xl shadow-slate-900/20' 
+                : 'bg-white border-slate-100 shadow-sm'
             }`}>
               <div className="text-left">
-                <p className="text-[9px] font-black text-warm-sand uppercase tracking-widest">Active Status</p>
-                <p className={`text-sm font-black uppercase tracking-tighter ${profile.isOnline ? 'text-[#001B4E]' : 'text-dusty-cocoa'}`}>
-                  {profile.isOnline ? 'Online' : 'Offline'}
-                </p>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Signal State</p>
+                <div className="flex items-center gap-2">
+                   <div className={`w-1.5 h-1.5 rounded-full ${profile.isOnline ? 'bg-[#D63384] animate-pulse' : 'bg-slate-300'}`}></div>
+                   <p className={`text-xs font-black uppercase tracking-widest ${profile.isOnline ? 'text-white' : 'text-slate-400'}`}>
+                     {profile.isOnline ? 'Transmitting' : 'Dormant'}
+                   </p>
+                </div>
               </div>
               <button 
                 onClick={toggleOnline}
-                className={`w-12 h-6 rounded-full relative transition-colors duration-300 ${
-                  profile.isOnline ? 'bg-[#001B4E]' : 'bg-soft-oatmeal'
+                className={`w-14 h-7 rounded-full relative transition-all duration-300 ${
+                  profile.isOnline ? 'bg-[#D63384]' : 'bg-slate-100'
                 }`}
               >
                 <motion.div 
-                  animate={{ x: profile.isOnline ? 26 : 2 }}
-                  className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-md"
+                  animate={{ x: profile.isOnline ? 30 : 4 }}
+                  className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-lg"
                 />
               </button>
             </div>
@@ -149,91 +178,94 @@ const Profile = () => {
             {!isEditing && (
               <button 
                 onClick={() => setIsEditing(true)}
-                className="flex items-center gap-2 bg-deep-espresso text-white px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-dusty-cocoa transition-all shadow-xl shadow-deep-espresso/20 active:scale-95"
+                className="flex items-center gap-3 bg-[#D63384] text-white px-8 py-5 rounded-3xl font-black uppercase tracking-widest text-[10px] hover:bg-[#B6256B] transition-all shadow-xl shadow-pink-500/20 active:scale-95"
               >
                 <FiEdit2 size={16} />
-                Edit Profile
+                Modify Protocol
               </button>
             )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Identity Column */}
-          <div className="lg:col-span-4 space-y-8">
-            <div className="bg-white rounded-[32px] shadow-2xl shadow-soft-oatmeal/40 border border-soft-oatmeal p-10 text-center relative overflow-hidden group">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+          {/* Identity Core */}
+          <div className="xl:col-span-4 space-y-8">
+            <div className="bg-[#111827] rounded-[3rem] p-10 text-center relative overflow-hidden border border-white/5">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-[#D63384]/10 rounded-full blur-[80px] -mr-20 -mt-20"></div>
+              
               <div className="relative z-10">
-                <div className="relative w-32 h-32 mx-auto mb-6">
-                  <div className="w-full h-full bg-soft-oatmeal/10 rounded-full flex items-center justify-center text-warm-sand border-4 border-white shadow-2xl overflow-hidden relative">
+                <div className="relative w-40 h-40 mx-auto mb-8 group">
+                  <div className="w-full h-full bg-slate-800 rounded-[2.5rem] flex items-center justify-center text-slate-600 border-8 border-slate-900 shadow-2xl overflow-hidden relative">
                     {profile.avatar ? (
-                      <img src={profile.avatar} alt="Me" className="w-full h-full object-cover" />
+                      <img src={profile.avatar} alt="Me" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     ) : (
-                      <LuUser size={64} className="opacity-20" />
+                      <LuUser size={80} className="opacity-20" />
                     )}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                       <LuActivity className="text-white animate-pulse" size={32} />
+                    </div>
                   </div>
-                  <label className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-lg border border-soft-oatmeal cursor-pointer hover:bg-soft-oatmeal/20 transition-all text-deep-espresso active:scale-90">
-                    <FiEdit2 size={18} />
+                  <label className="absolute -bottom-2 -right-2 p-4 bg-[#D63384] text-white rounded-2xl shadow-2xl cursor-pointer hover:scale-110 transition-all active:scale-90">
+                    <FiEdit2 size={20} />
                     <input type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
                   </label>
                 </div>
                 
-                <h3 className="text-2xl font-display font-bold text-deep-espresso tracking-tight">{profile.name}</h3>
-                <div className="inline-flex items-center gap-2 mt-2 px-4 py-1.5 bg-warm-sand/10 rounded-full text-[10px] font-black text-warm-sand uppercase tracking-widest">
-                  <LuTruck size={12} /> Partner Member
+                <h3 className="text-3xl font-black text-white tracking-tight uppercase italic">{profile.name}</h3>
+                <div className="inline-flex items-center gap-2 mt-3 px-5 py-2 bg-white/5 rounded-full text-[10px] font-black text-[#D63384] uppercase tracking-[0.2em] border border-white/5">
+                  <LuVerified size={14} /> Certified Operative
                 </div>
                 
-                <div className="mt-10 pt-10 border-t border-soft-oatmeal/50 space-y-6">
-                  <div className="flex items-center justify-between text-xs font-bold text-warm-sand uppercase tracking-widest">
-                    <span>Approval Status</span>
-                    <span className={`px-3 py-1 rounded-full text-[9px] ${
-                      profile.approvalStatus === 'Approved' ? 'bg-[#001B4E] text-white' : 'bg-[#001B4E] text-white'
-                    }`}>
+                <div className="mt-12 pt-12 border-t border-white/5 space-y-8">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Verification Node</span>
+                    <span className="px-4 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-xl text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">
                       {profile.approvalStatus}
                     </span>
                   </div>
-                  <div className="p-4 bg-[#001B4E]/5 rounded-2xl border border-[#001B4E]/10 flex items-center gap-3">
-                    <LuShieldCheck className="text-[#001B4E] shrink-0" size={20} />
-                    <p className="text-[10px] font-bold text-[#001B4E] text-left leading-relaxed uppercase tracking-tighter">Identity Verified & Secured by Riddha Mart Protocol</p>
+                  <div className="p-5 bg-white/5 rounded-[2rem] border border-white/5 flex items-center gap-4 text-left">
+                    <div className="w-12 h-12 rounded-2xl bg-[#D63384]/10 flex items-center justify-center text-[#D63384]">
+                       <LuShieldCheck size={24} />
+                    </div>
+                    <div>
+                       <p className="text-[10px] font-black text-white uppercase tracking-widest leading-tight mb-1">Riddha Security</p>
+                       <p className="text-[10px] font-bold text-slate-500 leading-relaxed italic">Biometric link established with central logistics grid.</p>
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              {/* Decorative Element */}
-              <div className="absolute -top-12 -right-12 w-40 h-40 bg-soft-oatmeal/10 rounded-full blur-3xl group-hover:bg-warm-sand/5 transition-colors duration-700" />
             </div>
 
             <button 
               onClick={logout}
-              className="w-full flex items-center justify-center gap-3 py-5 rounded-[24px] bg-white border border-soft-oatmeal text-[#001B4E] font-black uppercase tracking-widest text-[10px] hover:bg-[#001B4E]/5 hover:border-[#001B4E]/20 transition-all active:scale-95 shadow-sm"
+              className="w-full flex items-center justify-center gap-4 py-6 rounded-[2.5rem] bg-white border border-slate-100 text-slate-400 font-black uppercase tracking-[0.3em] text-[10px] hover:text-rose-600 hover:border-rose-100 transition-all active:scale-95 shadow-sm"
             >
-              <LuLogOut size={16} />
-              Sign Out Account
+              <LuLogOut size={18} />
+              Terminate Session
             </button>
           </div>
 
-          {/* Details Column */}
-          <div className="lg:col-span-8 space-y-8">
-            <div className="bg-white rounded-[32px] shadow-2xl shadow-soft-oatmeal/40 border border-soft-oatmeal overflow-hidden">
-              <div className="px-10 py-8 border-b border-soft-oatmeal flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-soft-oatmeal/10 rounded-xl flex items-center justify-center text-warm-sand">
-                    <LuFileText size={20} />
+          {/* Details Registry */}
+          <div className="xl:col-span-8 space-y-10">
+            <div className="bg-white rounded-[3.5rem] shadow-sm border border-slate-100 overflow-hidden">
+              <div className="px-12 py-10 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                <div className="flex items-center gap-5">
+                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#D63384] shadow-md">
+                    <LuFileText size={24} />
                   </div>
-                  <h3 className="text-xl font-bold text-deep-espresso tracking-tight">Partner Information</h3>
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase italic">Registry <span className="text-[#D63384]">Information</span></h3>
                 </div>
                 {isEditing && (
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => setIsEditing(false)} 
-                      className="p-3 bg-soft-oatmeal/20 rounded-xl text-warm-sand hover:bg-soft-oatmeal/40 transition-all"
-                    >
-                      <LuX size={20} />
-                    </button>
-                  </div>
+                  <button 
+                    onClick={() => setIsEditing(false)} 
+                    className="p-4 bg-white border border-slate-100 rounded-2xl text-slate-400 hover:text-rose-500 transition-all shadow-sm"
+                  >
+                    <LuX size={24} />
+                  </button>
                 )}
               </div>
 
-              <div className="p-10">
+              <div className="p-12">
                 <AnimatePresence mode="wait">
                   {isEditing ? (
                     <motion.form 
@@ -242,89 +274,89 @@ const Profile = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       onSubmit={handleSave} 
-                      className="space-y-8"
+                      className="space-y-10"
                     >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand ml-1">Full Identity Name</label>
-                          <div className="relative">
-                            <LuUser className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand" size={18} />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Operative Name</label>
+                          <div className="relative group">
+                            <LuUser className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#D63384] transition-colors" size={20} />
                             <input 
                               value={profile.name} 
                               onChange={(e) => setProfile({...profile, name: e.target.value})} 
-                              className="w-full bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white pl-12 pr-6 py-4 rounded-2xl text-sm font-bold text-deep-espresso transition-all"
-                              placeholder="Your full name"
+                              className="w-full bg-slate-50 border-2 border-transparent focus:border-[#D63384]/20 focus:bg-white pl-14 pr-8 py-5 rounded-[1.5rem] text-sm font-black text-slate-900 transition-all outline-none"
+                              placeholder="Full Identity Name"
                             />
                           </div>
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand ml-1">Work Email Address</label>
-                          <div className="relative">
-                            <LuMail className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand font-bold" size={18} />
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Communication Link</label>
+                          <div className="relative group">
+                            <LuMail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#D63384] transition-colors" size={20} />
                             <input 
                               type="email"
                               value={profile.email} 
                               onChange={(e) => setProfile({...profile, email: e.target.value})} 
-                              className="w-full bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white pl-12 pr-6 py-4 rounded-2xl text-sm font-bold text-deep-espresso transition-all"
-                              placeholder="email@example.com"
+                              className="w-full bg-slate-50 border-2 border-transparent focus:border-[#D63384]/20 focus:bg-white pl-14 pr-8 py-5 rounded-[1.5rem] text-sm font-black text-slate-900 transition-all outline-none"
+                              placeholder="operative@riddha.mart"
                             />
                           </div>
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand ml-1">Contact Number</label>
-                          <div className="relative">
-                            <LuPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand" size={18} />
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Direct Contact</label>
+                          <div className="relative group">
+                            <LuPhone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#D63384] transition-colors" size={20} />
                             <input 
                               value={profile.phone} 
                               onChange={(e) => setProfile({...profile, phone: e.target.value})} 
-                              className="w-full bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white pl-12 pr-6 py-4 rounded-2xl text-sm font-bold text-deep-espresso transition-all font-mono"
-                              placeholder="+91-0000000000"
+                              className="w-full bg-slate-50 border-2 border-transparent focus:border-[#D63384]/20 focus:bg-white pl-14 pr-8 py-5 rounded-[1.5rem] text-sm font-black text-slate-900 transition-all outline-none italic"
+                              placeholder="+91-0000-000-000"
                             />
                           </div>
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand ml-1">Vehicle Type</label>
-                          <div className="relative">
-                            <LuTruck className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand" size={18} />
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Deployment Vehicle</label>
+                          <div className="relative group">
+                            <LuTruck className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#D63384] transition-colors" size={20} />
                             <select 
                               value={profile.vehicleType} 
                               onChange={(e) => setProfile({...profile, vehicleType: e.target.value})} 
-                              className="w-full bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white pl-12 pr-6 py-4 rounded-2xl text-sm font-bold text-deep-espresso transition-all appearance-none cursor-pointer"
+                              className="w-full bg-slate-50 border-2 border-transparent focus:border-[#D63384]/20 focus:bg-white pl-14 pr-8 py-5 rounded-[1.5rem] text-sm font-black text-slate-900 transition-all outline-none appearance-none cursor-pointer"
                             >
-                              <option value="Bike">Two Wheeler / Bike</option>
-                              <option value="Van">Delivery Van</option>
-                              <option value="Truck">Logistics Truck</option>
+                              <option value="Bike">Two-Wheeler Matrix</option>
+                              <option value="Van">Delivery Van System</option>
+                              <option value="Truck">Heavy Logistics Truck</option>
                             </select>
                           </div>
                         </div>
-                        <div className="space-y-2 md:col-span-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-warm-sand ml-1">Vehicle Plate Number</label>
-                          <div className="relative">
-                            <LuFileText className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand" size={18} />
+                        <div className="space-y-3 md:col-span-2">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Vehicle Asset ID</label>
+                          <div className="relative group">
+                            <LuFileText className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#D63384] transition-colors" size={20} />
                             <input 
                               value={profile.vehicleNumber} 
                               onChange={(e) => setProfile({...profile, vehicleNumber: e.target.value})} 
-                              className="w-full bg-soft-oatmeal/5 border-2 border-transparent focus:border-warm-sand/20 focus:bg-white pl-12 pr-6 py-4 rounded-2xl text-sm font-bold text-deep-espresso transition-all font-mono"
-                              placeholder="RJ-14-XX-0000"
+                              className="w-full bg-slate-50 border-2 border-transparent focus:border-[#D63384]/20 focus:bg-white pl-14 pr-8 py-5 rounded-[1.5rem] text-sm font-black text-slate-900 transition-all outline-none uppercase italic"
+                              placeholder="RJ-XX-0000-ALPHA"
                             />
                           </div>
                         </div>
                       </div>
                       
-                      <div className="flex gap-4 pt-4">
+                      <div className="flex gap-6 pt-6">
                         <button 
                           disabled={isSaving}
                           type="submit" 
-                          className="flex-1 flex items-center justify-center gap-3 bg-deep-espresso text-white py-5 rounded-[20px] font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-deep-espresso/20 hover:bg-[#001B4E] transition-all active:scale-95 disabled:opacity-50"
+                          className="flex-1 flex items-center justify-center gap-4 bg-[#D63384] text-white py-6 rounded-[2rem] font-black uppercase tracking-[0.3em] text-[10px] shadow-2xl shadow-pink-500/20 hover:bg-[#B6256B] transition-all active:scale-95 disabled:opacity-50"
                         >
-                          {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <LuSave size={18} />}
-                          {isSaving ? 'Processing...' : 'Sync Profile Changes'}
+                          {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <LuSave size={20} />}
+                          Sync Registry Changes
                         </button>
                         <button 
                           disabled={isSaving}
                           type="button" 
                           onClick={() => setIsEditing(false)} 
-                          className="px-10 bg-soft-oatmeal/20 text-warm-sand rounded-[20px] font-black uppercase tracking-widest text-[10px] hover:bg-soft-oatmeal/40 transition-all"
+                          className="px-12 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest text-[10px] hover:bg-black transition-all"
                         >
                           Discard
                         </button>
@@ -335,39 +367,43 @@ const Profile = () => {
                       key="details-view"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="grid grid-cols-1 md:grid-cols-2 gap-12"
+                      className="grid grid-cols-1 md:grid-cols-2 gap-16"
                     >
-                      <div className="space-y-2 group">
-                        <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
-                          <LuUser size={12} /> Full Identity
+                      <div className="space-y-3 group">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                          <LuUser size={14} className="text-[#D63384]" /> Operative Alias
                         </p>
-                        <p className="text-base font-bold text-deep-espresso group-hover:translate-x-1 transition-transform duration-300">{profile.name}</p>
+                        <p className="text-xl font-black text-slate-900 group-hover:translate-x-2 transition-transform duration-500 uppercase italic tracking-tight">{profile.name}</p>
                       </div>
-                      <div className="space-y-2 group">
-                        <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
-                          <LuMail size={12} /> Primary Email
+                      <div className="space-y-3 group">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                          <LuMail size={14} className="text-[#D63384]" /> Core Communication
                         </p>
-                        <p className="text-base font-bold text-deep-espresso group-hover:translate-x-1 transition-transform duration-300 truncate">{profile.email}</p>
+                        <p className="text-xl font-black text-slate-900 group-hover:translate-x-2 transition-transform duration-500 truncate lowercase">{profile.email}</p>
                       </div>
-                      <div className="space-y-2 group">
-                        <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
-                          <LuPhone size={12} /> Business Contact
+                      <div className="space-y-3 group">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                          <LuPhone size={14} className="text-[#D63384]" /> Mission Contact
                         </p>
-                        <p className="text-base font-bold text-deep-espresso group-hover:translate-x-1 transition-transform duration-300 font-mono italic">{profile.phone || 'Not provided'}</p>
+                        <p className="text-xl font-black text-slate-900 group-hover:translate-x-2 transition-transform duration-500 italic tracking-tighter">{profile.phone || 'Registry Missing'}</p>
                       </div>
-                      <div className="space-y-2 group">
-                        <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
-                          <LuTruck size={12} /> Registered Vehicle
+                      <div className="space-y-3 group">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                          <LuTruck size={14} className="text-[#D63384]" /> Deployment Asset
                         </p>
-                        <p className="text-base font-bold text-deep-espresso group-hover:translate-x-1 transition-transform duration-300">{profile.vehicleType} • <span className="font-mono text-warm-sand">{profile.vehicleNumber || 'Pending'}</span></p>
+                        <p className="text-xl font-black text-slate-900 group-hover:translate-x-2 transition-transform duration-500">
+                          {profile.vehicleType} <span className="text-slate-300 font-normal mx-2">/</span> <span className="text-[#D63384] italic uppercase">{profile.vehicleNumber || 'Pending ID'}</span>
+                        </p>
                       </div>
-                      <div className="space-y-2 group md:col-span-2">
-                        <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
-                          <LuMapPin size={12} /> Operational Zone
+                      <div className="space-y-4 group md:col-span-2 p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                          <LuMapPin size={14} className="text-[#D63384]" /> Strategic Deployment Sector
                         </p>
-                        <div className="flex items-center gap-3">
-                          <p className="text-base font-bold text-deep-espresso">Regional Central Logistics (West Zone)</p>
-                          <span className="px-3 py-1 bg-soft-oatmeal/20 rounded-full text-[9px] font-black text-warm-sand uppercase tracking-widest">Global HQ</span>
+                        <div className="flex items-center justify-between">
+                           <p className="text-xl font-black text-slate-900 uppercase italic">Central Logistics Grid <span className="text-[#D63384]">Delta-9</span></p>
+                           <button className="p-3 bg-white rounded-xl text-slate-400 hover:text-[#D63384] transition-all shadow-sm">
+                              <LuExternalLink size={20} />
+                           </button>
                         </div>
                       </div>
                     </motion.div>
@@ -376,27 +412,49 @@ const Profile = () => {
               </div>
             </div>
 
-            <div className="bg-warm-sand/5 border border-soft-oatmeal rounded-[32px] p-10 space-y-8">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-5">
-                  <div className="w-12 h-12 bg-warm-sand text-white rounded-2xl flex items-center justify-center shadow-lg shadow-warm-sand/20">
-                    <LuShieldCheck size={24} />
+            {/* Compliance Matrix */}
+            <div className="bg-[#111827] rounded-[3.5rem] p-12 space-y-10 border border-white/5 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#D63384]/5 rounded-full blur-[100px] -mr-32 -mt-32"></div>
+              
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-center gap-6">
+                  <div className="w-14 h-14 bg-[#D63384] text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-pink-500/40">
+                    <LuShieldCheck size={28} />
                   </div>
                   <div>
-                    <h4 className="font-bold text-xl text-deep-espresso tracking-tight">Compliance & Documents</h4>
-                    <p className="text-xs font-medium text-dusty-cocoa uppercase tracking-widest mt-1">Verified Logistics Status</p>
+                    <h4 className="font-black text-2xl text-white tracking-tight uppercase italic">Compliance <span className="text-[#D63384]">Matrix</span></h4>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Verified Asset Registry</p>
                   </div>
+                </div>
+                <div className="hidden md:block">
+                   <div className="flex -space-x-4">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="w-10 h-10 rounded-full border-4 border-[#111827] bg-slate-800 flex items-center justify-center text-[10px] font-black text-white">
+                           {i + 1}
+                        </div>
+                      ))}
+                   </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {['Identity Proof', 'Drivers License', 'RC (Registration)', 'Business Insurance'].map((doc) => (
-                  <div key={doc} className="flex items-center justify-between p-4 bg-white border border-soft-oatmeal rounded-2xl shadow-sm hover:shadow-md transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-[#001B4E] animate-pulse" />
-                      <span className="text-[10px] font-black text-deep-espresso uppercase tracking-widest">{doc}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                {[
+                  { label: 'Identity Proof', icon: LuUser },
+                  { label: 'Drivers License', icon: LuFileText },
+                  { label: 'RC Registration', icon: LuTruck },
+                  { label: 'Business Insurance', icon: LuShieldCheck }
+                ].map((doc) => (
+                  <div key={doc.label} className="group flex items-center justify-between p-6 bg-white/5 border border-white/5 rounded-3xl hover:bg-white/[0.08] transition-all cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-[#D63384] transition-colors">
+                        <doc.icon size={20} />
+                      </div>
+                      <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{doc.label}</span>
                     </div>
-                    <span className="text-[8px] font-black text-[#001B4E] bg-[#001B4E]/5 px-2.5 py-1 rounded-full uppercase tracking-widest">Verified</span>
+                    <div className="flex items-center gap-2">
+                       <LuVerified className="text-emerald-500" size={16} />
+                       <LuChevronRight className="text-slate-600 group-hover:text-white transition-colors" size={14} />
+                    </div>
                   </div>
                 ))}
               </div>

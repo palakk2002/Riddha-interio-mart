@@ -179,26 +179,16 @@
 .seller-theme h2,
 .seller-theme h3,
 .seller-theme h4 {
-  font-family: 'Inter', sans-serif !important;
-  color: var(--color-text-primary) !important;
-  font-weight: 700 !important;
-}
-
-.seller-theme p {
-  color: var(--color-text-secondary);
-}
-
-.seller-theme h1,
-.seller-theme h2,
-.seller-theme h3,
-.seller-theme h4 {
   font-family: var(--font-display) !important;
   font-weight: 800 !important;
   text-transform: none !important;
   font-style: normal !important;
   letter-spacing: -0.02em !important;
   line-height: 1.1 !important;
-  color: var(--color-deep-espresso) !important;
+}
+
+.seller-theme p {
+  @apply text-slate-500;
 }
 
 .seller-theme h1 span,

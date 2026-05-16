@@ -167,7 +167,7 @@ const Orders = () => {
               <Calendar size={12} />
               Range
             </button>
-            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10">
+            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-seller-primary text-white px-5 py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20">
               <Download size={12} />
               Export
             </button>
@@ -262,7 +262,7 @@ const Orders = () => {
                             {order.status === 'Processing' && (
                               <button
                                 onClick={() => handleAssignInit(order)}
-                                className="p-2 bg-slate-900 text-white rounded-lg hover:bg-black transition-all shadow-lg shadow-slate-900/10"
+                                className="p-2 bg-seller-primary text-white rounded-lg hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20"
                               >
                                 <Truck size={14} />
                               </button>
@@ -321,7 +321,7 @@ const Orders = () => {
                       onClick={() => handleAssignProcess(boy._id)}
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white relative border-2 border-white shadow-sm">
+                        <div className="w-12 h-12 rounded-2xl bg-seller-primary flex items-center justify-center text-white relative border-2 border-white shadow-sm">
                           <User size={20} />
                           <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white" />
                         </div>

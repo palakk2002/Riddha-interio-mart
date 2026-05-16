@@ -78,7 +78,7 @@ const Notifications = () => {
                 setSoundEnabled(next);
               }}
               className={`p-3 rounded-xl transition-all shadow-sm border ${sound
-                  ? 'bg-slate-900 text-white border-slate-900'
+                  ? 'bg-seller-primary text-white hover:bg-seller-dark shadow-seller-primary/20'
                   : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'
                 }`}
               title={sound ? 'Disable Sound' : 'Enable Sound'}
@@ -230,7 +230,7 @@ const Notifications = () => {
                           navigate(selectedNotification.link);
                           setSelectedNotification(null);
                         }}
-                        className="px-8 py-3.5 rounded-2xl bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-seller-primary transition-all shadow-lg shadow-slate-900/10 flex items-center gap-2"
+                        className="px-8 py-3.5 rounded-2xl bg-seller-primary text-white text-xs font-bold uppercase tracking-widest hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20 flex items-center gap-2"
                       >
                         Action <ChevronRight size={16} />
                       </button>

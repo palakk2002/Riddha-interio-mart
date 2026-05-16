@@ -146,14 +146,14 @@ const Dashboard = () => {
                 <button
                   key={range}
                   onClick={() => setTimeRange(range)}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${timeRange === range ? 'bg-seller-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${timeRange === range ? 'bg-seller-primary text-white shadow-md' : 'text-slate-400 hover:text-seller-primary'}`}
                 >
                   {range}
                 </button>
               ))}
             </div>
             
-            <button className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:bg-slate-50 transition-colors shadow-sm">
+            <button className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-seller-primary transition-colors shadow-sm">
               <Filter size={16} />
             </button>
             
@@ -397,7 +397,7 @@ const Dashboard = () => {
             <div className="p-6 border-t border-slate-100 bg-slate-50/50">
               <button 
                 onClick={() => navigate('/seller/product/stock')}
-                className="w-full py-4 rounded-2xl bg-slate-900 text-white font-bold text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10"
+                className="w-full py-4 rounded-2xl bg-seller-primary text-white font-bold text-xs uppercase tracking-widest hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20"
               >
                 Manage Inventory
               </button>

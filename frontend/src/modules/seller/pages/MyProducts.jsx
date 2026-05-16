@@ -331,7 +331,7 @@ const MyProducts = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+                className="absolute inset-0 bg-slate-950/60 backdrop-blur-md"
                 onClick={() => setShowEditModal(false)}
               />
               <motion.div 

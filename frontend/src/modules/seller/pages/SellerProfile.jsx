@@ -30,6 +30,7 @@ import {
   HelpCircle,
   FileText
 } from 'lucide-react';
+import sellerBanner from '../../../assets/seller_banner.png';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
@@ -156,11 +157,10 @@ const SellerProfile = () => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200/50 border border-slate-100 relative"
         >
-          {/* Cover Area with Premium Dark Aesthetic */}
-          <div className="h-32 md:h-48 bg-slate-950 relative">
-             <div className="absolute top-0 right-0 w-80 h-80 bg-seller-primary/15 rounded-full blur-[100px] -mr-40 -mt-40"></div>
-             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-15"></div>
-             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent"></div>
+          {/* Cover Area with Premium Banner */}
+          <div className="h-32 md:h-48 relative overflow-hidden">
+             <img src={sellerBanner} className="absolute inset-0 w-full h-full object-cover" alt="Banner" />
+             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent"></div>
           </div>
           
           <div className="px-5 md:px-10 pb-6 md:pb-8 -mt-12 md:-mt-16 relative z-10">
@@ -204,12 +204,12 @@ const SellerProfile = () => {
               </div>
 
               <div className="flex flex-col gap-2 w-full md:w-auto md:pb-1">
-                 <button 
-                   onClick={() => setIsEditing(!isEditing)}
-                   className={`px-8 py-3 rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all border shadow-lg ${isEditing ? 'bg-slate-50 text-slate-500 border-slate-200 shadow-slate-100' : 'bg-slate-900 text-white border-slate-900 hover:bg-black active:scale-95'}`}
-                 >
-                   {isEditing ? 'Discard' : 'Manage Profile'}
-                 </button>
+                  <button 
+                    onClick={() => setIsEditing(!isEditing)}
+                    className={`px-8 py-3 rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all border shadow-lg ${isEditing ? 'bg-slate-50 text-slate-500 border-slate-200 shadow-slate-100' : 'bg-seller-primary text-white border-seller-primary hover:bg-seller-dark active:scale-95'}`}
+                  >
+                    {isEditing ? 'Discard' : 'Manage Profile'}
+                  </button>
                  <p className="text-[8px] md:text-[9px] font-black text-slate-400 text-center md:text-right uppercase tracking-widest opacity-60">
                     <Calendar size={10} className="inline mr-1" /> Member Since {profileData.joinDate}
                  </p>
@@ -303,11 +303,11 @@ const SellerProfile = () => {
                         />
                      </div>
                      <div className="md:col-span-2 pt-2">
-                        <button 
-                           type="submit" 
-                           disabled={isSaving}
-                           className="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-900/10 hover:bg-slate-800 transition-all flex items-center justify-center gap-3"
-                        >
+                         <button 
+                            type="submit" 
+                            disabled={isSaving}
+                            className="w-full py-4 bg-seller-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-seller-primary/20 hover:bg-seller-dark transition-all flex items-center justify-center gap-3"
+                         >
                            {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
                            {isSaving ? 'Processing...' : 'Apply Changes'}
                         </button>
@@ -429,7 +429,7 @@ const SellerProfile = () => {
                
                <button 
                  onClick={() => logout()}
-                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-900 text-white hover:bg-black transition-all font-black text-[9px] uppercase tracking-widest mt-2 shadow-xl shadow-slate-900/10"
+                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-800 text-white hover:bg-slate-700 transition-all font-black text-[9px] uppercase tracking-widest mt-2 shadow-xl shadow-slate-900/10"
                >
                   <LogOut size={14} /> Terminate Session
                </button>

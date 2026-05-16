@@ -226,7 +226,7 @@ const SalesReport = () => {
                  ))}
               </div>
               
-              <button className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-900/10 hover:bg-black transition-all">
+              <button className="w-full py-4 bg-seller-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-seller-primary/20 hover:bg-seller-dark transition-all">
                  View Complete Report
               </button>
            </div>

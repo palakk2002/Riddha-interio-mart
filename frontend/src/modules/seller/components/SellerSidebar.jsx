@@ -97,9 +97,9 @@ const SellerSidebar = ({ isOpen, onClose }) => {
         `}
       >
         {/* Logo Area */}
-        <div className="p-8 pb-4 flex items-center justify-between">
+        <div className="pt-2 px-6 pb-1 flex items-center justify-between">
           <Link to="/seller/dashboard" className="flex items-center group mx-auto lg:mx-0">
-            <div className="h-16 md:h-20 overflow-hidden transition-transform duration-300 group-hover:scale-105">
+            <div className="h-20 md:h-24 overflow-hidden transition-transform duration-300 group-hover:scale-105">
               <img 
                 src={logo} 
                 alt="Riddha Interio Mart" 
@@ -125,7 +125,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
                   <button
                     onClick={() => toggleMenu(item.label)}
                     className={`
-                      w-full flex items-center justify-between p-3 rounded-xl transition-all group
+                      w-full flex items-center justify-between p-2 rounded-xl transition-all group
                       ${isActive ? 'bg-seller-light/50 text-seller-primary' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
                     `}
                   >
@@ -153,7 +153,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
                             to={child.path}
                             onClick={() => { if (window.innerWidth < 1024) onClose(); }}
                             className={({ isActive }) => `
-                              flex items-center gap-3 p-2.5 rounded-lg text-sm font-medium transition-all
+                              flex items-center gap-3 p-2 rounded-lg text-sm font-medium transition-all
                               ${isActive ? 'text-seller-primary bg-seller-light/30' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}
                             `}
                           >
@@ -174,7 +174,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
                 end={item.path === '/seller'}
                 onClick={() => { if (window.innerWidth < 1024) onClose(); }}
                 className={({ isActive }) => `
-                  flex items-center gap-3 p-3 rounded-xl transition-all group
+                  flex items-center gap-3 p-2 rounded-xl transition-all group
                   ${isActive 
                     ? 'bg-seller-primary text-white shadow-lg shadow-seller-primary/20' 
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
