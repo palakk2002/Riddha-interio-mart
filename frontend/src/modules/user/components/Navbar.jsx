@@ -38,18 +38,10 @@ const toTitleCase = (str) => {
   return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
-const NAV_CATEGORIES = [
-  { name: 'Furniture', slug: 'furniture' },
-  { name: 'Lighting', slug: 'lighting' },
-  { name: 'Wall Solutions', slug: 'wall-solutions' },
-  { name: 'Decor', slug: 'decor' },
-  { name: 'Hardware', slug: 'hardware' },
-  { name: 'Flooring', slug: 'flooring' },
-  { name: 'Modular Kitchen', slug: 'modular-kitchen' },
-  { name: 'Bathroom', slug: 'bathroom' },
-  { name: 'Office Furniture', slug: 'office-furniture' },
-  { name: 'Outdoor', slug: 'outdoor' }
-];
+const getCategorySlug = (name) => {
+  if (!name) return '';
+  return name.toLowerCase().replace(/\s+/g, '-');
+};
 
 const SidebarLink = ({ to, icon: Icon, label, onClick }) => (
   <Link
@@ -250,10 +242,10 @@ const Navbar = () => {
               {/* Categories Dropdown */}
               <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover/cat:opacity-100 group-hover/cat:visible transition-all duration-300 z-50">
                 <div className="bg-white shadow-2xl border border-gray-100 rounded-xl py-3 w-64">
-                  {NAV_CATEGORIES.map((cat, i) => (
+                  {categories.map((cat, i) => (
                     <Link
                       key={i}
-                      to={`/category/${cat.slug}`}
+                      to={`/category/${getCategorySlug(cat.name)}`}
                       className="flex items-center gap-3 px-6 py-2.5 hover:bg-gray-50 text-gray-700 hover:text-[#189D91] transition-colors"
                     >
                       <span className="text-sm font-bold tracking-tight">{cat.name}</span>
@@ -268,22 +260,25 @@ const Navbar = () => {
 
             {/* Dynamic Categories */}
             <div className="flex items-center gap-1 overflow-x-auto no-scrollbar scroll-smooth">
-              {NAV_CATEGORIES.map((cat, i) => (
-                <div
-                  key={i}
-                  className="relative h-full flex items-center shrink-0"
-                >
-                  <Link
-                    to={`/category/${cat.slug}`}
-                    className={`text-[13px] font-bold tracking-tight transition-all h-full flex items-center whitespace-nowrap px-3 py-4 ${activeCategory === cat.slug
-                      ? "text-[#189D91]"
-                      : "text-gray-700 hover:text-[#189D91]"
-                      }`}
+              {categories.map((cat, i) => {
+                const slug = getCategorySlug(cat.name);
+                return (
+                  <div
+                    key={i}
+                    className="relative h-full flex items-center shrink-0"
                   >
-                    {cat.name}
-                  </Link>
-                </div>
-              ))}
+                    <Link
+                      to={`/category/${slug}`}
+                      className={`text-[13px] font-bold tracking-tight transition-all h-full flex items-center whitespace-nowrap px-3 py-4 ${activeCategory === slug
+                        ? "text-[#189D91]"
+                        : "text-gray-700 hover:text-[#189D91]"
+                        }`}
+                    >
+                      {cat.name}
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -427,10 +422,10 @@ const Navbar = () => {
 
                     {/* Dynamic Categories in Mobile Sidebar */}
                     <div className="px-4 py-2 grid grid-cols-2 gap-2">
-                      {NAV_CATEGORIES.map((cat, i) => (
+                      {categories.map((cat, i) => (
                         <Link
                           key={i}
-                          to={`/category/${cat.slug}`}
+                          to={`/category/${getCategorySlug(cat.name)}`}
                           onClick={closeMobile}
                           className="px-3 py-2.5 bg-gray-50 rounded-lg text-[10px] font-bold text-gray-600 hover:text-[#189D91] hover:bg-[#189D91]/5 transition-all text-center flex items-center justify-center"
                         >
