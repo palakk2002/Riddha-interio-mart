@@ -106,3 +106,51 @@ exports.getSellerStockStatus = async (req, res, next) => {
     next(err);
   }
 };
+// @desc    Get seller's customers (Unique users who placed orders)
+// @route   GET /api/auth/seller/customers
+// @access  Private/Seller
+exports.getSellerCustomers = async (req, res, next) => {
+  try {
+    const Order = require('../models/Order');
+    const User = require('../models/User');
+
+    // Get all orders for this seller
+    const orders = await Order.find({ seller: req.user.id }).populate('user', 'fullName email phone avatar createdAt');
+    
+    // Extract unique users
+    const userMap = new Map();
+    orders.forEach(order => {
+      if (order.user && !userMap.has(order.user._id.toString())) {
+        const u = order.user;
+        userMap.set(u._id.toString(), {
+          _id: u._id,
+          fullName: u.fullName,
+          email: u.email,
+          phone: u.phone,
+          avatar: u.avatar,
+          totalOrders: 1,
+          totalSpent: order.totalPrice,
+          lastOrderDate: order.createdAt,
+          memberSince: u.createdAt
+        });
+      } else if (order.user) {
+        const existing = userMap.get(order.user._id.toString());
+        existing.totalOrders += 1;
+        existing.totalSpent += order.totalPrice;
+        if (new Date(order.createdAt) > new Date(existing.lastOrderDate)) {
+          existing.lastOrderDate = order.createdAt;
+        }
+      }
+    });
+
+    const customers = Array.from(userMap.values());
+
+    res.status(200).json({
+      success: true,
+      count: customers.length,
+      data: customers
+    });
+  } catch (err) {
+    next(err);
+  }
+};

@@ -110,30 +110,30 @@ const Wallet = () => {
         {/* Financial KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Main Balance Card - Premium Gradient */}
-          <div className="md:col-span-1 bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-900/20 group">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-seller-primary/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-seller-primary/30 transition-colors"></div>
+          <div className="md:col-span-1 bg-gradient-to-br from-[#FF9A9E] via-[#F67062] to-[#FF8FA3] rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-rose-200/50 group">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-white/30 transition-colors"></div>
              <div className="relative z-10 flex flex-col h-full justify-between">
                 <div className="flex items-center justify-between mb-8">
-                   <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center">
-                      <WalletIcon size={24} />
+                   <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
+                      <WalletIcon size={24} className="text-white" />
                    </div>
                    <div className="flex flex-col items-end">
-                      <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Wallet Status</span>
-                      <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1">
-                         <div className="w-1 h-1 rounded-full bg-emerald-400"></div> Verified
+                      <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Wallet Status</span>
+                      <span className="text-[11px] font-black text-white flex items-center gap-1">
+                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse"></div> Active
                       </span>
                    </div>
                 </div>
                 <div>
-                   <p className="text-sm font-medium text-white/60 mb-1">Available Balance</p>
-                   <h2 className="text-4xl font-bold tracking-tight">₹{balance.toLocaleString()}</h2>
+                   <p className="text-xs font-black text-white/60 uppercase tracking-widest mb-1.5">Available Balance</p>
+                   <h2 className="text-4xl font-black tracking-tight text-white">₹{balance.toLocaleString()}</h2>
                 </div>
-                <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between">
+                <div className="mt-8 pt-8 border-t border-white/10 flex items-center justify-between">
                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Next Payout</span>
-                      <span className="text-xs font-bold text-white/80 mt-0.5">Apr 20, 2024</span>
+                      <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Next Payout</span>
+                      <span className="text-xs font-black text-white/90 mt-0.5">Apr 20, 2024</span>
                    </div>
-                   <button className="text-xs font-bold text-seller-primary hover:text-white transition-colors flex items-center gap-1">
+                   <button className="text-xs font-black text-white bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm hover:bg-white/30 transition-colors flex items-center gap-1">
                       Details <ChevronRight size={14} />
                    </button>
                 </div>
@@ -267,7 +267,7 @@ const Wallet = () => {
                   </button>
                 </div>
 
-                <div className="bg-slate-900 rounded-[2rem] p-6 mb-8 text-white relative overflow-hidden">
+                <div className="bg-gradient-to-br from-[#E36666] via-[#D64F4F] to-[#B93E3E] rounded-[2rem] p-6 mb-8 text-white relative overflow-hidden">
                    <div className="absolute top-0 right-0 w-20 h-20 bg-seller-primary/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
                    <div className="relative z-10 flex items-center justify-between">
                       <div>

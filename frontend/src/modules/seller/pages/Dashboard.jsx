@@ -15,7 +15,10 @@ import {
   MoreVertical,
   Layers,
   ArrowRight,
-  ShoppingCart
+  ShoppingCart,
+  Plus,
+  ShoppingBag,
+  Users
 } from 'lucide-react';
 import api from '../../../shared/utils/api';
 import { useNavigate } from 'react-router-dom';
@@ -86,41 +89,83 @@ const Dashboard = () => {
 
   return (
     <PageWrapper>
-      <div className="max-w-7xl mx-auto space-y-8 pb-10">
+      <div className="max-w-7xl mx-auto space-y-6 pb-10">
         
+        {/* Mobile Quick Command Center (Visible only on mobile) */}
+        <div className="lg:hidden space-y-4">
+           {/* Strategic Health Check */}
+           <div className="bg-gradient-to-br from-[#E36666] via-[#D64F4F] to-[#B93E3E] rounded-[2rem] p-5 text-white relative overflow-hidden shadow-xl shadow-seller-primary/20">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+              <div className="relative z-10 flex items-center justify-between">
+                 <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                       <CheckCircle2 size={14} className="text-white" />
+                       <span className="text-[9px] font-black uppercase tracking-[0.2em]">Operational Health</span>
+                    </div>
+                    <h3 className="text-lg font-black tracking-tight">Your store is 94% optimized</h3>
+                    <p className="text-[9px] text-white/70 font-bold uppercase tracking-widest">Deploy 3 more listings to reach Elite Tier</p>
+                 </div>
+                 <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
+                    <TrendingUp size={18} />
+                 </div>
+              </div>
+           </div>
+
+           {/* Quick Actions Grid */}
+           <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: 'Add', icon: Plus, path: '/seller/add-product', color: 'bg-emerald-50 text-emerald-600' },
+                { label: 'Orders', icon: ShoppingBag, path: '/seller/orders', color: 'bg-blue-50 text-blue-600' },
+                { label: 'Payout', icon: Wallet, path: '/seller/wallet', color: 'bg-amber-50 text-amber-600' },
+                { label: 'Network', icon: Users, path: '/seller/customers', color: 'bg-indigo-50 text-indigo-600' },
+              ].map((action, i) => (
+                <button 
+                  key={i} 
+                  onClick={() => navigate(action.path)}
+                  className="flex flex-col items-center gap-1.5"
+                >
+                   <div className={`w-12 h-12 rounded-xl ${action.color} flex items-center justify-center shadow-sm active:scale-90 transition-all`}>
+                      <action.icon size={20} />
+                   </div>
+                   <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{action.label}</span>
+                </button>
+              ))}
+           </div>
+        </div>
+
         {/* Dashboard Hero Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Merchant Intelligence</h1>
-            <p className="text-sm font-medium text-slate-500">Real-time business performance monitoring</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-0.5">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Merchant Intelligence</h1>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest opacity-60">Real-time business monitoring</p>
           </div>
           
-          <div className="flex items-center gap-3">
-            <div className="bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm flex">
+          <div className="flex items-center gap-2">
+            <div className="bg-white p-1 rounded-xl border border-slate-200 shadow-sm flex">
               {['daily', 'weekly', 'monthly'].map((range) => (
                 <button
                   key={range}
                   onClick={() => setTimeRange(range)}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold capitalize transition-all ${timeRange === range ? 'bg-seller-primary text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${timeRange === range ? 'bg-seller-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`}
                 >
                   {range}
                 </button>
               ))}
             </div>
             
-            <button className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">
-              <Filter size={18} />
+            <button className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:bg-slate-50 transition-colors shadow-sm">
+              <Filter size={16} />
             </button>
             
-            <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-emerald-50 border border-emerald-100 rounded-xl">
-               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-               <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Operational</span>
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-xl">
+               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+               <span className="text-[9px] font-black text-emerald-700 uppercase tracking-widest">Operational</span>
             </div>
           </div>
         </div>
 
         {/* Analytics Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard 
             label="Total Revenue" 
             value={`₹${stats.totalRevenue.toLocaleString()}`} 

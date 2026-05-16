@@ -7,7 +7,7 @@ import { FaGoogle, FaFacebookF, FaXTwitter } from 'react-icons/fa6';
 import Button from '../../../shared/components/Button';
 import LOGIN_BG from '../../../assets/login_bg_fretshop.png';
 import api from '../../../shared/utils/api';
-import logo from '../../../assets/transparent logo.png';
+import logo from '../../../assets/transparent_logo.png';
 
 const LoginPage = () => {
   const [identifier, setIdentifier] = useState('');

@@ -261,14 +261,14 @@ const AddProduct = () => {
 
                 <Link 
                   to="/seller/catalog"
-                  className="group relative bg-slate-900 border border-slate-800 p-10 rounded-[2.5rem] shadow-sm hover:shadow-2xl hover:border-seller-primary/30 transition-all duration-500 flex flex-col items-center text-center space-y-6"
+                  className="group relative bg-white border border-slate-200 p-10 rounded-[2.5rem] shadow-sm hover:shadow-2xl hover:border-seller-primary/30 transition-all duration-500 flex flex-col items-center text-center space-y-6"
                 >
-                  <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center text-white/40 group-hover:bg-seller-primary group-hover:text-white transition-all duration-500">
+                  <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-400 group-hover:bg-seller-primary group-hover:text-white transition-all duration-500 shadow-sm">
                     <Database size={36} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white">Catalog Import</h3>
-                    <p className="text-white/40 text-sm font-medium mt-3 leading-relaxed">Map your stock to an existing master catalog item. Instant approval and listing.</p>
+                    <h3 className="text-2xl font-bold text-slate-900">Select From Catalog</h3>
+                    <p className="text-slate-500 text-sm font-medium mt-3 leading-relaxed">Map your stock to an existing master catalog item. Instant approval and listing.</p>
                   </div>
                   <div className="pt-4 flex items-center gap-2 text-xs font-bold text-seller-primary uppercase tracking-widest">
                     Browse Master <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />

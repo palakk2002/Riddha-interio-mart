@@ -31,7 +31,7 @@ import { getDeliveryEstimate } from '../../../shared/utils/delivery';
 import BulkOrderModal from "./BulkOrderModal";
 import NotificationDropdown from "../../../shared/components/NotificationDropdown";
 import Logo from "../../../assets/WhatsApp Image 2026-05-06 at 3.50.08 PM.jpeg";
-import TransparentLogo from "../../../assets/transparent logo.png";
+import TransparentLogo from "../../../assets/transparent_logo.png";
 
 const toTitleCase = (str) => {
   if (!str) return '';

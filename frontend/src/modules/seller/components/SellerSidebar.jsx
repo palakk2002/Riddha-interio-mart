@@ -23,7 +23,7 @@ import {
   Truck
 } from 'lucide-react';
 import { useUser } from '../../user/data/UserContext';
-import logo from '../../../assets/transparent logo.png';
+import logo from '../../../assets/transparent_logo.png';
 
 const menuItems = [
   { path: '/seller/dashboard', icon: LayoutDashboard, label: 'Dashboard' },

@@ -147,28 +147,32 @@ const OrderDetail = () => {
               {/* Order Stepper */}
               <div className="pt-12 pb-16">
                 <div className="relative">
-                  {/* Progress Line */}
-                  <div className="absolute top-5 left-0 w-full h-1 bg-slate-100 -z-0">
+                  {/* Progress Line - Desktop: Horizontal, Mobile: Vertical */}
+                  <div className="absolute top-5 left-5 md:left-0 md:w-full w-1 h-[calc(100%-20px)] md:h-1 bg-slate-100 -z-0">
                     <div 
-                      className="h-full bg-seller-primary transition-all duration-1000 ease-out" 
+                      className="hidden md:block h-full bg-seller-primary transition-all duration-1000 ease-out" 
                       style={{ width: `${(currentStepIdx / (steps.length - 1)) * 100}%` }}
+                    />
+                    <div 
+                      className="md:hidden w-full bg-seller-primary transition-all duration-1000 ease-out" 
+                      style={{ height: `${(currentStepIdx / (steps.length - 1)) * 100}%` }}
                     />
                   </div>
 
                   {/* Steps */}
-                  <div className="flex justify-between relative z-10">
+                  <div className="flex flex-col md:flex-row justify-between relative z-10 gap-8 md:gap-0">
                     {steps.map((step, idx) => {
                       const isActive = idx <= currentStepIdx;
                       const StepIcon = step.icon;
                       
                       return (
-                        <div key={idx} className="flex flex-col items-center gap-3">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 border-4 border-white shadow-md ${
+                        <div key={idx} className="flex md:flex-col items-center gap-4 md:gap-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 border-4 border-white shadow-md shrink-0 ${
                             isActive ? 'bg-seller-primary text-white scale-110' : 'bg-white text-slate-300'
                           }`}>
                             <StepIcon size={18} />
                           </div>
-                          <div className="text-center">
+                          <div className="text-left md:text-center">
                             <p className={`text-[10px] font-black uppercase tracking-widest ${isActive ? 'text-slate-900' : 'text-slate-400'}`}>
                               {step.label}
                             </p>

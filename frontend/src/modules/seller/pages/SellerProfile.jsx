@@ -19,7 +19,16 @@ import {
   Calendar,
   ChevronRight,
   Store,
-  Briefcase
+  Briefcase,
+  BarChart3,
+  Globe,
+  Award,
+  Zap,
+  Lock,
+  RefreshCw,
+  Bell,
+  HelpCircle,
+  FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../user/data/UserContext';
@@ -139,80 +148,81 @@ const SellerProfile = () => {
 
   return (
     <PageWrapper>
-      <div className="max-w-6xl mx-auto space-y-10 pb-20">
+      <div className="max-w-6xl mx-auto space-y-8 pb-20 px-4 md:px-0">
         
-        {/* Profile Header Card */}
+        {/* Profile Header Card - High Density Enterprise */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-200 relative"
+          className="bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200/50 border border-slate-100 relative"
         >
-          {/* Cover Area */}
-          <div className="h-40 bg-slate-900 relative">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-seller-primary/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
-             <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-transparent opacity-60"></div>
+          {/* Cover Area with Premium Dark Aesthetic */}
+          <div className="h-32 md:h-48 bg-slate-950 relative">
+             <div className="absolute top-0 right-0 w-80 h-80 bg-seller-primary/15 rounded-full blur-[100px] -mr-40 -mt-40"></div>
+             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-15"></div>
+             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent"></div>
           </div>
           
-          <div className="px-10 pb-10 -mt-16 relative z-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-              <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
-                <div className="relative group">
-                  <div className="h-40 w-40 rounded-[2.5rem] bg-white p-2 shadow-xl ring-4 ring-white/10 group-hover:ring-seller-primary/20 transition-all duration-500">
-                    <div className="h-full w-full rounded-[2rem] overflow-hidden bg-slate-100 flex items-center justify-center relative">
+          <div className="px-5 md:px-10 pb-6 md:pb-8 -mt-12 md:-mt-16 relative z-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6">
+                <div className="relative">
+                  <div className="h-28 w-28 md:h-40 md:w-40 rounded-[2rem] md:rounded-[2.5rem] bg-white p-1.5 shadow-2xl ring-4 ring-white">
+                    <div className="h-full w-full rounded-[1.6rem] md:rounded-[2.1rem] overflow-hidden bg-slate-50 flex items-center justify-center relative">
                       {profileData.avatar ? (
-                        <img src={profileData.avatar} alt="Shop Avatar" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        <img src={profileData.avatar} alt="Shop Avatar" className="w-full h-full object-cover" />
                       ) : (
-                        <Store size={48} className="text-slate-300" />
-                      )}
-                      {isSaving && (
-                        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
-                          <div className="w-6 h-6 border-2 border-seller-light border-t-seller-primary rounded-full animate-spin" />
-                        </div>
+                        <Store size={40} className="text-slate-200" />
                       )}
                     </div>
                   </div>
-                  <label className="absolute bottom-2 right-2 h-10 w-10 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer hover:bg-seller-primary hover:scale-110 transition-all duration-300">
-                    <Camera size={18} />
+                  <label className="absolute -bottom-1 -right-1 h-9 w-9 bg-seller-primary text-white rounded-xl flex items-center justify-center shadow-xl cursor-pointer hover:scale-110 transition-all z-20 border-2 border-white">
+                    <Camera size={14} />
                     <input type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
                   </label>
                 </div>
 
-                <div className="text-center md:text-left space-y-2 pb-2">
-                  <div className="flex items-center justify-center md:justify-start gap-2">
-                    <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${profileData.tier === 'Premium Seller' ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}`}>
+                <div className="text-center md:text-left space-y-0.5 md:space-y-1 pb-1 flex-1">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-1">
+                    <span className="px-2.5 py-0.5 bg-seller-primary/10 text-seller-primary text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-lg border border-seller-primary/10">
                       {profileData.tier}
                     </span>
-                    <span className="flex items-center gap-1.5 px-3 py-1 bg-seller-light/30 text-seller-primary text-[10px] font-bold uppercase tracking-wider rounded-lg border border-seller-primary/10">
-                      <Star size={12} className="fill-current" /> {profileData.rating} Rating
+                    <span className="flex items-center gap-1 px-2.5 py-0.5 bg-slate-900 text-white text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-lg">
+                      <CheckCircle2 size={10} /> Verified
                     </span>
                   </div>
-                  <h1 className="text-4xl font-bold text-slate-900 tracking-tight">{profileData.shopName}</h1>
-                  <p className="text-slate-500 font-medium flex items-center justify-center md:justify-start gap-2">
-                    <User size={16} className="text-slate-400" /> {profileData.fullName}
-                  </p>
+                  <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter leading-none">{profileData.shopName}</h1>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 text-slate-400 font-bold text-[9px] md:text-[10px] uppercase tracking-widest">
+                    <p className="flex items-center gap-1.5">
+                       <User size={12} className="text-seller-primary" /> {profileData.fullName}
+                    </p>
+                    <p className="flex items-center gap-1.5">
+                       <MapPin size={12} className="text-seller-primary" /> {profileData.shopAddress.split(',')[0] || 'Warehouse'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 w-full md:w-auto">
+              <div className="flex flex-col gap-2 w-full md:w-auto md:pb-1">
                  <button 
                    onClick={() => setIsEditing(!isEditing)}
-                   className={`px-8 py-4 rounded-2xl font-bold text-sm transition-all border ${isEditing ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-seller-primary text-white border-seller-primary shadow-lg shadow-seller-primary/20 hover:bg-seller-dark'}`}
+                   className={`px-8 py-3 rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all border shadow-lg ${isEditing ? 'bg-slate-50 text-slate-500 border-slate-200 shadow-slate-100' : 'bg-slate-900 text-white border-slate-900 hover:bg-black active:scale-95'}`}
                  >
-                   {isEditing ? 'Cancel Editing' : 'Edit Profile'}
+                   {isEditing ? 'Discard' : 'Manage Profile'}
                  </button>
-                 <div className="flex items-center justify-center md:justify-end gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    <Calendar size={12} /> Joined {profileData.joinDate}
-                 </div>
+                 <p className="text-[8px] md:text-[9px] font-black text-slate-400 text-center md:text-right uppercase tracking-widest opacity-60">
+                    <Calendar size={10} className="inline mr-1" /> Member Since {profileData.joinDate}
+                 </p>
               </div>
             </div>
           </div>
         </motion.div>
 
         {/* Content Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           
           {/* Main Info / Form */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6 md:space-y-8">
             <AnimatePresence mode="wait">
               {isEditing ? (
                 <motion.div 
@@ -220,86 +230,86 @@ const SellerProfile = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-8"
+                  className="bg-white p-6 md:p-10 rounded-[2rem] border border-slate-200 shadow-sm space-y-8"
                 >
                   <div className="flex items-center gap-3 pb-2 border-b border-slate-50">
                      <div className="w-10 h-10 bg-seller-light/40 rounded-xl flex items-center justify-center text-seller-primary">
                         <Pencil size={20} />
                      </div>
-                     <h3 className="text-xl font-bold text-slate-900 tracking-tight">Personal & Business Info</h3>
+                     <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight">Personal & Business Info</h3>
                   </div>
                   
-                  <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Shop Name</label>
+                  <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">Shop Name</label>
                         <input 
                            type="text" 
                            value={profileData.shopName}
                            onChange={(e) => setProfileData({...profileData, shopName: e.target.value})}
-                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
                         />
                      </div>
-                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Owner's Full Name</label>
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">Full Name</label>
                         <input 
                            type="text" 
                            value={profileData.fullName}
                            onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
-                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
                         />
                      </div>
-                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Email Address</label>
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">Email Address</label>
                         <input 
                            type="email" 
                            value={profileData.email}
                            onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
                         />
                      </div>
-                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Phone Number</label>
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">Phone Number</label>
                         <input 
                            type="tel" 
                            value={profileData.phone}
                            onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
                         />
                      </div>
-                     <div className="space-y-2 md:col-span-2">
-                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Store Address</label>
+                     <div className="space-y-1.5 md:col-span-2">
+                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">Store Address</label>
                         <textarea 
                            value={profileData.shopAddress}
                            onChange={(e) => setProfileData({...profileData, shopAddress: e.target.value})}
-                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none h-32 resize-none"
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none h-28 resize-none"
                         />
                      </div>
-                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">GSTIN Number</label>
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">GSTIN Number</label>
                         <input 
                            type="text" 
                            value={profileData.gstNumber}
                            onChange={(e) => setProfileData({...profileData, gstNumber: e.target.value})}
-                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
                         />
                      </div>
-                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">PAN Card Number</label>
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider ml-1">PAN Card Number</label>
                         <input 
                            type="text" 
                            value={profileData.panNumber}
                            onChange={(e) => setProfileData({...profileData, panNumber: e.target.value})}
-                           className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
                         />
                      </div>
-                     <div className="md:col-span-2 pt-4">
+                     <div className="md:col-span-2 pt-2">
                         <button 
                            type="submit" 
                            disabled={isSaving}
-                           className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold text-sm shadow-xl shadow-slate-900/10 hover:bg-slate-800 transition-all flex items-center justify-center gap-3"
+                           className="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-900/10 hover:bg-slate-800 transition-all flex items-center justify-center gap-3"
                         >
-                           {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={20} />}
-                           {isSaving ? 'Saving Changes...' : 'Update Information'}
+                           {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
+                           {isSaving ? 'Processing...' : 'Apply Changes'}
                         </button>
                      </div>
                   </form>
@@ -309,50 +319,74 @@ const SellerProfile = () => {
                   key="view-info"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="space-y-8"
+                  className="space-y-6 md:space-y-8"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                     <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-seller-primary/20 transition-all">
-                        <div className="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-900/10 shrink-0">
-                           <ShoppingBag size={26} />
-                        </div>
-                        <div className="mt-8">
-                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Sales</p>
-                           <h4 className="text-2xl font-bold text-slate-900 tracking-tight">₹1.2M+</h4>
-                        </div>
-                     </div>
-                     <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-seller-primary/20 transition-all">
-                        <div className="w-14 h-14 rounded-2xl bg-seller-primary text-white flex items-center justify-center shadow-lg shadow-seller-primary/20 shrink-0">
-                           <ShieldCheck size={26} />
-                        </div>
-                        <div className="mt-8">
-                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Identity Status</p>
-                           <h4 className="text-2xl font-bold text-slate-900 tracking-tight">Verified</h4>
-                        </div>
+                  {/* Enhanced Stats Row - Dashboard Compact */}
+                  <div className="grid grid-cols-3 gap-3 md:gap-6">
+                     {[
+                       { label: 'Revenue', value: '₹12.4L', icon: <ShoppingBag size={18} />, color: 'text-seller-primary', bg: 'bg-seller-primary/5' },
+                       { label: 'Rating', value: '4.9/5', icon: <Star size={18} />, color: 'text-amber-500', bg: 'bg-amber-50' },
+                       { label: 'Service', value: '98%', icon: <Zap size={18} />, color: 'text-emerald-600', bg: 'bg-emerald-50' }
+                     ].map((stat, i) => (
+                       <div key={i} className="bg-white p-3.5 md:p-6 rounded-[1.5rem] md:rounded-[1.8rem] border border-slate-100 shadow-sm flex flex-col md:flex-row items-center gap-2 md:gap-4 group">
+                          <div className={`w-8 h-8 md:w-11 md:h-11 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center shrink-0`}>
+                             {stat.icon}
+                          </div>
+                          <div className="text-center md:text-left">
+                             <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
+                             <h4 className="text-sm md:text-xl font-black text-slate-900 tracking-tight leading-none">{stat.value}</h4>
+                          </div>
+                       </div>
+                     ))}
+                  </div>
+
+                  {/* Merchant Details Card - High Density */}
+                  <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8 relative overflow-hidden">
+                     <h3 className="text-base md:text-lg font-black text-slate-900 tracking-tight flex items-center gap-3">
+                        <div className="w-1.5 h-5 md:h-6 bg-seller-primary rounded-full" />
+                        Merchant Identification
+                     </h3>
+                     
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 md:gap-y-6 gap-x-8 md:gap-x-10">
+                        {[
+                          { label: 'Registered Email', value: profileData.email, icon: <Mail size={14} /> },
+                          { label: 'Merchant Hotline', value: profileData.phone, icon: <Phone size={14} /> },
+                          { label: 'GST Identification', value: profileData.gstNumber, icon: <CheckCircle2 size={14} /> },
+                          { label: 'Tax Identity (PAN)', value: profileData.panNumber, icon: <CreditCard size={14} /> },
+                          { label: 'Primary Fulfillment Center', value: profileData.shopAddress, icon: <MapPin size={14} />, full: true },
+                        ].map((field, i) => (
+                          <div key={i} className={`${field.full ? 'md:col-span-2' : ''} space-y-1`}>
+                             <div className="flex items-center gap-2 text-slate-400 font-black text-[8px] md:text-[9px] uppercase tracking-widest">
+                                {field.icon} {field.label}
+                             </div>
+                             <p className="text-[12px] md:text-sm font-black text-slate-900 truncate">
+                                {field.value || 'N/A'}
+                             </p>
+                          </div>
+                        ))}
                      </div>
                   </div>
 
-                  <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-10">
-                     <h3 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
-                        <div className="w-1.5 h-6 bg-seller-primary rounded-full" />
-                        Business Profile Details
-                     </h3>
-                     
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
+                  {/* Compliance Section - High Fidelity */}
+                  <div className="bg-slate-50/50 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200/50 space-y-6">
+                     <div className="flex items-center justify-between">
+                        <h3 className="text-[10px] md:text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2">
+                           <Lock size={14} className="text-seller-primary" /> Security & Compliance
+                        </h3>
+                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-600 text-[7px] md:text-[8px] font-black uppercase tracking-widest rounded-md border border-emerald-200/50">Lvl 3 Secure</span>
+                     </div>
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         {[
-                          { label: 'Merchant Email', value: profileData.email, icon: <Mail size={18} /> },
-                          { label: 'Contact Phone', value: profileData.phone, icon: <Phone size={18} /> },
-                          { label: 'Registered GSTIN', value: profileData.gstNumber, icon: <CheckCircle2 size={18} /> },
-                          { label: 'PAN Identity', value: profileData.panNumber, icon: <CreditCard size={18} /> },
-                          { label: 'Primary Warehouse', value: profileData.shopAddress, icon: <MapPin size={18} />, full: true },
-                        ].map((field, i) => (
-                          <div key={i} className={`${field.full ? 'md:col-span-2' : ''} space-y-1.5`}>
-                             <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-wider">
-                                {field.icon} {field.label}
+                          { title: 'Privacy', val: 'E2E Encryption', icon: <ShieldCheck size={14} /> },
+                          { title: 'Tax Flow', val: 'Verified Q1', icon: <FileText size={14} /> },
+                          { title: 'Identity', val: 'KYC Tier 2', icon: <Globe size={14} /> }
+                        ].map((item, i) => (
+                          <div key={i} className="bg-white px-4 py-3.5 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3">
+                             <div className="text-seller-primary opacity-60 shrink-0">{item.icon}</div>
+                             <div>
+                                <p className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">{item.title}</p>
+                                <p className="text-[9px] md:text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">{item.val}</p>
                              </div>
-                             <p className="text-base font-bold text-slate-900 leading-relaxed">
-                                {field.value || 'Not provided'}
-                             </p>
                           </div>
                         ))}
                      </div>
@@ -362,50 +396,59 @@ const SellerProfile = () => {
             </AnimatePresence>
           </div>
 
-          {/* Quick Actions Sidebar */}
-          <div className="space-y-8">
-            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
-               <h3 className="text-lg font-bold text-slate-900 mb-2">Merchant Tools</h3>
-               <div className="space-y-3">
+          {/* Quick Actions Sidebar - Professional Hub */}
+          <div className="space-y-6">
+            <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.2rem] border border-slate-100 shadow-xl shadow-slate-200/20 space-y-6">
+               <div className="space-y-0.5">
+                 <h3 className="text-base md:text-lg font-black text-slate-900 tracking-tight">Merchant Hub</h3>
+                 <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">System Control</p>
+               </div>
+               
+               <div className="grid grid-cols-1 gap-1.5">
                   {[
-                    { label: 'Store Analytics', icon: <BarChart3 size={18} />, path: '/seller/reports/sales' },
-                    { label: 'Wallet & Payouts', icon: <CreditCard size={18} />, path: '/seller/wallet' },
-                    { label: 'Account Settings', icon: <Settings size={18} />, path: '/seller/settings' },
+                    { label: 'Analytics', icon: <BarChart3 size={16} />, path: '/seller/reports/sales', color: 'bg-blue-50 text-blue-600' },
+                    { label: 'Finances', icon: <CreditCard size={16} />, path: '/seller/wallet', color: 'bg-emerald-50 text-emerald-600' },
+                    { label: 'Settings', icon: <Settings size={16} />, path: '/seller/settings', color: 'bg-slate-50 text-slate-600' },
+                    { label: 'System', icon: <Bell size={16} />, path: '/seller/notifications', color: 'bg-rose-50 text-rose-600' },
                   ].map((tool, i) => (
                     <button 
                       key={i}
                       onClick={() => navigate(tool.path)}
-                      className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-all group"
+                      className="flex items-center justify-between p-3 rounded-xl bg-slate-50/50 hover:bg-white border border-transparent hover:border-slate-100 transition-all group"
                     >
-                       <div className="flex items-center gap-4">
-                          <div className="text-slate-400 group-hover:text-seller-primary transition-colors">
+                       <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-lg ${tool.color} flex items-center justify-center transition-transform group-hover:scale-110`}>
                              {tool.icon}
                           </div>
-                          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">{tool.label}</span>
+                          <span className="text-[9px] md:text-[10px] font-black text-slate-700 uppercase tracking-widest">{tool.label}</span>
                        </div>
-                       <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+                       <ChevronRight size={14} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
                     </button>
                   ))}
                </div>
                
                <button 
                  onClick={() => logout()}
-                 className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all font-bold text-xs uppercase tracking-widest mt-4"
+                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-900 text-white hover:bg-black transition-all font-black text-[9px] uppercase tracking-widest mt-2 shadow-xl shadow-slate-900/10"
                >
-                  <LogOut size={18} /> Sign Out
+                  <LogOut size={14} /> Terminate Session
                </button>
             </div>
 
-            <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden group">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-seller-primary/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-seller-primary/40 transition-colors"></div>
-               <div className="relative z-10 space-y-4">
-                  <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-seller-primary">
-                     <ShieldCheck size={26} />
+            <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-[#923333] rounded-[2rem] md:rounded-[2.2rem] p-7 md:p-8 text-white relative overflow-hidden group shadow-2xl border border-white/5">
+               <div className="absolute top-0 right-0 w-40 h-40 bg-seller-primary/30 rounded-full blur-[60px] -mr-20 -mt-20 group-hover:bg-seller-primary/50 transition-all duration-1000"></div>
+               <div className="absolute bottom-0 left-0 w-32 h-32 bg-seller-primary/10 rounded-full blur-[50px] -ml-16 -mb-16"></div>
+               
+               <div className="relative z-10 space-y-5">
+                  <div className="w-11 h-11 bg-seller-primary/20 backdrop-blur-md rounded-xl flex items-center justify-center text-seller-primary border border-seller-primary/30 shadow-inner">
+                     <HelpCircle size={22} />
                   </div>
-                  <h4 className="text-xl font-bold tracking-tight">Need Assistance?</h4>
-                  <p className="text-xs text-white/60 leading-relaxed font-medium">Our merchant support specialists are here to help you grow your business 24/7.</p>
-                  <button className="w-full py-4 bg-seller-primary rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-seller-primary/20 hover:bg-seller-dark transition-all">
-                     Contact Support
+                  <div className="space-y-1">
+                    <h4 className="text-lg font-black tracking-tight leading-none text-white">Support Terminal</h4>
+                    <p className="text-[8px] text-seller-primary/80 leading-relaxed font-black uppercase tracking-[0.2em]">Priority 24/7 Enterprise Access</p>
+                  </div>
+                  <button className="w-full py-3.5 bg-seller-primary text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl shadow-seller-primary/40 hover:bg-seller-dark hover:scale-[1.02] active:scale-95 transition-all border border-seller-primary/30">
+                     Initiate Support Ticket
                   </button>
                </div>
             </div>

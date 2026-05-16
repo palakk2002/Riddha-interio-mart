@@ -7,14 +7,21 @@ import {
   Package, 
   ArrowUpRight, 
   ArrowDownRight, 
-  CreditCard,
   ShoppingBag,
   Download,
   Calendar,
   Filter,
   ArrowRight,
   Activity,
-  ChevronRight
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  MoreVertical,
+  Plus,
+  Database,
+  ArrowUp,
+  FileText,
+  Star
 } from 'lucide-react';
 import PageWrapper from '../components/PageWrapper';
 import { 
@@ -24,183 +31,206 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  Legend
 } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 
 const chartData = [
-  { name: 'Mon', sales: 4000 },
-  { name: 'Tue', sales: 3000 },
-  { name: 'Wed', sales: 2000 },
-  { name: 'Thu', sales: 2780 },
-  { name: 'Fri', sales: 1890 },
-  { name: 'Sat', sales: 2390 },
-  { name: 'Sun', sales: 3490 },
+  { name: 'Mon', sales: 400, revenue: 240, units: 100 },
+  { name: 'Tue', sales: 500, revenue: 300, units: 120 },
+  { name: 'Wed', sales: 1200, revenue: 800, units: 250 },
+  { name: 'Thu', sales: 900, revenue: 600, units: 180 },
+  { name: 'Fri', sales: 1500, revenue: 1100, units: 320 },
+];
+
+const pieData = [
+  { name: 'Sofa', value: 400, color: '#E36666' },
+  { name: 'Tables', value: 300, color: '#9333EA' },
+  { name: 'Lamps', value: 200, color: '#4F46E5' },
+  { name: 'Decor', value: 100, color: '#F59E0B' },
+];
+
+const bestSellers = [
+  { id: 1, name: 'Anticor Dist Table', price: '₹12,500', rating: 4.7, image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=200&auto=format&fit=crop' },
+  { id: 2, name: 'Velvet Soft Chair', price: '₹8,500', rating: 4.9, image: 'https://images.unsplash.com/photo-1592078615290-033ee584e267?q=80&w=200&auto=format&fit=crop' },
 ];
 
 const SalesReport = () => {
-  const [timeRange, setTimeRange] = useState('Weekly');
-
-  const handleExport = () => {
-    window.print();
-  };
-
-  const stats = [
-    { label: 'Net Revenue', value: '₹84,500', trend: '+12.5%', isUp: true, icon: DollarSign, color: 'text-emerald-600 bg-emerald-50' },
-    { label: 'Platform Fees', value: '₹8,450', trend: '-2.1%', isUp: false, icon: CreditCard, color: 'text-slate-600 bg-slate-50' },
-    { label: 'Fulfillment', value: '42 Orders', trend: '+8.4%', isUp: true, icon: Package, color: 'text-blue-600 bg-blue-50' },
-    { label: 'Conversion', value: '3.8%', trend: '+0.4%', isUp: true, icon: TrendingUp, color: 'text-seller-primary bg-seller-light/40' }
-  ];
-
-  const recentTransactions = [
-    { id: '#6541', product: 'Premium Velvet Sofa', amount: '₹42,000', net: '₹37,800', date: '24 Apr', status: 'Settled' },
-    { id: '#6538', product: 'Minimalist Floor Lamp', amount: '₹8,500', net: '₹7,650', date: '22 Apr', status: 'Pending' },
-    { id: '#6535', product: 'Marble Dining Table', amount: '₹65,000', net: '₹58,500', date: '20 Apr', status: 'Settled' }
-  ];
+  const navigate = useNavigate();
+  const [activeMetric, setActiveMetric] = useState('sales');
 
   return (
     <PageWrapper>
-      <div className="max-w-7xl mx-auto space-y-10 pb-20">
+      <div className="max-w-4xl mx-auto pb-20 space-y-6">
         
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-4 md:px-0">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Revenue Analytics</h1>
-            <p className="text-sm font-medium text-slate-500">Performance insights and financial reconciliation</p>
-          </div>
-          <div className="flex items-center gap-3">
-             <button className="p-3 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-                <Calendar size={20} />
-             </button>
-             <button 
-               onClick={handleExport}
-               className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-seller-primary transition-all shadow-lg shadow-slate-900/10"
-             >
-               <Download size={18} /> Export Statements
-             </button>
-          </div>
+        {/* Mobile-Style Header (Same as Img) */}
+        <div className="bg-seller-primary text-white p-6 pb-12 rounded-b-[2.5rem] -mx-4 md:-mx-0 md:rounded-[2.5rem] md:mt-4 shadow-xl shadow-seller-primary/10">
+           <div className="flex items-center justify-between mb-8">
+              <button onClick={() => navigate(-1)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                 <ChevronLeft size={24} />
+              </button>
+              <h1 className="text-xl font-bold tracking-tight">Seller Analytics</h1>
+              <div className="w-10" /> {/* Spacer */}
+           </div>
+           
+           {/* Search / Action Bar */}
+           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 flex items-center justify-between border border-white/20">
+              <div className="flex items-center gap-3">
+                 <FileText size={20} className="text-white/60" />
+                 <span className="text-xs font-bold uppercase tracking-widest text-white/80">Generate data report</span>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                 <Plus size={16} />
+              </div>
+           </div>
         </div>
 
-        {/* KPI Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4 md:px-0">
-          {stats.map((stat, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm group hover:shadow-md transition-all"
-            >
-              <div className={`w-14 h-14 rounded-2xl ${stat.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                <stat.icon size={26} />
+        {/* Analytics Content */}
+        <div className="px-4 md:px-0 -mt-8 space-y-6">
+           
+           {/* Line Chart Section */}
+           <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-2xl shadow-slate-200/50 border border-slate-100 space-y-8">
+              {/* Metric Toggles */}
+              <div className="flex items-center gap-4 overflow-x-auto pb-2 no-scrollbar">
+                 {[
+                   { id: 'sales', label: 'Sales', color: 'bg-seller-primary' },
+                   { id: 'revenue', label: 'Revenue', color: 'bg-purple-600' },
+                   { id: 'units', label: 'Units Sold', color: 'bg-indigo-600' }
+                 ].map(m => (
+                   <button 
+                     key={m.id}
+                     onClick={() => setActiveMetric(m.id)}
+                     className={`flex items-center gap-2 whitespace-nowrap transition-all ${activeMetric === m.id ? 'opacity-100 scale-105' : 'opacity-40 grayscale'}`}
+                   >
+                      <div className={`w-2 h-2 rounded-full ${m.color}`} />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">{m.label}</span>
+                   </button>
+                 ))}
               </div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
-              <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-4">{stat.value}</h3>
-              <div className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest ${stat.isUp ? 'text-emerald-600' : 'text-slate-400'}`}>
-                 {stat.isUp ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />} {stat.trend}
-                 <span className="text-slate-300 ml-1">vs period</span>
+
+              {/* Multi-Line Chart */}
+              <div className="h-64 w-full">
+                 <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                       <defs>
+                          <linearGradient id="colorMain" x1="0" y1="0" x2="0" y2="1">
+                             <stop offset="5%" stopColor={activeMetric === 'sales' ? '#E36666' : activeMetric === 'revenue' ? '#9333EA' : '#4F46E5'} stopOpacity={0.2}/>
+                             <stop offset="95%" stopColor={activeMetric === 'sales' ? '#E36666' : activeMetric === 'revenue' ? '#9333EA' : '#4F46E5'} stopOpacity={0}/>
+                          </linearGradient>
+                       </defs>
+                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                       <XAxis 
+                         dataKey="name" 
+                         axisLine={false} 
+                         tickLine={false} 
+                         tick={{fontSize: 9, fontWeight: 800, fill: '#94A3B8'}} 
+                         dy={10}
+                       />
+                       <YAxis 
+                         axisLine={false} 
+                         tickLine={false} 
+                         tick={{fontSize: 9, fontWeight: 800, fill: '#94A3B8'}} 
+                       />
+                       <Tooltip 
+                         contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', fontWeight: '900', fontSize: '10px', textTransform: 'uppercase' }}
+                       />
+                       <Area 
+                         type="monotone" 
+                         dataKey={activeMetric} 
+                         stroke={activeMetric === 'sales' ? '#E36666' : activeMetric === 'revenue' ? '#9333EA' : '#4F46E5'} 
+                         strokeWidth={4}
+                         fillOpacity={1} 
+                         fill="url(#colorMain)" 
+                         animationDuration={1500}
+                       />
+                       {/* Ghost lines for context */}
+                       <Area type="monotone" dataKey="sales" stroke="#E36666" strokeWidth={2} fill="none" opacity={activeMetric === 'sales' ? 0 : 0.1} />
+                       <Area type="monotone" dataKey="revenue" stroke="#9333EA" strokeWidth={2} fill="none" opacity={activeMetric === 'revenue' ? 0 : 0.1} />
+                    </AreaChart>
+                 </ResponsiveContainer>
               </div>
-            </motion.div>
-          ))}
-        </div>
+           </div>
 
-        {/* Detailed Insights */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 px-4 md:px-0">
-          {/* Revenue Trend Chart */}
-          <div className="lg:col-span-2 bg-white rounded-[2.5rem] p-10 border border-slate-200 shadow-sm space-y-10">
-             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
-                      <Activity size={20} />
-                   </div>
-                   <h3 className="text-xl font-bold text-slate-900 tracking-tight">Income Projection</h3>
-                </div>
-                <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
-                   {['Weekly', 'Monthly'].map((r) => (
-                      <button 
-                        key={r}
-                        onClick={() => setTimeRange(r)}
-                        className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${timeRange === r ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
-                      >
-                         {r}
-                      </button>
-                   ))}
-                </div>
-             </div>
-
-             <div className="h-80 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                   <AreaChart data={chartData}>
-                      <defs>
-                         <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#D63384" stopOpacity={0.1}/>
-                            <stop offset="95%" stopColor="#D63384" stopOpacity={0}/>
-                         </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                      <XAxis 
-                        dataKey="name" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fontSize: 10, fontWeight: 700, fill: '#94A3B8'}} 
-                        dy={10}
-                      />
-                      <YAxis 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fontSize: 10, fontWeight: 700, fill: '#94A3B8'}} 
-                        tickFormatter={(v) => `₹${v/1000}k`}
-                      />
-                      <Tooltip 
-                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontWeight: 'bold', fontSize: '12px' }}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="sales" 
-                        stroke="#D63384" 
-                        strokeWidth={3}
-                        fillOpacity={1} 
-                        fill="url(#colorSales)" 
-                      />
-                   </AreaChart>
-                </ResponsiveContainer>
-             </div>
-          </div>
-
-          {/* Recent Payout List */}
-          <div className="bg-white rounded-[2.5rem] p-10 border border-slate-200 shadow-sm space-y-10">
-             <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Recent Activity</h3>
-                <button className="p-2 text-slate-400 hover:text-seller-primary transition-colors">
-                   <Filter size={18} />
-                </button>
-             </div>
-
-             <div className="space-y-6">
-                {recentTransactions.map((tx, idx) => (
-                  <div key={idx} className="flex items-center justify-between group cursor-pointer">
-                    <div className="flex items-center gap-4">
-                       <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-seller-light/40 group-hover:text-seller-primary transition-all">
-                         <ShoppingBag size={20} />
+           {/* Category Contribution (Donut Chart) */}
+           <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-2xl shadow-slate-200/50 border border-slate-100">
+              <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 mb-6">Category contribution</h3>
+              <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                 <div className="w-full h-48 md:h-56 max-w-[240px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                       <PieChart>
+                          <Pie
+                            data={pieData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={8}
+                            dataKey="value"
+                          >
+                            {pieData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                       </PieChart>
+                    </ResponsiveContainer>
+                 </div>
+                 
+                 {/* Legend Custom */}
+                 <div className="grid grid-cols-2 md:grid-cols-1 gap-4 w-full md:w-auto">
+                    {pieData.map((item, i) => (
+                       <div key={i} className="flex items-center gap-3">
+                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                          <div className="space-y-0.5">
+                             <p className="text-[10px] font-black text-slate-900 leading-none">{item.name}</p>
+                             <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">₹{item.value}k Sales</p>
+                          </div>
                        </div>
-                       <div className="min-w-0">
-                         <p className="text-sm font-bold text-slate-900 truncate group-hover:text-seller-primary transition-colors">{tx.product}</p>
-                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{tx.id} • {tx.date}</p>
-                       </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                       <p className="text-sm font-bold text-emerald-600">+{tx.net}</p>
-                       <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-lg border mt-1 inline-block ${tx.status === 'Settled' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
-                          {tx.status}
-                       </span>
-                    </div>
-                  </div>
-                ))}
-             </div>
+                    ))}
+                 </div>
+              </div>
+           </div>
 
-             <button className="w-full flex items-center justify-center gap-2 py-4 bg-slate-50 rounded-2xl text-[11px] font-bold text-slate-500 uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">
-                Full Transaction Log <ArrowRight size={14} />
-             </button>
-          </div>
+           {/* Best Selling Products */}
+           <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-2xl shadow-slate-200/50 border border-slate-100 space-y-6">
+              <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Best-selling products</h3>
+              
+              <div className="space-y-4">
+                 {bestSellers.map((product) => (
+                    <motion.div 
+                      whileHover={{ x: 5 }}
+                      key={product.id} 
+                      className="flex items-center justify-between p-3 rounded-3xl bg-slate-50/50 hover:bg-white border border-transparent hover:border-slate-100 transition-all group cursor-pointer"
+                    >
+                       <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 rounded-2xl overflow-hidden border border-slate-100 shadow-sm shrink-0">
+                             <img src={product.image} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                          </div>
+                          <div className="space-y-1">
+                             <h4 className="text-sm font-black text-slate-900 leading-tight">{product.name}</h4>
+                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total {product.price}</p>
+                             <div className="flex items-center gap-1.5">
+                                <Star size={10} className="text-amber-500 fill-amber-500" />
+                                <span className="text-[10px] font-black text-slate-900">{product.rating}</span>
+                             </div>
+                          </div>
+                       </div>
+                       <ChevronRight size={18} className="text-slate-300 group-hover:text-seller-primary group-hover:translate-x-1 transition-all" />
+                    </motion.div>
+                 ))}
+              </div>
+              
+              <button className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-900/10 hover:bg-black transition-all">
+                 View Complete Report
+              </button>
+           </div>
+
         </div>
       </div>
     </PageWrapper>

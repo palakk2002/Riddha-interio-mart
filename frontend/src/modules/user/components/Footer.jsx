@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiFacebook, FiTwitter, FiInstagram, FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
-import TransparentLogo from "../../../assets/transparent logo.png";
+import TransparentLogo from "../../../assets/transparent_logo.png";
  
 const Footer = () => {
   const containerVariants = {
