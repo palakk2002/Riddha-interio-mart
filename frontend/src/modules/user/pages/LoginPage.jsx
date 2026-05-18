@@ -29,6 +29,18 @@ const LoginPage = () => {
   };
 
   const role = getRole();
+  const isDelivery = role === 'delivery';
+  
+  // Theme styling based on role
+  const theme = {
+    primaryBtn: isDelivery ? 'bg-[#2A458A] hover:bg-[#1f346b]' : 'bg-slate-900 hover:bg-black',
+    accentText: isDelivery ? 'text-[#2A458A]' : 'text-[#189D91]',
+    focusBorder: isDelivery ? 'focus:border-[#2A458A] focus:ring-[#2A458A]/5' : 'focus:border-[#189D91] focus:ring-[#189D91]/5',
+    iconFocus: isDelivery ? 'group-focus-within:text-[#2A458A]' : 'group-focus-within:text-[#189D91]',
+    checkboxBg: isDelivery ? 'bg-[#2A458A] border-[#2A458A]' : 'bg-[#189D91] border-[#189D91]',
+    ambientGlow: isDelivery ? 'bg-[#2A458A]/20' : 'bg-[#189D91]/20',
+    lineGlow: isDelivery ? 'from-[#2A458A]' : 'from-[#189D91]'
+  };
 
   const getSignupPath = () => {
     if (role === 'admin') return null;
@@ -107,7 +119,7 @@ const LoginPage = () => {
         >
           <div className="relative overflow-hidden bg-white/[0.03] backdrop-blur-3xl rounded-[3.5rem] p-16 border border-white/10 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] group">
             {/* Ambient Glows */}
-            <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#189D91]/20 rounded-full blur-[80px] pointer-events-none" />
+            <div className={`absolute -top-24 -left-24 w-48 h-48 rounded-full blur-[80px] pointer-events-none ${theme.ambientGlow}`} />
             <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-pink-500/10 rounded-full blur-[80px] pointer-events-none" />
             
             <div className="relative z-10">
@@ -119,7 +131,7 @@ const LoginPage = () => {
                 
                 <div className="mt-12 space-y-4">
                     <div className="flex items-center gap-3">
-                        <div className="h-[1px] w-8 bg-gradient-to-r from-[#189D91] to-transparent" />
+                        <div className={`h-[1px] w-8 bg-gradient-to-r ${theme.lineGlow} to-transparent`} />
                         <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.6em] leading-none italic">
                             Premium Quality Supply
                         </p>
@@ -142,6 +154,11 @@ const LoginPage = () => {
       {/* Right Section - Login Form */}
       <div className="flex-1 flex flex-col justify-center bg-white relative">
         <div className="max-w-md w-full mx-auto px-8 md:px-0">
+          {/* Mobile Logo */}
+          <div className="lg:hidden mb-8 flex justify-center">
+            <img src={logo} alt="Riddha Logo" className="w-48 md:w-56 h-auto object-contain" />
+          </div>
+
           {/* Header */}
           <div className="mb-10 flex items-center justify-between">
             <div>
@@ -194,13 +211,13 @@ const LoginPage = () => {
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email ID</label>
                 <div className="relative group">
-                  <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#189D91] transition-colors" size={18} />
+                  <FiUser className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 ${theme.iconFocus} transition-colors`} size={18} />
                   <input
                     type="text"
                     placeholder="name@example.com"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:border-[#189D91] focus:ring-4 focus:ring-[#189D91]/5 outline-none transition-all font-semibold text-slate-800 placeholder:text-slate-300"
+                    className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white ${theme.focusBorder} outline-none transition-all font-semibold text-slate-800 placeholder:text-slate-300`}
                   />
                 </div>
               </div>
@@ -208,16 +225,16 @@ const LoginPage = () => {
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center px-1">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Password</label>
-                    <button type="button" onClick={() => navigate('/forgot-password')} className="text-[9px] font-black text-[#189D91] uppercase tracking-widest hover:underline">Forgot?</button>
+                    <button type="button" onClick={() => navigate('/forgot-password')} className={`text-[9px] font-black ${theme.accentText} uppercase tracking-widest hover:underline`}>Forgot?</button>
                 </div>
                 <div className="relative group">
-                  <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#189D91] transition-colors" size={18} />
+                  <FiLock className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 ${theme.iconFocus} transition-colors`} size={18} />
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:border-[#189D91] focus:ring-4 focus:ring-[#189D91]/5 outline-none transition-all font-semibold text-slate-800 placeholder:text-slate-300"
+                    className={`w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white ${theme.focusBorder} outline-none transition-all font-semibold text-slate-800 placeholder:text-slate-300`}
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-600">
                     {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
@@ -232,7 +249,7 @@ const LoginPage = () => {
                 onClick={() => setRememberMe(!rememberMe)} 
                 className="flex items-center gap-2.5 group"
               >
-                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${rememberMe ? 'bg-[#189D91] border-[#189D91]' : 'border-slate-200 bg-white group-hover:border-slate-300'}`}>
+                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${rememberMe ? theme.checkboxBg : 'border-slate-200 bg-white group-hover:border-slate-300'}`}>
                   {rememberMe && <FiCheck className="text-white text-xs stroke-[4]" />}
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-600 transition-colors">Remember Me</span>
@@ -242,7 +259,7 @@ const LoginPage = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-slate-200 transition-all active:scale-[0.98] mt-4"
+              className={`w-full py-4 rounded-xl ${theme.primaryBtn} text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-slate-200 transition-all active:scale-[0.98] mt-4`}
             >
               {loading ? 'Authenticating...' : 'Sign In Now'}
             </Button>
@@ -268,7 +285,7 @@ const LoginPage = () => {
 
             {getSignupPath() && (
               <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest mt-8">
-                Don't have an account? <Link to={getSignupPath()} className="text-[#189D91] hover:underline ml-1">Create Account</Link>
+                Don't have an account? <Link to={getSignupPath()} className={`${theme.accentText} hover:underline ml-1`}>Create Account</Link>
               </p>
             )}
           </form>

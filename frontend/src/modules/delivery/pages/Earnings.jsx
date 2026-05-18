@@ -7,7 +7,8 @@ import {
   LuCalendar, 
   LuAward, 
   LuFileText,
-  LuActivity
+  LuActivity,
+  LuPackage
 } from 'react-icons/lu';
 import { 
   BarChart, 
@@ -36,170 +37,168 @@ const Earnings = () => {
 
   return (
     <PageWrapper>
-      <div className="max-w-[1600px] mx-auto space-y-8 pb-10">
+      <div className="max-w-[1600px] mx-auto space-y-4 pb-8">
         
         {/* Financial Header */}
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-8 bg-[#D63384] rounded-full"></div>
-              <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight uppercase italic">
-                Revenue <span className="text-[#D63384]">Stream</span>
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-6 bg-[#2A458A] rounded-full"></div>
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                Your <span className="text-[#2A458A]">Earnings</span>
               </h1>
             </div>
-            <p className="text-slate-400 font-black text-[10px] uppercase tracking-[0.3em] flex items-center gap-2">
-               <LuActivity className="text-[#D63384] animate-pulse" />
-               Automated settlement & commission intelligence
+            <p className="text-slate-500 font-medium text-xs flex items-center gap-1.5">
+               <LuActivity className="text-[#2A458A]" />
+               Track your deliveries and income
             </p>
           </div>
           
-          <button className="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-xl">
-             <LuFileText size={18} />
-             Export Financial Log
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl font-bold text-xs transition-all shadow-sm">
+             <LuFileText size={16} />
+             Export Report
           </button>
         </div>
 
         {/* Financial KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           <EarningsCard 
-            label="Daily Velocity" 
+            label="Today's Earnings" 
             value={earningsData.today} 
-            subtext="3/5 Targeted Missions"
+            subtext="3/5 Deliveries completed"
             icon={LuWallet}
             trend={12}
           />
           <EarningsCard 
-            label="Weekly Aggregation" 
+            label="This Week" 
             value={earningsData.thisWeek} 
-            subtext="21 deployments completed"
+            subtext="21 deliveries completed"
             icon={LuCalendar}
             trend={-5}
           />
           <EarningsCard 
-            label="Lifetime Yield" 
+            label="Total Lifetime" 
             value={earningsData.total} 
-            subtext="Fleet Partner since Jan 2026"
+            subtext="Partner since Jan 2026"
             icon={LuAward}
           />
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
           
           {/* Income Velocity Chart */}
-          <div className="xl:col-span-2 bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm flex flex-col">
-             <div className="flex items-center justify-between mb-8">
+          <div className="xl:col-span-2 bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-col">
+             <div className="flex items-center justify-between mb-4">
                 <div>
-                   <h3 className="text-slate-900 font-black text-xl tracking-tight uppercase italic">Income <span className="text-[#D63384]">Velocity</span></h3>
-                   <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-0.5">Distribution over active cycles</p>
+                   <h3 className="text-slate-900 font-bold text-base">Weekly Earnings</h3>
+                   <p className="text-slate-500 text-xs mt-0.5">Your income over the last 7 days</p>
                 </div>
-                <LuTrendingUp className="text-[#D63384]" size={24} />
+                <LuTrendingUp className="text-[#2A458A]" size={20} />
              </div>
 
-             <div className="flex-1 min-h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
+             <div className="flex-1 min-h-[220px]">
+                <ResponsiveContainer width="100%" height={220}>
                    <BarChart data={chartData}>
                       <Tooltip 
-                        cursor={{ fill: 'rgba(214, 51, 132, 0.05)' }}
-                        contentStyle={{ backgroundColor: '#111827', border: 'none', borderRadius: '16px', color: '#fff' }}
-                        itemStyle={{ color: '#D63384', fontSize: '12px', fontWeight: 'bold' }}
+                        cursor={{ fill: 'rgba(24, 157, 145, 0.05)' }}
+                        contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '12px', color: '#0f172a' }}
+                        itemStyle={{ color: '#189D91', fontSize: '14px', fontWeight: 'bold' }}
                       />
-                      <Bar dataKey="income" radius={[12, 12, 0, 0]}>
+                      <Bar dataKey="income" radius={[8, 8, 0, 0]}>
                          {chartData.map((entry, index) => (
-                           <Cell key={`cell-${index}`} fill={index === 4 ? '#D63384' : '#1F2937'} />
+                           <Cell key={`cell-${index}`} fill={index === 4 ? '#189D91' : '#e2e8f0'} />
                          ))}
                       </Bar>
-                      <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 900, fill: '#94A3B8' }} dy={10} />
+                      <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600, fill: '#64748b' }} dy={10} />
                    </BarChart>
                 </ResponsiveContainer>
              </div>
           </div>
 
           {/* Commission Intelligence */}
-          <div className="bg-[#111827] rounded-[2.5rem] p-8 text-white relative overflow-hidden border border-white/5">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-[#D63384]/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
-             
+          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
              <div className="relative z-10 flex flex-col h-full">
-                <div className="flex items-center gap-4 mb-8">
-                   <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
-                      <LuTrendingUp className="text-[#D63384]" size={24} />
+                <div className="flex items-center gap-3 mb-4">
+                   <div className="w-10 h-10 bg-[#2A458A]/10 rounded-xl flex items-center justify-center border border-[#2A458A]/20">
+                      <LuTrendingUp className="text-[#2A458A]" size={20} />
                    </div>
                    <div>
-                      <h3 className="text-white font-black text-xl tracking-tight uppercase italic leading-tight">Contract <span className="text-[#D63384]">Model</span></h3>
-                      <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Tier-based incentives active</p>
+                      <h3 className="text-slate-900 font-bold text-base">Earnings Breakdown</h3>
+                      <p className="text-slate-500 text-xs mt-0.5">Current incentive structure</p>
                    </div>
                 </div>
 
-                <div className="flex-1 space-y-6">
-                   <div className="bg-white/5 rounded-2xl p-6 border border-white/5 flex justify-between items-center">
+                <div className="flex-1 space-y-4">
+                   <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex justify-between items-center">
                       <div>
-                         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Fixed Multiplier</p>
-                         <p className="text-3xl font-black text-white italic">₹{earningsData.perOrderCommission}<span className="text-xs text-[#D63384] not-italic"> / UNIT</span></p>
+                         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-0.5">Per Delivery</p>
+                         <p className="text-2xl font-bold text-slate-900">₹{earningsData.perOrderCommission}</p>
                       </div>
-                      <LuAward className="text-[#D63384]" size={32} />
+                      <LuAward className="text-[#2A458A]" size={24} />
                    </div>
 
-                   <div className="space-y-4">
-                      <div className="flex items-center justify-between text-[11px] font-bold">
-                         <span className="text-slate-400">Night Shift Premium</span>
-                         <span className="text-emerald-500 uppercase tracking-widest">+₹25.00 Active</span>
+                   <div className="space-y-3 px-1">
+                      <div className="flex items-center justify-between text-xs font-semibold">
+                         <span className="text-slate-600">Night Shift Surcharge</span>
+                         <span className="text-emerald-600">+₹25.00 Active</span>
                       </div>
-                      <div className="flex items-center justify-between text-[11px] font-bold">
-                         <span className="text-slate-400">Distance Surcharge</span>
-                         <span className="text-slate-200">Scale 2.4x</span>
+                      <div className="flex items-center justify-between text-xs font-semibold">
+                         <span className="text-slate-600">Distance Premium</span>
+                         <span className="text-slate-500">2.4x</span>
                       </div>
-                      <div className="flex items-center justify-between text-[11px] font-bold">
-                         <span className="text-slate-400">Performance Bonus</span>
-                         <span className="text-emerald-500 uppercase tracking-widest">Unlocked</span>
+                      <div className="flex items-center justify-between text-xs font-semibold">
+                         <span className="text-slate-600">Weekly Bonus</span>
+                         <span className="text-emerald-600">Unlocked</span>
                       </div>
                    </div>
                 </div>
 
-                <button className="w-full mt-10 bg-[#D63384] text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-[#B6256B] transition-all shadow-xl shadow-pink-500/20">
-                   Request Settlement
+                <button className="w-full mt-6 bg-[#189D91] text-white py-2.5 rounded-xl font-bold text-xs hover:bg-[#137A71] transition-all shadow-sm">
+                   Withdraw Earnings
                 </button>
              </div>
           </div>
         </div>
 
         {/* Historical Ledger */}
-        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-           <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+           <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div>
-                 <h3 className="text-slate-900 font-black text-xl tracking-tight uppercase italic">Financial <span className="text-[#D63384]">Ledger</span></h3>
-                 <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-0.5">Historical Yield Verification Log</p>
+                 <h3 className="text-slate-900 font-bold text-base">Earnings History</h3>
+                 <p className="text-slate-500 text-xs mt-0.5">Past payouts and delivery records</p>
               </div>
-              <button className="p-3 bg-slate-50 text-slate-400 hover:text-[#D63384] rounded-xl transition-all">
-                 <LuCalendar size={20} />
+              <button className="p-2 bg-white border border-slate-200 text-slate-500 hover:text-[#2A458A] hover:border-[#2A458A]/30 rounded-lg transition-all shadow-sm">
+                 <LuCalendar size={16} />
               </button>
            </div>
 
            <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                  <thead>
-                    <tr className="bg-slate-50/50">
-                       <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">Settlement Date</th>
-                       <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">Deployment Units</th>
-                       <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">Unit Commission</th>
-                       <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 text-right">Net Aggregate</th>
+                    <tr className="bg-slate-50 text-slate-500">
+                       <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200">Date</th>
+                       <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200">Deliveries</th>
+                       <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200">Base Pay</th>
+                       <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200 text-right">Total Payout</th>
                     </tr>
                  </thead>
-                 <tbody className="divide-y divide-slate-50">
+                 <tbody className="divide-y divide-slate-100">
                     {earningsData.recentEarnings.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50 transition-all group">
-                        <td className="px-8 py-6">
-                           <span className="text-xs font-black text-slate-900 tracking-tighter uppercase">{item.date}</span>
+                      <tr key={idx} className="hover:bg-slate-50 transition-colors group">
+                        <td className="px-5 py-3">
+                           <span className="text-xs font-semibold text-slate-900">{item.date}</span>
                         </td>
-                        <td className="px-8 py-6">
+                        <td className="px-5 py-3">
                            <div className="flex items-center gap-2">
-                              <LuPackage size={14} className="text-[#D63384]" />
-                              <span className="text-xs font-black text-slate-600">{item.orders} Deployments</span>
+                              <LuPackage size={14} className="text-slate-400 group-hover:text-[#2A458A] transition-colors" />
+                              <span className="text-xs font-medium text-slate-700">{item.orders}</span>
                            </div>
                         </td>
-                        <td className="px-8 py-6">
-                           <span className="text-xs font-black text-slate-400">₹{earningsData.perOrderCommission}</span>
+                        <td className="px-5 py-3">
+                           <span className="text-xs font-medium text-slate-500">₹{earningsData.perOrderCommission}</span>
                         </td>
-                        <td className="px-8 py-6 text-right">
-                           <span className="text-sm font-black text-slate-900 tracking-tighter">₹{item.amount.toLocaleString()}</span>
+                        <td className="px-5 py-3 text-right">
+                           <span className="text-xs font-bold text-slate-900">₹{item.amount.toLocaleString()}</span>
                         </td>
                       </tr>
                     ))}

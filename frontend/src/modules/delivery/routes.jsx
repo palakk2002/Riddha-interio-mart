@@ -13,14 +13,15 @@ const About = React.lazy(() => import('./pages/About'));
 const Notifications = React.lazy(() => import('./pages/Notifications'));
 const LoginPage = React.lazy(() => import('../user/pages/LoginPage'));
 const SignupPage = React.lazy(() => import('../user/pages/SignupPage'));
+const DeliveryLanding = React.lazy(() => import('./pages/DeliveryLanding'));
 
 const DeliveryRoutes = () => {
   return (
     <Routes>
+      <Route path="/" element={<DeliveryLanding />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route element={<DeliveryLayout />}>
-        <Route index element={<Dashboard />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/delivery-history" element={<DeliveryHistory />} />

@@ -88,49 +88,49 @@ const Orders = () => {
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="w-1.5 h-8 bg-[#D63384] rounded-full"></div>
-              <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight uppercase italic">
-                Active <span className="text-[#D63384]">Deployments</span>
+              <div className="w-1.5 h-8 bg-[#189D91] rounded-full"></div>
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+                Active Deliveries
               </h1>
             </div>
-            <p className="text-slate-400 font-black text-[10px] uppercase tracking-[0.3em] flex items-center gap-2">
-               <LuActivity className="text-[#D63384] animate-pulse" />
-               Real-time cargo tracking & status management
+            <p className="text-slate-500 font-medium text-sm flex items-center gap-2">
+               <LuActivity className="text-[#189D91]" />
+               Track and manage your ongoing deliveries
             </p>
           </div>
           
           <div className="flex flex-wrap items-center gap-4">
             <button 
               onClick={fetchOrders}
-              className="p-4 bg-white border border-slate-100 rounded-2xl text-slate-400 hover:text-[#D63384] hover:shadow-lg transition-all"
+              className="p-3 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-[#189D91] transition-all shadow-sm"
             >
               <LuRefreshCw size={20} className={loading ? 'animate-spin' : ''} />
             </button>
             
-            <div className="flex p-1.5 bg-slate-100 rounded-[2rem] border border-slate-200">
+            <div className="flex p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
               <button
                 onClick={() => setActiveTab('available')}
-                className={`px-8 py-3 rounded-[1.5rem] text-[10px] font-black transition-all uppercase tracking-[0.2em] flex items-center gap-2 ${
+                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                   activeTab === 'available' 
-                    ? 'bg-slate-900 text-white shadow-xl' 
-                    : 'text-slate-500 hover:text-slate-900'
+                    ? 'bg-white text-slate-900 shadow-sm' 
+                    : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
-                Mission Pool 
-                <span className={`px-2 py-0.5 rounded-lg text-[9px] ${activeTab === 'available' ? 'bg-white/20' : 'bg-slate-200'}`}>
+                Available Orders 
+                <span className={`px-2 py-0.5 rounded-md text-xs ${activeTab === 'available' ? 'bg-slate-100' : 'bg-slate-200'}`}>
                    {availableOrders.length}
                 </span>
               </button>
               <button
                 onClick={() => setActiveTab('my')}
-                className={`px-8 py-3 rounded-[1.5rem] text-[10px] font-black transition-all uppercase tracking-[0.2em] flex items-center gap-2 ${
+                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                   activeTab === 'my' 
-                    ? 'bg-[#D63384] text-white shadow-xl shadow-pink-500/20' 
-                    : 'text-slate-500 hover:text-[#D63384]'
+                    ? 'bg-[#189D91] text-white shadow-md' 
+                    : 'text-slate-500 hover:text-[#189D91]'
                 }`}
               >
-                My Registry
-                <span className={`px-2 py-0.5 rounded-lg text-[9px] ${activeTab === 'my' ? 'bg-white/20' : 'bg-slate-200'}`}>
+                My Deliveries
+                <span className={`px-2 py-0.5 rounded-md text-xs ${activeTab === 'my' ? 'bg-white/20' : 'bg-slate-200'}`}>
                    {myOrders.length}
                 </span>
               </button>
@@ -175,21 +175,21 @@ const Orders = () => {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="col-span-full py-32 text-center bg-white rounded-[3rem] border border-dashed border-slate-200"
+                className="col-span-full py-32 text-center bg-white rounded-3xl border border-slate-200 shadow-sm"
               >
-                <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+                <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-[#189D91]">
                   <LuZap size={40} />
                 </div>
                 <div className="max-w-md mx-auto px-6">
-                  <h3 className="text-xl font-black text-slate-900 uppercase italic">Registry Empty</h3>
-                  <p className="text-sm text-slate-400 font-bold mt-2 leading-relaxed">
-                    No active missions detected in this sector. Monitoring mission pool for incoming deployment requests...
+                  <h3 className="text-xl font-bold text-slate-900">No Orders Found</h3>
+                  <p className="text-sm text-slate-500 font-medium mt-2 leading-relaxed">
+                    There are currently no active deliveries in this section. Refresh to check for new ones.
                   </p>
                   <button 
                     onClick={fetchOrders}
-                    className="mt-8 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-xl"
+                    className="mt-6 px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition-all shadow-sm"
                   >
-                    Rescan Registry
+                    Refresh Orders
                   </button>
                 </div>
               </motion.div>

@@ -18,7 +18,7 @@ export const WishlistProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
 
   const fetchWishlist = useCallback(async () => {
-    if (!isLoggedIn || user?.role === 'seller' || user?.role === 'admin') {
+    if (!isLoggedIn || ['seller', 'admin', 'delivery'].includes(user?.role)) {
       setWishlistItems([]);
       return;
     }
