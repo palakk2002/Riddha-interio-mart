@@ -17,7 +17,7 @@ const ComingSoonShopPage = () => {
     { name: "Veneer Wall Panel", category: "Wall Panels", price: "₹2,499", img: "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=400&q=80" },
     { name: "Marble Dining Table", category: "Furniture", price: "₹45,999", img: "https://images.unsplash.com/photo-1615064646657-dd44f77c8e74?w=400&q=80" },
     { name: "Sleek Kitchen Cabinet", category: "Modular Kitchen", price: "₹18,000", img: "https://images.unsplash.com/photo-1556912177-f1319777174b?w=400&q=80" },
-    { name: "Industrial Pendant", category: "Lighting", price: "₹2,199", img: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=400&q=80" }
+    { name: "Industrial Pendant", category: "Lighting", price: "₹2,199", img: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=500&q=80" }
   ];
 
   return (
@@ -35,9 +35,9 @@ const ComingSoonShopPage = () => {
          </div>
 
          <motion.div 
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           className="relative z-10 space-y-6 max-w-4xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative z-10 space-y-6 max-w-4xl mx-auto"
          >
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-slate-100 mb-4">
                <FiZap className="text-orange-500" />
@@ -133,7 +133,6 @@ const ProductTeaserCard = ({ name, category, price, img, index }) => (
      initial={{ opacity: 0, y: 20 }}
      whileInView={{ opacity: 1, y: 0 }}
      viewport={{ once: true }}
-     transition={{ delay: index * 0.1 }}
      className="group"
    >
       <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 shadow-sm border border-slate-100">

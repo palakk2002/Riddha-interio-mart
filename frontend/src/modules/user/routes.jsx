@@ -52,13 +52,7 @@ const UserRoutes = () => {
       <Route path="/splash" element={<SplashPage />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
       <Route path="/" element={<HomePage />} />
-      <Route path="/coming-soon" element={<ComingSoonPage />} />
-      <Route path="/coming-soon/about" element={<ComingSoonAboutPage />} />
-      <Route path="/coming-soon/services" element={<ComingSoonServicesPage />} />
-      <Route path="/coming-soon/categories" element={<ComingSoonCategoriesPage />} />
-      <Route path="/coming-soon/shop" element={<ComingSoonShopPage />} />
-      <Route path="/coming-soon/contact" element={<ComingSoonContactPage />} />
-      <Route path="/coming-soon/:section" element={<ComingSoonSubPage />} />
+
       <Route path="/contractor-registration" element={<ContractorRegistration />} />
       <Route path="/designer-registration" element={<DesignerRegistration />} />
       <Route path="/builder-registration" element={<BuilderRegistration />} />

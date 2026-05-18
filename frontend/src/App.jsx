@@ -9,6 +9,7 @@ import UserRoutes from './modules/user/routes';
 import AdminRoutes from './modules/admin/routes';
 import SellerRoutes from './modules/seller/routes';
 import DeliveryRoutes from './modules/delivery/routes';
+import ComingSoonRoutes from './modules/comingsoon/routes';
 import { Toaster } from 'react-hot-toast';
 import PincodeModal from './modules/user/components/PincodeModal';
 import DeliveryBar from './modules/user/components/DeliveryBar';
@@ -24,9 +25,9 @@ function App() {
   const isSellerPath = location.pathname.startsWith('/seller');
   const isDeliveryPath = location.pathname.startsWith('/delivery');
   const isInitPath = location.pathname.includes('/splash') || location.pathname.includes('/onboarding');
-  const isAuthPath = location.pathname === '/login' || location.pathname === '/signup' || 
-                      location.pathname.endsWith('/login') || location.pathname.endsWith('/signup') ||
-                      location.pathname === '/search' || location.pathname.startsWith('/coming-soon');
+  const isAuthPath = location.pathname === '/login' || location.pathname === '/signup' ||
+    location.pathname.endsWith('/login') || location.pathname.endsWith('/signup') ||
+    location.pathname === '/search' || location.pathname.startsWith('/coming-soon');
   const isDashboardLayout = isAdminPath || isSellerPath || isDeliveryPath || isAuthPath || isInitPath;
   const isProductPage = location.pathname.startsWith('/product/') || location.pathname.startsWith('/products/');
   const isCheckoutPath = ['/cart', '/address', '/payment'].includes(location.pathname);
@@ -47,14 +48,14 @@ function App() {
     <div className={`min-h-screen flex flex-col user-theme bg-white border-deep-espresso/5 ${(!isDashboardLayout && !isCheckoutPath && !isProductPage) ? 'pb-24 md:pb-0' : ''}`}>
       <Toaster position="top-center" reverseOrder={false} />
       {showPincodeModal && <PincodeModal onComplete={handlePincodeComplete} />}
-      
+
       {/* Global Notifications */}
       {user?.role === 'admin' ? (
         <AdminNotifications token={user.token} />
       ) : (
         user?.token && <UserNotifications token={user.token} />
       )}
-      
+
       {!isDashboardLayout && (
         <>
           {isProductPage ? (
