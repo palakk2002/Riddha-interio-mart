@@ -38,7 +38,7 @@ export const NotificationProvider = ({ children }) => {
 
       const newSocket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
         auth: { token: user.token },
-        transports: ['websocket']
+        transports: ['polling', 'websocket']
       });
 
       newSocket.on('connect', () => console.log('Socket connected for notifications'));

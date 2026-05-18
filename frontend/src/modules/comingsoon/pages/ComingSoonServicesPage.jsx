@@ -36,23 +36,23 @@ const ComingSoonServicesPage = () => {
       <ComingSoonHeader />
 
       {/* --- HERO SECTION --- */}
-      <section className="relative py-24 lg:py-32 overflow-hidden flex flex-col items-center justify-center text-center px-6">
-        {/* Decorative background Blobs */}
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
-           <div className="absolute top-10 left-10 w-80 h-80 bg-[#D12C8D]/10 blur-[120px] rounded-full"></div>
-           <div className="absolute bottom-10 right-10 w-96 h-96 bg-[#189D91]/10 blur-[150px] rounded-full"></div>
-        </div>
+      <section className="relative py-14 md:py-18 overflow-hidden flex flex-col items-center justify-center text-center px-6">
+         {/* Decorative background Blobs */}
+         <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
+            <div className="absolute top-10 left-10 w-80 h-80 bg-[#D12C8D]/10 blur-[120px] rounded-full"></div>
+            <div className="absolute bottom-10 right-10 w-96 h-96 bg-[#189D91]/10 blur-[150px] rounded-full"></div>
+         </div>
 
-        <motion.div {...fadeInUp} className="relative z-10 space-y-6 max-w-4xl">
-           <h4 className="text-xs font-black uppercase tracking-[0.5em] text-[#D12C8D]">Our Expertise</h4>
-           <h1 className="text-5xl md:text-8xl font-black text-[#311B92] leading-[0.9] tracking-tighter">
-             Our <span className="text-[#189D91]">Services</span> <br /> 
-             All In <span className="text-[#D12C8D]">One Place.</span>
-           </h1>
-           <p className="text-lg md:text-xl text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto pt-4">
-             Complete Interior Solutions tailored to your needs. From design to delivery, we handle everything with precision and care.
-           </p>
-        </motion.div>
+         <motion.div {...fadeInUp} className="relative z-10 space-y-3 max-w-4xl">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#D12C8D]">Our Expertise</h4>
+            <h1 className="text-3xl md:text-5xl font-black text-[#311B92] leading-[1.1] tracking-tight">
+              Our <span className="text-[#189D91]">Services</span> <br /> 
+              All In <span className="text-[#D12C8D]">One Place.</span>
+            </h1>
+            <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto pt-2">
+              Complete Interior Solutions tailored to your needs. From design to delivery, we handle everything with precision and care.
+            </p>
+         </motion.div>
       </section>
 
       {/* --- SERVICES GRID --- */}
@@ -121,15 +121,47 @@ const ComingSoonServicesPage = () => {
       </section>
 
       {/* --- WHY CHOOSE OUR SERVICES --- */}
-      <section className="py-24 bg-[#311B92] text-white relative overflow-hidden">
-         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-white/5 blur-[120px] rounded-full"></div>
+      <section className="py-14 bg-slate-50 relative overflow-hidden text-slate-800">
+         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#189D91]/5 blur-[120px] rounded-full"></div>
+         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#311B92]/5 blur-[120px] rounded-full"></div>
+         
          <div className="max-w-7xl mx-auto px-8 relative z-10 text-center">
-            <h2 className="text-4xl md:text-6xl font-black mb-20">Why Choose Our Services?</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-               <WhyCard icon={<FiStar />} title="Expert Guidance" text="Certified designers at your service." />
-               <WhyCard icon={<FiAward />} title="Premium Quality" text="Only the best materials used." />
-               <WhyCard icon={<FiCheckCircle />} title="Affordable Pricing" text="Luxury accessible to everyone." />
-               <WhyCard icon={<FiTruck />} title="Fast Delivery" text="On-time project completion." />
+            <h2 className="text-2xl md:text-4xl font-black text-[#311B92]">Why Choose Our Services?</h2>
+            <div className="w-16 h-1 bg-[#D12C8D] rounded-full mx-auto mt-3 mb-10"></div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+               <WhyCard 
+                  icon={<FiStar />} 
+                  title="Expert Guidance" 
+                  text="Certified designers at your service." 
+                  bgClass="from-[#189D91]/12 to-[#189D91]/2"
+                  iconBgClass="bg-[#189D91]/10"
+                  iconColorClass="text-[#189D91]"
+               />
+               <WhyCard 
+                  icon={<FiAward />} 
+                  title="Premium Quality" 
+                  text="Only the best materials used." 
+                  bgClass="from-[#311B92]/12 to-[#311B92]/2"
+                  iconBgClass="bg-[#311B92]/10"
+                  iconColorClass="text-[#311B92]"
+               />
+               <WhyCard 
+                  icon={<FiCheckCircle />} 
+                  title="Affordable Pricing" 
+                  text="Luxury accessible to everyone." 
+                  bgClass="from-[#D12C8D]/12 to-[#D12C8D]/2"
+                  iconBgClass="bg-[#D12C8D]/10"
+                  iconColorClass="text-[#D12C8D]"
+               />
+               <WhyCard 
+                  icon={<FiTruck />} 
+                  title="Fast Delivery" 
+                  text="On-time project completion." 
+                  bgClass="from-[#189D91]/12 via-[#311B92]/8 to-[#D12C8D]/12"
+                  iconBgClass="bg-gradient-to-br from-[#189D91]/15 to-[#D12C8D]/15"
+                  iconColorClass="text-[#311B92]"
+               />
             </div>
          </div>
       </section>
@@ -155,21 +187,51 @@ const ComingSoonServicesPage = () => {
       </section>
 
       {/* --- CTA --- */}
-      <section className="py-20 px-8">
+      <section className="py-16 px-8 overflow-hidden">
          <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
+            whileHover={{ scale: 1.01 }}
             viewport={{ once: true }}
-            className="max-w-6xl mx-auto bg-gradient-to-r from-[#311B92] via-[#D12C8D] to-[#189D91] rounded-[3rem] p-12 lg:p-20 text-center text-white relative overflow-hidden shadow-2xl"
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="max-w-5xl mx-auto bg-gradient-to-br from-[#189D91]/12 via-[#311B92]/8 to-[#D12C8D]/12 backdrop-blur-xl border border-slate-200/60 rounded-[3rem] p-10 lg:p-16 text-center text-slate-800 relative overflow-hidden shadow-[0_30px_70px_-15px_rgba(49,27,146,0.15)] group"
          >
-            <div className="absolute inset-0 bg-black/10"></div>
+            {/* Decorative Elements */}
+            <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+               <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent"></div>
+               {/* Mesh Pattern */}
+               <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                     <pattern id="mesh-services" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#311B92" strokeWidth="0.3" opacity="0.08" />
+                     </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#mesh-services)" />
+               </svg>
+            </div>
+
+            {/* Floating Spheres */}
+            <motion.div 
+               animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
+               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+               className="absolute -top-20 -left-20 w-64 h-64 bg-[#311B92]/8 blur-3xl rounded-full"
+            />
+            <motion.div 
+               animate={{ y: [0, 20, 0], x: [0, -10, 0] }}
+               transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+               className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#D12C8D]/8 blur-3xl rounded-full"
+            />
+
             <div className="relative z-10 space-y-8">
-               <h2 className="text-4xl md:text-6xl font-black leading-tight">Ready to Transform <br /> Your Space?</h2>
-               <div className="flex flex-col sm:flex-row justify-center gap-6 pt-4">
-                  <Link to="/coming-soon" className="px-10 py-5 bg-white text-[#311B92] rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-xl">
+               <h2 className="text-3xl md:text-5xl font-black leading-[1.15] tracking-tight text-[#311B92]">
+                  Ready to Transform <br /> 
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#189D91] via-[#311B92] to-[#D12C8D]">Your Space?</span>
+               </h2>
+               <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+                  <Link to="/coming-soon" className="px-8 py-4 bg-[#311B92] text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 hover:bg-[#189D91] transition-all shadow-lg shadow-[#311B92]/20 active:scale-95">
                      Explore Now
                   </Link>
-                  <Link to="/coming-soon/contact" className="px-10 py-5 bg-transparent border-2 border-white/40 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-white hover:text-[#311B92] transition-all">
+                  <Link to="/coming-soon/contact" className="px-8 py-4 bg-transparent border-2 border-[#311B92]/30 text-[#311B92] rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-[#311B92] hover:text-white hover:border-[#311B92] transition-all backdrop-blur-sm active:scale-95">
                      Contact Us
                   </Link>
                </div>
@@ -200,13 +262,13 @@ const ComingSoonServicesPage = () => {
 
 // --- Sub Components ---
 
-const WhyCard = ({ icon, title, text }) => (
-   <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/10 transition-colors space-y-4">
-      <div className="text-[#D12C8D] flex justify-center">
-         {React.cloneElement(icon, { size: 40 })}
+const WhyCard = ({ icon, title, text, bgClass, iconBgClass, iconColorClass }) => (
+   <div className={`p-6 rounded-[1.75rem] bg-gradient-to-br ${bgClass} border border-white/60 hover:shadow-[0_20px_50px_-12px_rgba(49,27,146,0.12)] hover:scale-102 transition-all duration-300 text-center space-y-3 group`}>
+      <div className={`w-12 h-12 rounded-xl ${iconBgClass} flex items-center justify-center ${iconColorClass} mx-auto group-hover:scale-110 transition-transform duration-500`}>
+         {React.cloneElement(icon, { size: 24 })}
       </div>
-      <h4 className="text-xl font-bold tracking-tight">{title}</h4>
-      <p className="text-slate-400 text-sm leading-relaxed">{text}</p>
+      <h4 className="text-base md:text-lg font-black text-[#311B92] tracking-tight">{title}</h4>
+      <p className="text-slate-500 font-medium text-xs md:text-sm leading-relaxed">{text}</p>
    </div>
 );
 

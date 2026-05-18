@@ -428,7 +428,7 @@ export const products = [
     category: "beds",
     price: 550,
     originalPrice: 700,
-    image: "https://images.unsplash.com/photo-1505691938895-1758d7eaa511?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1505693419173-42b9258a6270?w=800&q=80",
     rating: 4.7,
     colors: ["#2D3436"],
     sizes: ["Full", "Queen"],

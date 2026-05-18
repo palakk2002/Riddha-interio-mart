@@ -16,9 +16,9 @@ const ComingSoonCategoriesPage = () => {
     { name: "Wall Panels", label: "Textured Art", img: "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=500&q=80", color: "from-pink-500" },
     { name: "Home Decor", label: "Elegant Accents", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&q=80", color: "from-purple-500" },
     { name: "Flooring", label: "Luxury Surfaces", img: "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=500&q=80", color: "from-indigo-500" },
-    { name: "Modular Kitchen", label: "Smart Living", img: "https://images.unsplash.com/photo-1556911220-e150223eaa33?w=500&q=80", color: "from-teal-500" },
-    { name: "Hardware", label: "Reliable Fittings", img: "https://images.unsplash.com/photo-1518481612222-68bbe828ecd1?w=500&q=80", color: "from-slate-600" },
-    { name: "Paints & Finishes", label: "Master Colors", img: "https://images.unsplash.com/photo-1562591176-32930998d58c?w=500&q=80", color: "from-red-500" }
+    { name: "Modular Kitchen", label: "Smart Living", img: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=500&q=80", color: "from-teal-500" },
+    { name: "Hardware", label: "Reliable Fittings", img: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&q=80", color: "from-slate-600" },
+    { name: "Paints & Finishes", label: "Master Colors", img: "https://images.unsplash.com/photo-1562591176-d8655479d722?w=500&q=80", color: "from-red-500" }
   ];
 
   return (
@@ -28,7 +28,7 @@ const ComingSoonCategoriesPage = () => {
       <ComingSoonHeader />
 
       {/* --- HERO SECTION --- */}
-      <section className="relative py-20 lg:py-28 overflow-hidden flex flex-col items-center justify-center text-center px-6">
+      <section className="relative py-12 lg:py-16 overflow-hidden flex flex-col items-center justify-center text-center px-6">
         {/* Decorative Blobs */}
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
            <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#189D91]/10 blur-[120px] rounded-full"></div>
@@ -38,68 +38,55 @@ const ComingSoonCategoriesPage = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 space-y-6 max-w-4xl"
+          className="relative z-10 space-y-4 max-w-3xl"
         >
-           <h4 className="text-xs font-black uppercase tracking-[0.5em] text-[#189D91]">Explore Our Catalog</h4>
-           <h1 className="text-5xl md:text-8xl font-black text-[#311B92] leading-[0.9] tracking-tighter">
-             Shop by <span className="text-[#D12C8D]">Categories</span>
+           <h4 className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-[#189D91]">Explore Our Catalog</h4>
+           <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-[#311B92] leading-[1.1] tracking-tighter">
+             Shop by <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#189D91] via-[#311B92] to-[#D12C8D]">Categories</span>
            </h1>
-           <p className="text-lg md:text-xl text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto pt-4">
+           <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed max-w-lg mx-auto pt-2">
              Find everything you need for your perfect interior. Thousands of products across 20+ premium categories.
            </p>
         </motion.div>
       </section>
 
-      {/* --- SEARCH + FILTER BAR --- */}
-      <section className="max-w-7xl mx-auto px-8 mb-16 relative z-20">
-         <div className="bg-white/50 backdrop-blur-xl border border-slate-100 p-3 rounded-[2rem] shadow-xl shadow-slate-100 flex flex-col md:flex-row gap-4 items-center">
-            <div className="flex-grow flex items-center gap-4 px-6 py-3 bg-slate-50 rounded-2xl w-full">
-               <FiSearch className="text-slate-400" />
-               <input 
-                 type="text" 
-                 placeholder="Search categories..." 
-                 className="bg-transparent border-none outline-none w-full text-sm font-bold text-slate-700 placeholder:text-slate-300" 
-               />
-            </div>
-            <div className="flex gap-2 w-full md:w-auto overflow-x-auto hide-scrollbar">
-               <FilterPill label="Popular" active />
-               <FilterPill label="New Arrivals" />
-               <FilterPill label="Top Rated" />
-            </div>
-         </div>
-      </section>
 
       {/* --- CATEGORIES GRID --- */}
-      <section className="py-10 pb-24 max-w-7xl mx-auto px-8">
-         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <section className="py-6 pb-12 max-w-6xl mx-auto px-8">
+         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {categories.map((cat, index) => (
-              <CategoryCard key={index} {...cat} index={index} />
+               <CategoryCard key={index} {...cat} index={index} />
             ))}
          </div>
       </section>
 
       {/* --- FEATURED CATEGORY SECTION --- */}
-      <section className="py-24 bg-slate-50/50">
-         <div className="max-w-7xl mx-auto px-8">
+      <section className="py-14 bg-slate-50/50">
+         <div className="max-w-6xl mx-auto px-8">
             <motion.div 
                initial={{ opacity: 0, scale: 0.98 }}
                whileInView={{ opacity: 1, scale: 1 }}
                viewport={{ once: true }}
-               className="relative h-[500px] rounded-[3.5rem] overflow-hidden shadow-2xl group"
+               className="relative h-[380px] rounded-[2.5rem] overflow-hidden shadow-2xl group"
             >
                <img 
                   src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1200&q=80" 
                   alt="Premium Collection" 
                   className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000"
                />
-               <div className="absolute inset-0 bg-gradient-to-r from-[#311B92]/80 via-[#311B92]/40 to-transparent flex items-center px-12 lg:px-24">
-                  <div className="max-w-xl space-y-6 text-white">
-                     <h4 className="text-xs font-black uppercase tracking-[0.5em] text-[#189D91]">Highlight of the Month</h4>
-                     <h2 className="text-4xl md:text-6xl font-black leading-tight">Premium Furniture <br /> Collection 2025</h2>
-                     <p className="text-lg text-white/70 font-medium">Hand-picked luxury pieces curated by global designers for the modern Indian home.</p>
-                     <button className="px-10 py-5 bg-[#D12C8D] text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-xl shadow-[#D12C8D]/20">
-                        Explore Now
-                     </button>
+               <div className="absolute inset-0 bg-gradient-to-r from-[#FAF6EE]/90 via-[#FAF6EE]/75 to-transparent backdrop-blur-[2px] flex items-center px-8 lg:px-16">
+                  <div className="max-w-lg space-y-4 text-slate-800">
+                     <h4 className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-[#189D91]">Highlight of the Month</h4>
+                     <h2 className="text-2xl md:text-4xl font-black leading-tight text-[#311B92]">
+                        Premium Furniture <br /> 
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#189D91] via-[#311B92] to-[#D12C8D]">Collection 2025</span>
+                     </h2>
+                     <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">Hand-picked luxury pieces curated by global designers for the modern Indian home.</p>
+                     <div className="pt-2">
+                        <button className="px-8 py-3.5 bg-[#311B92] hover:bg-[#189D91] text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-lg shadow-indigo-900/10 active:scale-95">
+                           Explore Now
+                        </button>
+                     </div>
                   </div>
                </div>
             </motion.div>
@@ -160,15 +147,15 @@ const CategoryCard = ({ name, label, img, index }) => (
      initial={{ opacity: 0, scale: 0.9 }}
      whileInView={{ opacity: 1, scale: 1 }}
      viewport={{ once: true }}
-     transition={{ delay: index * 0.1 }}
-     whileHover={{ y: -10 }}
-     className="relative h-[400px] rounded-[2.5rem] overflow-hidden group cursor-pointer shadow-xl shadow-slate-100/50"
+     transition={{ delay: index * 0.05 }}
+     whileHover={{ y: -6 }}
+     className="relative h-[300px] rounded-[1.5rem] overflow-hidden group cursor-pointer shadow-xl shadow-slate-100/50"
    >
       <img src={img} alt={name} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
-         <p className="text-[#189D91] text-[10px] font-black uppercase tracking-[0.4em] mb-2">{label}</p>
-         <h3 className="text-white text-2xl font-black tracking-tight">{name}</h3>
-         <div className="h-1 w-0 bg-[#D12C8D] group-hover:w-full transition-all duration-500 mt-4 rounded-full"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5">
+         <p className="text-[#189D91] text-[9px] font-black uppercase tracking-[0.3em] mb-1">{label}</p>
+         <h3 className="text-white text-lg font-black tracking-tight">{name}</h3>
+         <div className="h-1 w-0 bg-[#D12C8D] group-hover:w-full transition-all duration-500 mt-2 rounded-full"></div>
       </div>
    </motion.div>
 );

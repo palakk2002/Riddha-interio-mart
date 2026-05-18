@@ -14,7 +14,7 @@ export const manageFavouriteCategoriesData = {
     { id: 8, name: 'Memory Foam', category: 'Mattresses', slug: 'memory-foam', image: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80' },
     { id: 9, name: 'Pocket Spring', category: 'Mattresses', slug: 'spring-mattress', image: 'https://images.unsplash.com/photo-1505693419173-42b92118f196?w=800&q=80' },
     { id: 10, name: 'Dual Comfort', category: 'Mattresses', slug: 'dual-comfort', image: 'https://images.unsplash.com/photo-1544124499-58912cbddada?w=800&q=80' },
-    { id: 11, name: 'Latex Premium', category: 'Mattresses', slug: 'latex-mattress', image: 'https://images.unsplash.com/photo-1505691938895-1758d7eaa511?w=800&q=80' },
+    { id: 11, name: 'Latex Premium', category: 'Mattresses', slug: 'latex-mattress', image: 'https://images.unsplash.com/photo-1505693419173-42b9258a6270?w=800&q=80' },
     { id: 12, name: 'Hybrid Series', category: 'Mattresses', slug: 'hybrid-mattress', image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&q=80' },
 
     // Home Goods

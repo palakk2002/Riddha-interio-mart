@@ -32,7 +32,7 @@ export function connectSocket({ token } = {}) {
   }
 
   socketInstance = io(url, {
-    transports: ['websocket'],
+    transports: ['polling', 'websocket'],
     autoConnect: true,
     reconnection: true,
     auth: token ? { token } : undefined,

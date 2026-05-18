@@ -17,7 +17,12 @@ const ComingSoonHeader = () => {
     <nav className="h-16 flex items-center justify-between px-8 bg-white/70 backdrop-blur-xl sticky top-0 z-50 border-b border-slate-100/50">
       <div className="flex items-center gap-12">
         <Link to="/coming-soon" className="hover:scale-105 transition-transform">
-          <img src={Logo} alt="Riddha Interio" className="h-8 md:h-10 w-auto object-contain" />
+          <img 
+            src={Logo} 
+            alt="Riddha Interio" 
+            className="h-12 md:h-15 w-auto object-contain" 
+            style={{ mixBlendMode: 'multiply' }}
+          />
         </Link>
 
         {/* Desktop Links */}

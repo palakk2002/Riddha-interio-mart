@@ -36,7 +36,7 @@ const ComingSoonPage = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  
+
   // Set target date dynamically to 23 days from now to match the user image's "23 days" countdown perfectly
   const [timeLeft, setTimeLeft] = useState({
     days: 23,
@@ -81,7 +81,7 @@ const ComingSoonPage = () => {
       setEmail('');
     }, 1500);
   };
-  
+
   const handleContactSubmit = (e) => {
     e.preventDefault();
     setIsSubmitted(true);
@@ -95,7 +95,7 @@ const ComingSoonPage = () => {
 
       {/* --- MAIN HERO SECTION (SUPER COMPACT LAYOUT FOR ELEVATION) --- */}
       <main className="flex-grow relative pt-2 pb-8 lg:pt-3 overflow-hidden bg-gradient-to-b from-[#FAF6EE] to-white">
-        
+
         {/* Soft Background Decor Blurs */}
         <div className="absolute top-1/4 left-0 w-80 h-80 bg-purple-200/30 blur-[100px] rounded-full pointer-events-none -z-10"></div>
         <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-teal-100/20 blur-[130px] rounded-full pointer-events-none -z-10"></div>
@@ -107,7 +107,12 @@ const ComingSoonPage = () => {
 
             {/* Official Logo Banner - Super Crisp Size */}
             <div className="flex flex-col items-center lg:items-start">
-              <img src={Logo} alt="Riddha Interio Mart Logo" className="h-16 md:h-18 w-auto object-contain" />
+              <img
+                src={Logo}
+                alt="Riddha Interio Mart Logo"
+                className="h-20 md:h-26 w-auto object-contain"
+                style={{ mixBlendMode: 'multiply' }}
+              />
             </div>
 
             {/* Main Destination Heading - Styled smaller & more compact */}
@@ -122,7 +127,7 @@ const ComingSoonPage = () => {
                 <span className="block text-[#189D91]">ALL INTERIOR</span>
                 <span className="block text-[#D12C8D]">SOLUTIONS</span>
               </h1>
-              
+
               {/* Horizontal Single Line Features Row */}
               <div className="flex flex-wrap justify-center lg:justify-start items-center gap-x-2 text-[9px] md:text-[10px] font-black text-slate-600 uppercase tracking-widest pt-1">
                 <span>WIDE RANGE</span>
@@ -184,13 +189,13 @@ const ComingSoonPage = () => {
                 <FiBell className="text-[#D12C8D] animate-bounce" size={14} />
                 <span>Be the first to know about launch updates, offers & more!</span>
               </div>
-              
+
               <form onSubmit={handleSubscribe} className="bg-white p-1 rounded-full border border-slate-100 shadow-xl shadow-slate-200/50 flex items-center">
                 <div className="flex items-center gap-3 pl-4 flex-grow">
                   <FiMail className="text-slate-300" size={16} />
-                  <input 
-                    type="email" 
-                    placeholder="Enter your email address" 
+                  <input
+                    type="email"
+                    placeholder="Enter your email address"
                     className="w-full bg-transparent border-none outline-none text-[11px] md:text-xs font-bold text-slate-700 placeholder:text-slate-300"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -206,23 +211,31 @@ const ComingSoonPage = () => {
           </div>
 
           {/* CENTER COLUMN: HIGH-FIDELITY SMARTPHONE MOCKUP ON A NEON CYLINDRICAL PEDESTAL */}
-          <div className="flex-1 relative min-h-[550px] flex flex-col items-center justify-center">
-            
+          <div className="flex-1 relative min-h-[550px] flex flex-col items-center justify-center lg:translate-x-24">
+
             {/* Tilted iPhone Smartphone Mockup Container - Slightly scaled down */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
-              className="relative w-[240px] md:w-[260px] h-[480px] md:h-[530px] bg-slate-950 rounded-[3rem] border-[8px] md:border-[10px] border-slate-900 shadow-[0_40px_80px_-20px_rgba(49,27,146,0.4)] flex flex-col overflow-hidden z-10"
+              className="relative w-[240px] md:w-[260px] h-[480px] md:h-[530px] bg-slate-950 rounded-[3rem] border-[8px] md:border-[10px] border-slate-900 flex flex-col overflow-hidden z-10"
+              style={{
+                transform: 'perspective(1200px) rotateX(8deg) rotateY(20deg) rotateZ(-12deg)',
+                transformStyle: 'preserve-3d',
+                boxShadow: '0 40px 80px -20px rgba(49, 27, 146, 0.4), inset 0 0 0 2px rgba(255, 255, 255, 0.15), 0 0 0 4px #475569'
+              }}
             >
+              {/* Glossy Screen Glare Reflection Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/15 pointer-events-none z-40" />
+
               {/* Dynamic Island */}
               <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 md:w-24 h-5 md:h-6 bg-slate-950 rounded-full z-50 flex items-center justify-center">
-                 <div className="w-1 h-1 rounded-full bg-white/10 ml-auto mr-3" />
+                <div className="w-1 h-1 rounded-full bg-white/10 ml-auto mr-3" />
               </div>
 
               {/* Tilted Screen Main Body */}
               <div className="flex-1 bg-[#FAFAFA] overflow-y-auto no-scrollbar relative flex flex-col">
-                
+
                 {/* Smartphone Custom Header */}
                 <div className="bg-[#189D91] pt-10 pb-4 px-4 space-y-3">
                   <div className="flex items-center justify-between text-white">
@@ -273,34 +286,34 @@ const ComingSoonPage = () => {
                   {/* Designer Favorites Product Teasers */}
                   <div className="space-y-3">
                     <div className="space-y-0.5">
-                       <h4 className="text-[10px] font-black text-slate-800">Designer Favorites</h4>
-                       <p className="text-[7px] font-bold text-slate-400">Curated collections by top designers.</p>
+                      <h4 className="text-[10px] font-black text-slate-800">Designer Favorites</h4>
+                      <p className="text-[7px] font-bold text-slate-400">Curated collections by top designers.</p>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-2.5">
-                      <SmartphoneProductCard 
-                        name="Tuak Master Bed" 
-                        price="₹34,999" 
-                        rating="4.7" 
-                        img="https://images.unsplash.com/photo-1505691938895-1758d7eaa511?w=200&q=80" 
+                      <SmartphoneProductCard
+                        name="Tuak Master Bed"
+                        price="₹34,999"
+                        rating="4.7"
+                        img={Furniture2Img}
                       />
-                      <SmartphoneProductCard 
-                        name="Veneer Wall Panel (Modern)" 
-                        price="₹3,500/sq.ft" 
-                        rating="4.9" 
-                        img="https://images.unsplash.com/photo-1615529182904-14819c35db37?w=200&q=80" 
+                      <SmartphoneProductCard
+                        name="Veneer Wall Panel (Modern)"
+                        price="₹3,500/sq.ft"
+                        rating="4.9"
+                        img="https://images.unsplash.com/photo-1615529182904-14819c35db37?w=200&q=80"
                       />
-                      <SmartphoneProductCard 
-                        name="Artisan Dining Set" 
-                        price="₹21,099" 
-                        rating="4.8" 
-                        img="https://images.unsplash.com/photo-1617806118233-18e1db207f62?w=200&q=80" 
+                      <SmartphoneProductCard
+                        name="Artisan Dining Set"
+                        price="₹21,099"
+                        rating="4.8"
+                        img={FurnitureImg}
                       />
-                      <SmartphoneProductCard 
-                        name="Designer Bed" 
-                        price="₹29,999" 
-                        rating="4.6" 
-                        img="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&q=80" 
+                      <SmartphoneProductCard
+                        name="Designer Bed"
+                        price="₹29,999"
+                        rating="4.6"
+                        img="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&q=80"
                       />
                     </div>
                   </div>
@@ -335,22 +348,30 @@ const ComingSoonPage = () => {
           </div>
 
           {/* RIGHT COLUMN: VERTICAL FEATURE BADGES WITH COMPACT SPACING */}
-          <div className="flex-1 w-full max-w-xs relative flex flex-col justify-center items-center lg:items-end">
-            
-            {/* Vertical Cards Wrapper - Tighter gaps and smaller icons */}
-            <div className="relative space-y-3.5 pl-8 lg:pl-0 w-full flex flex-col items-start lg:items-end">
-              {/* Connection Dotted Line */}
-              <div className="absolute left-6 lg:left-auto lg:right-[158px] top-4 bottom-4 w-0.5 border-l-2 border-dashed border-[#311B92]/20 z-0"></div>
+          <div className="flex-1 w-full max-w-md relative flex flex-col justify-center items-start lg:pl-16">
 
-              {/* Vertical Feature Item Lists */}
-              <RightVerticalFeature icon={<FiShoppingCart />} text="WIDE RANGE" subtext="of Products" color="bg-[#D12C8D]" compact={true} />
-              <RightVerticalFeature icon={<FiAward />} text="BEST QUALITY" subtext="Assured" color="bg-[#189D91]" compact={true} />
-              <RightVerticalFeature icon={<FiTag />} text="EXCLUSIVE" subtext="Deals" color="bg-[#311B92]" compact={true} />
-              <RightVerticalFeature icon={<FiTruck />} text="FAST & RELIABLE" subtext="Delivery" color="bg-[#E0A96D]" compact={true} />
+            {/* Vertical Cards Wrapper with Beautiful Curved Dashed Line */}
+            <div className="relative w-full flex flex-col gap-6 py-6 pl-4 lg:pl-0">
+
+              {/* Connection Curved SVG Dashed Line */}
+              <svg className="absolute left-4 lg:left-0 top-0 w-36 h-[290px] pointer-events-none z-0 overflow-visible" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M 36 28 C 76 50, 76 90, 76 112 C 76 134, 48 174, 48 196 C 48 218, 24 258, 24 280"
+                  stroke="#94A3B8"
+                  strokeWidth="2.5"
+                  strokeDasharray="6 6"
+                />
+              </svg>
+
+              {/* Vertical Feature Item Lists with X-offsets perfectly matching the curve centers */}
+              <RightVerticalFeature icon={<FiShoppingCart />} text="WIDE RANGE" subtext="of Products" color="bg-[#D12C8D]" style={{ transform: 'translateX(12px)' }} />
+              <RightVerticalFeature icon={<FiAward />} text="BEST QUALITY" subtext="Assured" color="bg-[#189D91]" style={{ transform: 'translateX(52px)' }} />
+              <RightVerticalFeature icon={<FiTag />} text="EXCLUSIVE" subtext="Deals" color="bg-[#311B92]" style={{ transform: 'translateX(24px)' }} />
+              <RightVerticalFeature icon={<FiTruck />} text="FAST & RELIABLE" subtext="Delivery" color="bg-[#E0A96D]" style={{ transform: 'translateX(0px)' }} />
             </div>
 
             {/* Floating Purple Emerging Logo Box Container */}
-            <div className="mt-6 flex flex-col items-center lg:items-end gap-4 w-full">
+            <div className="mt-6 flex flex-col items-start lg:items-start gap-4 w-full pl-6 lg:pl-6">
               {/* Rocket emerge badge */}
               <div className="bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-full border border-slate-100 shadow-[0_10px_30px_rgba(209,44,141,0.06)] flex items-center gap-2.5 hover:scale-105 transition-transform duration-300">
                 <span className="text-[#D12C8D] text-xs animate-pulse">🚀</span>
@@ -368,116 +389,128 @@ const ComingSoonPage = () => {
       {/* --- INTERIOR SHOWCASE SECTION (SEAMLESS INFINITE SCROLL CAROUSEL) --- */}
       <section className="bg-[#FAF5EC] py-24 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 mb-20 flex flex-col items-center text-center">
-           <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[#311B92]/40 mb-4 text-center">Curated Inspiration</h3>
-           <h2 className="text-2xl md:text-5xl font-black text-[#311B92]">Transforming Visions into Reality</h2>
+          <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[#311B92]/40 mb-4 text-center">Curated Inspiration</h3>
+          <h2 className="text-2xl md:text-5xl font-black text-[#311B92]">Transforming Visions into Reality</h2>
         </div>
-        
+
         {/* Infinite Scrolling Carousel (Seamless Right-to-Left) */}
         <div className="relative flex overflow-hidden pb-10">
-           <motion.div 
-             className="flex gap-6 md:gap-10 px-4 whitespace-nowrap"
-             animate={{ x: [0, "-50%"] }}
-             transition={{ 
-               duration: 30, 
-               repeat: Infinity, 
-               ease: "linear" 
-             }}
-           >
-              {[
-                Showcase1, Showcase2, Showcase3, Showcase4,
-                Showcase5, Showcase6, Showcase7, Showcase8,
-                Showcase1, Showcase2, Showcase3, Showcase4,
-                Showcase5, Showcase6, Showcase7, Showcase8
-              ].map((img, idx) => (
-                <ShowcaseCard key={idx} img={img} />
-              ))}
-           </motion.div>
+          <motion.div
+            className="flex gap-6 md:gap-10 px-4 whitespace-nowrap"
+            animate={{ x: [0, "-50%"] }}
+            transition={{
+              duration: 30,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+          >
+            {[
+              Showcase1, Showcase2, Showcase3, Showcase4,
+              Showcase5, Showcase6, Showcase7, Showcase8,
+              Showcase1, Showcase2, Showcase3, Showcase4,
+              Showcase5, Showcase6, Showcase7, Showcase8
+            ].map((img, idx) => (
+              <ShowcaseCard key={idx} img={img} />
+            ))}
+          </motion.div>
         </div>
       </section>
 
       {/* --- WHO WE ARE (CLEAN OVERLAPPING LAYOUT) --- */}
-      <section className="py-24 bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-8 flex flex-col lg:flex-row items-center gap-16 lg:gap-20">
-           {/* Left Side: Overlapping Images */}
-           <div className="w-full lg:w-1/2 relative min-h-[500px] flex items-center justify-center">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="w-full h-full relative z-10 rounded-[3rem] overflow-hidden shadow-2xl border border-slate-100"
-              >
-                 <img src={AboutShowroom} alt="Showroom" className="w-full h-full object-cover" />
-                 <div className="absolute top-6 left-6 px-4 py-1.5 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-[10px] font-black text-white uppercase tracking-[0.3em]">
-                   About Riddha // 01
-                 </div>
-              </motion.div>
-
-              <motion.div 
-                initial={{ x: -30, y: 30, opacity: 0 }}
-                whileInView={{ x: 0, y: 0, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.3 }}
-                className="absolute -bottom-8 -left-8 w-64 h-80 z-20 rounded-2xl overflow-hidden shadow-2xl border-8 border-white"
-              >
-                 <img src={AboutDetail} alt="Detail" className="w-full h-full object-cover" />
-              </motion.div>
-           </div>
-
-           {/* Right Side: Editorial Content */}
-           <div className="w-full lg:w-1/2 space-y-8">
-              <div className="space-y-4">
-                 <h4 className="text-xs font-black uppercase tracking-[0.6em] text-[#189D91]">The Riddha Legacy</h4>
-                 <h2 className="text-5xl md:text-7xl font-black text-[#311B92] leading-[1.1] tracking-tighter">
-                   Creating A <br /> <span className="text-[#189D91]">Legacy.</span>
-                 </h2>
+      <section className="py-14 bg-white overflow-hidden">
+         <div className="max-w-6xl mx-auto px-8 flex flex-col lg:flex-row items-center gap-10 lg:gap-14">
+          {/* Left Side: Overlapping Images */}
+          <div className="w-full lg:w-1/2 relative min-h-[380px] flex items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="w-full h-full relative z-10 rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100"
+            >
+              <img src={AboutShowroom} alt="Showroom" className="w-full h-full object-cover" />
+              <div className="absolute top-4 left-4 px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-[9px] font-black text-white uppercase tracking-[0.3em]">
+                About Riddha // 01
               </div>
-              <p className="text-xl text-slate-500 leading-relaxed font-medium">
-                 We specialize in elevating your living spaces into a visual narrative that stands out. Our approach blends technical precision with raw emotional depth, bringing you the finest interior products from across the globe.
-              </p>
-              <div className="pt-4">
-                 <button className="px-10 py-5 bg-[#311B92] text-white rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] shadow-xl shadow-[#311B92]/20 hover:scale-105 transition-all">
-                    Inquire Now
-                 </button>
-              </div>
-           </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ x: -20, y: 20, opacity: 0 }}
+              whileInView={{ x: 0, y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="absolute -bottom-6 -left-6 w-48 h-60 z-20 rounded-2xl overflow-hidden shadow-2xl border-[6px] border-white"
+            >
+              <img src={AboutDetail} alt="Detail" className="w-full h-full object-cover" />
+            </motion.div>
+          </div>
+
+          {/* Right Side: Editorial Content */}
+          <div className="w-full lg:w-1/2 space-y-5">
+            <div className="space-y-3">
+              <h4 className="text-[10px] md:text-xs font-black uppercase tracking-[0.5em] text-[#189D91]">The Riddha Legacy</h4>
+              <h2 className="text-3xl md:text-5xl font-black text-[#311B92] leading-[1.1] tracking-tighter">
+                Creating A <br /> <span className="text-[#189D91]">Legacy.</span>
+              </h2>
+            </div>
+            <p className="text-sm md:text-base text-slate-500 leading-relaxed font-medium">
+              We specialize in elevating your living spaces into a visual narrative that stands out. Our approach blends technical precision with raw emotional depth, bringing you the finest interior products from across the globe.
+            </p>
+            <div className="pt-2">
+              <button className="px-8 py-3.5 bg-[#311B92] text-white rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-indigo-900/10 hover:scale-105 transition-all active:scale-95">
+                Inquire Now
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* --- MISSION & VISION --- */}
-      <section className="py-24 bg-slate-50/50">
-         <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <MissionCard 
-               icon={<FiTarget size={32} />} 
-               title="Our Mission" 
-               text="To revolutionize the interior supply industry in India by providing high-quality, designer-curated products with transparent pricing and exceptional service."
-               color="from-[#189D91]/10 to-[#189D91]/5"
-            />
-            <MissionCard 
-               icon={<FiEye size={32} />} 
-               title="Our Vision" 
-               text="To become the most trusted digital hub for interior solutions, where innovation meets elegance, making premium home styling accessible to every household."
-               color="from-[#311B92]/10 to-[#311B92]/5"
-            />
-         </div>
+      <section className="py-14 bg-[#FAF6EE]/40 border-y border-slate-100/50 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <MissionCard
+            icon={<FiTarget size={24} />}
+            title="Our Mission"
+            text="To revolutionize the interior supply industry in India by providing high-quality, designer-curated products with transparent pricing and exceptional service."
+            color="from-[#189D91]/12 via-[#189D91]/4 to-transparent"
+            iconColor="text-[#189D91]"
+            borderColor="border-[#189D91]/20"
+          />
+          <MissionCard
+            icon={<FiEye size={24} />}
+            title="Our Vision"
+            text="To become the most trusted digital hub for interior solutions, where innovation meets elegance, making premium home styling accessible to every household."
+            color="from-[#311B92]/12 via-[#311B92]/4 to-transparent"
+            iconColor="text-[#311B92]"
+            borderColor="border-[#311B92]/20"
+          />
+          <MissionCard
+            icon={<FiAward size={24} />}
+            title="Our Values"
+            text="Uncompromising integrity, design innovation, and customer-first obsession in everything we touch."
+            color="from-[#D12C8D]/12 via-[#D12C8D]/4 to-transparent"
+            iconColor="text-[#D12C8D]"
+            borderColor="border-[#D12C8D]/20"
+          />
+        </div>
       </section>
 
       {/* --- WHY CHOOSE US (CLEAN VERSION) --- */}
       <section className="py-24 bg-white relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#189D91]/5 blur-[150px] rounded-full"></div>
-         
-         <div className="max-w-7xl mx-auto px-8 relative z-10">
-            <div className="text-center space-y-4 mb-20">
-               <h4 className="text-xs font-black uppercase tracking-[0.5em] text-[#189D91]">The Riddha Edge</h4>
-               <h2 className="text-4xl md:text-6xl font-black text-[#311B92]">Why Choose Us?</h2>
-            </div>
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#189D91]/5 blur-[150px] rounded-full"></div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-               <FeatureItem icon={<FiBox />} title="Wide Range" text="Thousands of products across 20+ categories." />
-               <FeatureItem icon={<FiAward />} title="Premium Quality" text="Each item is hand-picked and quality-checked." />
-               <FeatureItem icon={<FiTag />} title="Affordable Pricing" text="Designer looks without the designer price tag." />
-               <FeatureItem icon={<FiTruck />} title="Fast Delivery" text="Reliable shipping across all major Indian cities." />
-            </div>
-         </div>
+        <div className="max-w-7xl mx-auto px-8 relative z-10">
+          <div className="text-center space-y-4 mb-20">
+            <h4 className="text-xs font-black uppercase tracking-[0.5em] text-[#189D91]">The Riddha Edge</h4>
+            <h2 className="text-4xl md:text-6xl font-black text-[#311B92]">Why Choose Us?</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <FeatureItem icon={<FiBox />} title="Wide Range" text="Thousands of products across 20+ categories." />
+            <FeatureItem icon={<FiAward />} title="Premium Quality" text="Each item is hand-picked and quality-checked." />
+            <FeatureItem icon={<FiTag />} title="Affordable Pricing" text="Designer looks without the designer price tag." />
+            <FeatureItem icon={<FiTruck />} title="Fast Delivery" text="Reliable shipping across all major Indian cities." />
+          </div>
+        </div>
       </section>
 
       {/* --- CONTACT SECTION --- */}
@@ -485,83 +518,83 @@ const ComingSoonPage = () => {
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#189D91]/5 blur-[120px] rounded-full"></div>
         <div className="max-w-7xl mx-auto px-8">
           <div className="text-center space-y-4 mb-20">
-             <h4 className="text-xs font-black uppercase tracking-[0.5em] text-[#189D91]">Let's Connect</h4>
-             <h2 className="text-4xl md:text-6xl font-black text-[#311B92]">Get In <span className="text-[#D12C8D]">Touch</span></h2>
+            <h4 className="text-xs font-black uppercase tracking-[0.5em] text-[#189D91]">Let's Connect</h4>
+            <h2 className="text-4xl md:text-6xl font-black text-[#311B92]">Get In <span className="text-[#D12C8D]">Touch</span></h2>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
             <div className="space-y-12">
-               <ContactInfoCard 
-                 icon={<FiMapPin />} 
-                 title="Our Office" 
-                 text="123 Interior Hub, Mumbai, Maharashtra 400001" 
-                 link="https://maps.google.com"
-               />
-               <ContactInfoCard 
-                 icon={<FiPhone />} 
-                 title="Call Us" 
-                 text="+91 98765 43210" 
-                 link="tel:+919876543210"
-               />
-               <ContactInfoCard 
-                 icon={<FiMail />} 
-                 title="Email Us" 
-                 text="info@riddhainterio.com" 
-                 link="mailto:info@riddhainterio.com"
-               />
-               
-               <div className="pt-8 border-t border-slate-100">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Stay Connected</h4>
-                  <div className="flex gap-4">
-                    <SocialLink icon={<LuInstagram />} />
-                    <SocialLink icon={<LuFacebook />} />
-                    <SocialLink icon={<LuYoutube />} />
-                  </div>
-               </div>
+              <ContactInfoCard
+                icon={<FiMapPin />}
+                title="Our Office"
+                text="123 Interior Hub, Mumbai, Maharashtra 400001"
+                link="https://maps.google.com"
+              />
+              <ContactInfoCard
+                icon={<FiPhone />}
+                title="Call Us"
+                text="+91 98765 43210"
+                link="tel:+919876543210"
+              />
+              <ContactInfoCard
+                icon={<FiMail />}
+                title="Email Us"
+                text="info@riddhainterio.com"
+                link="mailto:info@riddhainterio.com"
+              />
+
+              <div className="pt-8 border-t border-slate-100">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Stay Connected</h4>
+                <div className="flex gap-4">
+                  <SocialLink icon={<LuInstagram />} />
+                  <SocialLink icon={<LuFacebook />} />
+                  <SocialLink icon={<LuYoutube />} />
+                </div>
+              </div>
             </div>
 
             <div className="relative">
-               <div className="bg-white rounded-[3rem] p-8 lg:p-12 shadow-2xl border border-slate-50 relative z-10">
-                  <form onSubmit={handleContactSubmit} className="space-y-6">
-                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <FormInput label="Full Name" placeholder="John Doe" type="text" required />
-                        <FormInput label="Email Address" placeholder="john@example.com" type="email" required />
-                     </div>
-                     <FormInput label="Subject" placeholder="General Inquiry" type="text" required />
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Your Message</label>
-                        <textarea 
-                           rows="4" 
-                           placeholder="How can we help you?"
-                           className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-700 focus:border-[#189D91] outline-none transition-colors resize-none"
-                           required
-                        ></textarea>
-                     </div>
-                     <button 
-                       type="submit"
-                       className="w-full py-5 bg-gradient-to-r from-[#311B92] to-[#189D91] text-white rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs shadow-xl hover:scale-[1.02] transition-all active:scale-95 flex items-center justify-center gap-4"
-                     >
-                        Send Message <FiSend size={16} />
-                     </button>
-                  </form>
+              <div className="bg-white rounded-[3rem] p-8 lg:p-12 shadow-2xl border border-slate-50 relative z-10">
+                <form onSubmit={handleContactSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <FormInput label="Full Name" placeholder="John Doe" type="text" required />
+                    <FormInput label="Email Address" placeholder="john@example.com" type="email" required />
+                  </div>
+                  <FormInput label="Subject" placeholder="General Inquiry" type="text" required />
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Your Message</label>
+                    <textarea
+                      rows="4"
+                      placeholder="How can we help you?"
+                      className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-700 focus:border-[#189D91] outline-none transition-colors resize-none"
+                      required
+                    ></textarea>
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-5 bg-gradient-to-r from-[#311B92] to-[#189D91] text-white rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs shadow-xl hover:scale-[1.02] transition-all active:scale-95 flex items-center justify-center gap-4"
+                  >
+                    Send Message <FiSend size={16} />
+                  </button>
+                </form>
 
-                  <AnimatePresence>
-                     {isSubmitted && (
-                       <motion.div 
-                         initial={{ opacity: 0, scale: 0.9 }}
-                         animate={{ opacity: 1, scale: 1 }}
-                         exit={{ opacity: 0, scale: 0.9 }}
-                         className="absolute inset-0 bg-white rounded-[3rem] z-20 flex flex-col items-center justify-center p-12 text-center"
-                       >
-                          <div className="w-20 h-20 bg-teal-50 text-[#189D91] rounded-full flex items-center justify-center mb-6">
-                             <FiCheckCircle size={40} />
-                          </div>
-                          <h3 className="text-2xl font-black text-[#311B92] mb-4">Message Sent!</h3>
-                          <p className="text-slate-500 font-medium leading-relaxed">We'll get back to you shortly.</p>
-                       </motion.div>
-                     )}
-                  </AnimatePresence>
-               </div>
+                <AnimatePresence>
+                  {isSubmitted && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className="absolute inset-0 bg-white rounded-[3rem] z-20 flex flex-col items-center justify-center p-12 text-center"
+                    >
+                      <div className="w-20 h-20 bg-teal-50 text-[#189D91] rounded-full flex items-center justify-center mb-6">
+                        <FiCheckCircle size={40} />
+                      </div>
+                      <h3 className="text-2xl font-black text-[#311B92] mb-4">Message Sent!</h3>
+                      <p className="text-slate-500 font-medium leading-relaxed">We'll get back to you shortly.</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </div>
@@ -591,7 +624,7 @@ const ComingSoonPage = () => {
                 <FooterLink to="/coming-soon/shop" label="Shop Online" />
                 <FooterLink to="/coming-soon/categories" label="Collections" />
                 <li>
-                  <button 
+                  <button
                     onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
                     className="text-sm text-slate-500 hover:text-[#311B92] transition-colors flex items-center gap-2 group"
                   >
@@ -668,71 +701,73 @@ const SmartphoneProductCard = ({ name, price, rating, img }) => (
 
 // --- Right Column Sub Components ---
 
-const RightVerticalFeature = ({ icon, text, subtext, color, compact }) => (
-  <div className="flex items-center gap-3 group cursor-default z-10 w-full justify-start lg:justify-end">
-    <div className="flex flex-col items-start lg:items-end order-2 lg:order-1 text-left lg:text-right">
-      <span className={`font-black text-slate-800 tracking-wider uppercase leading-none ${compact ? 'text-[9px] md:text-[10px]' : 'text-[10px] md:text-xs'}`}>{text}</span>
-      <span className={`font-bold text-slate-400 uppercase tracking-wider mt-0.5 ${compact ? 'text-[8px] md:text-[9px]' : 'text-[9px] md:text-[10px]'}`}>{subtext}</span>
+const RightVerticalFeature = ({ icon, text, subtext, color, style }) => (
+  <div className="flex items-center gap-4 group cursor-default z-10 w-full justify-start" style={style}>
+    {/* Circular Icon - Larger size matching the reference image */}
+    <div className={`rounded-full ${color} flex items-center justify-center text-white shadow-lg shadow-indigo-950/10 shrink-0 transform group-hover:scale-110 transition-transform duration-300 w-12 h-12`}>
+      {React.cloneElement(icon, { size: 20 })}
     </div>
-    <div className={`rounded-full ${color} flex items-center justify-center text-white shadow-lg shadow-indigo-950/10 order-1 lg:order-2 shrink-0 transform group-hover:scale-110 transition-transform duration-300 ${compact ? 'w-9 h-9' : 'w-12 h-12'}`}>
-      {React.cloneElement(icon, { size: compact ? 16 : 20 })}
+    {/* Text Description - Larger text matching the reference image, natural casing for subtext */}
+    <div className="flex flex-col items-start text-left">
+      <span className="font-black text-slate-800 tracking-wider uppercase leading-none text-xs md:text-sm">{text}</span>
+      <span className="font-bold text-slate-400 tracking-wider mt-1 text-[10px] md:text-xs">{subtext}</span>
     </div>
   </div>
 );
 
 // --- Global Page Sub Components ---
 
-const MissionCard = ({ icon, title, text, color }) => (
-   <motion.div 
-      whileHover={{ y: -12, scale: 1.02 }}
-      className={`p-10 md:p-14 rounded-[3.5rem] bg-gradient-to-br ${color} border border-white relative group transition-all duration-500 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)] hover:shadow-2xl overflow-hidden`}
-   >
-      <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${color} blur-[60px] opacity-0 group-hover:opacity-40 transition-opacity duration-500`}></div>
-      <div className="relative z-10 space-y-8">
-         <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center text-[#311B92] shadow-xl shadow-indigo-900/5 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
-            {React.cloneElement(icon, { size: 36 })}
-         </div>
-         <div className="space-y-4">
-            <h3 className="text-2xl md:text-3xl font-black text-[#311B92] tracking-tight">{title}</h3>
-            <p className="text-lg text-slate-500 font-medium leading-relaxed">{text}</p>
-         </div>
+const MissionCard = ({ icon, title, text, color, iconColor = "text-[#311B92]", borderColor = "border-white" }) => (
+  <motion.div
+    whileHover={{ y: -6, scale: 1.01 }}
+    className={`p-8 rounded-[2rem] bg-gradient-to-br ${color} border ${borderColor} relative group transition-all duration-500 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.06)] hover:shadow-2xl overflow-hidden`}
+  >
+    <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${color} blur-[60px] opacity-0 group-hover:opacity-40 transition-opacity duration-500`}></div>
+    <div className="relative z-10 space-y-5">
+      <div className={`w-14 h-14 rounded-2xl bg-white flex items-center justify-center ${iconColor} shadow-xl shadow-indigo-900/5 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500`}>
+        {React.cloneElement(icon, { size: 24 })}
       </div>
-   </motion.div>
+      <div className="space-y-2">
+        <h3 className={`text-xl font-black ${iconColor} tracking-tight`}>{title}</h3>
+        <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">{text}</p>
+      </div>
+    </div>
+  </motion.div>
 );
 
 const FeatureItem = ({ icon, title, text }) => (
   <div className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-slate-200/60 hover:-translate-y-2 transition-all duration-500 space-y-6 text-center md:text-left">
-     <div className="text-[#189D91] flex justify-center md:justify-start">
-        <div className="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center">
-           {React.cloneElement(icon, { size: 28 })}
-        </div>
-     </div>
-     <h4 className="text-2xl font-black text-[#311B92] tracking-tight">{title}</h4>
-     <p className="text-slate-500 font-medium leading-relaxed">{text}</p>
+    <div className="text-[#189D91] flex justify-center md:justify-start">
+      <div className="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center">
+        {React.cloneElement(icon, { size: 28 })}
+      </div>
+    </div>
+    <h4 className="text-2xl font-black text-[#311B92] tracking-tight">{title}</h4>
+    <p className="text-slate-500 font-medium leading-relaxed">{text}</p>
   </div>
 );
 
 const ContactInfoCard = ({ icon, title, text, link }) => (
   <a href={link} className="flex gap-6 items-center group">
-     <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-[#189D91] border border-slate-100 group-hover:bg-[#311B92] group-hover:text-white transition-all duration-500 shadow-sm">
-        {React.cloneElement(icon, { size: 24 })}
-     </div>
-     <div className="space-y-1">
-        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{title}</h4>
-        <p className="text-lg font-black text-[#311B92] group-hover:text-[#189D91] transition-colors">{text}</p>
-     </div>
+    <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-[#189D91] border border-slate-100 group-hover:bg-[#311B92] group-hover:text-white transition-all duration-500 shadow-sm">
+      {React.cloneElement(icon, { size: 24 })}
+    </div>
+    <div className="space-y-1">
+      <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{title}</h4>
+      <p className="text-lg font-black text-[#311B92] group-hover:text-[#189D91] transition-colors">{text}</p>
+    </div>
   </a>
 );
 
 const FormInput = ({ label, placeholder, type, required }) => (
   <div className="space-y-2">
-     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{label}</label>
-     <input 
-        type={type} 
-        placeholder={placeholder} 
-        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-700 focus:border-[#189D91] outline-none transition-colors"
-        required={required}
-     />
+    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{label}</label>
+    <input
+      type={type}
+      placeholder={placeholder}
+      className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-700 focus:border-[#189D91] outline-none transition-colors"
+      required={required}
+    />
   </div>
 );
 
