@@ -106,12 +106,11 @@ const ComingSoonPage = () => {
           <div className="flex-1 space-y-3 flex flex-col items-center lg:items-start text-center lg:text-left">
 
             {/* Official Logo Banner - Super Crisp Size */}
-            <div className="flex flex-col items-center lg:items-start">
+            <div className="flex flex-col items-center lg:items-start bg-[#FAF6EE] rounded-3xl p-1.5 mix-blend-multiply">
               <img
                 src={Logo}
                 alt="Riddha Interio Mart Logo"
-                className="h-20 md:h-26 w-auto object-contain"
-                style={{ mixBlendMode: 'multiply' }}
+                className="h-20 md:h-26 w-auto object-contain mix-blend-multiply"
               />
             </div>
 
@@ -394,7 +393,7 @@ const ComingSoonPage = () => {
         </div>
 
         {/* Infinite Scrolling Carousel (Seamless Right-to-Left) */}
-        <div className="relative flex overflow-hidden pb-10">
+        <div className="relative flex overflow-hidden py-12">
           <motion.div
             className="flex gap-6 md:gap-10 px-4 whitespace-nowrap"
             animate={{ x: [0, "-50%"] }}
@@ -605,10 +604,14 @@ const ComingSoonPage = () => {
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             <div className="space-y-6">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-black tracking-tighter text-[#189D91]">Riddha</span>
-                <span className="text-xl font-bold text-slate-400">Interio Mart</span>
-              </div>
+              <Link to="/coming-soon" className="inline-block hover:scale-105 transition-transform duration-300">
+                <img 
+                  src={Logo} 
+                  alt="Riddha Interio Mart" 
+                  className="h-16 w-auto object-contain" 
+                  style={{ mixBlendMode: 'multiply' }}
+                />
+              </Link>
               <p className="text-sm text-slate-500 leading-relaxed">Transforming spaces with elegance and efficiency. India's premium hub for all interior supply needs.</p>
               <div className="flex items-center gap-4">
                 <SocialLink icon={<LuInstagram />} />
@@ -788,7 +791,8 @@ const SocialLink = ({ icon }) => (
 
 const ShowcaseCard = ({ img }) => (
   <motion.div
-    whileHover={{ y: -10 }}
+    whileHover={{ y: -14, scale: 1.03, rotate: 0 }}
+    transition={{ type: "spring", stiffness: 300, damping: 20 }}
     className="w-48 h-72 md:w-56 md:h-80 shrink-0 bg-white rounded-[2rem] overflow-hidden shadow-2xl shadow-black/5"
   >
     <img src={img} alt="Interior Inspiration" className="w-full h-full object-cover" />
