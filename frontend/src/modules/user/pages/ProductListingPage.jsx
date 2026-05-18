@@ -130,7 +130,7 @@ const ProductListingPage = () => {
             <div className="space-y-3">
               <button
                 onClick={() => handleCategoryChange('all')}
-                className={`flex items-center justify-between w-full p-4 rounded-2xl transition-all group ${activeCategory === 'all' ? 'bg-warm-sand text-white font-semibold shadow-lg shadow-warm-sand/20' : 'text-deep-espresso/60 hover:bg-soft-oatmeal/10 hover:text-deep-espresso'}`}
+                className={`flex items-center justify-between w-full p-4 rounded-2xl transition-all group ${activeCategory === 'all' ? 'bg-[#189D91] text-white font-semibold shadow-lg shadow-[#189D91]/20' : 'text-deep-espresso/60 hover:bg-soft-oatmeal/10 hover:text-deep-espresso'}`}
               >
                 <span className="text-sm font-medium group-hover:translate-x-1 transition-transform">All Collections</span>
                 <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold ${activeCategory === 'all' ? 'bg-white/20' : 'bg-soft-oatmeal/20'}`}>{products.length}</span>
@@ -139,7 +139,7 @@ const ProductListingPage = () => {
                 <button
                   key={cat.id}
                   onClick={() => handleCategoryChange(cat.slug)}
-                  className={`flex items-center justify-between w-full p-4 rounded-2xl transition-all group ${activeCategory === cat.slug ? 'bg-warm-sand text-white font-semibold shadow-lg shadow-warm-sand/20' : 'text-deep-espresso/60 hover:bg-soft-oatmeal/10 hover:text-deep-espresso'}`}
+                  className={`flex items-center justify-between w-full p-4 rounded-2xl transition-all group ${activeCategory === cat.slug ? 'bg-[#189D91] text-white font-semibold shadow-lg shadow-[#189D91]/20' : 'text-deep-espresso/60 hover:bg-soft-oatmeal/10 hover:text-deep-espresso'}`}
                 >
                   <span className="text-sm font-medium group-hover:translate-x-1 transition-transform">{cat.name}</span>
                   <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold ${activeCategory === cat.slug ? 'bg-white/20' : 'bg-soft-oatmeal/20'}`}>{cat.productCount}</span>
@@ -204,7 +204,7 @@ const ProductListingPage = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleCategoryChange('all')}
-                    className="mt-10 bg-deep-espresso text-white px-10 py-4 rounded-full font-bold text-sm shadow-xl"
+                    className="mt-10 bg-[#189D91] hover:bg-[#14847a] text-white px-10 py-4 rounded-xl font-bold text-sm shadow-md shadow-[#189D91]/15 transition-all"
                   >
                     Reset all filters
                   </motion.button>
@@ -249,7 +249,7 @@ const ProductListingPage = () => {
                       <button
                         key={slug}
                         onClick={() => { handleCategoryChange(slug); setIsSidebarOpen(false); }}
-                        className={`px-5 py-4 rounded-[1.25rem] border text-xs font-black uppercase tracking-widest transition-all ${activeCategory === slug ? 'bg-deep-espresso border-deep-espresso text-white shadow-xl' : 'border-soft-oatmeal/40 text-deep-espresso hover:bg-soft-oatmeal/10'}`}
+                        className={`px-5 py-4 rounded-[1.25rem] border text-xs font-black uppercase tracking-widest transition-all ${activeCategory === slug ? 'bg-[#189D91] border-[#189D91] text-white shadow-lg' : 'border-soft-oatmeal/40 text-deep-espresso hover:bg-soft-oatmeal/10'}`}
                       >
                         {slug}
                       </button>
