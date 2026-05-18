@@ -9,7 +9,8 @@ import {
   LuSettings,
   LuMessageCircle,
   LuInfo,
-  LuLogOut
+  LuLogOut,
+  LuShieldCheck
 } from 'react-icons/lu';
 
 const DeliverySidebar = ({ isOpen, onClose }) => {
@@ -28,6 +29,7 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
     { name: 'Settings', path: '/delivery/settings', icon: LuSettings },
     { name: 'Help & Support', path: '/delivery/help', icon: LuMessageCircle },
     { name: 'About', path: '/delivery/about', icon: LuInfo },
+    { name: 'Terms & Conditions', path: '/delivery/terms', icon: LuShieldCheck },
   ];
 
   return (

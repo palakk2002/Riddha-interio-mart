@@ -59,6 +59,7 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
       items: [
         { name: 'Notifications', path: '/delivery/notifications', icon: LuBell },
         { name: 'Reports', path: '/delivery/dashboard', icon: LuFileText },
+        { name: 'Terms & Conditions', path: '/delivery/terms', icon: LuShieldCheck },
         { name: 'Settings', path: '/delivery/settings', icon: LuSettings },
         { name: 'Help & Support', path: '/delivery/help', icon: LuCircleHelp },
       ]

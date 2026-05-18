@@ -10,6 +10,7 @@ const Wallet = React.lazy(() => import('./pages/Wallet'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 const HelpSupport = React.lazy(() => import('./pages/HelpSupport'));
 const About = React.lazy(() => import('./pages/About'));
+const TermsConditions = React.lazy(() => import('./pages/TermsConditions'));
 const Notifications = React.lazy(() => import('./pages/Notifications'));
 const LoginPage = React.lazy(() => import('../user/pages/LoginPage'));
 const SignupPage = React.lazy(() => import('../user/pages/SignupPage'));
@@ -31,6 +32,7 @@ const DeliveryRoutes = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/help" element={<HelpSupport />} />
         <Route path="/about" element={<About />} />
+        <Route path="/terms" element={<TermsConditions />} />
         <Route path="/notifications" element={<Notifications />} />
       </Route>
     </Routes>
