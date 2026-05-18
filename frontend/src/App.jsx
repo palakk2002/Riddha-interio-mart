@@ -7,6 +7,7 @@ import UserRoutes from './modules/user/routes';
 import AdminRoutes from './modules/admin/routes';
 import SellerRoutes from './modules/seller/routes';
 import DeliveryRoutes from './modules/delivery/routes';
+import ComingSoonRoutes from './modules/comingsoon/routes';
 import { Toaster } from 'react-hot-toast';
 import PincodeModal from './modules/user/components/PincodeModal';
 import DeliveryBar from './modules/user/components/DeliveryBar';
@@ -75,6 +76,7 @@ function App() {
           <Route path="/admin/*" element={<AdminRoutes />} />
           <Route path="/seller/*" element={<SellerRoutes />} />
           <Route path="/delivery/*" element={<DeliveryRoutes />} />
+          <Route path="/coming-soon/*" element={<ComingSoonRoutes />} />
           <Route path="/*" element={<UserRoutes />} />
         </Routes>
       </main>

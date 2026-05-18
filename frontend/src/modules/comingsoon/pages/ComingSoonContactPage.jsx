@@ -120,19 +120,19 @@ const ComingSoonContactPage = () => {
                {/* Success Overlay */}
                <AnimatePresence>
                   {isSubmitted && (
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      className="absolute inset-0 bg-white rounded-[3rem] z-20 flex flex-col items-center justify-center p-12 text-center"
-                    >
-                       <div className="w-20 h-20 bg-teal-50 text-[#189D91] rounded-full flex items-center justify-center mb-6">
-                          <FiCheckCircle size={40} />
-                       </div>
-                       <h3 className="text-2xl font-black text-[#311B92] mb-4">Message Sent!</h3>
-                       <p className="text-slate-500 font-medium leading-relaxed">Thank you for reaching out. Our team will get back to you within 24 hours.</p>
-                       <button onClick={() => setIsSubmitted(false)} className="mt-8 text-xs font-black uppercase tracking-widest text-[#189D91]">Send another message</button>
-                    </motion.div>
+                     <motion.div 
+                       initial={{ opacity: 0, scale: 0.9 }}
+                       animate={{ opacity: 1, scale: 1 }}
+                       exit={{ opacity: 0, scale: 0.9 }}
+                       className="absolute inset-0 bg-white rounded-[3rem] z-20 flex flex-col items-center justify-center p-12 text-center"
+                     >
+                        <div className="w-20 h-20 bg-teal-50 text-[#189D91] rounded-full flex items-center justify-center mb-6">
+                           <FiCheckCircle size={40} />
+                        </div>
+                        <h3 className="text-2xl font-black text-[#311B92] mb-4">Message Sent!</h3>
+                        <p className="text-slate-500 font-medium leading-relaxed">Thank you for reaching out. Our team will get back to you within 24 hours.</p>
+                        <button onClick={() => setIsSubmitted(false)} className="mt-8 text-xs font-black uppercase tracking-widest text-[#189D91]">Send another message</button>
+                     </motion.div>
                   )}
                </AnimatePresence>
             </div>

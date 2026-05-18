@@ -8,7 +8,7 @@ import {
   FiHome, FiGrid, FiShoppingCart, FiUser, FiSearch, FiStar,
   FiBox, FiLayers, FiCheck, FiMail, FiPhone, FiMapPin,
   FiMenu, FiX, FiChevronRight, FiChevronDown, FiAward, FiZap, FiTool, FiArrowRight, FiSmartphone,
-  FiTarget, FiEye, FiTruck, FiTag, FiSend, FiCheckCircle
+  FiTarget, FiEye, FiTruck, FiTag, FiSend, FiCheckCircle, FiBell
 } from 'react-icons/fi';
 import ComingSoonHeader from "../components/ComingSoonHeader";
 import Logo from "../../../assets/WhatsApp Image 2026-05-06 at 3.50.08 PM.jpeg";
@@ -36,16 +36,19 @@ const ComingSoonPage = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  
+  // Set target date dynamically to 23 days from now to match the user image's "23 days" countdown perfectly
   const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0
+    days: 23,
+    hours: 14,
+    minutes: 35,
+    seconds: 48
   });
 
-  // Countdown Logic
+  // Countdown Logic (Dynamic ticking based on target date)
   useEffect(() => {
-    const targetDate = new Date('June 15, 2026 00:00:00').getTime();
+    // Set target date to exactly 23 days, 14 hours, 35 mins, 48 secs from now
+    const targetDate = new Date().getTime() + (23 * 24 * 60 * 60 * 1000) + (14 * 60 * 60 * 1000) + (35 * 60 * 1000) + (48 * 1000);
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
@@ -86,97 +89,141 @@ const ComingSoonPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden flex flex-col font-sans selection:bg-teal-500/30">
+    <div className="min-h-screen bg-[#FDFBF7] text-slate-900 overflow-x-hidden flex flex-col font-sans selection:bg-teal-500/30">
       {/* --- SHARED HEADER --- */}
       <ComingSoonHeader />
 
-      {/* --- MAIN HERO SECTION --- */}
-      <main className="flex-grow relative pt-6 lg:pt-10">
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-10 overflow-hidden">
-          <div className="absolute right-[-10%] top-[10%] w-[500px]">
-            <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80" alt="Furniture" className="w-full blur-sm" />
-          </div>
-          <div className="absolute left-[-10%] bottom-[20%] w-[400px]">
-            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80" alt="Plant" className="w-full blur-sm" />
-          </div>
-        </div>
+      {/* --- MAIN HERO SECTION (SUPER COMPACT LAYOUT FOR ELEVATION) --- */}
+      <main className="flex-grow relative pt-2 pb-8 lg:pt-3 overflow-hidden bg-gradient-to-b from-[#FAF6EE] to-white">
+        
+        {/* Soft Background Decor Blurs */}
+        <div className="absolute top-1/4 left-0 w-80 h-80 bg-purple-200/30 blur-[100px] rounded-full pointer-events-none -z-10"></div>
+        <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-teal-100/20 blur-[130px] rounded-full pointer-events-none -z-10"></div>
 
-        {/* Purple Wavy Floor Component */}
-        <div className="absolute bottom-0 left-0 w-full h-[200px] z-0 pointer-events-none">
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[120%] h-[150%] bg-[#311B92]/5 blur-[100px] rounded-full"></div>
-          <svg viewBox="0 0 1440 320" className="absolute bottom-0 w-full drop-shadow-2xl">
-            <path fill="#311B92" fillOpacity="1" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,218.7C672,235,768,245,864,229.3C960,213,1056,171,1152,144C1248,117,1344,107,1392,101.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-          </svg>
-        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col lg:flex-row items-center justify-between gap-6">
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col lg:flex-row items-center gap-12 lg:gap-8 min-h-[600px]">
+          {/* LEFT COLUMN: BRANDING, HEADINGS, WE ARE COMING SOON BANNER & TIMER CARD */}
+          <div className="flex-1 space-y-3 flex flex-col items-center lg:items-start text-center lg:text-left">
 
-          {/* Left Content Area */}
-          <div className="flex-1 space-y-4 text-center lg:text-left flex flex-col items-center lg:items-start">
-
-            {/* Logo Section */}
-            <div className="flex flex-col items-center lg:items-start group">
-              <div className="flex items-center gap-2">
-                <span className="text-3xl md:text-4xl font-black tracking-tighter text-[#189D91]">Riddha</span>
-                <div className="relative">
-                  <div className="w-8 h-8 md:w-10 md:h-10 bg-[#311B92] rounded-lg flex items-center justify-center shadow-lg transform rotate-3">
-                    <LuSmartphone className="text-white text-xl md:text-2xl" />
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 mt-0.5">
-                <span className="text-lg md:text-xl font-black text-[#311B92] tracking-[0.2em] uppercase">Interio Mart</span>
-              </div>
+            {/* Official Logo Banner - Super Crisp Size */}
+            <div className="flex flex-col items-center lg:items-start">
+              <img src={Logo} alt="Riddha Interio Mart Logo" className="h-16 md:h-18 w-auto object-contain" />
             </div>
 
+            {/* Main Destination Heading - Styled smaller & more compact */}
             <div className="space-y-1">
-              <p className="text-xs md:text-sm font-bold text-slate-700 uppercase tracking-[0.2em] opacity-60">Your One-Stop Destination For</p>
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tight drop-shadow-sm">
-                <span className="block text-[#311B92]">ALL INTERIOR</span>
+              <div className="flex items-center gap-2 justify-center lg:justify-start">
+                <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.25em] text-slate-700">
+                  YOUR ONE-STOP DESTINATION FOR
+                </p>
+                <span className="text-sm select-none">✨</span>
+              </div>
+              <h1 className="text-4xl md:text-6xl font-black leading-[0.9] tracking-tighter drop-shadow-sm">
+                <span className="block text-[#189D91]">ALL INTERIOR</span>
                 <span className="block text-[#D12C8D]">SOLUTIONS</span>
               </h1>
-              <div className="flex flex-wrap justify-center lg:justify-start gap-x-3 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest pt-2">
-                <span>WIDE RANGE</span> <span className="text-[#189D91]">/</span> <span>BEST QUALITY</span> <span className="text-[#189D91]">/</span> <span>EXCLUSIVE DEALS</span> <span className="text-[#189D91]">/</span> <span>FAST DELIVERY</span>
+              
+              {/* Horizontal Single Line Features Row */}
+              <div className="flex flex-wrap justify-center lg:justify-start items-center gap-x-2 text-[9px] md:text-[10px] font-black text-slate-600 uppercase tracking-widest pt-1">
+                <span>WIDE RANGE</span>
+                <span className="text-[#D12C8D] font-black">•</span>
+                <span>BEST QUALITY</span>
+                <span className="text-[#D12C8D] font-black">•</span>
+                <span>EXCLUSIVE DEALS</span>
+                <span className="text-[#D12C8D] font-black">•</span>
+                <span>FAST DELIVERY</span>
               </div>
             </div>
 
-            <div className="relative bg-gradient-to-r from-[#189D91] to-[#D12C8D] text-white px-8 py-3 rounded-xl font-black uppercase tracking-[0.2em] text-xs md:text-sm shadow-xl">
-              We Are Launching Soon!
+            {/* WE ARE COMING SOON Gradient Rounded Pill - Compact size */}
+            <div className="bg-gradient-to-r from-[#189D91] via-[#8E2D8E] to-[#D12C8D] text-white px-8 py-2.5 rounded-full font-black uppercase tracking-[0.2em] text-[10px] md:text-xs shadow-xl shadow-indigo-900/10">
+              WE ARE COMING SOON!
             </div>
 
-            <div className="space-y-6 w-full max-w-lg">
-              <div className="flex items-center justify-center lg:justify-start gap-3 text-[#311B92]">
-                <LuCalendar size={28} className="text-[#D12C8D]" />
-                <p className="text-lg md:text-2xl font-black uppercase tracking-widest">
-                  Launching On <span className="text-[#D12C8D]">15<sup>TH</sup> June 2026</span>
+            {/* Launching Info Section - Tighter margins */}
+            <div className="space-y-1.5 w-full flex flex-col items-center lg:items-start">
+              <div className="flex items-center gap-3">
+                <span className="h-[1px] w-6 bg-slate-200"></span>
+                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">LAUNCHING ON</span>
+                <span className="h-[1px] w-6 bg-slate-200"></span>
+              </div>
+              <div className="flex items-center gap-2 text-[#311B92]">
+                <LuCalendar size={24} className="text-[#D12C8D]" />
+                <p className="text-xl md:text-3xl font-black uppercase tracking-tight">
+                  15<sup>TH</sup> JUNE 2025
                 </p>
               </div>
-              <div className="grid grid-cols-4 gap-3 md:gap-4">
-                <CountdownBox value={timeLeft.days} label="Days" />
-                <CountdownBox value={timeLeft.hours} label="Hours" />
-                <CountdownBox value={timeLeft.minutes} label="Minutes" />
-                <CountdownBox value={timeLeft.seconds} label="Seconds" />
+            </div>
+
+            {/* Premium Countdown Timer Card (Custom Glassmorphism Pill) - Super Slim and Neat */}
+            <div className="bg-white/95 backdrop-blur-md rounded-[1.5rem] py-2.5 px-5 shadow-[0_12px_30px_rgba(49,27,146,0.04)] border border-slate-100/70 flex items-center justify-around w-full max-w-sm">
+              <div className="flex flex-col items-center">
+                <span className="text-2xl md:text-4xl font-black text-[#189D91] tracking-tight">{String(timeLeft.days).padStart(2, '0')}</span>
+                <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 mt-0.5">DAYS</span>
               </div>
+              <span className="text-xl md:text-2xl font-black text-slate-300 -translate-y-1.5 select-none">:</span>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl md:text-4xl font-black text-[#D12C8D] tracking-tight">{String(timeLeft.hours).padStart(2, '0')}</span>
+                <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 mt-0.5">HOURS</span>
+              </div>
+              <span className="text-xl md:text-2xl font-black text-slate-300 -translate-y-1.5 select-none">:</span>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl md:text-4xl font-black text-[#311B92] tracking-tight">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 mt-0.5">MINUTES</span>
+              </div>
+              <span className="text-xl md:text-2xl font-black text-slate-300 -translate-y-1.5 select-none">:</span>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl md:text-4xl font-black text-[#311B92] tracking-tight">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 mt-0.5">SECONDS</span>
+              </div>
+            </div>
+
+            {/* Notification Subscription Block - Tighter Spacing */}
+            <div className="w-full max-w-sm space-y-2.5">
+              <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-bold text-slate-500 justify-center lg:justify-start">
+                <FiBell className="text-[#D12C8D] animate-bounce" size={14} />
+                <span>Be the first to know about launch updates, offers & more!</span>
+              </div>
+              
+              <form onSubmit={handleSubscribe} className="bg-white p-1 rounded-full border border-slate-100 shadow-xl shadow-slate-200/50 flex items-center">
+                <div className="flex items-center gap-3 pl-4 flex-grow">
+                  <FiMail className="text-slate-300" size={16} />
+                  <input 
+                    type="email" 
+                    placeholder="Enter your email address" 
+                    className="w-full bg-transparent border-none outline-none text-[11px] md:text-xs font-bold text-slate-700 placeholder:text-slate-300"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <button type="submit" className="bg-gradient-to-r from-[#189D91] to-[#311B92] text-white px-5 md:px-6 py-2.5 rounded-full font-black uppercase tracking-widest text-[9px] flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-md">
+                  NOTIFY ME <FiSend />
+                </button>
+              </form>
             </div>
 
           </div>
 
-          {/* --- SMARTPHONE MOCKUP (REPLACING EDITORIAL IMAGES) --- */}
-          <div className="flex-1 relative min-h-[600px] flex items-center justify-center lg:justify-end">
+          {/* CENTER COLUMN: HIGH-FIDELITY SMARTPHONE MOCKUP ON A NEON CYLINDRICAL PEDESTAL */}
+          <div className="flex-1 relative min-h-[550px] flex flex-col items-center justify-center">
+            
+            {/* Tilted iPhone Smartphone Mockup Container - Slightly scaled down */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="relative w-[260px] md:w-[300px] h-[540px] md:h-[610px] bg-slate-950 rounded-[3rem] border-[8px] md:border-[12px] border-slate-900 shadow-[0_50px_100px_-20px_rgba(49,27,146,0.3)] flex flex-col overflow-hidden"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8 }}
+              className="relative w-[240px] md:w-[260px] h-[480px] md:h-[530px] bg-slate-950 rounded-[3rem] border-[8px] md:border-[10px] border-slate-900 shadow-[0_40px_80px_-20px_rgba(49,27,146,0.4)] flex flex-col overflow-hidden z-10"
             >
               {/* Dynamic Island */}
               <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 md:w-24 h-5 md:h-6 bg-slate-950 rounded-full z-50 flex items-center justify-center">
                  <div className="w-1 h-1 rounded-full bg-white/10 ml-auto mr-3" />
               </div>
 
-              {/* Screen Content */}
-              <div className="flex-1 bg-white overflow-y-auto no-scrollbar relative flex flex-col">
-                {/* Header Area */}
+              {/* Tilted Screen Main Body */}
+              <div className="flex-1 bg-[#FAFAFA] overflow-y-auto no-scrollbar relative flex flex-col">
+                
+                {/* Smartphone Custom Header */}
                 <div className="bg-[#189D91] pt-10 pb-4 px-4 space-y-3">
                   <div className="flex items-center justify-between text-white">
                     <span className="text-[10px] font-black tracking-tight">Riddha Interio Mart</span>
@@ -197,87 +244,130 @@ const ComingSoonPage = () => {
                   </div>
                 </div>
 
-                {/* Main Scroll Area */}
+                {/* Smartphone Screen Core Content */}
                 <div className="flex-1 p-3 space-y-4">
-                  {/* Promo Banner */}
-                  <div className="bg-slate-50 rounded-xl overflow-hidden border border-slate-100 p-3 flex gap-3">
-                    <div className="flex-1 space-y-1">
-                       <span className="text-[6px] font-black text-[#189D91] uppercase tracking-widest">Premium Selection:</span>
-                       <h4 className="text-[10px] font-black text-slate-800 leading-tight">INTERIOR OFFERS</h4>
-                       <p className="text-[7px] font-bold text-slate-400">Curated by Experts</p>
-                    </div>
-                    <div className="w-14 h-10 rounded-lg bg-slate-200 overflow-hidden">
-                       <img src={Showcase1} className="w-full h-full object-cover" />
+                  {/* High Fidelity Banner card */}
+                  <div className="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm flex flex-col">
+                    <div className="p-3 bg-gradient-to-r from-teal-50 to-white flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <span className="text-[6px] font-black text-[#D12C8D] uppercase tracking-widest">PREMIUM SELECTION:</span>
+                        <h4 className="text-[10px] font-black text-slate-800 leading-tight">INTERIOR OFFERS</h4>
+                        <p className="text-[7px] font-bold text-slate-400">Curated by Experts</p>
+                      </div>
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 border border-slate-100">
+                        <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=100&q=80" className="w-full h-full object-cover" />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Categories Row */}
-                  <div className="flex justify-between px-1">
-                    <PhoneCategory icon={<FiBox />} label="Furniture" color="bg-teal-500" />
-                    <PhoneCategory icon={<FiZap />} label="Lighting" color="bg-[#D12C8D]" />
-                    <PhoneCategory icon={<FiLayers />} label="Wall Panels" color="bg-indigo-600" />
-                    <PhoneCategory icon={<FiGrid />} label="Decor" color="bg-orange-500" />
-                    <PhoneCategory icon={<FiTool />} label="Hardware" color="bg-[#189D91]" />
+                  {/* Circular Categories matching the exact reference icon circles */}
+                  <div className="flex justify-between px-1 overflow-x-auto hide-scrollbar gap-2 shrink-0">
+                    <SmartphoneCategoryIcon icon={<FiBox />} label="Furniture" color="border-[#189D91] text-[#189D91]" />
+                    <SmartphoneCategoryIcon icon={<FiZap />} label="Lighting" color="border-[#D12C8D] text-[#D12C8D]" />
+                    <SmartphoneCategoryIcon icon={<FiLayers />} label="Wall Panels" color="border-[#311B92] text-[#311B92]" />
+                    <SmartphoneCategoryIcon icon={<FiGrid />} label="Decor" color="border-[#D12C8D] text-[#D12C8D]" />
+                    <SmartphoneCategoryIcon icon={<FiTool />} label="Hardware" color="border-[#189D91] text-[#189D91]" />
+                    <SmartphoneCategoryIcon icon={<FiLayers />} label="Flooring" color="border-[#E0A96D] text-[#E0A96D]" />
                   </div>
 
-                  {/* Designer Favorites Grid */}
+                  {/* Designer Favorites Product Teasers */}
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
                        <h4 className="text-[10px] font-black text-slate-800">Designer Favorites</h4>
-                       <span className="text-[7px] font-black text-[#189D91] uppercase">View All</span>
+                       <p className="text-[7px] font-bold text-slate-400">Curated collections by top designers.</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <PhoneProductCard name="Tuak Master Bed" price="₹34,999" rating="4.7 (212)" img={Showcase2} />
-                      <PhoneProductCard name="Veneer Wall Panel" price="₹3,500/sq.ft" rating="4.9 (189)" img={Showcase3} />
-                      <PhoneProductCard name="Artisan Dining Set" price="₹21,099" rating="4.8 (156)" img={Showcase4} />
-                      <PhoneProductCard name="Designer Bed" price="₹29,999" rating="4.6 (98)" img={Showcase5} />
+                    
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <SmartphoneProductCard 
+                        name="Tuak Master Bed" 
+                        price="₹34,999" 
+                        rating="4.7" 
+                        img="https://images.unsplash.com/photo-1505691938895-1758d7eaa511?w=200&q=80" 
+                      />
+                      <SmartphoneProductCard 
+                        name="Veneer Wall Panel (Modern)" 
+                        price="₹3,500/sq.ft" 
+                        rating="4.9" 
+                        img="https://images.unsplash.com/photo-1615529182904-14819c35db37?w=200&q=80" 
+                      />
+                      <SmartphoneProductCard 
+                        name="Artisan Dining Set" 
+                        price="₹21,099" 
+                        rating="4.8" 
+                        img="https://images.unsplash.com/photo-1617806118233-18e1db207f62?w=200&q=80" 
+                      />
+                      <SmartphoneProductCard 
+                        name="Designer Bed" 
+                        price="₹29,999" 
+                        rating="4.6" 
+                        img="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&q=80" 
+                      />
                     </div>
                   </div>
                 </div>
 
-                {/* Bottom Navigation */}
-                <div className="bg-white border-t border-slate-50 flex items-center justify-between px-6 py-2 pb-4">
+                {/* Smartphone Sticky Footer Tab Navigation */}
+                <div className="bg-white border-t border-slate-50 flex items-center justify-between px-6 py-2 pb-4 shrink-0">
                   <div className="flex flex-col items-center text-[#189D91]">
                     <FiHome size={14} />
-                    <span className="text-[6px] font-bold mt-1">HOME</span>
+                    <span className="text-[6px] font-bold mt-1 uppercase">HOME</span>
                   </div>
                   <div className="flex flex-col items-center text-slate-400">
                     <FiGrid size={14} />
-                    <span className="text-[6px] font-bold mt-1 uppercase">Categories</span>
+                    <span className="text-[6px] font-bold mt-1 uppercase">CATEGORIES</span>
                   </div>
                   <div className="flex flex-col items-center text-slate-400">
                     <FiShoppingCart size={14} />
-                    <span className="text-[6px] font-bold mt-1 uppercase">Cart</span>
+                    <span className="text-[6px] font-bold mt-1 uppercase">CART</span>
                   </div>
                   <div className="flex flex-col items-center text-slate-400">
                     <FiUser size={14} />
-                    <span className="text-[6px] font-bold mt-1 uppercase">Profile</span>
+                    <span className="text-[6px] font-bold mt-1 uppercase">PROFILE</span>
                   </div>
                 </div>
               </div>
             </motion.div>
 
-            {/* Floating Elements Around Phone */}
-            <motion.div
-               animate={{ y: [0, -15, 0], x: [0, 10, 0] }}
-               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-               className="absolute -bottom-10 right-0 z-20 bg-white p-4 rounded-3xl shadow-2xl border border-slate-100 flex items-center gap-3"
-            >
-               <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white">
-                  <FiAward size={20} />
-               </div>
-               <div>
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Big Things</p>
-                  <p className="text-xs font-black text-[#311B92] mt-1">Are On The Way!</p>
-               </div>
-            </motion.div>
+            {/* Glowing Cylindrical 3D Pedestal Base Under the Smartphone */}
+            <div className="absolute bottom-6 w-48 h-10 bg-gradient-to-r from-purple-800 via-[#311B92] to-indigo-900 rounded-full shadow-[0_12px_30px_rgba(49,27,146,0.3)] z-0 border-t border-purple-500/20"></div>
+            <div className="absolute bottom-2 w-40 h-8 bg-gradient-to-r from-purple-950 via-indigo-950 to-purple-950 rounded-full shadow-2xl z-0"></div>
+
           </div>
+
+          {/* RIGHT COLUMN: VERTICAL FEATURE BADGES WITH COMPACT SPACING */}
+          <div className="flex-1 w-full max-w-xs relative flex flex-col justify-center items-center lg:items-end">
+            
+            {/* Vertical Cards Wrapper - Tighter gaps and smaller icons */}
+            <div className="relative space-y-3.5 pl-8 lg:pl-0 w-full flex flex-col items-start lg:items-end">
+              {/* Connection Dotted Line */}
+              <div className="absolute left-6 lg:left-auto lg:right-[158px] top-4 bottom-4 w-0.5 border-l-2 border-dashed border-[#311B92]/20 z-0"></div>
+
+              {/* Vertical Feature Item Lists */}
+              <RightVerticalFeature icon={<FiShoppingCart />} text="WIDE RANGE" subtext="of Products" color="bg-[#D12C8D]" compact={true} />
+              <RightVerticalFeature icon={<FiAward />} text="BEST QUALITY" subtext="Assured" color="bg-[#189D91]" compact={true} />
+              <RightVerticalFeature icon={<FiTag />} text="EXCLUSIVE" subtext="Deals" color="bg-[#311B92]" compact={true} />
+              <RightVerticalFeature icon={<FiTruck />} text="FAST & RELIABLE" subtext="Delivery" color="bg-[#E0A96D]" compact={true} />
+            </div>
+
+            {/* Floating Purple Emerging Logo Box Container */}
+            <div className="mt-6 flex flex-col items-center lg:items-end gap-4 w-full">
+              {/* Rocket emerge badge */}
+              <div className="bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-full border border-slate-100 shadow-[0_10px_30px_rgba(209,44,141,0.06)] flex items-center gap-2.5 hover:scale-105 transition-transform duration-300">
+                <span className="text-[#D12C8D] text-xs animate-pulse">🚀</span>
+                <span className="text-[9px] font-black uppercase tracking-wider text-slate-800">
+                  BIG THINGS <span className="text-[#D12C8D]">ARE ON THE WAY!</span>
+                </span>
+              </div>
+            </div>
+
+          </div>
+
         </div>
       </main>
 
-      {/* --- INTERIOR SHOWCASE SECTION (MATCHING USER REFERENCE) --- */}
-      <section className="bg-[#F9E8E2] py-24 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 mb-32 flex flex-col items-center text-center">
+      {/* --- INTERIOR SHOWCASE SECTION (SEAMLESS INFINITE SCROLL CAROUSEL) --- */}
+      <section className="bg-[#FAF5EC] py-24 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 mb-20 flex flex-col items-center text-center">
            <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[#311B92]/40 mb-4 text-center">Curated Inspiration</h3>
            <h2 className="text-2xl md:text-5xl font-black text-[#311B92]">Transforming Visions into Reality</h2>
         </div>
@@ -293,7 +383,6 @@ const ComingSoonPage = () => {
                ease: "linear" 
              }}
            >
-              {/* Ultimate Infinite Loop with 8 High-Quality Interior Images */}
               {[
                 Showcase1, Showcase2, Showcase3, Showcase4,
                 Showcase5, Showcase6, Showcase7, Showcase8,
@@ -311,7 +400,6 @@ const ComingSoonPage = () => {
         <div className="max-w-7xl mx-auto px-8 flex flex-col lg:flex-row items-center gap-16 lg:gap-20">
            {/* Left Side: Overlapping Images */}
            <div className="w-full lg:w-1/2 relative min-h-[500px] flex items-center justify-center">
-              {/* Background Large Image */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -324,7 +412,6 @@ const ComingSoonPage = () => {
                  </div>
               </motion.div>
 
-              {/* Foreground Small Overlapping Image */}
               <motion.div 
                 initial={{ x: -30, y: 30, opacity: 0 }}
                 whileInView={{ x: 0, y: 0, opacity: 1 }}
@@ -345,7 +432,7 @@ const ComingSoonPage = () => {
                  </h2>
               </div>
               <p className="text-xl text-slate-500 leading-relaxed font-medium">
-                We specialize in elevating your living spaces into a visual narrative that stands out. Our approach blends technical precision with raw emotional depth, bringing you the finest interior products from across the globe.
+                 We specialize in elevating your living spaces into a visual narrative that stands out. Our approach blends technical precision with raw emotional depth, bringing you the finest interior products from across the globe.
               </p>
               <div className="pt-4">
                  <button className="px-10 py-5 bg-[#311B92] text-white rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] shadow-xl shadow-[#311B92]/20 hover:scale-105 transition-all">
@@ -356,7 +443,7 @@ const ComingSoonPage = () => {
         </div>
       </section>
 
-      {/* --- MISSION & VISION (FROM ABOUT) --- */}
+      {/* --- MISSION & VISION --- */}
       <section className="py-24 bg-slate-50/50">
          <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-8">
             <MissionCard 
@@ -393,7 +480,7 @@ const ComingSoonPage = () => {
          </div>
       </section>
 
-      {/* --- CONTACT SECTION (FROM CONTACT) --- */}
+      {/* --- CONTACT SECTION --- */}
       <section id="contact" className="py-24 bg-white relative overflow-hidden">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#189D91]/5 blur-[120px] rounded-full"></div>
         <div className="max-w-7xl mx-auto px-8">
@@ -403,7 +490,6 @@ const ComingSoonPage = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
-            {/* Left Side: Info */}
             <div className="space-y-12">
                <ContactInfoCard 
                  icon={<FiMapPin />} 
@@ -434,7 +520,6 @@ const ComingSoonPage = () => {
                </div>
             </div>
 
-            {/* Right Side: Form */}
             <div className="relative">
                <div className="bg-white rounded-[3rem] p-8 lg:p-12 shadow-2xl border border-slate-50 relative z-10">
                   <form onSubmit={handleContactSubmit} className="space-y-6">
@@ -553,40 +638,56 @@ const ComingSoonPage = () => {
   );
 };
 
-// --- Phone Sub Components ---
-const PhoneCategory = ({ icon, label, color }) => (
-  <div className="flex flex-col items-center gap-1.5 shrink-0">
-    <div className={`w-10 h-10 rounded-full ${color} flex items-center justify-center text-white shadow-sm`}>
-      {React.cloneElement(icon, { size: 16 })}
+// --- Smartphone Sub Components ---
+
+const SmartphoneCategoryIcon = ({ icon, label, color }) => (
+  <div className="flex flex-col items-center gap-1 shrink-0">
+    <div className={`w-8 h-8 rounded-full border-2 ${color} bg-white flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.02)]`}>
+      {React.cloneElement(icon, { size: 13 })}
     </div>
-    <span className="text-[7px] font-bold text-slate-500 uppercase tracking-tighter">{label}</span>
+    <span className="text-[6px] font-black text-slate-500 uppercase tracking-tighter">{label}</span>
   </div>
 );
 
-const PhoneProductCard = ({ name, price, rating, img }) => (
-  <div className="bg-white rounded-xl p-2 border border-slate-100 shadow-sm space-y-1.5">
-    <div className="aspect-square bg-slate-50 rounded-lg overflow-hidden">
+const SmartphoneProductCard = ({ name, price, rating, img }) => (
+  <div className="bg-white rounded-xl p-1.5 border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.02)] space-y-1">
+    <div className="aspect-square bg-slate-50 rounded-lg overflow-hidden relative">
       <img src={img} alt={name} className="w-full h-full object-cover" />
     </div>
-    <div className="space-y-0.5">
-      <h5 className="text-[8px] font-black text-slate-800 leading-none truncate">{name}</h5>
-      <p className="text-[7px] font-bold text-teal-600">{price}</p>
-      <div className="flex items-center gap-1">
-        <FiStar size={6} className="text-yellow-400 fill-yellow-400" />
-        <span className="text-[6px] font-bold text-slate-400">{rating}</span>
+    <div className="space-y-0.5 px-0.5">
+      <h5 className="text-[7px] font-black text-slate-800 leading-none truncate">{name}</h5>
+      <p className="text-[6px] font-black text-slate-400">Price: <span className="text-teal-600 font-black">{price}</span></p>
+      <div className="flex items-center gap-0.5">
+        <span className="text-[6px] font-black text-slate-400">Rating:</span>
+        <FiStar size={5} className="text-yellow-400 fill-yellow-400 ml-0.5" />
+        <span className="text-[5px] font-black text-slate-400">{rating}</span>
       </div>
     </div>
   </div>
 );
+
+// --- Right Column Sub Components ---
+
+const RightVerticalFeature = ({ icon, text, subtext, color, compact }) => (
+  <div className="flex items-center gap-3 group cursor-default z-10 w-full justify-start lg:justify-end">
+    <div className="flex flex-col items-start lg:items-end order-2 lg:order-1 text-left lg:text-right">
+      <span className={`font-black text-slate-800 tracking-wider uppercase leading-none ${compact ? 'text-[9px] md:text-[10px]' : 'text-[10px] md:text-xs'}`}>{text}</span>
+      <span className={`font-bold text-slate-400 uppercase tracking-wider mt-0.5 ${compact ? 'text-[8px] md:text-[9px]' : 'text-[9px] md:text-[10px]'}`}>{subtext}</span>
+    </div>
+    <div className={`rounded-full ${color} flex items-center justify-center text-white shadow-lg shadow-indigo-950/10 order-1 lg:order-2 shrink-0 transform group-hover:scale-110 transition-transform duration-300 ${compact ? 'w-9 h-9' : 'w-12 h-12'}`}>
+      {React.cloneElement(icon, { size: compact ? 16 : 20 })}
+    </div>
+  </div>
+);
+
+// --- Global Page Sub Components ---
 
 const MissionCard = ({ icon, title, text, color }) => (
    <motion.div 
       whileHover={{ y: -12, scale: 1.02 }}
       className={`p-10 md:p-14 rounded-[3.5rem] bg-gradient-to-br ${color} border border-white relative group transition-all duration-500 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)] hover:shadow-2xl overflow-hidden`}
    >
-      {/* Decorative Blur Glow */}
       <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${color} blur-[60px] opacity-0 group-hover:opacity-40 transition-opacity duration-500`}></div>
-      
       <div className="relative z-10 space-y-8">
          <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center text-[#311B92] shadow-xl shadow-indigo-900/5 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
             {React.cloneElement(icon, { size: 36 })}
@@ -635,14 +736,6 @@ const FormInput = ({ label, placeholder, type, required }) => (
   </div>
 );
 
-// --- Global Sub Components ---
-const NavHoverLink = ({ to, label }) => (
-  <Link to={to} className="text-sm font-bold text-slate-700 hover:text-[#189D91] relative group transition-colors">
-    {label}
-    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#189D91] transition-all group-hover:w-full"></span>
-  </Link>
-);
-
 const FooterLink = ({ to, label }) => (
   <li>
     <Link to={to} className="text-sm text-slate-500 hover:text-[#311B92] transition-colors flex items-center gap-2 group">
@@ -656,27 +749,6 @@ const SocialLink = ({ icon }) => (
   <a href="#" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 hover:bg-[#189D91] hover:text-white transition-all border border-slate-100">
     {React.cloneElement(icon, { size: 18 })}
   </a>
-);
-
-const CountdownBox = ({ value, label }) => (
-  <div className="flex flex-col items-center gap-2">
-    <div className="w-full aspect-square bg-white border border-slate-100 rounded-2xl shadow-xl flex items-center justify-center">
-      <span className="text-2xl md:text-4xl font-black text-[#311B92]">{String(value).padStart(2, '0')}</span>
-    </div>
-    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</span>
-  </div>
-);
-
-const FeatureBadge = ({ icon, text, subtext, color }) => (
-  <div className="flex items-center gap-4 group cursor-default">
-    <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br ${color} flex items-center justify-center text-white shadow-lg`}>
-      {React.cloneElement(icon, { size: 24, className: 'md:w-8 md:h-8' })}
-    </div>
-    <div className="flex flex-col">
-      <span className="text-[10px] md:text-xs font-black text-slate-800 tracking-widest uppercase leading-none">{text}</span>
-      <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{subtext}</span>
-    </div>
-  </div>
 );
 
 const ShowcaseCard = ({ img }) => (
