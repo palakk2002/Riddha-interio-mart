@@ -4,24 +4,24 @@ import { FiArrowRight } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 
 // Asset Imports
-import ContractorImg from '../../../assets/promo_contractor.png';
-import DesignerImg from '../../../assets/promo_designer.png';
-import BuildingImg from '../../../assets/promo_building.png';
-import GiftImg from '../../../assets/promo_giftbox.png';
+import ContractorImg from '../../../assets/3.png';
+import DesignerImg from '../../../assets/2 (2).png';
+import BuildingImg from '../../../assets/4.png';
+import GiftImg from '../../../assets/1 (2).png';
 
 const PromoCard = ({ title, items, btnText, bg, textColor, btnColor, img, link }) => (
   <motion.div
     whileHover={{ y: -5 }}
-    className={`${bg} rounded-[20px] md:rounded-[24px] p-4 pb-6 md:p-8 flex items-center justify-between overflow-hidden relative group h-[140px] md:h-[220px] border border-gray-100/50`}
+    className={`${bg} rounded-[16px] md:rounded-[24px] p-4 md:p-6 flex items-center justify-between overflow-hidden relative group h-[140px] md:h-[210px] border border-gray-100/50 shadow-sm hover:shadow-lg transition-all duration-500`}
   >
-    <div className="z-10 flex flex-col justify-between h-full max-w-[54%] md:max-w-[60%]">
+    <div className="z-10 flex flex-col justify-between h-full max-w-[55%] md:max-w-[52%]">
       <div className="flex-1">
-        <h3 className={`text-[12px] md:text-xl font-black mb-1 md:mb-3 leading-tight ${textColor}`}>{title}</h3>
+        <h3 className={`text-[12px] md:text-xl font-black mb-1 md:mb-2 leading-tight ${textColor}`}>{title}</h3>
         {items && (
           <ul className="space-y-0.5 md:space-y-1">
             {items.map((item, i) => (
               <li key={i} className="text-gray-500 md:text-gray-600 text-[8px] md:text-xs font-bold flex items-center gap-1">
-                <span className="w-0.5 h-0.5 rounded-full bg-gray-400" /> {item}
+                <span className={`w-0.5 h-0.5 rounded-full ${textColor} opacity-40`} /> {item}
               </li>
             ))}
           </ul>
@@ -30,17 +30,17 @@ const PromoCard = ({ title, items, btnText, bg, textColor, btnColor, img, link }
 
       <Link
         to={link || "#"}
-        className={`mt-auto mb-1 w-fit flex items-center gap-0.5 md:gap-2 px-1.5 py-0.5 md:px-5 md:py-2.5 rounded-lg md:rounded-xl text-[8px] md:text-xs font-black bg-white shadow-sm border border-gray-100 hover:shadow-md transition-all whitespace-nowrap ${btnColor}`}
+        className={`mt-auto mb-1 w-fit flex items-center gap-1 md:gap-2 px-1.5 py-1 md:px-5 md:py-2.5 rounded-lg md:rounded-xl text-[8px] md:text-xs font-black bg-white shadow-sm border border-gray-100 hover:shadow-md transition-all whitespace-nowrap ${btnColor}`}
       >
         {btnText} <FiArrowRight className="text-[8px] md:text-xs" />
       </Link>
     </div>
 
-    <div className="absolute right-0 top-0 bottom-0 w-[42%] md:w-[45%] h-full flex items-end justify-end pointer-events-none">
+    <div className="absolute right-0 top-0 bottom-0 w-[42%] md:w-[48%] h-full flex items-end justify-end pointer-events-none overflow-hidden">
       <img
         src={img}
         alt={title}
-        className="w-full h-full object-cover md:object-contain group-hover:scale-105 transition-transform duration-500"
+        className="w-full h-full object-cover md:object-contain group-hover:scale-105 transition-transform duration-500 origin-bottom-right"
       />
     </div>
   </motion.div>
@@ -91,9 +91,9 @@ const PromoGrid = () => {
   ];
 
   return (
-    <section className="py-6 md:py-10 bg-white">
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+    <section className="pt-2 pb-2 md:pt-2 md:pb-4 bg-white">
+      <div className="max-w-[1920px] mx-auto px-2 md:px-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
           {promos.map((promo, idx) => (
             <PromoCard key={idx} {...promo} />
           ))}

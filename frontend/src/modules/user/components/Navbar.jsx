@@ -18,7 +18,8 @@ import {
   FiLogOut,
   FiXCircle,
   FiTruck,
-  FiFileText
+  FiFileText,
+  FiHeart
 } from "react-icons/fi";
 import { AiOutlineShop } from "react-icons/ai";
 import { motion, AnimatePresence } from "framer-motion";
@@ -119,8 +120,8 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-[#189D91] md:bg-[#006B5C] border-b-0 md:border-b border-white/10 relative z-50">
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-6">
+      <nav className="bg-[#189D91] md:bg-white border-b-0 md:border-b border-gray-100 relative z-50">
+        <div className="max-w-[1700px] mx-auto px-4 lg:px-6">
           {/* Main Desktop Header Row */}
           <div className="hidden md:flex items-center justify-between py-1 md:py-0.5 gap-4 lg:gap-6">
             <div className="flex items-center gap-6 lg:gap-8 shrink-0">
@@ -135,26 +136,26 @@ const Navbar = () => {
               </Link>
 
               {/* Delivery Location */}
-              <div className="flex items-center gap-2 text-white">
-                <div className="p-1.5 rounded-full bg-white/10">
-                  <FiMapPin className="text-white w-4 h-4" />
+              <div className="flex items-center gap-2 text-gray-900">
+                <div className="p-1.5 rounded-full bg-gray-100">
+                  <FiMapPin className="text-gray-500 w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] lg:text-[10.5px] font-medium text-white/60 leading-none">Delivering to</span>
-                  <button className="flex items-center gap-1 text-[11px] lg:text-[12px] font-bold text-white mt-0.5 group">
-                    Kolkata - <span className="">{pincode}</span> <FiChevronDown className="text-white/40 group-hover:text-white transition-colors" size={12} />
+                  <span className="text-[10px] lg:text-[10.5px] font-medium text-gray-500 leading-none">Delivering to</span>
+                  <button className="flex items-center gap-1 text-[11px] lg:text-[12px] font-bold text-gray-900 mt-0.5 group">
+                    Kolkata - <span className="">{pincode}</span> <FiChevronDown className="text-gray-400 group-hover:text-gray-600 transition-colors" size={12} />
                   </button>
                 </div>
               </div>
 
               {/* Delivery Time */}
-              <div className="flex items-center gap-2 text-white border-l border-white/10 pl-4">
-                <div className="p-1.5 rounded-full bg-white/10">
-                  <FiTruck className="text-white w-4 h-4" />
+              <div className="flex items-center gap-2 text-gray-900 border-l border-gray-100 pl-4">
+                <div className="p-1.5 rounded-full bg-gray-100">
+                  <FiTruck className="text-gray-500 w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] lg:text-[10.5px] font-medium text-white/60 leading-none">Delivery in</span>
-                  <span className="text-[11px] lg:text-[12px] font-bold text-teal-200 mt-0.5">
+                  <span className="text-[10px] lg:text-[10.5px] font-medium text-gray-500 leading-none">Delivery in</span>
+                  <span className="text-[11px] lg:text-[12px] font-bold text-[#189D91] mt-0.5">
                     {getDeliveryEstimate(pincode).time}
                   </span>
                 </div>
@@ -170,26 +171,26 @@ const Navbar = () => {
             <div className="flex items-center gap-4 lg:gap-6 shrink-0">
               {/* Become a Seller */}
               <Link to="/seller/join" className="flex items-center gap-2.5 group">
-                <div className="p-2 rounded-xl bg-white/10 group-hover:bg-white/20 transition-colors">
-                  <AiOutlineShop className="text-white w-5 h-5" />
+                <div className="p-2 rounded-xl bg-gray-100 group-hover:bg-gray-200 transition-colors">
+                  <AiOutlineShop className="text-gray-500 w-5 h-5" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[11px] lg:text-[12px] font-bold text-white leading-tight">Become a Seller</span>
-                  <span className="text-[10px] lg:text-[11px] font-bold text-teal-200">Join Now</span>
+                  <span className="text-[11px] lg:text-[12px] font-bold text-gray-900 leading-tight">Become a Seller</span>
+                  <span className="text-[10px] lg:text-[11px] font-bold text-[#189D91]">Join Now</span>
                 </div>
               </Link>
 
               {/* Bulk Order */}
               <button
                 onClick={() => setIsBulkModalOpen(true)}
-                className="flex items-center gap-2.5 group border-l border-white/10 pl-4 lg:pl-6"
+                className="flex items-center gap-2.5 group border-l border-gray-100 pl-4 lg:pl-6"
               >
-                <div className="p-2 rounded-xl bg-white/10 group-hover:bg-white/20 transition-colors text-left">
-                  <FiFileText className="text-white w-4 h-4" />
+                <div className="p-2 rounded-xl bg-gray-100 group-hover:bg-gray-200 transition-colors text-left">
+                  <FiFileText className="text-gray-500 w-4 h-4" />
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-[11px] lg:text-[12px] font-bold text-white leading-tight">Bulk Order</span>
-                  <span className="text-[10px] lg:text-[11px] font-bold text-teal-200">Get Best Price</span>
+                  <span className="text-[11px] lg:text-[12px] font-bold text-gray-900 leading-tight">Bulk Order</span>
+                  <span className="text-[10px] lg:text-[11px] font-bold text-[#189D91]">Get Best Price</span>
                 </div>
               </button>
             </div>
@@ -204,6 +205,11 @@ const Navbar = () => {
               <Link to="/profile" className="p-2 text-white">
                 <FiUser className="h-6 w-6" />
               </Link>
+              {user && (
+                <Link to="/wishlist" className="p-2 text-white">
+                  <FiHeart className="h-6 w-6" />
+                </Link>
+              )}
               {user && <NotificationDropdown isMobile={true} />}
               <Link to="/cart" className="p-2 text-white relative">
                 <FiShoppingCart className="h-6 w-6" />
@@ -216,7 +222,7 @@ const Navbar = () => {
           </div>
 
           {!isCartPage && (
-            <div className="md:hidden pb-3">
+            <div className="md:hidden pb-3 px-2">
               <SearchBar variant="premium" />
             </div>
           )}
@@ -227,7 +233,7 @@ const Navbar = () => {
 
       {/* Desktop Secondary Categories Nav with Mega Menu */}
       <div className="hidden md:block bg-white border-b border-gray-200 relative z-40">
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-8 flex items-center justify-between h-14">
+        <div className="max-w-[1700px] mx-auto px-6 lg:px-8 flex items-center justify-between h-14">
           <div className="flex items-center gap-6 overflow-hidden">
             {/* All Categories Button */}
             <div className="relative group/cat shrink-0">
@@ -291,6 +297,10 @@ const Navbar = () => {
               </span>
             </Link>
 
+            <Link to="/wishlist" className="flex items-center gap-2 group">
+              <FiHeart className="w-5 h-5 text-gray-700 group-hover:text-red-500 transition-colors" />
+              <span className="text-[13px] font-bold text-gray-700 group-hover:text-red-500 transition-colors">Wishlist</span>
+            </Link>
 
             <Link to="/cart" className="flex items-center gap-2 group relative">
               <FiShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-[#189D91] transition-colors" />
@@ -436,6 +446,7 @@ const Navbar = () => {
 
                     <SidebarLink to="/referral-rewards" icon={LuWallet} label="Riddha Wallet" onClick={closeMobile} />
                     <SidebarLink to="/orders" icon={FiShoppingBag} label="My Orders" onClick={closeMobile} />
+                    {user && <SidebarLink to="/wishlist" icon={FiHeart} label="My Wishlist" onClick={closeMobile} />}
                     <SidebarLink to="/profile" icon={FiUser} label="My Account" onClick={closeMobile} />
                   </div>
 

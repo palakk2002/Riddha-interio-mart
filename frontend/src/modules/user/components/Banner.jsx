@@ -55,19 +55,20 @@ const Banner = () => {
   const prevSlide = () => setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
 
   return (
-    <section className="py-1 md:py-8 bg-white">
-      <div className="max-w-[1600px] mx-auto px-2 md:px-8">
-        <div className="relative w-full h-[140px] md:h-[360px] overflow-hidden bg-[#E0F2F1] md:bg-gray-50 flex items-center rounded-[20px] md:rounded-[48px] shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
+    <section className="py-2 md:py-4 bg-white">
+      <div className="max-w-[1700px] mx-auto px-2 md:px-10">
+        <div className="relative w-full h-[160px] md:h-[360px] overflow-hidden bg-gray-50 flex items-center rounded-[24px] md:rounded-[48px] shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 1 }}
               className="absolute inset-0"
             >
-              {/* Background Image with Overlay */}
+              {/* Background Image with subtle gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent z-[1]" />
               <img 
                 src={slides[currentSlide].bg} 
                 alt="Modern Interior" 
@@ -76,117 +77,147 @@ const Banner = () => {
             </motion.div>
           </AnimatePresence>
 
-          <div className="w-full h-full px-4 md:px-20 relative z-10 flex flex-row items-center justify-between gap-4 md:gap-8 text-left">
+          <div className="w-full h-full px-6 md:px-24 relative z-10 flex flex-row items-center justify-between gap-8 text-left">
             
             {/* Left Content */}
-            <div className="flex-1 max-w-2xl">
+            <div className="flex-1 max-w-3xl">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.5 }}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.6 }}
                 >
-                  <h1 className="text-[13px] md:text-3xl lg:text-[40px] font-black text-[#004D40] md:text-gray-900 leading-tight uppercase">
+                  <h1 className="text-xl md:text-3xl lg:text-[40px] font-black text-white drop-shadow-lg leading-[1.1] tracking-tight">
                     {slides[currentSlide].titlePart1} <br />
-                    <span className="text-[#702D8B] md:text-[#FF0055]">{slides[currentSlide].titlePart2}</span>
+                    <span className="text-[#FF0055] drop-shadow-none">with the {slides[currentSlide].titlePart2}</span>
                   </h1>
                   
-                  <p className="mt-1 text-gray-500 md:text-[#189D91] font-bold text-[8px] md:text-lg flex items-center justify-start gap-2 uppercase tracking-widest">
+                  <p className="mt-2 text-white/90 font-bold text-[10px] md:text-base flex items-center justify-start gap-3 tracking-wide drop-shadow-md">
                     {slides[currentSlide].subtitle}
                   </p>
                 </motion.div>
               </AnimatePresence>
 
-              {/* Info Stats (Hidden on mobile) */}
-              <div className="hidden md:grid mt-6 grid-cols-3 gap-6">
+              {/* Info Stats (Hidden on small desktop) */}
+              <div className="hidden xl:grid mt-4 md:mt-6 grid-cols-3 gap-4 md:gap-6">
                 <motion.div 
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3 }}
                   className="flex items-center gap-3"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-[#E0F2F1] flex items-center justify-center text-[#189D91]">
-                    <FiBox size={18} />
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white">
+                    <FiBox className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-black text-gray-900 text-[12px]">10,000+</span>
-                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Products</span>
+                    <span className="font-black text-white text-[11px] md:text-sm">10,000+</span>
+                    <span className="text-[8px] md:text-[9px] font-bold text-white/70 uppercase tracking-wider">Products</span>
                   </div>
                 </motion.div>
 
                 <motion.div 
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.4 }}
                   className="flex items-center gap-3"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-[#FCE4EC] flex items-center justify-center text-[#FF0055]">
-                    <FiShield size={18} />
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white">
+                    <FiShield className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-black text-gray-900 text-[12px]">Trusted</span>
-                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">1L+ Users</span>
+                    <span className="font-black text-white text-[11px] md:text-sm">Trusted by</span>
+                    <span className="text-[8px] md:text-[9px] font-bold text-white/70 uppercase tracking-wider">1L+ Customers</span>
                   </div>
                 </motion.div>
 
                 <motion.div 
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5 }}
                   className="flex items-center gap-3"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-[#FFF3E0] flex items-center justify-center text-[#F57C00]">
-                    <FiTruck size={18} />
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white">
+                    <FiTruck className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-black text-gray-900 text-[12px]">Express</span>
-                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">4 Hour Delivery</span>
+                    <span className="font-black text-white text-[11px] md:text-sm">Express Delivery</span>
+                    <span className="text-[8px] md:text-[9px] font-bold text-white/70 uppercase tracking-wider">in 4 Hours</span>
                   </div>
                 </motion.div>
               </div>
 
               {/* CTA Buttons */}
-              {/* CTA Buttons - Hidden on Mobile to match screenshot */}
-              <div className="hidden md:flex mt-6 md:mt-10 flex-row items-center justify-start gap-3 w-full">
+              <div className="flex mt-8 md:mt-10 flex-row items-center justify-start gap-4 w-full">
                 <Link 
                   to="/products" 
-                  className="bg-[#004D40] text-white px-5 md:px-8 py-3 md:py-3.5 rounded-xl font-black text-[11px] md:text-xs flex items-center gap-2 hover:bg-[#003d33] transition-all group whitespace-nowrap"
+                  className="bg-[#189D91] text-white px-6 md:px-10 py-2.5 md:py-3 rounded-xl font-black text-xs md:text-sm flex items-center gap-2 hover:bg-[#148278] transition-all group whitespace-nowrap shadow-lg shadow-[#189D91]/20"
                 >
                   Shop Now <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link 
                   to="/categories" 
-                  className="border-2 border-gray-200 text-gray-700 px-5 md:px-8 py-3 md:py-3.5 rounded-xl font-black text-[11px] md:text-xs hover:border-[#189D91] hover:text-[#189D91] transition-all whitespace-nowrap"
+                  className="bg-transparent border border-white/50 text-white px-6 md:px-10 py-2.5 md:py-3 rounded-xl font-black text-xs md:text-sm hover:bg-white/10 transition-all whitespace-nowrap"
                 >
-                  Explore
+                  Explore Collections
                 </Link>
               </div>
             </div>
 
+            {/* Right Side - Today's Deal Card (Visible only on Desktop) */}
+            <div className="hidden lg:block w-64 xl:w-72 shrink-0">
+              <motion.div 
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-white/95 backdrop-blur-lg p-4 md:p-5 rounded-[28px] shadow-2xl border border-white/50"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-[#FF0055] font-black text-[11px] uppercase tracking-wider">Today's Deal</h3>
+                  <div className="flex items-center gap-1 font-bold text-gray-800 text-[10px] tabular-nums">
+                    <span>{formatTime(timeLeft.hours)}</span>:
+                    <span>{formatTime(timeLeft.minutes)}</span>:
+                    <span>{formatTime(timeLeft.seconds)}</span>
+                  </div>
+                </div>
 
+                <div className="relative aspect-video mb-3 rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center group">
+                  <img src={DealProduct} alt="Pendant Light" className="w-[60%] h-[60%] object-contain group-hover:scale-110 transition-transform duration-500" />
+                </div>
 
+                <div className="space-y-0.5">
+                  <h4 className="text-gray-900 font-bold text-xs">Modern Pendant Light</h4>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-black text-gray-900">₹2,499</span>
+                    <span className="text-[10px] text-gray-400 line-through">₹3,999</span>
+                    <span className="text-[9px] font-black text-[#189D91] bg-[#189D91]/10 px-2 py-0.5 rounded-full">37% OFF</span>
+                  </div>
+                </div>
 
+                <button className="w-full mt-4 bg-[#FF0055] text-white py-2.5 rounded-xl font-black text-[11px] hover:bg-[#D40046] transition-all shadow-lg shadow-[#FF0055]/20 active:scale-[0.98]">
+                  Shop Now
+                </button>
+              </motion.div>
+            </div>
           </div>
 
           {/* Manual Controls */}
-          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-between px-6 pointer-events-none">
-            <button onClick={prevSlide} className="w-10 h-10 rounded-full bg-white/50 backdrop-blur-md flex items-center justify-center text-gray-800 pointer-events-auto border border-white/10 hover:bg-white transition-all shadow-md active:scale-90">
-              <FiChevronLeft size={20} />
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-between px-6 pointer-events-none z-20">
+            <button onClick={prevSlide} className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white pointer-events-auto border border-white/30 hover:bg-white hover:text-[#189D91] transition-all shadow-lg active:scale-90">
+              <FiChevronLeft size={24} />
             </button>
-            <button onClick={nextSlide} className="w-10 h-10 rounded-full bg-white/50 backdrop-blur-md flex items-center justify-center text-gray-800 pointer-events-auto border border-white/10 hover:bg-white transition-all shadow-md active:scale-90">
-              <FiChevronRight size={20} />
+            <button onClick={nextSlide} className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white pointer-events-auto border border-white/30 hover:bg-white hover:text-[#189D91] transition-all shadow-lg active:scale-90">
+              <FiChevronRight size={24} />
             </button>
           </div>
 
           {/* Carousel Dots */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
             {slides.map((_, i) => (
               <button 
                 key={i} 
                 onClick={() => setCurrentSlide(i)}
-                className={`h-1 rounded-full transition-all ${i === currentSlide ? 'w-6 bg-[#004D40]' : 'w-1.5 bg-gray-200'}`} 
+                className={`h-1.5 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-10 bg-white' : 'w-2 bg-white/40'}`} 
               />
             ))}
           </div>
