@@ -64,6 +64,7 @@ const Navbar = () => {
   const [policiesOpen, setPoliciesOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [scrolled, setScrolled] = useState(false);
   const dropdownTimeoutRef = useRef(null);
   const { cartCount } = useCart();
   const location = useLocation();
@@ -92,6 +93,13 @@ const Navbar = () => {
       }
     };
     fetchCategories();
+  }, []);
+
+  // Scroll detection for mobile navbar background
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Lock body scroll when mobile menu is open
@@ -124,7 +132,11 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-[#189D91] md:bg-white border-b border-gray-100 relative z-50">
+      <nav className={`transition-all duration-300 border-b border-gray-100 relative z-50 md:bg-white ${
+        scrolled
+          ? 'bg-white shadow-md'
+          : 'bg-gradient-to-r from-[#189D91]/10 via-white to-[#EC008C]/10'
+      }`}>
         <div className="max-w-[1700px] mx-auto px-4 lg:px-6">
           {/* Main Desktop Header Row */}
           <div className="hidden md:flex items-center justify-between py-2.5 gap-4 lg:gap-6">
@@ -225,27 +237,25 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Header Row */}
-          <div className="flex md:hidden justify-between items-center h-12 px-1">
-            <Link to="/" className="flex-shrink-0">
-              <div className="bg-white px-2 py-1 rounded-lg shadow-sm">
-                <img src={TransparentLogo} alt="Riddha Interio" className="h-8 w-auto object-contain" />
-              </div>
+          <div className="flex md:hidden justify-between items-center h-[72px] px-1">
+            <Link to="/" className="flex-shrink-0 flex items-center h-full py-1">
+              <img src={TransparentLogo} alt="Riddha Interio" className="h-[60px] w-auto object-contain pl-2 scale-110 origin-left" />
             </Link>
-            <div className="flex items-center gap-1">
-              <Link to="/profile" className="p-2 text-white">
-                <FiUser className="h-6 w-6" />
+            <div className="flex items-center gap-1.5">
+              <Link to="/profile" className="p-1.5 text-[#189D91]">
+                <FiUser className="h-[22px] w-[22px]" />
               </Link>
               {user && (
-                <Link to="/wishlist" className="p-2 text-white">
-                  <FiHeart className="h-6 w-6" />
+                <Link to="/wishlist" className="p-1.5 text-[#189D91]">
+                  <FiHeart className="h-[22px] w-[22px]" />
                 </Link>
               )}
               {user && <NotificationDropdown isMobile={true} />}
-              <Link to="/cart" className="p-2 text-white relative">
-                <FiShoppingCart className="h-6 w-6" />
-                {cartCount > 0 && <span className="absolute top-1 right-1 bg-[#FF6B35] text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-[#189D91]">{cartCount}</span>}
+              <Link to="/cart" className="p-1.5 text-[#189D91] relative">
+                <FiShoppingCart className="h-[22px] w-[22px]" />
+                {cartCount > 0 && <span className="absolute top-0 right-0 bg-[#EC008C] text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full border border-white">{cartCount}</span>}
               </Link>
-              <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-white">
+              <button onClick={() => setIsOpen(!isOpen)} className="p-1.5 text-[#189D91]">
                 {isOpen ? <FiX className="h-6 w-6" /> : <FiMenu className="h-6 w-6" />}
               </button>
             </div>
@@ -425,22 +435,7 @@ const Navbar = () => {
                   {/* Primary Nav */}
                   <div className="pb-4 mb-4 border-b border-gray-50">
                     <SidebarLink to="/" icon={FiHome} label="Home" onClick={closeMobile} />
-                    <SidebarLink to="/categories" icon={FiGrid} label="Shop by Category" onClick={closeMobile} />
-
-                    {/* Dynamic Categories in Mobile Sidebar */}
-                    <div className="px-4 py-2 grid grid-cols-2 gap-2">
-                      {categories.map((cat, i) => (
-                        <Link
-                          key={i}
-                          to={`/category/${getCategorySlug(cat.name)}`}
-                          onClick={closeMobile}
-                          className="px-3 py-2.5 bg-gray-50 rounded-lg text-[10px] font-bold text-gray-600 hover:text-[#189D91] hover:bg-[#189D91]/5 transition-all text-center flex items-center justify-center"
-                        >
-                          {cat.name}
-                        </Link>
-                      ))}
-                    </div>
-
+                    <SidebarLink to="/products" icon={FiGrid} label="Shop Products" onClick={closeMobile} />
                     <SidebarLink to="/referral-rewards" icon={LuWallet} label="Riddha Wallet" onClick={closeMobile} />
                     <SidebarLink to="/orders" icon={FiShoppingBag} label="My Orders" onClick={closeMobile} />
                     {user && <SidebarLink to="/wishlist" icon={FiHeart} label="My Wishlist" onClick={closeMobile} />}

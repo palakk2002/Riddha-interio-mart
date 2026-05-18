@@ -45,80 +45,76 @@ const ProductTile = ({ product }) => {
     product?.discountPrice != null && product.discountPrice !== ''
       ? product?.price
       : null;
+  const hasDiscount = originalPrice != null && Number(originalPrice) > Number(displayPrice);
 
   return (
     <Link
       to={`/products/${productId}`}
-      className="group overflow-hidden rounded-[1.75rem] border border-soft-oatmeal/60 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 h-full"
     >
-      <div className="relative aspect-[4/3.2] md:aspect-video md:h-40 overflow-hidden bg-soft-oatmeal/10">
+      {/* Product Image */}
+      <div className="relative aspect-square overflow-hidden bg-gray-50">
         <img
           src={getProductImage(product)}
           alt={product?.name || 'Product'}
-          className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-deep-espresso/45 via-transparent to-transparent" />
-      </div>
-      <div className="space-y-1 p-2 md:p-3">
-        <div className="space-y-1">
-          <p className="line-clamp-1 text-[13px] md:text-sm font-bold text-deep-espresso">
-            {product?.name}
-          </p>
-          <p className="line-clamp-1 text-[10px] font-black tracking-[0.24em] text-warm-sand">
-            {product?.category}
-          </p>
-        </div>
-        <div className="flex items-end justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-base md:text-md font-black text-black">
-              {toMoney(displayPrice)}
-            </p>
-            {originalPrice != null && Number(originalPrice) > Number(displayPrice) && (
-              <p className="text-[11px] text-warm-sand line-through">
-                {toMoney(originalPrice)}
-              </p>
-            )}
-          </div>
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-header-red)]/10 text-[var(--color-header-red)] transition-colors group-hover:bg-[var(--color-header-red)] group-hover:text-white">
-            <LuChevronRight size={15} />
+        {hasDiscount && (
+          <span className="absolute top-1.5 left-1.5 bg-[#EC008C] text-white text-[8px] font-black px-1.5 py-0.5 rounded-md">
+            SALE
           </span>
+        )}
+      </div>
+
+      {/* Product Info */}
+      <div className="p-2 flex flex-col gap-0.5">
+        <p className="line-clamp-1 text-[10px] md:text-xs font-black text-gray-800 leading-tight">
+          {product?.name}
+        </p>
+        <p className="line-clamp-1 text-[8px] md:text-[10px] font-bold text-[#189D91] uppercase tracking-wide">
+          {product?.category}
+        </p>
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className="text-[11px] md:text-sm font-black text-gray-900">
+            {toMoney(displayPrice)}
+          </span>
+          {hasDiscount && (
+            <span className="text-[9px] text-gray-400 line-through">
+              {toMoney(originalPrice)}
+            </span>
+          )}
         </div>
       </div>
     </Link>
   );
 };
 
+
 const SectionShell = ({ section, children, action }) => {
   return (
     <Motion.section
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-80px' }}
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-1 md:py-10"
+      viewport={{ once: true, margin: '-40px' }}
+      className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-12 py-4 md:py-8 border-t border-gray-50 bg-white"
     >
-      <div className="mx-auto mb-1 md:mb-10 max-w-5xl text-center space-y-1 md:space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-soft-oatmeal/40 border border-soft-oatmeal/60 text-[10px] font-black uppercase tracking-[0.35em] text-warm-sand">
-          Curated Collection
-        </div>
-
-        <h2 className="text-2xl md:text-6xl font-display font-black tracking-tight text-black">
-          {section.title}
-        </h2>
-
-        <div className="flex items-center justify-center gap-3 py-0.5 md:py-1">
-          <div className="h-[1.5px] w-12 bg-soft-oatmeal shadow-sm" />
-          <div className="w-2.5 h-2.5 rounded-full border border-warm-sand/40" />
-          <div className="h-[1.5px] w-12 bg-soft-oatmeal shadow-sm" />
-        </div>
-
-        {section.subtitle && (
-          <p className="mx-auto max-w-3xl text-sm md:text-xl leading-relaxed text-deep-espresso/50 font-light italic">
-            {section.subtitle}
+      {/* Compact Standard Header */}
+      <div className="flex items-center justify-between mb-4 md:mb-6">
+        <div>
+          <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#189D91] mb-0.5">
+            Curated Collection
           </p>
-        )}
-
+          <h2 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight leading-tight">
+            {section.title}
+          </h2>
+          {section.subtitle && (
+            <p className="text-[11px] md:text-xs text-gray-500 mt-1 max-w-2xl leading-relaxed">
+              {section.subtitle}
+            </p>
+          )}
+        </div>
         {action && (
-          <div className="pt-1 flex justify-center">
+          <div className="shrink-0">
             {action}
           </div>
         )}
@@ -129,10 +125,13 @@ const SectionShell = ({ section, children, action }) => {
   );
 };
 
+
 const DynamicSections = () => {
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedFilters, setSelectedFilters] = useState({});
+
 
   useEffect(() => {
     let alive = true;
@@ -198,43 +197,68 @@ const DynamicSections = () => {
         }
 
         if (section.displayType === 'product') {
+          const sectionId = getId(section);
+          const activeFilter = selectedFilters[sectionId];
+
+          const filteredProducts = activeFilter
+            ? products.filter((p) => {
+                if (!p) return false;
+                const catName = typeof p.category === 'string' ? p.category : p.category?.name;
+                const catId = typeof p.category === 'object' ? getId(p.category) : p.categoryId;
+                return catId === activeFilter || catName === activeFilter;
+              })
+            : products;
+
           return (
             <SectionShell
-              key={getId(section)}
+              key={sectionId}
               section={section}
               action={
                 <Link
                   to="/products"
-                  className="inline-flex items-center gap-2 rounded-full border border-soft-oatmeal bg-white px-3 md:px-4 py-1 md:py-1.5 text-xs font-bold uppercase tracking-[0.22em] text-deep-espresso transition-all hover:border-[var(--color-header-red)] hover:text-[var(--color-header-red)]"
+                  className="flex items-center gap-1 text-[11px] md:text-sm font-bold text-[#189D91] hover:underline shrink-0"
                 >
-                  View all products
-                  <LuChevronRight size={13} />
+                  View All <span>›</span>
                 </Link>
               }
             >
-              <div className="space-y-1 md:space-y-4">
+              <div className="space-y-4 md:space-y-6">
                 {categories.length > 0 && (
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {categories.map((category) => (
-                      <span
-                        key={getId(category)}
-                        className="rounded-full border border-soft-oatmeal bg-white px-2 md:px-3 py-0.5 md:py-1 text-[11px] font-bold text-deep-espresso/70"
-                      >
-                        {category?.name}
-                      </span>
-                    ))}
+                  <div className="flex flex-wrap justify-start gap-1.5 md:gap-3 py-1">
+                    {categories.map((category) => {
+                      const catId = getId(category);
+                      const isActive = activeFilter === catId;
+                      return (
+                        <button
+                          key={catId}
+                          onClick={() => {
+                            setSelectedFilters((prev) => ({
+                              ...prev,
+                              [sectionId]: isActive ? null : catId,
+                            }));
+                          }}
+                          className={`rounded-full px-4.5 py-2 text-[10px] md:text-xs font-black transition-all duration-200 shadow-sm border ${
+                            isActive
+                              ? 'bg-[#189D91] border-[#189D91] text-white hover:bg-[#14847a]'
+                              : 'bg-white border-gray-200 text-slate-500 hover:border-gray-300 hover:text-gray-800'
+                          }`}
+                        >
+                          {category?.name}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
 
-                {products.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                    {products.map((product) => (
+                {filteredProducts.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-2 md:gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                    {filteredProducts.map((product) => (
                       <ProductTile key={getId(product)} product={product} />
                     ))}
                   </div>
                 ) : (
                   <div className="rounded-[1.75rem] border border-dashed border-soft-oatmeal bg-white p-8 text-center text-warm-sand">
-                    No products have been selected for this section yet.
+                    No products matching this category found.
                   </div>
                 )}
               </div>

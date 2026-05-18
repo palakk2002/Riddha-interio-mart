@@ -16,68 +16,66 @@ const SplashPage = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen w-full bg-[#189D91] flex items-center justify-center font-sans overflow-y-auto px-4 py-8">
-      {/* Device wrapper for desktop, seamless on mobile */}
-      <div className="w-full max-w-[420px] min-h-[820px] bg-[#189D91] flex flex-col items-center justify-between py-16 px-8 rounded-3xl md:shadow-2xl relative overflow-hidden">
+    <div className="min-h-screen w-full bg-white flex items-center justify-center font-sans overflow-hidden px-4">
+      
+      {/* Decorative background effects */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#189D91]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#EC008C]/5 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="w-full max-w-md flex flex-col items-center justify-center z-10">
         
-        {/* Decorative background glow rings for high-end look */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none -translate-y-1/3 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none translate-y-1/3 -translate-x-1/3" />
+        {/* Main Logo Container */}
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="w-[280px] sm:w-[320px] flex items-center justify-center mb-10 relative"
+        >
+          <img 
+            src={TransparentLogo} 
+            alt="Riddha Interio Mart" 
+            className="w-full h-auto object-contain" 
+          />
+        </motion.div>
 
-        <div className="flex-1 flex flex-col items-center justify-center w-full z-10">
-          
-          {/* Logo Card with floating shopping cart icon */}
-          <div className="relative mb-12">
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="bg-white rounded-[24px] px-8 py-6 shadow-xl shadow-black/10 w-[240px] flex items-center justify-center"
-            >
-              <img src={TransparentLogo} alt="Interio Mega Mart" className="w-full object-contain" />
-            </motion.div>
+        {/* Tagline */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h1 className="text-slate-800 text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
+            Connecting India to
+          </h1>
+          <h2 className="text-slate-600 text-xl sm:text-2xl font-semibold tracking-wide">
+            Premium Interiors.
+          </h2>
+        </motion.div>
 
-            {/* Shopping Cart Icon next to logo box as seen in screenshot */}
-            <motion.div 
-              initial={{ x: 10, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="absolute -right-10 top-1/2 -translate-y-1/2 text-white/70"
-            >
-              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </motion.div>
-          </div>
-
-          {/* Tagline */}
-          <motion.p 
-            initial={{ y: 15, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-white text-center text-[19px] font-bold tracking-wide leading-snug max-w-xs"
-          >
-            Connecting India to<br/> Premium Interiors.
-          </motion.p>
-        </div>
-
-        {/* Loading Indicator */}
+        {/* Premium Loading Bar */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="w-full max-w-[200px] mx-auto flex flex-col items-center mb-6 z-10"
+          transition={{ delay: 0.7, duration: 0.5 }}
+          className="w-full max-w-[240px] flex flex-col items-center"
         >
-          <span className="text-white/80 text-[11px] font-bold uppercase tracking-widest mb-3">Loading...</span>
-          <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden relative">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-2 h-2 rounded-full bg-[#EC008C] animate-pulse" />
+            <span className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em]">Loading</span>
+            <div className="w-2 h-2 rounded-full bg-[#EC008C] animate-pulse delay-75" />
+          </div>
+          
+          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden relative shadow-inner">
             <motion.div 
-              initial={{ width: 0 }}
+              initial={{ width: "0%" }}
               animate={{ width: "100%" }}
-              transition={{ duration: 2.7, ease: "easeInOut" }}
-              className="h-full bg-[#EC008C] rounded-full shadow-[0_0_8px_rgba(236,0,140,0.6)]"
+              transition={{ duration: 2.5, ease: "easeInOut" }}
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#EC008C] to-[#ff47b3] rounded-full"
             />
           </div>
         </motion.div>
+        
       </div>
     </div>
   );

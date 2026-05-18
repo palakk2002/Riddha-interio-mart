@@ -74,7 +74,7 @@ const LoginPage = () => {
         if (role === 'admin') navigate('/admin/dashboard');
         else if (role === 'seller') navigate('/seller/dashboard');
         else if (role === 'delivery') navigate('/delivery/dashboard');
-        else navigate('/cart');
+        else navigate('/');
       }
     } catch (err) {
       if (err.response?.data?.unverified) {
@@ -106,9 +106,18 @@ const LoginPage = () => {
         {/* Device wrapper for desktop, seamless on mobile */}
         <div className="w-full max-w-[420px] min-h-[820px] bg-white flex flex-col justify-between py-12 px-8 rounded-3xl md:shadow-2xl overflow-hidden relative border border-slate-100">
           
+          {/* Back Button */}
+          <button 
+            onClick={() => navigate(-1)} 
+            className="absolute top-6 left-6 p-2 bg-slate-50 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all border border-slate-100 shadow-sm"
+            aria-label="Go Back"
+          >
+            <FiArrowLeft size={18} />
+          </button>
+
           <div className="w-full flex flex-col items-center">
             {/* Logo */}
-            <div className="mt-6 mb-8 w-full max-w-[200px] flex justify-center">
+            <div className="mt-8 mb-8 w-full max-w-[200px] flex justify-center">
               <img src={logo} alt="Interio Mega Mart" className="w-full h-auto object-contain" />
             </div>
 

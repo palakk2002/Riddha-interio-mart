@@ -43,34 +43,35 @@ const QUICK_CATEGORIES = [
 
 const CategoryQuickAccess = () => {
   return (
-    <section className="pt-1 pb-1 md:pt-4 md:pb-0 bg-white overflow-hidden">
-      <div className="max-w-[1700px] mx-auto px-6 md:px-12">
-        <div className="flex items-center overflow-x-auto no-scrollbar gap-2 md:gap-2 pb-2 md:pb-4 scroll-smooth">
+    <section className="py-2 md:pt-3 md:pb-2 bg-white overflow-hidden border-b border-gray-50">
+      <div className="max-w-[1700px] mx-auto px-4 md:px-12">
+        <div className="flex items-center overflow-x-auto no-scrollbar gap-2 md:gap-0 pb-1 scroll-smooth justify-start md:justify-between w-full">
           {QUICK_CATEGORIES.map((category, idx) => {
             const config = getCategoryConfig(category.name);
             const Icon = config.icon;
 
+
             return (
               <motion.div
                 key={idx}
-                whileHover={{ y: -3 }}
+                whileHover={{ y: -2 }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
               >
                 <Link
                   to={`/category/${category.slug}`}
-                  className="group flex flex-col items-center justify-center min-w-[80px] md:min-w-[130px] transition-all duration-300"
+                  className="group flex flex-col items-center justify-center min-w-[64px] md:min-w-[90px] transition-all duration-300 py-1"
                 >
                   <div 
-                    className="mb-2 md:mb-3 h-14 w-14 md:h-22 md:w-32 rounded-full md:rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300"
+                    className="mb-1.5 h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300"
                     style={{ backgroundColor: `${config.color}15` }}
                   >
                     <Icon 
-                      className="w-7 h-7 md:w-11 md:h-11" 
+                      className="w-5 h-5 md:w-7 md:h-7" 
                       style={{ color: config.color }}
                       strokeWidth={1.5}
                     />
                   </div>
-                  <span className="text-[10px] md:text-[13px] font-bold text-gray-800 text-center px-1 group-hover:text-black transition-colors leading-tight">
+                  <span className="text-[9px] md:text-[11px] font-bold text-gray-600 text-center px-0.5 group-hover:text-gray-900 transition-colors leading-tight">
                     {toTitleCase(category.name)}
                   </span>
                 </Link>
