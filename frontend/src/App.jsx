@@ -23,10 +23,11 @@ function App() {
   const isAdminPath = location.pathname.startsWith('/admin');
   const isSellerPath = location.pathname.startsWith('/seller');
   const isDeliveryPath = location.pathname.startsWith('/delivery');
+  const isInitPath = location.pathname.includes('/splash') || location.pathname.includes('/onboarding');
   const isAuthPath = location.pathname === '/login' || location.pathname === '/signup' || 
                       location.pathname.endsWith('/login') || location.pathname.endsWith('/signup') ||
                       location.pathname === '/search' || location.pathname.startsWith('/coming-soon');
-  const isDashboardLayout = isAdminPath || isSellerPath || isDeliveryPath || isAuthPath;
+  const isDashboardLayout = isAdminPath || isSellerPath || isDeliveryPath || isAuthPath || isInitPath;
   const isProductPage = location.pathname.startsWith('/product/') || location.pathname.startsWith('/products/');
   const isCheckoutPath = ['/cart', '/address', '/payment'].includes(location.pathname);
 

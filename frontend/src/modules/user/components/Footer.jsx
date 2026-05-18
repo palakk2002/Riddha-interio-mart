@@ -1,10 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiFacebook, FiTwitter, FiInstagram, FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
 import TransparentLogo from "../../../assets/transparent_logo.png";
  
 const Footer = () => {
+  const location = useLocation();
+  if (location.pathname.toLowerCase().includes('/splash') || location.pathname.toLowerCase().includes('/onboarding')) return null;
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {

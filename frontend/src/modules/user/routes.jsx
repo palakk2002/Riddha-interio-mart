@@ -43,10 +43,14 @@ const DesignerRegistration = React.lazy(() => import('./pages/DesignerRegistrati
 const BuilderRegistration = React.lazy(() => import('./pages/BuilderRegistration'));;
 const WishlistPage = React.lazy(() => import('./pages/WishlistPage'));;
 const NotificationPage = React.lazy(() => import('./pages/NotificationPage'));;
+const SplashPage = React.lazy(() => import('./pages/SplashPage'));;
+const OnboardingPage = React.lazy(() => import('./pages/OnboardingPage'));;
 
 const UserRoutes = () => {
   return (
     <Routes>
+      <Route path="/splash" element={<SplashPage />} />
+      <Route path="/onboarding" element={<OnboardingPage />} />
       <Route path="/" element={<HomePage />} />
       <Route path="/coming-soon" element={<ComingSoonPage />} />
       <Route path="/coming-soon/about" element={<ComingSoonAboutPage />} />
