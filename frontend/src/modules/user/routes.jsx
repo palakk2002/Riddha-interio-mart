@@ -43,10 +43,9 @@ import { Navigate } from 'react-router-dom';
 import { useUser } from './data/UserContext';
 
 const RootRoute = () => {
-  const { user } = useUser();
   const splashCompleted = sessionStorage.getItem('splashCompleted') === 'true';
 
-  if (user || splashCompleted) {
+  if (splashCompleted) {
     return <HomePage />;
   }
   return <Navigate to="/splash" replace />;

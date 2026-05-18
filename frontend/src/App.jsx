@@ -33,6 +33,9 @@ function App() {
   const isCheckoutPath = ['/cart', '/address', '/payment'].includes(location.pathname);
 
   useEffect(() => {
+    // Clear splash session storage on fresh page load/refresh
+    sessionStorage.removeItem('splashCompleted');
+    
     // Check if pincode is set in localStorage
     const savedPincode = localStorage.getItem('userPincode');
     if (!savedPincode && !isDashboardLayout) {
