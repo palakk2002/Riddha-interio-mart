@@ -103,50 +103,43 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans">
       {/* Left Section - Branding & Visuals */}
-      <div className="hidden lg:flex flex-1 relative items-center justify-center overflow-hidden bg-slate-900">
-        <img
-          src={LOGIN_BG}
-          alt="Luxury Interior"
-          className="absolute inset-0 w-full h-full object-cover opacity-40 scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-tr from-slate-900 via-slate-900/40 to-transparent" />
+      <div className="hidden lg:flex flex-1 relative items-center justify-center overflow-hidden bg-gradient-to-br from-[#2A458A] via-[#1E3163] to-[#111A30]">
+        {/* Subtle Ambient Mesh Glows */}
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#189D91]/15 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#2A458A]/30 rounded-full blur-[100px] pointer-events-none translate-x-1/3 translate-y-1/3" />
         
         <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          className="relative z-10 max-w-xl w-full p-8"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="relative z-10 max-w-lg w-full p-12 text-center flex flex-col items-center"
         >
-          <div className="relative overflow-hidden bg-white/[0.03] backdrop-blur-3xl rounded-[3.5rem] p-16 border border-white/10 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] group">
-            {/* Ambient Glows */}
-            <div className={`absolute -top-24 -left-24 w-48 h-48 rounded-full blur-[80px] pointer-events-none ${theme.ambientGlow}`} />
-            <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-pink-500/10 rounded-full blur-[80px] pointer-events-none" />
-            
-            <div className="relative z-10">
-                <img 
-                  src={logo} 
-                  alt="Riddha Logo" 
-                  className="w-full h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)] transform transition-transform duration-700 group-hover:scale-[1.02]" 
-                />
-                
-                <div className="mt-12 space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className={`h-[1px] w-8 bg-gradient-to-r ${theme.lineGlow} to-transparent`} />
-                        <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.6em] leading-none italic">
-                            Premium Quality Supply
-                        </p>
-                    </div>
-                    <h2 className="text-3xl font-display font-black text-white tracking-tighter leading-tight drop-shadow-lg">
-                        India's Largest <br/>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/60">Interior Supply Hub</span>
-                    </h2>
-                    <div className="pt-2">
-                        <p className="text-white/30 text-[10px] font-bold leading-relaxed max-w-[280px]">
-                            Curating the finest collection of luxury interiors for over a decade.
-                        </p>
-                    </div>
-                </div>
-            </div>
+          {/* Logo Frame */}
+          <div className="mb-10 w-full max-w-[280px]">
+             <img 
+               src={logo} 
+               alt="Riddha Logo" 
+               className="w-full h-auto object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.2)]" 
+             />
+          </div>
+
+          {/* Typography Area */}
+          <div className="space-y-4 text-center">
+             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/10 rounded-full backdrop-blur-sm">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#189D91]" />
+                <span className="text-[10px] font-bold text-white/95 uppercase tracking-[0.2em] leading-none">
+                   Premium Quality Supply
+                </span>
+             </div>
+
+             <h2 className="text-2xl font-bold text-white tracking-tight leading-snug">
+                India's Largest <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#B9C6E2]">Interior Supply Hub</span>
+             </h2>
+
+             <p className="text-[#B9C6E2] text-xs font-normal leading-relaxed max-w-sm mx-auto">
+                Curating the finest collection of luxury interiors for over a decade.
+             </p>
           </div>
         </motion.div>
       </div>
