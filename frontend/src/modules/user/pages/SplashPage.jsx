@@ -2,18 +2,25 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+import { useUser } from '../data/UserContext';
+
 import TransparentLogo from "../../../assets/transparent_logo.png";
 
 const SplashPage = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       sessionStorage.setItem('splashCompleted', 'true');
-      navigate('/onboarding');
+      if (user) {
+        navigate('/');
+      } else {
+        navigate('/onboarding');
+      }
     }, 3000);
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, user]);
 
   return (
     <div className="min-h-screen w-full bg-white flex items-center justify-center font-sans overflow-hidden px-4">
