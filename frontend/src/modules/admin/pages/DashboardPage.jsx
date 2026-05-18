@@ -927,6 +927,139 @@ const DashboardPage = () => {
           </div>
         </div>
 
+        {/* Mobile Status Mix Matrix */}
+        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm min-w-0">
+          <div className="pb-1">
+            <span className="text-[9px] font-bold text-[var(--color-accent-pink)] uppercase tracking-wider">Order Metrics</span>
+            <h3 className="text-xs font-bold text-slate-800 mt-0.5">Status Mix Matrix</h3>
+            <p className="text-[10px] text-slate-400 font-medium mt-0.5">Real-time order stage ratios</p>
+          </div>
+          
+          <div className="h-[150px] w-full relative my-2">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+              <PieChart>
+                <Pie
+                  data={statusPieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={45}
+                  outerRadius={60}
+                  paddingAngle={3}
+                  dataKey="value"
+                >
+                  {statusPieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ fontSize: '10px', borderRadius: '8px' }} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-lg font-bold text-slate-800">{totalOrders}</span>
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wide">Ledgers</span>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-2 justify-center pt-2 border-t border-slate-50">
+            {statusPieData.map((item, idx) => (
+              <div key={item.name} className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded px-2 py-0.5">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
+                <span className="text-[9px] font-bold text-slate-500 uppercase">{item.name}: {item.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile Preferred Channels */}
+        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm min-w-0">
+          <div className="pb-1">
+            <span className="text-[9px] font-bold text-[var(--color-primary)] uppercase tracking-wider">Gateway Telemetry</span>
+            <h3 className="text-xs font-bold text-slate-800 mt-0.5">Preferred Channels</h3>
+            <p className="text-[10px] text-slate-400 font-medium mt-0.5">Client checkout statistics</p>
+          </div>
+          
+          <div className="h-[150px] w-full relative my-2">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+              <PieChart>
+                <Pie
+                  data={paymentPieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={45}
+                  outerRadius={60}
+                  paddingAngle={3}
+                  dataKey="value"
+                >
+                  {paymentPieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ fontSize: '10px', borderRadius: '8px' }} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <LuCreditCard className="text-[var(--color-primary)] mb-0.5" size={16} />
+              <span className="text-[8px] font-bold text-slate-400 uppercase">Gateway</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 justify-center pt-2 border-t border-slate-50">
+            {paymentPieData.map((item, idx) => (
+              <div key={item.name} className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded px-2 py-0.5">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[(idx + 2) % COLORS.length] }}></div>
+                <span className="text-[9px] font-bold text-slate-500 uppercase">{item.name}: {item.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile Audience Segmentation */}
+        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm min-w-0">
+          <div className="pb-1">
+            <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Demographics</span>
+            <h3 className="text-xs font-bold text-slate-800 mt-0.5">Audience Segmentation</h3>
+            <p className="text-[10px] text-slate-400 font-medium mt-0.5">Active marketplace accounts</p>
+          </div>
+          
+          <div className="h-[150px] w-full my-2">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+              <BarChart data={userTypeData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 8, fontWeight: 700, fill: '#64748b' }} 
+                />
+                <YAxis axisLine={false} tickLine={false} hide />
+                <Tooltip 
+                  cursor={{ fill: '#f8fafc' }}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '10px' }}
+                />
+                <Bar 
+                  dataKey="count" 
+                  fill="var(--color-primary)" 
+                  radius={[4, 4, 0, 0]} 
+                  barSize={24}
+                >
+                  {userTypeData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={index === 0 ? 'var(--color-primary)' : 'var(--color-accent-pink)'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="flex justify-around pt-2 border-t border-slate-50">
+            {userTypeData.map((item, idx) => (
+              <div key={item.name} className="text-center">
+                <p className="text-[8px] text-slate-400 uppercase font-bold">{item.name}</p>
+                <p className="text-[11px] font-bold text-slate-800 mt-0.5">{item.count} users</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Mobile Live System Stream */}
         <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm space-y-3">
           <div className="flex justify-between items-center pb-2 border-b border-slate-100">
