@@ -81,6 +81,7 @@ function App() {
               <Route path="/admin/*" element={<AdminRoutes />} />
               <Route path="/seller/*" element={<SellerRoutes />} />
               <Route path="/delivery/*" element={<DeliveryRoutes />} />
+              <Route path="/coming-soon/*" element={<ComingSoonRoutes />} />
               <Route path="/*" element={<UserRoutes />} />
             </Routes>
           </Suspense>
