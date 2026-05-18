@@ -6,16 +6,16 @@ const StatCard = ({ icon: Icon, label, value, color, onClick }) => {
 
   return (
     <motion.div
-      whileHover={{ y: -5 }}
+      whileHover={{ y: -4 }}
       onClick={onClick}
-      className={`bg-white p-6 rounded-3xl shadow-sm border border-soft-oatmeal flex flex-col gap-4 transition-all duration-300 hover:shadow-xl hover:border-brand-teal/20 ${onClick ? 'cursor-pointer' : ''}`}
+      className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-4 transition-all duration-300 hover:shadow-md hover:border-[#6D28D9] ${onClick ? 'cursor-pointer' : ''}`}
     >
-      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${color}/10 transition-colors`}>
-        <Icon size={22} className={textColor} />
+      <div className={`w-11 h-11 rounded-lg flex items-center justify-center bg-slate-50 border border-slate-100 transition-colors`}>
+        <Icon size={20} className={textColor} />
       </div>
       <div>
-        <p className="text-[10px] font-black text-warm-sand uppercase tracking-[0.2em]">{label}</p>
-        <h3 className="text-2xl font-black text-[#240046] mt-1 tracking-tight">{value}</h3>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+        <h3 className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{value}</h3>
       </div>
     </motion.div>
   );

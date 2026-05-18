@@ -50,92 +50,100 @@ const OrderTracking = () => {
 
   return (
     <PageWrapper>
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="space-y-2">
-            <h1 className="text-3xl md:text-5xl font-display font-bold text-deep-espresso">Order <span className="text-warm-sand">Tracking</span></h1>
-            <p className="text-warm-sand/60 text-sm font-medium uppercase tracking-[0.2em]">Live network monitor for active shipments</p>
+      <div className="max-w-7xl mx-auto space-y-6 pb-12">
+        {/* Header Block */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm">
+          <div className="space-y-1">
+            <h1 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+              <LuNavigation className="text-[var(--color-primary)]" size={20} /> Live Order Tracking
+            </h1>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active shipment telemetry ledger</p>
           </div>
           
-          <div className="relative w-full md:w-96">
-            <LuSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-warm-sand" size={20} />
+          <div className="relative w-full sm:w-72">
+            <LuSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
             <input 
               type="text" 
               placeholder="Search Order ID or Customer..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-soft-oatmeal rounded-2xl pl-14 pr-6 py-4 focus:outline-none focus:ring-4 focus:ring-warm-sand/10 transition-all font-medium text-deep-espresso shadow-sm"
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-1.5 focus:bg-white focus:outline-none focus:border-[var(--color-primary)] transition-all text-xs font-semibold text-slate-800 placeholder-slate-400"
             />
           </div>
         </div>
 
         {loading ? (
-          <div className="py-40 text-center">
-            <div className="w-16 h-16 border-4 border-soft-oatmeal border-t-red-800 rounded-full animate-spin mx-auto mb-6" />
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-warm-sand animate-pulse">Establishing Satellite Link...</p>
+          <div className="py-24 text-center">
+            <div className="w-10 h-10 border-3 border-slate-100 border-t-[var(--color-primary)] rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 animate-pulse">Syncing logistics coordinates...</p>
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="bg-white rounded-[3rem] border border-dashed border-soft-oatmeal p-20 text-center shadow-sm">
-             <div className="w-20 h-20 bg-soft-oatmeal/20 rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-warm-sand opacity-30">
-                <LuNavigation size={40} />
+          <div className="bg-white rounded-xl border border-slate-200/60 p-12 text-center shadow-sm">
+             <div className="w-12 h-12 bg-slate-50 rounded-lg flex items-center justify-center mx-auto mb-4 text-slate-400">
+                <LuNavigation size={22} />
              </div>
-             <h3 className="text-2xl font-bold text-deep-espresso mb-3">No active shipments</h3>
-             <p className="text-warm-sand font-medium max-w-sm mx-auto">Either all orders are delivered or no orders match your search.</p>
+             <h3 className="text-sm font-bold text-slate-800 mb-1">No active shipments in transit</h3>
+             <p className="text-xs text-slate-400 max-w-sm mx-auto font-medium">All active order cycles are currently settled.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          /* Sleek Compact Grid */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredOrders.map((order) => (
-              <div key={order._id} className="bg-white rounded-[2.5rem] p-8 border border-soft-oatmeal shadow-xl hover:shadow-2xl transition-all duration-500 group overflow-hidden relative">
-                <div className="flex justify-between items-start mb-8 relative z-10">
-                  <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 bg-red-800/10 rounded-2xl flex items-center justify-center text-red-800 group-hover:scale-110 transition-transform duration-500">
-                      <LuTruck size={28} />
+              <div 
+                key={order._id} 
+                className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-sm hover:border-[var(--color-primary)] hover:shadow-md transition-all duration-300 group flex flex-col justify-between"
+              >
+                <div>
+                  {/* Card Header */}
+                  <div className="flex justify-between items-start mb-3 pb-3 border-b border-slate-50">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 bg-teal-50 text-[var(--color-primary)] rounded-lg flex items-center justify-center">
+                        <LuTruck size={16} />
+                      </div>
+                      <div>
+                        <p className="text-[8px] font-bold uppercase tracking-wider text-slate-400 leading-none">Order ID</p>
+                        <h3 className="text-xs font-bold text-slate-800 mt-1">#{order.orderId || order._id.slice(-8).toUpperCase()}</h3>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-warm-sand mb-1">Order Identifier</p>
-                      <h3 className="text-xl font-black text-deep-espresso">#{order.orderId || order._id.slice(-8).toUpperCase()}</h3>
-                    </div>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
+                      order.status === 'Shipped' ? 'bg-emerald-50 text-emerald-600 border-emerald-100/50' : 'bg-amber-50 text-amber-600 border-amber-100/50'
+                    }`}>
+                      {order.status}
+                    </span>
                   </div>
-                  <span className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                    order.status === 'Shipped' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'
-                  }`}>
-                    {order.status}
-                  </span>
-                </div>
 
-                <div className="grid grid-cols-2 gap-8 mb-8 border-y border-soft-oatmeal/10 py-8 relative z-10">
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-warm-sand/60">Receiver</p>
-                    <p className="font-bold text-deep-espresso">{order.user?.fullName || 'Guest User'}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-warm-sand/60">Dispatcher</p>
-                    <p className="font-bold text-deep-espresso">{order.deliveryBoy?.fullName || 'Awaiting Assignment'}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-8 relative z-10">
-                  <div className="flex items-start gap-5 relative">
-                    <div className="w-1 h-16 bg-red-800/10 absolute left-[11px] top-6 rounded-full" />
-                    <div className="w-6 h-6 rounded-full bg-red-800 flex items-center justify-center z-10 shadow-lg shadow-red-800/20">
-                      <LuNavigation size={12} className="text-white" />
+                  {/* Compact Details Grid */}
+                  <div className="grid grid-cols-2 gap-3 mb-4 text-[11px] leading-tight">
+                    <div className="space-y-0.5">
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Receiver</p>
+                      <p className="font-semibold text-slate-700 truncate">{order.user?.fullName || 'Guest User'}</p>
                     </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-warm-sand/80 mb-1">Delivery Destination</p>
-                      <p className="text-sm font-medium text-deep-espresso/70 leading-relaxed line-clamp-2">
+                    <div className="space-y-0.5">
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Dispatcher Partner</p>
+                      <p className="font-semibold text-slate-700 truncate">{order.deliveryBoy?.fullName || 'Awaiting Partner'}</p>
+                    </div>
+                  </div>
+
+                  {/* Destination Details */}
+                  <div className="bg-slate-50/50 p-2.5 rounded-lg border border-slate-100 mb-4 flex items-start gap-2">
+                    <LuMapPin size={13} className="text-slate-400 shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Delivery Address</p>
+                      <p className="text-[10px] text-slate-500 font-semibold truncate mt-0.5">
                         {order.shippingAddress?.fullAddress}, {order.shippingAddress?.city}
                       </p>
                     </div>
                   </div>
-
-                  <button 
-                    onClick={() => handleOpenMap(order)}
-                    className="w-full py-5 bg-deep-espresso text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.25em] flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl shadow-deep-espresso/20 group/btn active:scale-95"
-                  >
-                    <LuMapPin size={18} className="group-hover/btn:animate-bounce" />
-                    View Live GPS Location
-                  </button>
                 </div>
+
+                {/* Compact Action Trigger */}
+                <button 
+                  onClick={() => handleOpenMap(order)}
+                  className="w-full py-2 bg-[var(--color-primary)] hover:opacity-90 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98]"
+                >
+                  <LuMapPin size={13} />
+                  GPS Live Location
+                </button>
               </div>
             ))}
           </div>
@@ -145,44 +153,46 @@ const OrderTracking = () => {
       {/* Real-time Map Modal */}
       <AnimatePresence>
         {showMap && selectedOrder && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowMap(false)}
-              className="absolute inset-0 bg-deep-espresso/80 backdrop-blur-md"
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             />
             
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-6xl bg-white rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col h-[85vh] border border-white/20"
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              className="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col h-[75vh] border border-slate-200"
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between px-8 py-6 border-b border-soft-oatmeal shrink-0">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-red-800 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-red-800/20">
-                    <LuNavigation size={24} />
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 shrink-0 bg-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[var(--color-primary)] text-white rounded-lg flex items-center justify-center shadow-sm shadow-[var(--color-primary)]/10">
+                    <LuNavigation size={18} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-deep-espresso leading-none">Tracking Shipment <span className="text-red-800">#{selectedOrder.orderId || selectedOrder._id.slice(-8).toUpperCase()}</span></h3>
-                    <p className="text-[10px] font-bold text-warm-sand uppercase tracking-widest mt-2 flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live Positioning Active
+                    <h3 className="text-sm font-bold text-slate-800 leading-none">
+                      Tracking Shipment <span className="text-[var(--color-primary)]">#{selectedOrder.orderId || selectedOrder._id.slice(-8).toUpperCase()}</span>
+                    </h3>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live Telemetry
                     </p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setShowMap(false)}
-                  className="w-12 h-12 rounded-full bg-soft-oatmeal/30 flex items-center justify-center text-deep-espresso hover:bg-red-800 hover:text-white transition-all duration-500 active:scale-90"
+                  className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
                 >
-                  <LuX size={24} />
+                  <LuX size={18} />
                 </button>
               </div>
 
-              {/* Map View */}
-              <div className="flex-1 bg-soft-oatmeal/20 relative">
+              {/* Map View Frame */}
+              <div className="flex-1 bg-slate-50 relative">
                 <iframe
                   title="Live Tracking Map"
                   width="100%"
@@ -192,28 +202,28 @@ const OrderTracking = () => {
                   marginHeight="0"
                   marginWidth="0"
                   src={getMapUrl(selectedOrder)}
-                  className="filter grayscale-[0.2] contrast-[1.1]"
+                  className="filter grayscale-[0.05]"
                 />
                 
                 {/* Floating Info Overlay */}
-                <div className="absolute bottom-10 left-10 right-10 flex flex-col md:flex-row gap-6">
-                  <div className="bg-white/90 backdrop-blur-xl p-6 rounded-[2rem] shadow-2xl border border-soft-oatmeal flex-1 flex items-center gap-6">
-                    <div className="w-14 h-14 bg-red-800/10 rounded-2xl flex items-center justify-center text-red-800">
-                      <LuMapPin size={28} />
+                <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row gap-3">
+                  <div className="bg-white/90 backdrop-blur-md p-3 rounded-lg shadow-lg border border-slate-200/60 flex-1 flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 bg-teal-50 text-[var(--color-primary)] rounded-lg flex items-center justify-center shrink-0">
+                      <LuMapPin size={16} />
                     </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-warm-sand mb-1">Destination Address</p>
-                      <p className="text-sm font-bold text-deep-espresso">{selectedOrder.shippingAddress?.fullAddress}, {selectedOrder.shippingAddress?.city}</p>
+                    <div className="min-w-0">
+                      <p className="text-[8px] font-bold uppercase tracking-wider text-slate-400">Destination Address</p>
+                      <p className="text-[11px] font-bold text-slate-700 truncate">{selectedOrder.shippingAddress?.fullAddress}, {selectedOrder.shippingAddress?.city}</p>
                     </div>
                   </div>
                   
-                  <div className="bg-deep-espresso p-6 rounded-[2rem] shadow-2xl flex items-center gap-6 text-white min-w-[300px]">
-                    <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center">
-                      <LuTruck size={28} />
+                  <div className="bg-slate-900 p-3 rounded-lg shadow-lg flex items-center gap-3 text-white sm:min-w-[240px] shrink-0">
+                    <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center shrink-0">
+                      <LuTruck size={16} />
                     </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-warm-sand mb-1">Assigned Partner</p>
-                      <p className="text-sm font-bold">{selectedOrder.deliveryBoy?.fullName || 'Express Courier'}</p>
+                    <div className="min-w-0">
+                      <p className="text-[8px] font-bold uppercase tracking-wider text-slate-300">Carrier Partner</p>
+                      <p className="text-[11px] font-bold truncate">{selectedOrder.deliveryBoy?.fullName || 'Express Dispatch'}</p>
                     </div>
                   </div>
                 </div>

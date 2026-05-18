@@ -42,31 +42,33 @@ const StockManagement = () => {
 
   return (
     <PageWrapper>
-      <div className="max-w-7xl mx-auto space-y-8 pb-12">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">Stock Management</h1>
-            <p className="text-warm-sand mt-1 font-medium">Monitor and manage inventory levels across all sellers.</p>
+      <div className="max-w-7xl mx-auto space-y-5 pb-12">
+        {/* Header Block */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm">
+          <div className="space-y-0.5">
+            <h1 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+              <FiPackage className="text-[var(--color-primary)]" size={20} /> Stock Management
+            </h1>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Monitor and audit inventory reserves across partners</p>
           </div>
           
-          <div className="flex items-center gap-3">
-             <div className="bg-white p-1 rounded-2xl border border-soft-oatmeal shadow-sm flex">
+          <div className="flex items-center">
+             <div className="bg-slate-100 p-0.5 rounded-lg border border-slate-200 flex">
                 <button 
                   onClick={() => setFilter('all')}
-                  className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filter === 'all' ? 'bg-deep-espresso text-white shadow-lg' : 'text-warm-sand hover:bg-soft-oatmeal/30'}`}
+                  className={`px-3.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${filter === 'all' ? 'bg-white text-slate-800 shadow-sm border border-slate-200/30' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                   All Items
                 </button>
                 <button 
                   onClick={() => setFilter('low')}
-                  className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filter === 'low' ? 'bg-amber-500 text-white shadow-lg' : 'text-warm-sand hover:bg-soft-oatmeal/30'}`}
+                  className={`px-3.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${filter === 'low' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                   Low Stock
                 </button>
                 <button 
                   onClick={() => setFilter('out')}
-                  className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filter === 'out' ? 'bg-red-600 text-white shadow-lg' : 'text-warm-sand hover:bg-soft-oatmeal/30'}`}
+                  className={`px-3.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${filter === 'out' ? 'bg-rose-505 bg-rose-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                   Out of Stock
                 </button>
@@ -74,76 +76,79 @@ const StockManagement = () => {
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-8 rounded-[32px] border border-soft-oatmeal shadow-sm flex items-center gap-6 group hover:shadow-xl hover:shadow-soft-oatmeal/20 transition-all duration-500">
-            <div className="w-16 h-16 bg-soft-oatmeal/20 rounded-2xl flex items-center justify-center text-deep-espresso group-hover:bg-deep-espresso group-hover:text-white transition-all duration-500">
-              <FiPackage size={28} />
+        {/* Quick Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Total Catalog Items */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-4 hover:border-slate-300 transition-all duration-300">
+            <div className="w-10 h-10 bg-teal-50 text-[var(--color-primary)] rounded-lg flex items-center justify-center shrink-0">
+              <FiPackage size={20} />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand mb-1">Total Catalog Items</p>
-              <h3 className="text-3xl font-display font-bold text-deep-espresso">{stats.totalItems}</h3>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 leading-none">Cataloged Items</p>
+              <h3 className="text-lg font-bold text-slate-800 mt-1">{stats.totalItems}</h3>
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-[32px] border border-soft-oatmeal shadow-sm flex items-center gap-6 group hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-500 border-l-4 border-l-amber-500">
-            <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-all duration-500">
-              <FiAlertCircle size={28} />
+          {/* Low Stock Warning */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200/80 border-l-4 border-l-amber-500 shadow-sm flex items-center gap-4 hover:border-slate-300 transition-all duration-300">
+            <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center shrink-0">
+              <FiAlertCircle size={20} />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600/60 mb-1">Low Stock Warning</p>
-              <h3 className="text-3xl font-display font-bold text-amber-600">{stats.lowStock}</h3>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-amber-600/70 leading-none">Low Stock Warnings</p>
+              <h3 className="text-lg font-bold text-amber-600 mt-1">{stats.lowStock}</h3>
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-[32px] border border-soft-oatmeal shadow-sm flex items-center gap-6 group hover:shadow-xl hover:shadow-red-500/10 transition-all duration-500 border-l-4 border-l-red-600">
-            <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 group-hover:bg-red-600 group-hover:text-white transition-all duration-500">
-              <FiTrendingDown size={28} />
+          {/* Out of Stock */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200/80 border-l-4 border-l-rose-600 shadow-sm flex items-center gap-4 hover:border-slate-300 transition-all duration-300">
+            <div className="w-10 h-10 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center shrink-0">
+              <FiTrendingDown size={20} />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-600/60 mb-1">Out of Stock</p>
-              <h3 className="text-3xl font-display font-bold text-red-600">{stats.outOfStock}</h3>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-rose-600/70 leading-none">Depleted Stock Out</p>
+              <h3 className="text-lg font-bold text-rose-600 mt-1">{stats.outOfStock}</h3>
             </div>
           </div>
         </div>
 
         {/* Main Content Area */}
-        <div className="bg-white rounded-[40px] border border-soft-oatmeal shadow-xl overflow-hidden min-h-[500px] flex flex-col">
-          {/* Toolbar */}
-          <div className="p-6 md:p-8 border-b border-soft-oatmeal flex flex-col md:flex-row gap-6 bg-soft-oatmeal/5">
+        <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col min-h-[450px]">
+          {/* Toolbar Search Bar */}
+          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-warm-sand" size={20} />
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
               <input 
                 type="text"
                 placeholder="Search products by name or SKU..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-white border border-soft-oatmeal rounded-2xl pl-14 pr-6 py-4 text-sm focus:outline-none focus:ring-4 focus:ring-warm-sand/10 transition-all font-medium"
+                className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-4 py-1.5 text-xs font-semibold text-slate-700 focus:outline-none focus:border-[var(--color-primary)] transition-all placeholder-slate-450"
               />
             </div>
           </div>
 
-          {/* Table */}
+          {/* Table Container */}
           <div className="flex-1 overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-soft-oatmeal/20">
-                  <th className="px-8 py-5 text-[10px] font-black text-warm-sand uppercase tracking-widest border-b border-soft-oatmeal">Product Details</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-warm-sand uppercase tracking-widest border-b border-soft-oatmeal">Seller / Partner</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-warm-sand uppercase tracking-widest border-b border-soft-oatmeal text-center">Status</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-warm-sand uppercase tracking-widest border-b border-soft-oatmeal text-right">Current Stock</th>
+                <tr className="bg-slate-50/30">
+                  <th className="px-4 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-150">Product Details</th>
+                  <th className="px-4 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-150">Seller / Partner</th>
+                  <th className="px-4 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-150 text-center">Status</th>
+                  <th className="px-4 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-150 text-right">Current Stock</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-soft-oatmeal/30">
+              <tbody className="divide-y divide-slate-100">
                 {loading ? (
                   Array(5).fill(0).map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td colSpan="4" className="px-8 py-10">
-                        <div className="flex gap-4 items-center">
-                          <div className="w-16 h-16 bg-soft-oatmeal/40 rounded-xl" />
+                      <td colSpan="4" className="px-4 py-5">
+                        <div className="flex gap-3 items-center">
+                          <div className="w-10 h-10 bg-slate-100 rounded-lg" />
                           <div className="space-y-2 flex-1">
-                            <div className="h-4 bg-soft-oatmeal/40 rounded w-1/4" />
-                            <div className="h-3 bg-soft-oatmeal/40 rounded w-1/6" />
+                            <div className="h-3 bg-slate-100 rounded w-1/4" />
+                            <div className="h-2.5 bg-slate-100 rounded w-1/6" />
                           </div>
                         </div>
                       </td>
@@ -155,75 +160,75 @@ const StockManagement = () => {
                     const isOut = product.countInStock === 0;
 
                     return (
-                      <tr key={product._id} className="hover:bg-soft-oatmeal/10 transition-colors group">
-                        <td className="px-8 py-6">
-                          <div className="flex items-center gap-5">
-                            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-soft-oatmeal/30 border border-soft-oatmeal/20 group-hover:scale-105 transition-transform duration-500">
+                      <tr key={product._id} className="hover:bg-slate-50/40 transition-colors group">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-50 border border-slate-100 shrink-0 group-hover:scale-[1.03] transition-transform duration-300">
                               <img 
                                 src={product.images?.[0] || 'https://via.placeholder.com/150'} 
                                 alt={product.name} 
                                 className="w-full h-full object-cover"
                               />
                             </div>
-                            <div>
-                              <p className="font-display font-bold text-deep-espresso text-base mb-1">{product.name}</p>
-                              <div className="flex items-center gap-3">
-                                <span className="text-[10px] font-black text-warm-sand bg-soft-oatmeal/40 px-2 py-0.5 rounded uppercase tracking-tighter">
+                            <div className="min-w-0">
+                              <p className="font-bold text-slate-800 text-xs truncate max-w-[280px]">{product.name}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[8px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
                                   {product.sku || 'NO-SKU'}
                                 </span>
-                                <span className="text-[10px] font-bold text-dusty-cocoa italic">
+                                <span className="text-[9px] font-semibold text-slate-400 italic">
                                   {product.brand?.name || 'Local Brand'}
                                 </span>
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-8 py-6">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-soft-oatmeal/20 flex items-center justify-center text-deep-espresso">
-                              <FiShoppingCart size={14} />
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
+                              <FiShoppingCart size={11} />
                             </div>
-                            <div>
-                              <p className="text-sm font-bold text-deep-espresso">{product.seller?.shopName || 'Admin'}</p>
-                              <p className="text-[10px] text-warm-sand font-medium">{product.sellerType || 'Seller'}</p>
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-slate-700 truncate max-w-[150px]">{product.seller?.shopName || 'Admin'}</p>
+                              <p className="text-[9px] text-slate-450 font-semibold">{product.sellerType || 'Seller'}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-8 py-6 text-center">
+                        <td className="px-4 py-3 text-center">
                           {isOut ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-red-100">
-                              <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-rose-50 text-rose-600 rounded-full text-[9px] font-bold uppercase tracking-wider border border-rose-100/50">
+                              <span className="w-1 h-1 rounded-full bg-rose-500 animate-pulse" />
                               Out of Stock
                             </span>
                           ) : isLow ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100">
-                              <div className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full text-[9px] font-bold uppercase tracking-wider border border-amber-100/50">
+                              <span className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" />
                               Critical Low
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100">
-                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full text-[9px] font-bold uppercase tracking-wider border border-emerald-100/50">
+                              <span className="w-1 h-1 rounded-full bg-emerald-500" />
                               Healthy
                             </span>
                           )}
                         </td>
-                        <td className="px-8 py-6 text-right">
-                          <div className={`text-2xl font-display font-black ${isOut ? 'text-red-600' : isLow ? 'text-amber-500' : 'text-deep-espresso'}`}>
+                        <td className="px-4 py-3 text-right">
+                          <div className={`text-xs font-bold ${isOut ? 'text-rose-600' : isLow ? 'text-amber-500' : 'text-slate-800'}`}>
                             {product.countInStock}
-                            <span className="text-[10px] font-black text-warm-sand ml-2 uppercase tracking-widest opacity-40 italic">Units</span>
+                            <span className="text-[9px] font-bold text-slate-400 ml-1 uppercase tracking-wider opacity-60">Units</span>
                           </div>
-                          {isLow && <p className="text-[10px] font-bold text-amber-600/70 mt-1 uppercase tracking-tighter">Needs Restock Soon</p>}
-                          {isOut && <p className="text-[10px] font-bold text-red-600/70 mt-1 uppercase tracking-tighter">Inventory Depleted</p>}
+                          {isLow && <p className="text-[8px] font-bold text-amber-500/80 mt-0.5 uppercase tracking-tight">Needs Restock</p>}
+                          {isOut && <p className="text-[8px] font-bold text-rose-500/80 mt-0.5 uppercase tracking-tight">Depleted</p>}
                         </td>
                       </tr>
                     );
                   })
                 ) : (
                   <tr>
-                    <td colSpan="4" className="px-8 py-32 text-center">
-                      <div className="flex flex-col items-center gap-4 text-warm-sand opacity-40">
-                        <FiPackage size={64} strokeWidth={1} />
-                        <p className="font-display font-medium text-lg italic">No products found matching your filters.</p>
+                    <td colSpan="4" className="px-4 py-20 text-center">
+                      <div className="flex flex-col items-center gap-3 text-slate-300">
+                        <FiPackage size={40} strokeWidth={1.5} />
+                        <p className="font-semibold text-xs italic">No matching catalog items discovered.</p>
                       </div>
                     </td>
                   </tr>
@@ -232,16 +237,16 @@ const StockManagement = () => {
             </table>
           </div>
           
-          {/* Footer */}
-          <div className="p-6 bg-soft-oatmeal/5 border-t border-soft-oatmeal flex flex-col sm:flex-row items-center justify-between gap-4">
-             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">
-               Showing {filteredProducts.length} of {products.length} cataloged products
+          {/* Footer Block */}
+          <div className="p-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+             <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
+               Displaying {filteredProducts.length} of {products.length} registered assets
              </p>
              <button 
                onClick={fetchStockData}
-               className="text-[10px] font-black uppercase tracking-[0.2em] text-deep-espresso hover:text-warm-sand transition-colors flex items-center gap-2"
+               className="text-[9px] font-bold uppercase tracking-wider text-slate-700 hover:text-[var(--color-primary)] transition-colors flex items-center gap-1.5"
              >
-               Refresh Live Inventory <FiArrowUp size={14} />
+               Refresh Stocks <FiArrowUp size={12} />
              </button>
           </div>
         </div>

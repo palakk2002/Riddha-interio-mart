@@ -31,13 +31,6 @@ const SearchEntryPage = React.lazy(() => import('./pages/SearchEntryPage'));;
 const SearchProductsPage = React.lazy(() => import('./pages/SearchProductsPage'));;
 const InvoicePage = React.lazy(() => import('./pages/InvoicePage'));;
 const ReferralRewardsPage = React.lazy(() => import('./pages/ReferralRewardsPage'));;
-const ComingSoonPage = React.lazy(() => import('../comingsoon/pages/ComingSoonPage'));;
-const ComingSoonSubPage = React.lazy(() => import('../comingsoon/pages/ComingSoonSubPage'));;
-const ComingSoonAboutPage = React.lazy(() => import('../comingsoon/pages/ComingSoonAboutPage'));;
-const ComingSoonServicesPage = React.lazy(() => import('../comingsoon/pages/ComingSoonServicesPage'));;
-const ComingSoonCategoriesPage = React.lazy(() => import('../comingsoon/pages/ComingSoonCategoriesPage'));;
-const ComingSoonShopPage = React.lazy(() => import('../comingsoon/pages/ComingSoonShopPage'));;
-const ComingSoonContactPage = React.lazy(() => import('../comingsoon/pages/ComingSoonContactPage'));;
 const ContractorRegistration = React.lazy(() => import('./pages/ContractorRegistration'));;
 const DesignerRegistration = React.lazy(() => import('./pages/DesignerRegistration'));;
 const BuilderRegistration = React.lazy(() => import('./pages/BuilderRegistration'));;
@@ -46,12 +39,25 @@ const NotificationPage = React.lazy(() => import('./pages/NotificationPage'));;
 const SplashPage = React.lazy(() => import('./pages/SplashPage'));;
 const OnboardingPage = React.lazy(() => import('./pages/OnboardingPage'));;
 
+import { Navigate } from 'react-router-dom';
+import { useUser } from './data/UserContext';
+
+const RootRoute = () => {
+  const { user } = useUser();
+  const splashCompleted = sessionStorage.getItem('splashCompleted') === 'true';
+
+  if (user || splashCompleted) {
+    return <HomePage />;
+  }
+  return <Navigate to="/splash" replace />;
+};
+
 const UserRoutes = () => {
   return (
     <Routes>
       <Route path="/splash" element={<SplashPage />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
-      <Route path="/" element={<HomePage />} />
+      <Route path="/" element={<RootRoute />} />
 
       <Route path="/contractor-registration" element={<ContractorRegistration />} />
       <Route path="/designer-registration" element={<DesignerRegistration />} />

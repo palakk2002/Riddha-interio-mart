@@ -34,24 +34,38 @@
 }
 
 .admin-theme {
-  --color-deep-espresso: #240046;
-  --color-brand-purple: #240046;
-  --color-brand-teal: #240046;
-  --color-warm-sand: #240046;
-  --color-dusty-cocoa: #240046;
-  --color-soft-oatmeal: #f5f3ff;
-  --color-golden-glow: #ede9fe;
+  --color-deep-espresso: #111827;
+  --color-brand-purple: #189D91;
+  --color-brand-teal: #189D91;
+  --color-warm-sand: #6B7280;
+  --color-dusty-cocoa: #4B5563;
+  --color-soft-oatmeal: #E5E7EB;
+  --color-golden-glow: #E2F2F1;
+
+  --color-primary: #189D91;
+  --color-secondary-purple: #2A458A;
+  --color-accent-pink: #EC008C;
+  --color-admin-bg: #F8FAFC;
+  --color-admin-card: #FFFFFF;
+  --color-admin-border: #E5E7EB;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-dark-sidebar: #FFFFFF;
+  --color-sidebar-hover: #F8FAFC;
 }
 
 .admin-theme h1,
 .admin-theme h2,
 .admin-theme h3,
 .admin-theme h4 {
-  font-family: var(--font-display) !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.025em !important;
-  line-height: 1.1 !important;
-  color: #240046 !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.2 !important;
+  color: var(--color-deep-espresso) !important;
   text-transform: none !important;
   font-style: normal !important;
 }
@@ -59,11 +73,11 @@
 .admin-theme p.subtitle,
 .admin-theme .admin-label {
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.1em;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #240046;
-  opacity: 0.7;
+  color: var(--color-text-secondary);
+  opacity: 0.8;
 }
 
 /* Global override for any remaining red accents in the admin module */
@@ -73,25 +87,25 @@
 .admin-theme .text-red-700,
 .admin-theme .text-red-800,
 .admin-theme .text-brand-pink {
-  color: #240046 !important;
+  color: var(--color-primary) !important;
 }
 
 .admin-theme .bg-red-50,
 .admin-theme .bg-red-100,
 .admin-theme .bg-red-800\/10 {
-  background-color: rgba(36, 0, 70, 0.05) !important;
+  background-color: rgba(24, 157, 145, 0.05) !important;
 }
 
 .admin-theme .bg-red-800,
 .admin-theme .bg-red-600 {
-  background-color: #240046 !important;
+  background-color: var(--color-primary) !important;
   color: white !important;
 }
 
 .admin-theme .border-red-100,
 .admin-theme .border-red-200,
 .admin-theme .border-red-700\/10 {
-  border-color: rgba(36, 0, 70, 0.1) !important;
+  border-color: rgba(24, 157, 145, 0.1) !important;
 }
 
 /* Delivery Theme Global Overrides (Deep Blue #001B4E) */

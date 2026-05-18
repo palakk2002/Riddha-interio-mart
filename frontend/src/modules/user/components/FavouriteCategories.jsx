@@ -33,40 +33,40 @@ const FavouriteSectionCard = ({ section }) => {
   const products = Array.isArray(activeBlock?.productIds) ? activeBlock.productIds.filter(Boolean) : [];
 
   return (
-    <section className="bg-soft-oatmeal/5 py-4 md:py-6 border-b border-soft-oatmeal/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 md:space-y-8">
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-warm-sand/5 border border-warm-sand/10 text-[10px] font-semibold uppercase tracking-[0.1em] text-warm-sand/80">
-            Premium Selection
+    <section className="bg-white py-4 md:py-6 border-b border-gray-100">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-12">
+
+        {/* Compact Header */}
+        <div className="flex items-center justify-between mb-3 md:mb-5">
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#189D91] mb-0.5">Premium Selection</p>
+            <h2 className="text-lg md:text-2xl font-black text-gray-900 tracking-tight leading-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
+              {section.heading}
+            </h2>
+            {section.subheading && (
+              <p className="text-[11px] md:text-sm text-gray-400 font-medium mt-0.5 leading-snug">
+                {section.subheading}
+              </p>
+            )}
           </div>
-
-          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight text-black leading-tight">
-            {section.heading}
-          </h2>
-
-          <div className="h-px w-12 bg-warm-sand/30 mx-auto" />
-
-          {section.subheading && (
-            <p className="mx-auto max-w-xl text-sm md:text-base leading-relaxed text-deep-espresso/60 font-normal">
-              {section.subheading}
-            </p>
-          )}
         </div>
 
-        <div className="flex justify-start md:justify-start gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-4 px-4 -mx-4 md:mx-0 md:px-2">
+        {/* Compact Category Tabs */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-3 -mx-4 px-4 md:mx-0 md:px-0">
           {blocks.map((block) => {
             const category = block?.categoryId;
             const categoryId = String(getId(category));
+            const isActive = String(activeCategoryId) === categoryId;
 
             return (
               <button
                 key={categoryId || getId(block)}
                 type="button"
                 onClick={() => setActiveCategoryId(categoryId)}
-                className={`px-5 py-2.5 rounded-xl border transition-all duration-300 whitespace-nowrap text-[11px] md:text-sm font-semibold ${String(activeCategoryId) === categoryId
-                  ? 'border-warm-sand text-white bg-warm-sand shadow-lg shadow-warm-sand/20'
-                  : 'border-soft-oatmeal/40 text-deep-espresso/50 hover:border-warm-sand/30 bg-white'
-                  }`}
+                className={`px-4 py-1.5 rounded-full border transition-all duration-300 whitespace-nowrap text-[11px] font-bold shrink-0 ${isActive
+                  ? 'border-[#189D91] text-white bg-[#189D91] shadow-sm'
+                  : 'border-gray-200 text-gray-500 bg-white hover:border-[#189D91]/40'
+                }`}
               >
                 {category?.name || 'Category'}
               </button>
@@ -74,7 +74,8 @@ const FavouriteSectionCard = ({ section }) => {
           })}
         </div>
 
-        <div className="min-h-0 md:min-h-[320px]">
+        {/* Product Grid */}
+        <div className="min-h-0">
           <AnimatePresence mode="popLayout">
             {products.length > 0 ? (
               <Motion.div
@@ -82,29 +83,28 @@ const FavouriteSectionCard = ({ section }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-8"
+                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 md:gap-4"
               >
                 {products.map((product) => (
                   <Motion.div
                     layout
                     key={getId(product)}
-                    initial={{ opacity: 0, scale: 0.94 }}
+                    initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.94 }}
-                    transition={{ duration: 0.35 }}
-                    className="group relative flex flex-col bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-sm border border-soft-oatmeal/10 hover:shadow-xl transition-all duration-500"
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    transition={{ duration: 0.3 }}
+                    className="group relative flex flex-col bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <Link to={`/products/${getId(product)}`} className="block h-full">
-                      <div className="aspect-square overflow-hidden bg-soft-oatmeal/5">
+                      <div className="aspect-square overflow-hidden bg-gray-50">
                         <img
                           src={getProductImage(product)}
                           alt={product?.name || 'Product'}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       </div>
-
-                      <div className="py-2 px-2 text-center bg-gray-50/50">
-                        <span className="text-[11px] md:text-sm font-medium text-deep-espresso/60 group-hover:text-warm-sand transition-colors">
+                      <div className="py-1.5 px-2 text-center">
+                        <span className="text-[10px] md:text-xs font-semibold text-gray-600 group-hover:text-[#189D91] transition-colors leading-tight line-clamp-1">
                           {product?.name}
                         </span>
                       </div>
@@ -116,9 +116,9 @@ const FavouriteSectionCard = ({ section }) => {
               <Motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="col-span-full flex flex-col items-center justify-center py-20 text-deep-espresso/30"
+                className="col-span-full flex flex-col items-center justify-center py-10 text-gray-300"
               >
-                <p className="text-lg font-medium italic">No products selected yet.</p>
+                <p className="text-sm font-medium italic">No products selected yet.</p>
               </Motion.div>
             )}
           </AnimatePresence>

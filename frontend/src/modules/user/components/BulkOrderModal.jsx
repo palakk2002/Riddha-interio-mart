@@ -87,7 +87,6 @@ const BulkOrderModal = ({ isOpen, onClose }) => {
     e.preventDefault();
     if (orderItems.length === 0) return alert('Please add at least one product');
     
-    // Manual validation check (though required attribute handles most of it)
     if (!formData.name || !formData.phone || !formData.email) {
       return alert('Name, Phone, and Email are mandatory fields.');
     }
@@ -132,128 +131,150 @@ const BulkOrderModal = ({ isOpen, onClose }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
         >
           <motion.div
-            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            initial={{ scale: 0.95, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="bg-white rounded-[32px] w-full max-w-[600px] max-h-[90vh] overflow-hidden shadow-2xl flex flex-col relative"
+            exit={{ scale: 0.95, opacity: 0, y: 15 }}
+            className="bg-white rounded-[24px] w-full max-w-[550px] max-h-[90vh] overflow-hidden shadow-2xl flex flex-col relative"
           >
             {/* Close Button */}
-            <button onClick={onClose} className="absolute top-6 right-6 p-2 rounded-full bg-gray-50 text-gray-400 hover:text-red-500 z-50 transition-all">
-              <FiX size={18} />
+            <button 
+              onClick={onClose} 
+              className="absolute top-6 right-6 p-2 rounded-full bg-white/10 text-white/85 hover:bg-white/20 z-50 transition-all border border-white/10"
+            >
+              <FiX size={16} />
             </button>
 
             {/* Header */}
             <div className="bg-[#189D91] p-6 text-white shrink-0">
-               <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                    <FiPackage className="w-6 h-6" />
+               <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
+                    <FiPackage className="w-5.5 h-5.5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black uppercase italic tracking-tight">Bulk Order <span className="text-white/60">Center</span></h2>
-                    <p className="text-white/60 text-[9px] font-black uppercase tracking-widest">Premium Corporate & Volume Solutions</p>
+                    <h2 className="text-lg font-bold tracking-tight text-white leading-snug">Bulk Order Center</h2>
+                    <p className="text-teal-50/75 text-[10px] font-medium tracking-wider uppercase">Premium Corporate & Volume Solutions</p>
                   </div>
                </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-6 space-y-5 no-scrollbar">
               {status === 'success' ? (
-                <div className="py-20 text-center space-y-4">
-                  <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto shadow-inner">
-                    <FiCheckCircle size={32} />
+                <div className="py-16 text-center space-y-3">
+                  <div className="w-14 h-14 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                    <FiCheckCircle size={28} />
                   </div>
-                  <h3 className="text-lg font-black uppercase italic text-gray-800">Inquiry Logged</h3>
-                  <p className="text-gray-400 text-xs font-bold uppercase tracking-wide">Our B2B team will contact you shortly.</p>
+                  <h3 className="text-lg font-bold text-gray-900">Inquiry Logged</h3>
+                  <p className="text-gray-500 text-xs font-semibold">Our B2B team will contact you shortly.</p>
                 </div>
               ) : (
-                <form id="bulkForm" onSubmit={handleSubmit} className="space-y-6">
+                <form id="bulkForm" onSubmit={handleSubmit} className="space-y-5">
                   {/* Step 1: Info */}
                   <div className="grid grid-cols-1 gap-3">
                     <div className="relative">
-                      <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+                      <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
                       <input 
                         required 
                         placeholder="Full Name *" 
                         value={formData.name} 
                         onChange={e => setFormData({...formData, name: e.target.value})} 
-                        className="w-full bg-gray-50 border border-gray-100 focus:border-[#189D91] focus:bg-white rounded-xl py-3 pl-10 pr-4 outline-none text-xs font-bold transition-all" 
+                        className="w-full bg-gray-50/80 border border-gray-150 focus:border-[#189D91] focus:bg-white rounded-xl py-3 pl-11 pr-4 outline-none text-xs font-semibold text-gray-800 transition-all placeholder:text-gray-400" 
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="relative">
-                        <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+                        <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
                         <input 
                           required 
                           placeholder="Phone Number *" 
                           value={formData.phone} 
                           onChange={e => setFormData({...formData, phone: e.target.value})} 
-                          className="w-full bg-gray-50 border border-gray-100 focus:border-[#189D91] focus:bg-white rounded-xl py-3 pl-10 pr-4 outline-none text-xs font-bold transition-all" 
+                          className="w-full bg-gray-50/80 border border-gray-150 focus:border-[#189D91] focus:bg-white rounded-xl py-3 pl-11 pr-4 outline-none text-xs font-semibold text-gray-800 transition-all placeholder:text-gray-400" 
                         />
                       </div>
                       <div className="relative">
-                        <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+                        <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
                         <input 
                           required 
                           type="email"
                           placeholder="Email Address *" 
                           value={formData.email} 
                           onChange={e => setFormData({...formData, email: e.target.value})} 
-                          className="w-full bg-gray-50 border border-gray-100 focus:border-[#189D91] focus:bg-white rounded-xl py-3 pl-10 pr-4 outline-none text-xs font-bold transition-all" 
+                          className="w-full bg-gray-50/80 border border-gray-150 focus:border-[#189D91] focus:bg-white rounded-xl py-3 pl-11 pr-4 outline-none text-xs font-semibold text-gray-800 transition-all placeholder:text-gray-400" 
                         />
                       </div>
                     </div>
                   </div>
 
                   {/* Step 2: Mode Toggle */}
-                  <div className="flex items-center justify-between p-1 bg-gray-50 rounded-xl">
-                    <button type="button" onClick={() => handleModeChange('single')} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${selectionMode === 'single' ? 'bg-white text-[#189D91] shadow-sm' : 'text-gray-400'}`}>Single Category</button>
-                    <button type="button" onClick={() => handleModeChange('multiple')} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${selectionMode === 'multiple' ? 'bg-white text-[#189D91] shadow-sm' : 'text-gray-400'}`}>Multiple Categories</button>
+                  <div className="flex items-center justify-between p-1 bg-gray-50/80 rounded-xl border border-gray-100">
+                    <button 
+                      type="button" 
+                      onClick={() => handleModeChange('single')} 
+                      className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-all ${selectionMode === 'single' ? 'bg-white text-[#189D91] shadow-sm border border-gray-100/50' : 'text-gray-500'}`}
+                    >
+                      Single Category
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => handleModeChange('multiple')} 
+                      className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-all ${selectionMode === 'multiple' ? 'bg-white text-[#189D91] shadow-sm border border-gray-100/50' : 'text-gray-500'}`}
+                    >
+                      Multiple Categories
+                    </button>
                   </div>
 
                   {/* Step 3: Category Selection */}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <label className="text-[9px] font-black uppercase tracking-widest text-gray-400">Select {selectionMode === 'single' ? 'Category' : 'Categories'}</label>
+                      <label className="text-xs font-semibold text-gray-500">Select {selectionMode === 'single' ? 'Category' : 'Categories'}</label>
                     </div>
 
                     {/* Category Search Bar */}
                     <div className="relative group">
-                      <FiSearch className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${categorySearchTerm ? 'text-[#189D91]' : 'text-gray-300'}`} size={14} />
+                      <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
                       <input
                         type="text"
                         placeholder="Search categories (e.g. Marble, Tiles...)"
                         value={categorySearchTerm}
                         onChange={(e) => setCategorySearchTerm(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-100 focus:border-[#189D91] focus:bg-white rounded-xl py-2.5 pl-10 pr-4 outline-none text-[11px] font-bold transition-all placeholder:text-gray-300"
+                        className="w-full bg-gray-50/80 border border-gray-150 focus:border-[#189D91] focus:bg-white rounded-xl py-2.5 pl-11 pr-4 outline-none text-xs font-semibold text-gray-800 transition-all placeholder:text-gray-400"
                       />
                       {categorySearchTerm && (
                         <button 
                           type="button"
                           onClick={() => setCategorySearchTerm('')}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-red-400 transition-colors"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
                         >
                           <FiX size={14} />
                         </button>
                       )}
                     </div>
 
-                    <div className="flex flex-wrap gap-2 max-h-[120px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="flex flex-wrap gap-2 max-h-[110px] overflow-y-auto pr-2 custom-scrollbar">
                       {categories
                         .filter(cat => cat.name.toLowerCase().includes(categorySearchTerm.toLowerCase()))
-                        .map(cat => (
-                          <button
-                            key={cat._id}
-                            type="button"
-                            onClick={() => toggleCategory(cat._id)}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-bold transition-all border ${selectedCategoryIds.includes(cat._id) ? 'bg-[#189D91] border-[#189D91] text-white' : 'bg-white border-gray-100 text-gray-500 hover:border-[#189D91]'}`}
-                          >
-                            {cat.name}
-                          </button>
-                        ))}
+                        .map(cat => {
+                          const isSelected = selectedCategoryIds.includes(cat._id);
+                          return (
+                            <button
+                              key={cat._id}
+                              type="button"
+                              onClick={() => toggleCategory(cat._id)}
+                              className={`px-3.5 py-1.5 rounded-xl text-[10.5px] font-semibold transition-all border ${
+                                isSelected 
+                                  ? 'bg-[#189D91] border-[#189D91] text-white shadow-sm' 
+                                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900'
+                              }`}
+                            >
+                              {cat.name}
+                            </button>
+                          );
+                        })}
                       {categorySearchTerm && !categories.some(cat => cat.name.toLowerCase().includes(categorySearchTerm.toLowerCase())) && (
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest py-2">No matching categories</p>
+                        <p className="text-[10px] font-semibold text-gray-400 tracking-wide py-2">No matching categories</p>
                       )}
                     </div>
                   </div>
@@ -261,33 +282,33 @@ const BulkOrderModal = ({ isOpen, onClose }) => {
                   {/* Step 4: Product Selection */}
                   <AnimatePresence>
                     {selectedCategoryIds.length > 0 && (
-                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <label className="text-[9px] font-black uppercase tracking-widest text-gray-400">Available Products</label>
+                          <label className="text-xs font-semibold text-gray-500">Available Products</label>
                         </div>
                         
                         {/* Search Bar */}
                         <div className="relative group">
-                          <FiSearch className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-[#189D91]' : 'text-gray-300'}`} size={14} />
+                          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
                           <input
                             type="text"
                             placeholder="Quick search products..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-gray-50 border border-gray-100 focus:border-[#189D91] focus:bg-white rounded-xl py-2.5 pl-10 pr-4 outline-none text-[11px] font-bold transition-all placeholder:text-gray-300"
+                            className="w-full bg-gray-50/80 border border-gray-150 focus:border-[#189D91] focus:bg-white rounded-xl py-2.5 pl-11 pr-4 outline-none text-xs font-semibold text-gray-800 transition-all placeholder:text-gray-400"
                           />
                           {searchTerm && (
                             <button 
                               type="button"
                               onClick={() => setSearchTerm('')}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-red-400 transition-colors"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
                             >
                               <FiX size={14} />
                             </button>
                           )}
                         </div>
 
-                        <div className="grid grid-cols-1 gap-2 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="grid grid-cols-1 gap-2 max-h-[160px] overflow-y-auto pr-2 custom-scrollbar">
                           {selectedCategoryIds.map(catId => {
                             const products = availableProducts[catId]?.filter(p => 
                               p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -297,29 +318,36 @@ const BulkOrderModal = ({ isOpen, onClose }) => {
 
                             return (
                               <div key={catId} className="space-y-2">
-                                {products.map(prod => (
-                                  <div key={prod._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl hover:bg-white border border-transparent hover:border-gray-100 transition-all group">
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-lg bg-white overflow-hidden shadow-sm border border-gray-50">
-                                        <img src={prod.images?.[0]} className="w-full h-full object-cover" alt={prod.name} />
+                                {products.map(prod => {
+                                  const isSelected = orderItems.some(i => i.id === prod._id);
+                                  return (
+                                    <div key={prod._id} className="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl hover:bg-white border border-transparent hover:border-gray-150 transition-all">
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-white overflow-hidden shadow-sm border border-gray-200">
+                                          <img src={prod.images?.[0]} className="w-full h-full object-cover" alt={prod.name} />
+                                        </div>
+                                        <span className="text-[11px] font-semibold text-gray-700 truncate max-w-[200px]">{prod.name}</span>
                                       </div>
-                                      <span className="text-[11px] font-bold text-gray-700 truncate max-w-[200px]">{prod.name}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => addProductToOrder(prod, catId)}
+                                        className={`p-1.5 rounded-lg transition-all ${
+                                          isSelected 
+                                            ? 'bg-green-500 text-white' 
+                                            : 'bg-white text-[#189D91] border border-gray-200 hover:border-[#189D91] shadow-sm hover:scale-105'
+                                        }`}
+                                      >
+                                        {isSelected ? <FiCheckCircle size={13} /> : <FiPlus size={13} />}
+                                      </button>
                                     </div>
-                                    <button
-                                      type="button"
-                                      onClick={() => addProductToOrder(prod, catId)}
-                                      className={`p-1.5 rounded-lg transition-all ${orderItems.find(i => i.id === prod._id) ? 'bg-green-500 text-white' : 'bg-white text-[#189D91] shadow-sm hover:scale-110'}`}
-                                    >
-                                      {orderItems.find(i => i.id === prod._id) ? <FiCheckCircle /> : <FiPlus />}
-                                    </button>
-                                  </div>
-                                ))}
+                                  );
+                                })}
                               </div>
                             );
                           })}
                           {searchTerm && !selectedCategoryIds.some(catId => availableProducts[catId]?.some(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))) && (
-                            <div className="py-8 text-center">
-                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">No matching products found</p>
+                            <div className="py-6 text-center">
+                              <p className="text-[10px] font-semibold text-gray-400 tracking-wide">No matching products found</p>
                             </div>
                           )}
                         </div>
@@ -330,30 +358,30 @@ const BulkOrderModal = ({ isOpen, onClose }) => {
                   {/* Step 5: Order List */}
                   <AnimatePresence>
                     {orderItems.length > 0 && (
-                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 border-t border-dashed border-gray-100 pt-6">
+                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 border-t border-dashed border-gray-150 pt-5">
                         <div className="flex items-center justify-between">
-                          <label className="text-[9px] font-black uppercase tracking-widest text-gray-400">Order Items ({orderItems.length})</label>
-                          <button type="button" onClick={() => setOrderItems([])} className="text-[9px] font-bold text-red-400 uppercase tracking-widest">Clear All</button>
+                          <label className="text-xs font-semibold text-gray-500">Order Items ({orderItems.length})</label>
+                          <button type="button" onClick={() => setOrderItems([])} className="text-[10px] font-bold text-red-500 tracking-wide">Clear All</button>
                         </div>
                         <div className="space-y-2">
                           {orderItems.map(item => (
-                            <div key={item.id} className="flex items-center justify-between p-3 bg-[#189D91]/5 rounded-2xl">
+                            <div key={item.id} className="flex items-center justify-between p-2.5 bg-[#189D91]/5 rounded-xl">
                               <div className="flex items-center gap-3">
-                                <span className="text-[11px] font-bold text-[#189D91] truncate max-w-[150px]">{item.name}</span>
+                                <span className="text-[11px] font-semibold text-gray-800 truncate max-w-[150px]">{item.name}</span>
                               </div>
                               <div className="flex items-center gap-3">
-                                <div className="flex items-center bg-white rounded-lg border border-[#189D91]/20 p-1">
-                                  <button type="button" onClick={() => updateQty(item.id, item.qty - 1)} className="w-5 h-5 flex items-center justify-center text-[#189D91] font-bold">-</button>
+                                <div className="flex items-center bg-white rounded-lg border border-[#189D91]/20 p-0.5">
+                                  <button type="button" onClick={() => updateQty(item.id, item.qty - 1)} className="w-5 h-5 flex items-center justify-center text-[#189D91] font-bold text-sm">-</button>
                                   <input 
                                     type="number" 
                                     value={item.qty} 
                                     onChange={e => updateQty(item.id, e.target.value)}
-                                    className="w-8 text-center text-[11px] font-black bg-transparent outline-none" 
+                                    className="w-8 text-center text-xs font-bold bg-transparent outline-none" 
                                   />
-                                  <button type="button" onClick={() => updateQty(item.id, item.qty + 1)} className="w-5 h-5 flex items-center justify-center text-[#189D91] font-bold">+</button>
+                                  <button type="button" onClick={() => updateQty(item.id, item.qty + 1)} className="w-5 h-5 flex items-center justify-center text-[#189D91] font-bold text-sm">+</button>
                                 </div>
-                                <button type="button" onClick={() => removeOrderItem(item.id)} className="p-1.5 text-red-400 hover:text-red-600 transition-colors">
-                                  <FiTrash2 size={14} />
+                                <button type="button" onClick={() => removeOrderItem(item.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                                  <FiTrash2 size={13} />
                                 </button>
                               </div>
                             </div>
@@ -364,8 +392,14 @@ const BulkOrderModal = ({ isOpen, onClose }) => {
                   </AnimatePresence>
 
                   <div className="relative">
-                    <FiMessageSquare className="absolute left-4 top-3 text-gray-300 text-xs" />
-                    <textarea placeholder="Notes / Special Requirements" rows="2" value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} className="w-full bg-gray-50 border border-gray-100 focus:border-[#189D91] focus:bg-white rounded-xl py-2.5 pl-10 pr-4 outline-none text-xs font-bold resize-none" />
+                    <FiMessageSquare className="absolute left-4 top-3 text-gray-400 text-sm" />
+                    <textarea 
+                      placeholder="Notes / Special Requirements" 
+                      rows="2" 
+                      value={formData.message} 
+                      onChange={e => setFormData({...formData, message: e.target.value})} 
+                      className="w-full bg-gray-50/80 border border-gray-150 focus:border-[#189D91] focus:bg-white rounded-xl py-2.5 pl-11 pr-4 outline-none text-xs font-semibold text-gray-800 transition-all placeholder:text-gray-400 resize-none" 
+                    />
                   </div>
                 </form>
               )}
@@ -373,17 +407,17 @@ const BulkOrderModal = ({ isOpen, onClose }) => {
 
             {/* Footer */}
             {status !== 'success' && (
-              <div className="p-6 bg-gray-50 border-t border-gray-100 shrink-0">
+              <div className="p-6 bg-gray-50 border-t border-gray-150 shrink-0">
                 <button
                   form="bulkForm"
                   disabled={loading || orderItems.length === 0 || status === 'sending'}
                   type="submit"
-                  className="w-full bg-[#189D91] text-white py-3.5 rounded-[18px] font-black uppercase tracking-[0.15em] text-[11px] hover:bg-[#14847a] transition-all shadow-lg shadow-[#189D91]/20 active:scale-[0.98] disabled:opacity-30 disabled:grayscale flex items-center justify-center gap-3"
+                  className="w-full bg-[#189D91] text-white py-3.5 rounded-[12px] font-bold tracking-wider text-xs hover:bg-[#14847a] transition-all shadow-md shadow-[#189D91]/10 active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2"
                 >
                   {status === 'sending' ? (
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
-                    <>Submit Bulk Inquiry <FiChevronRight /></>
+                    <>Submit Bulk Inquiry <FiChevronRight size={13} /></>
                   )}
                 </button>
               </div>

@@ -11,17 +11,17 @@ import GiftImg from '../../../assets/1 (2).png';
 
 const PromoCard = ({ title, items, btnText, bg, textColor, btnColor, img, link }) => (
   <motion.div
-    whileHover={{ y: -5 }}
-    className={`${bg} rounded-[16px] md:rounded-[24px] p-4 md:p-6 flex items-center justify-between overflow-hidden relative group h-[140px] md:h-[210px] border border-gray-100/50 shadow-sm hover:shadow-lg transition-all duration-500`}
+    whileHover={{ y: -3 }}
+    className={`${bg} rounded-[14px] md:rounded-[24px] p-3 md:p-6 flex items-center justify-between overflow-hidden relative group h-[110px] md:h-[210px] border border-gray-100/50 shadow-sm hover:shadow-lg transition-all duration-500`}
   >
-    <div className="z-10 flex flex-col justify-between h-full max-w-[55%] md:max-w-[52%]">
+    <div className="z-10 flex flex-col justify-between h-full max-w-[56%] md:max-w-[52%]">
       <div className="flex-1">
-        <h3 className={`text-[12px] md:text-xl font-black mb-1 md:mb-2 leading-tight ${textColor}`}>{title}</h3>
+        <h3 className={`text-[11px] md:text-xl font-black mb-1 md:mb-2 leading-tight ${textColor}`}>{title}</h3>
         {items && (
-          <ul className="space-y-0.5 md:space-y-1">
+          <ul className="space-y-0 md:space-y-1">
             {items.map((item, i) => (
-              <li key={i} className="text-gray-500 md:text-gray-600 text-[8px] md:text-xs font-bold flex items-center gap-1">
-                <span className={`w-0.5 h-0.5 rounded-full ${textColor} opacity-40`} /> {item}
+              <li key={i} className="text-gray-500 md:text-gray-600 text-[7.5px] md:text-xs font-semibold flex items-center gap-1 leading-tight">
+                <span className={`w-0.5 h-0.5 rounded-full ${textColor} opacity-40 shrink-0`} /> {item}
               </li>
             ))}
           </ul>
@@ -30,13 +30,13 @@ const PromoCard = ({ title, items, btnText, bg, textColor, btnColor, img, link }
 
       <Link
         to={link || "#"}
-        className={`mt-auto mb-1 w-fit flex items-center gap-1 md:gap-2 px-1.5 py-1 md:px-5 md:py-2.5 rounded-lg md:rounded-xl text-[8px] md:text-xs font-black bg-white shadow-sm border border-gray-100 hover:shadow-md transition-all whitespace-nowrap ${btnColor}`}
+        className={`mt-auto mb-0.5 w-fit flex items-center gap-1 px-2 py-1 md:px-5 md:py-2.5 rounded-lg md:rounded-xl text-[7.5px] md:text-xs font-black bg-white shadow-sm border border-gray-100 hover:shadow-md transition-all whitespace-nowrap ${btnColor}`}
       >
-        {btnText} <FiArrowRight className="text-[8px] md:text-xs" />
+        {btnText} <FiArrowRight className="text-[7px] md:text-xs" />
       </Link>
     </div>
 
-    <div className="absolute right-0 top-0 bottom-0 w-[42%] md:w-[48%] h-full flex items-end justify-end pointer-events-none overflow-hidden">
+    <div className="absolute right-0 top-0 bottom-0 w-[44%] md:w-[48%] h-full flex items-end justify-end pointer-events-none overflow-hidden">
       <img
         src={img}
         alt={title}

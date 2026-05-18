@@ -4,13 +4,12 @@ import {
   LuShield, 
   LuFileText, 
   LuScale, 
-  LuAlertTriangle, 
   LuSearch, 
   LuBookOpen, 
   LuArrowRight, 
-  LuCheckCircle, 
+  LuShieldCheck, 
   LuTrendingUp, 
-  LuHelpCircle 
+  LuCircleHelp 
 } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -23,7 +22,7 @@ const TermsConditions = () => {
     { id: 'all', name: 'All Terms', icon: LuBookOpen },
     { id: 'earnings', name: 'Payments & Fares', icon: LuTrendingUp },
     { id: 'conduct', name: 'Partner Code of Conduct', icon: LuShield },
-    { id: 'safety', name: 'Safety & Compliance', icon: LuAlertTriangle },
+    { id: 'safety', name: 'Safety & Compliance', icon: LuShieldCheck },
   ];
 
   const termsList = [
@@ -38,7 +37,7 @@ const TermsConditions = () => {
     {
       category: 'earnings',
       title: '2. Surge Payouts and Incentives',
-      icon: LuCheckCircle,
+      icon: LuShieldCheck,
       shortDesc: 'Conditions for extra delivery bonuses and surge incentives.',
       content: `Weekly incentives, streak bonuses, and peak hour surge multipliers are subject to completing a minimum acceptance rate of 90% of dispatched orders during the active period. 
       Manipulating location tracking, spoofing coordinates, or intentionally delaying order handovers to accumulate waiting fees will lead to immediate forfeiture of all accumulated bonuses and potential system suspension.`,
@@ -70,7 +69,7 @@ const TermsConditions = () => {
     {
       category: 'safety',
       title: '6. Vehicle Safety & Compliance',
-      icon: LuAlertTriangle,
+      icon: LuShieldCheck,
       shortDesc: 'Standards for transport maintenance and legal safety.',
       content: `You must verify that the vehicle used for delivery services matches the vehicle listed in your profile. The vehicle must comply with all local emission, environmental, and transport laws. 
       While operating under active dispatch, delivery partners are fully responsible for obeying state traffic regulations, wearing helmets (for bikes), wearing seat belts (for vans/trucks), and keeping items secured in specialized carrier bags.`,
@@ -200,7 +199,7 @@ const TermsConditions = () => {
                               </p>
                               <div className="mt-4 flex items-center gap-2 text-xs text-[#2A458A] font-semibold">
                                 <span>Binding Clause verified</span>
-                                <LuCheckCircle size={14} className="text-emerald-500" />
+                                <LuShieldCheck size={14} className="text-emerald-500" />
                               </div>
                             </div>
                           </motion.div>
@@ -211,7 +210,7 @@ const TermsConditions = () => {
                 })
               ) : (
                 <div className="text-center py-12 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                  <LuHelpCircle size={48} className="mx-auto text-slate-300 mb-4 animate-pulse" />
+                  <LuCircleHelp size={48} className="mx-auto text-slate-300 mb-4 animate-pulse" />
                   <p className="text-slate-600 font-semibold text-lg">No terms matched your search.</p>
                   <p className="text-slate-400 text-xs mt-2">Try clearing your filters or testing other keywords!</p>
                 </div>

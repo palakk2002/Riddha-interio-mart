@@ -25,8 +25,9 @@ const TrustBar = () => {
   ];
 
   return (
-    <section className="py-4 bg-white overflow-hidden hidden md:block">
+    <section className="py-2 bg-white overflow-hidden hidden md:block">
       <div className="max-w-[1920px] mx-auto px-4 flex gap-3">
+
         {/* Left Section: Trust Items */}
         <div className="flex-1 bg-teal-50/20 border border-teal-100/50 rounded-2xl p-3 flex items-center justify-between shadow-sm">
           {trustItems.map((item, idx) => (
