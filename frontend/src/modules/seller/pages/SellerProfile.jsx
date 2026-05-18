@@ -1,6 +1,36 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PageWrapper from '../components/PageWrapper';
-import { FiUser, FiShoppingBag, FiStar, FiSettings, FiLogOut, FiEdit2, FiMail, FiPhone, FiCheckCircle, FiTrash2, FiSave, FiMapPin, FiCreditCard, FiCamera } from 'react-icons/fi';
+import { 
+  User, 
+  ShoppingBag, 
+  Star, 
+  Settings, 
+  LogOut, 
+  Pencil, 
+  Mail, 
+  Phone, 
+  CheckCircle2, 
+  Trash2, 
+  Save, 
+  MapPin, 
+  CreditCard, 
+  Camera,
+  ShieldCheck,
+  Calendar,
+  ChevronRight,
+  Store,
+  Briefcase,
+  BarChart3,
+  Globe,
+  Award,
+  Zap,
+  Lock,
+  RefreshCw,
+  Bell,
+  HelpCircle,
+  FileText
+} from 'lucide-react';
+import sellerBanner from '../../../assets/seller_banner.png';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
@@ -31,7 +61,6 @@ const SellerProfile = () => {
     try {
       setLoading(true);
       const { data } = await api.get('/auth/seller/me');
-      console.log('Profile fetch response:', data);
       if (data.success && data.data) {
         const s = data.data;
         setProfileData({
@@ -84,7 +113,6 @@ const SellerProfile = () => {
       }
     } catch (err) {
       console.error('Update failed:', err);
-      alert(err.response?.data?.error || 'Failed to update profile');
     } finally {
       setIsSaving(false);
     }
@@ -108,16 +136,12 @@ const SellerProfile = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   if (loading) {
     return (
       <PageWrapper>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-12 h-12 border-4 border-red-800/10 border-t-red-800 rounded-full animate-spin" />
+        <div className="py-24 text-center space-y-4">
+           <div className="w-12 h-12 border-4 border-seller-light border-t-seller-primary rounded-full animate-spin mx-auto"></div>
+           <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Loading Profile...</p>
         </div>
       </PageWrapper>
     );
@@ -125,260 +149,293 @@ const SellerProfile = () => {
 
   return (
     <PageWrapper>
-      <div className="max-w-6xl mx-auto space-y-12">
-        {/* Profile Card */}
+      <div className="max-w-6xl mx-auto space-y-8 pb-20 px-4 md:px-0">
+        
+        {/* Profile Header Card - High Density Enterprise */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl md:rounded-[48px] overflow-hidden shadow-2xl shadow-soft-oatmeal border border-soft-oatmeal/50 relative mx-1 md:mx-0"
+          className="bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200/50 border border-slate-100 relative"
         >
-          {/* Cover Accent */}
-          <div className="h-24 md:h-32 bg-gradient-to-r from-red-900 to-red-700" />
+          {/* Cover Area with Premium Banner */}
+          <div className="h-32 md:h-48 relative overflow-hidden">
+             <img src={sellerBanner} className="absolute inset-0 w-full h-full object-cover" alt="Banner" />
+             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent"></div>
+          </div>
           
-          <div className="px-6 md:px-8 pb-8 md:pb-12 -mt-12 md:-mt-16 flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
-            <div className="relative">
-              <div className="h-32 w-32 md:h-40 md:w-40 rounded-3xl md:rounded-[40px] bg-white p-1.5 md:p-2 shadow-2xl">
-                <div className="h-full w-full rounded-2xl md:rounded-[32px] overflow-hidden bg-soft-oatmeal flex items-center justify-center relative">
-                  {profileData.avatar ? (
-                    <img src={profileData.avatar} alt="Store" className="w-full h-full object-cover" />
-                  ) : (
-                    <FiUser size={48} className="text-red-800/20" />
-                  )}
-                  {isSaving && (
-                    <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center">
-                      <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <div className="px-5 md:px-10 pb-6 md:pb-8 -mt-12 md:-mt-16 relative z-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6">
+                <div className="relative">
+                  <div className="h-28 w-28 md:h-40 md:w-40 rounded-[2rem] md:rounded-[2.5rem] bg-white p-1.5 shadow-2xl ring-4 ring-white">
+                    <div className="h-full w-full rounded-[1.6rem] md:rounded-[2.1rem] overflow-hidden bg-slate-50 flex items-center justify-center relative">
+                      {profileData.avatar ? (
+                        <img src={profileData.avatar} alt="Shop Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        <Store size={40} className="text-slate-200" />
+                      )}
                     </div>
-                  )}
+                  </div>
+                  <label className="absolute -bottom-1 -right-1 h-9 w-9 bg-seller-primary text-white rounded-xl flex items-center justify-center shadow-xl cursor-pointer hover:scale-110 transition-all z-20 border-2 border-white">
+                    <Camera size={14} />
+                    <input type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
+                  </label>
+                </div>
+
+                <div className="text-center md:text-left space-y-0.5 md:space-y-1 pb-1 flex-1">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-1">
+                    <span className="px-2.5 py-0.5 bg-seller-primary/10 text-seller-primary text-[8px] md:text-[9px] font-semibold uppercase tracking-widest rounded-lg border border-seller-primary/10">
+                      {profileData.tier}
+                    </span>
+                    <span className="flex items-center gap-1 px-2.5 py-0.5 bg-slate-900 text-white text-[8px] md:text-[9px] font-semibold uppercase tracking-widest rounded-lg">
+                      <CheckCircle2 size={10} /> Verified
+                    </span>
+                  </div>
+                  <h1 className="text-2xl md:text-4xl font-semibold text-slate-900 tracking-tighter leading-none">{profileData.shopName}</h1>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 text-slate-400 font-semibold text-[9px] md:text-[10px] uppercase tracking-widest">
+                    <p className="flex items-center gap-1.5">
+                       <User size={12} className="text-seller-primary" /> {profileData.fullName}
+                    </p>
+                    <p className="flex items-center gap-1.5">
+                       <MapPin size={12} className="text-seller-primary" /> {profileData.shopAddress.split(',')[0] || 'Warehouse'}
+                    </p>
+                  </div>
                 </div>
               </div>
-              <label className="absolute bottom-1 right-1 h-10 w-10 md:h-12 md:w-12 bg-white text-red-800 rounded-xl md:rounded-2xl flex items-center justify-center shadow-xl border border-soft-oatmeal cursor-pointer hover:bg-red-800 hover:text-white transition-all active:scale-90">
-                <FiCamera className="text-lg md:text-xl" />
-                <input type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
-              </label>
-            </div>
 
-            <div className="flex-1 pb-2 md:pb-4 text-center md:text-left">
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 mb-3 md:mb-4">
-                <span className={`px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] shadow-sm ${profileData.tier === 'Premium Seller' ? 'bg-orange-500 text-white' : 'bg-red-800 text-white'}`}>
-                  {profileData.tier}
-                </span>
-                <span className="flex items-center gap-1.5 px-3 py-1 md:px-4 md:py-1.5 bg-yellow-500/10 text-yellow-600 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-yellow-500/10">
-                  <FiStar size={10} md:size={12} fill="currentColor" /> {profileData.rating} Rating
-                </span>
+              <div className="flex flex-col gap-2 w-full md:w-auto md:pb-1">
+                  <button 
+                    onClick={() => setIsEditing(!isEditing)}
+                    className={`px-8 py-3 rounded-xl font-semibold text-[9px] md:text-[10px] uppercase tracking-widest transition-all border shadow-lg ${isEditing ? 'bg-slate-50 text-slate-500 border-slate-200 shadow-slate-100' : 'bg-seller-primary text-white border-seller-primary hover:bg-seller-dark active:scale-95'}`}
+                  >
+                    {isEditing ? 'Discard' : 'Manage Profile'}
+                  </button>
+                 <p className="text-[8px] md:text-[9px] font-semibold text-slate-400 text-center md:text-right uppercase tracking-widest opacity-60">
+                    <Calendar size={10} className="inline mr-1" /> Member Since {profileData.joinDate}
+                 </p>
               </div>
-              <h1 className="text-2xl md:text-6xl font-display font-black text-deep-espresso tracking-tight">{profileData.shopName}</h1>
-              <p className="text-red-800 font-bold text-xs md:text-sm mt-1 md:mt-2 uppercase tracking-[0.2em] md:tracking-[0.3em] flex items-center justify-center md:justify-start gap-2 md:gap-3">
-                <FiUser size={12} md:size={14} /> {profileData.fullName}
-              </p>
             </div>
-
-            <button 
-              onClick={() => setIsEditing(!isEditing)}
-              className="mb-2 md:mb-4 px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl bg-soft-oatmeal/20 text-red-800 font-black uppercase tracking-widest text-[9px] md:text-[10px] hover:bg-red-800 hover:text-white transition-all border border-red-800/10 w-full md:w-auto"
-            >
-              {isEditing ? 'Discard Changes' : 'Manage Profile'}
-            </button>
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Main Content Areas */}
-          <div className="lg:col-span-2 space-y-12">
+        {/* Content Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+          
+          {/* Main Info / Form */}
+          <div className="lg:col-span-2 space-y-6 md:space-y-8">
             <AnimatePresence mode="wait">
               {isEditing ? (
                 <motion.div 
-                  key="edit"
+                  key="edit-form"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm"
+                  className="bg-white p-6 md:p-10 rounded-[2rem] border border-slate-200 shadow-sm space-y-8"
                 >
-                  <h3 className="text-lg md:text-xl font-bold text-deep-espresso mb-6 md:mb-8 flex items-center gap-3">
-                    <FiEdit2 className="text-red-800 shrink-0" /> Evolution of Identity
-                  </h3>
-                  <form onSubmit={handleSave} className="space-y-6 md:space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                       <div className="space-y-2">
-                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Shop Essence</label>
-                         <input 
+                  <div className="flex items-center gap-3 pb-2 border-b border-slate-50">
+                     <div className="w-10 h-10 bg-seller-light/40 rounded-xl flex items-center justify-center text-seller-primary">
+                        <Pencil size={20} />
+                     </div>
+                     <h3 className="text-lg md:text-xl font-semibold text-slate-900 tracking-tight">Personal & Business Info</h3>
+                  </div>
+                  
+                  <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Shop Name</label>
+                        <input 
                            type="text" 
                            value={profileData.shopName}
                            onChange={(e) => setProfileData({...profileData, shopName: e.target.value})}
-                           placeholder="Ex: Golden Threads"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
-                         />
-                       </div>
-                       <div className="space-y-2">
-                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Owner's Name</label>
-                         <input 
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                        />
+                     </div>
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Full Name</label>
+                        <input 
                            type="text" 
                            value={profileData.fullName}
                            onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
-                           placeholder="Full Name"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
-                         />
-                       </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                      <div className="space-y-2">
-                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Email Conduit</label>
-                         <input 
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                        />
+                     </div>
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Email Address</label>
+                        <input 
                            type="email" 
                            value={profileData.email}
                            onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                           placeholder="Email"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
-                         />
-                       </div>
-                       <div className="space-y-2">
-                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Primary Contact</label>
-                         <input 
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                        />
+                     </div>
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Phone Number</label>
+                        <input 
                            type="tel" 
                            value={profileData.phone}
                            onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                           placeholder="Phone"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
-                         />
-                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                       <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Physical HQ (Address)</label>
-                       <textarea 
-                         value={profileData.shopAddress}
-                         onChange={(e) => setProfileData({...profileData, shopAddress: e.target.value})}
-                         placeholder="Store Address"
-                         className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none h-24 md:h-32 resize-none text-sm"
-                       />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                       <div className="space-y-2">
-                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">GST-IN Credentials</label>
-                         <input 
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                        />
+                     </div>
+                     <div className="space-y-1.5 md:col-span-2">
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Store Address</label>
+                        <textarea 
+                           value={profileData.shopAddress}
+                           onChange={(e) => setProfileData({...profileData, shopAddress: e.target.value})}
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none h-28 resize-none"
+                        />
+                     </div>
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">GSTIN Number</label>
+                        <input 
                            type="text" 
                            value={profileData.gstNumber}
                            onChange={(e) => setProfileData({...profileData, gstNumber: e.target.value})}
-                           placeholder="GST Code"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
-                         />
-                       </div>
-                       <div className="space-y-2">
-                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-800 ml-2">Personal Taxation (PAN)</label>
-                         <input 
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                        />
+                     </div>
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">PAN Card Number</label>
+                        <input 
                            type="text" 
                            value={profileData.panNumber}
                            onChange={(e) => setProfileData({...profileData, panNumber: e.target.value})}
-                           placeholder="PAN Card Number"
-                           className="w-full bg-soft-oatmeal/10 border-2 border-transparent focus:border-red-800 focus:bg-white rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 font-bold text-deep-espresso transition-all outline-none text-sm"
-                         />
-                       </div>
-                    </div>
-
-                    <div className="flex gap-4 pt-2 md:pt-4">
-                       <button 
-                         type="submit" 
-                         disabled={isSaving}
-                         className="flex-1 py-4 md:py-5 bg-red-800 text-white rounded-2xl md:rounded-[24px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-[9px] md:text-[10px] shadow-2xl shadow-red-800/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 md:gap-4"
-                       >
-                         {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <FiSave className="text-lg md:text-xl" />}
-                         {isSaving ? 'Processing...' : 'Commit Updates'}
-                       </button>
-                    </div>
+                           className="w-full bg-slate-50 border-none rounded-xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all outline-none"
+                        />
+                     </div>
+                     <div className="md:col-span-2 pt-2">
+                         <button 
+                            type="submit" 
+                            disabled={isSaving}
+                            className="w-full py-4 bg-seller-primary text-white rounded-xl font-semibold text-[10px] uppercase tracking-widest shadow-xl shadow-seller-primary/20 hover:bg-seller-dark transition-all flex items-center justify-center gap-3"
+                         >
+                           {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
+                           {isSaving ? 'Processing...' : 'Apply Changes'}
+                        </button>
+                     </div>
                   </form>
                 </motion.div>
               ) : (
                 <motion.div 
-                  key="view"
+                  key="view-info"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="space-y-12"
+                  className="space-y-6 md:space-y-8"
                 >
-                  <div className="grid grid-cols-2 gap-4 md:gap-8">
-                     <div className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm flex flex-col justify-between group hover:border-red-800/20 transition-all">
-                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-red-800 text-white flex items-center justify-center shadow-2xl shadow-red-800/20 shrink-0">
-                           <FiShoppingBag size={24} md:size={28} />
-                        </div>
-                        <div className="mt-6 md:mt-8">
-                           <p className="text-[8px] md:text-[10px] font-black text-red-800 uppercase tracking-widest mb-1">Established</p>
-                           <p className="text-lg md:text-2xl font-black text-deep-espresso">{profileData.joinDate}</p>
-                        </div>
-                     </div>
-                     <div className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm flex flex-col justify-between group hover:border-red-800/20 transition-all">
-                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-deep-espresso text-white flex items-center justify-center shadow-2xl shadow-deep-espresso/20 shrink-0">
-                           <FiShoppingBag size={24} md:size={28} />
-                        </div>
-                        <div className="mt-6 md:mt-8">
-                           <p className="text-[8px] md:text-[10px] font-black text-red-800 uppercase tracking-widest mb-1">Seller Tier</p>
-                           <p className="text-lg md:text-2xl font-black text-deep-espresso">{profileData.tier.split(' ')[0]}</p>
-                        </div>
+                  {/* Enhanced Stats Row - Dashboard Compact */}
+                  <div className="grid grid-cols-3 gap-3 md:gap-6">
+                     {[
+                       { label: 'Revenue', value: '₹12.4L', icon: <ShoppingBag size={18} />, color: 'text-seller-primary', bg: 'bg-seller-primary/5' },
+                       { label: 'Rating', value: '4.9/5', icon: <Star size={18} />, color: 'text-amber-500', bg: 'bg-amber-50' },
+                       { label: 'Service', value: '98%', icon: <Zap size={18} />, color: 'text-emerald-600', bg: 'bg-emerald-50' }
+                     ].map((stat, i) => (
+                       <div key={i} className="bg-white p-3.5 md:p-6 rounded-[1.5rem] md:rounded-[1.8rem] border border-slate-100 shadow-sm flex flex-col md:flex-row items-center gap-2 md:gap-4 group">
+                          <div className={`w-8 h-8 md:w-11 md:h-11 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center shrink-0`}>
+                             {stat.icon}
+                          </div>
+                          <div className="text-center md:text-left">
+                             <p className="text-[8px] md:text-[9px] font-semibold text-slate-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
+                             <h4 className="text-sm md:text-xl font-semibold text-slate-900 tracking-tight leading-none">{stat.value}</h4>
+                          </div>
+                       </div>
+                     ))}
+                  </div>
+
+                  {/* Merchant Details Card - High Density */}
+                  <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8 relative overflow-hidden">
+                     <h3 className="text-base md:text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-3">
+                        <div className="w-1.5 h-5 md:h-6 bg-seller-primary rounded-full" />
+                        Merchant Identification
+                     </h3>
+                     
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 md:gap-y-6 gap-x-8 md:gap-x-10">
+                        {[
+                          { label: 'Registered Email', value: profileData.email, icon: <Mail size={14} /> },
+                          { label: 'Merchant Hotline', value: profileData.phone, icon: <Phone size={14} /> },
+                          { label: 'GST Identification', value: profileData.gstNumber, icon: <CheckCircle2 size={14} /> },
+                          { label: 'Tax Identity (PAN)', value: profileData.panNumber, icon: <CreditCard size={14} /> },
+                          { label: 'Primary Fulfillment Center', value: profileData.shopAddress, icon: <MapPin size={14} />, full: true },
+                        ].map((field, i) => (
+                          <div key={i} className={`${field.full ? 'md:col-span-2' : ''} space-y-1`}>
+                             <div className="flex items-center gap-2 text-slate-400 font-semibold text-[8px] md:text-[9px] uppercase tracking-widest">
+                                {field.icon} {field.label}
+                             </div>
+                             <p className="text-[12px] md:text-sm font-semibold text-slate-900 truncate">
+                                {field.value || 'N/A'}
+                             </p>
+                          </div>
+                        ))}
                      </div>
                   </div>
 
-                  <div className="bg-white p-8 md:p-12 rounded-[2rem] md:rounded-[48px] border border-soft-oatmeal shadow-sm overflow-hidden relative">
-                    <div className="absolute top-0 right-0 p-8 md:p-12 opacity-5 pointer-events-none">
-                      <FiShoppingBag size={120} md:size={200} className="text-red-800" />
-                    </div>
-                    
-                    <h2 className="text-xl md:text-2xl font-black text-deep-espresso mb-8 md:mb-10 flex items-center gap-3 md:gap-4">
-                      <div className="w-1.5 md:w-2 h-6 md:h-8 bg-red-800 rounded-full" /> Business Identity
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-16">
-                       {[
-                         { label: 'Merchant Email', value: profileData.email, icon: <FiMail /> },
-                         { label: 'Secure Phone', value: profileData.phone, icon: <FiPhone /> },
-                         { label: 'Global GST-IN', value: profileData.gstNumber, icon: <FiCheckCircle /> },
-                         { label: 'Permanent Account', value: profileData.panNumber, icon: <FiCreditCard /> },
-                         { label: 'Physical HQ', value: profileData.shopAddress, icon: <FiMapPin />, full: true },
-                       ].map((field, i) => (
-                         <div key={i} className={`${field.full ? 'md:col-span-2' : ''} space-y-2`}>
-                            <p className="text-[10px] font-black text-red-800 uppercase tracking-widest flex items-center gap-2">
-                              {field.icon} {field.label}
-                            </p>
-                            <p className="text-lg font-bold text-deep-espresso break-words">
-                              {field.value || 'Credentials Required'}
-                            </p>
-                         </div>
-                       ))}
-                    </div>
+                  {/* Compliance Section - High Fidelity */}
+                  <div className="bg-slate-50/50 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200/50 space-y-6">
+                     <div className="flex items-center justify-between">
+                        <h3 className="text-[10px] md:text-xs font-semibold text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2">
+                           <Lock size={14} className="text-seller-primary" /> Security & Compliance
+                        </h3>
+                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-600 text-[7px] md:text-[8px] font-semibold uppercase tracking-widest rounded-md border border-emerald-200/50">Lvl 3 Secure</span>
+                     </div>
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {[
+                          { title: 'Privacy', val: 'E2E Encryption', icon: <ShieldCheck size={14} /> },
+                          { title: 'Tax Flow', val: 'Verified Q1', icon: <FileText size={14} /> },
+                          { title: 'Identity', val: 'KYC Tier 2', icon: <Globe size={14} /> }
+                        ].map((item, i) => (
+                          <div key={i} className="bg-white px-4 py-3.5 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3">
+                             <div className="text-seller-primary opacity-60 shrink-0">{item.icon}</div>
+                             <div>
+                                <p className="text-[7px] md:text-[8px] font-semibold text-slate-400 uppercase tracking-widest leading-none mb-0.5">{item.title}</p>
+                                <p className="text-[9px] md:text-[10px] font-semibold text-slate-900 uppercase tracking-widest leading-none">{item.val}</p>
+                             </div>
+                          </div>
+                        ))}
+                     </div>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Quick Actions Sidebar */}
-          <div className="space-y-6 md:space-y-8">
-            <div className="bg-white p-8 md:p-10 rounded-[2rem] md:rounded-[40px] border border-soft-oatmeal shadow-sm">
-               <h3 className="text-lg md:text-xl font-bold text-deep-espresso mb-6 md:mb-8">Quick Actions</h3>
-               <div className="space-y-3 md:space-y-4">
-                  <button 
-                    onClick={() => setIsEditing(!isEditing)} 
-                    className={`w-full flex items-center justify-between p-4 md:p-5 rounded-2xl transition-all font-bold group ${isEditing ? 'bg-red-800 text-white' : 'bg-soft-oatmeal/10 hover:bg-soft-oatmeal/30 text-deep-espresso'}`}
-                  >
-                     <div className="flex items-center gap-4">
-                        <FiEdit2 className={isEditing ? 'text-white' : 'text-red-800'} />
-                        <span className="text-xs md:text-sm uppercase tracking-widest font-black">
-                          {isEditing ? 'Stop Editing' : 'Edit Profile'}
-                        </span>
-                     </div>
-                  </button>
-                  <button 
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-3 md:gap-4 p-5 md:p-6 rounded-[20px] md:rounded-[24px] bg-red-50 text-red-900 hover:bg-red-900 hover:text-white transition-all font-black text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] mt-6 md:mt-8 shadow-xl shadow-red-900/5"
-                  >
-                     <FiLogOut /> Logout
-                  </button>
+          {/* Quick Actions Sidebar - Professional Hub */}
+          <div className="space-y-6">
+            <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.2rem] border border-slate-100 shadow-xl shadow-slate-200/20 space-y-6">
+               <div className="space-y-0.5">
+                 <h3 className="text-base md:text-lg font-semibold text-slate-900 tracking-tight">Merchant Hub</h3>
+                 <p className="text-[8px] md:text-[9px] font-semibold text-slate-400 uppercase tracking-widest">System Control</p>
                </div>
+               
+               <div className="grid grid-cols-1 gap-1.5">
+                  {[
+                    { label: 'Analytics', icon: <BarChart3 size={16} />, path: '/seller/reports/sales', color: 'bg-blue-50 text-blue-600' },
+                    { label: 'Finances', icon: <CreditCard size={16} />, path: '/seller/wallet', color: 'bg-emerald-50 text-emerald-600' },
+                    { label: 'Settings', icon: <Settings size={16} />, path: '/seller/settings', color: 'bg-slate-50 text-slate-600' },
+                    { label: 'System', icon: <Bell size={16} />, path: '/seller/notifications', color: 'bg-rose-50 text-rose-600' },
+                  ].map((tool, i) => (
+                    <button 
+                      key={i}
+                      onClick={() => navigate(tool.path)}
+                      className="flex items-center justify-between p-3 rounded-xl bg-slate-50/50 hover:bg-white border border-transparent hover:border-slate-100 transition-all group"
+                    >
+                       <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-lg ${tool.color} flex items-center justify-center transition-transform group-hover:scale-110`}>
+                             {tool.icon}
+                          </div>
+                          <span className="text-[9px] md:text-[10px] font-semibold text-slate-700 uppercase tracking-widest">{tool.label}</span>
+                       </div>
+                       <ChevronRight size={14} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  ))}
+               </div>
+               
+               <button 
+                 onClick={() => logout()}
+                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-800 text-white hover:bg-slate-700 transition-all font-semibold text-[9px] uppercase tracking-widest mt-2 shadow-xl shadow-slate-900/10"
+               >
+                  <LogOut size={14} /> Terminate Session
+               </button>
             </div>
 
-            <div className="bg-red-900/5 p-8 md:p-10 rounded-[2rem] md:rounded-[40px] border border-red-900/10">
-               <h3 className="text-base md:text-lg font-black text-red-900 uppercase tracking-widest mb-4">Merchant Support</h3>
-               <p className="text-[10px] md:text-xs text-red-900/60 font-bold leading-relaxed mb-6 md:mb-8 uppercase tracking-tighter">Our specialists are available 24/7 to ensure your storefront maintains its prestige status.</p>
-               <button className="w-full py-4 bg-red-900 text-white rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-[10px]">Contact Liaison</button>
-            </div>
+
           </div>
         </div>
       </div>
@@ -387,4 +444,3 @@ const SellerProfile = () => {
 };
 
 export default SellerProfile;
-

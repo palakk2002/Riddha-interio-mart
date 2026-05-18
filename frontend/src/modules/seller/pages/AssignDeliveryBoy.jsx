@@ -78,19 +78,19 @@ const AssignDeliveryBoy = () => {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
           <div>
-            <h1 className="text-4xl font-display font-black text-gray-900 tracking-tight uppercase italic">
-              Delivery <span className="text-red-800">Dispatch</span>
+            <h1 className="text-4xl font-display font-black text-slate-900 tracking-tight uppercase italic">
+              Delivery <span className="text-seller-primary">Dispatch</span>
             </h1>
-            <p className="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] mt-2">
+            <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.2em] mt-2">
               Assign reliable partners for your pending shipments
             </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Ready to Dispatch</p>
-              <p className="text-xl font-black text-gray-900">{orders.length}</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Ready to Dispatch</p>
+              <p className="text-xl font-black text-slate-900">{orders.length}</p>
             </div>
-            <div className="w-12 h-12 bg-red-800 rounded-2xl shadow-lg shadow-red-900/20 flex items-center justify-center text-white">
+            <div className="w-12 h-12 bg-seller-primary rounded-2xl shadow-lg shadow-seller-primary/20 flex items-center justify-center text-white">
               <LuTruck size={24} />
             </div>
           </div>
@@ -108,17 +108,17 @@ const AssignDeliveryBoy = () => {
 
         {/* Orders Grid */}
         {loading ? (
-          <div className="bg-white rounded-[2rem] p-20 text-center border border-gray-100 shadow-sm">
-             <div className="w-12 h-12 border-4 border-gray-100 border-t-red-800 rounded-full animate-spin mx-auto mb-4" />
-             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Scanning logistics network...</p>
+          <div className="bg-white rounded-[2rem] p-20 text-center border border-slate-100 shadow-sm">
+             <div className="w-12 h-12 border-4 border-slate-100 border-t-seller-primary rounded-full animate-spin mx-auto mb-4" />
+             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning logistics network...</p>
           </div>
         ) : orders.length === 0 ? (
-          <div className="bg-white rounded-[2rem] p-20 text-center border border-gray-100 shadow-sm">
-             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-200">
+          <div className="bg-white rounded-[2rem] p-20 text-center border border-slate-100 shadow-sm">
+             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-200">
                 <LuPackage size={32} />
              </div>
-             <h3 className="text-xl font-bold text-gray-900">All clear!</h3>
-             <p className="text-gray-400 text-sm mt-1">There are no orders waiting for delivery assignment right now.</p>
+             <h3 className="text-xl font-bold text-slate-900">All clear!</h3>
+             <p className="text-slate-400 text-sm mt-1">There are no orders waiting for delivery assignment right now.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -128,47 +128,47 @@ const AssignDeliveryBoy = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 key={order._id}
-                className="bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/20 overflow-hidden group hover:border-red-800/20 transition-all p-6"
+                className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/20 overflow-hidden group hover:border-seller-primary/20 transition-all p-6"
               >
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-red-50 group-hover:text-red-800 transition-colors">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-seller-light/20 group-hover:text-seller-primary transition-colors">
                       <LuClock size={20} />
                     </div>
                     <div>
-                      <p className="text-xs font-black text-gray-900 uppercase">#{order._id.slice(-8).toUpperCase()}</p>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">{new Date(order.createdAt).toLocaleString()}</p>
+                      <p className="text-xs font-black text-slate-900 uppercase">#{order._id.slice(-8).toUpperCase()}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{new Date(order.createdAt).toLocaleString()}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-black text-gray-900 tracking-tighter">₹{Number(order.totalPrice || 0).toLocaleString()}</p>
-                    <p className="text-[9px] text-green-600 font-black uppercase tracking-widest">{order.orderItems.length} Items • Paid</p>
+                    <p className="text-lg font-black text-slate-900 tracking-tighter">₹{Number(order.totalPrice || 0).toLocaleString()}</p>
+                    <p className="text-[9px] text-seller-primary font-black uppercase tracking-widest">{order.orderItems.length} Items • Paid</p>
                   </div>
                 </div>
 
                 <div className="space-y-4 mb-8">
                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-800 font-black text-[10px]">
+                      <div className="w-8 h-8 rounded-full bg-seller-light/40 flex items-center justify-center text-seller-primary font-black text-[10px]">
                         {String(order.shippingAddress?.fullName || "G").charAt(0)}
                       </div>
                       <div className="flex-1">
-                        <p className="text-xs font-black text-gray-900 uppercase tracking-tighter">{String(order.shippingAddress?.fullName || "Guest")}</p>
-                        <p className="text-[10px] text-gray-400 font-bold flex items-center gap-1 uppercase tracking-widest truncate">
+                        <p className="text-xs font-black text-slate-900 uppercase tracking-tighter">{String(order.shippingAddress?.fullName || "Guest")}</p>
+                        <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1 uppercase tracking-widest truncate">
                           <FiMapPin size={10} /> {order.shippingAddress?.fullAddress}, {order.shippingAddress?.city}
                         </p>
                       </div>
                    </div>
                 </div>
 
-                <div className="flex items-center gap-3 border-t border-gray-50 pt-6">
+                <div className="flex items-center gap-3 border-t border-slate-50 pt-6">
                    <button 
                      onClick={() => handleAssignClick(order)}
-                     className="flex-1 bg-gray-900 text-white rounded-2xl py-4 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-red-800 transition-all shadow-lg shadow-black/10 flex items-center justify-center gap-2"
+                     className="flex-1 bg-seller-primary text-white rounded-2xl py-4 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20 flex items-center justify-center gap-2"
                    >
                      <LuTruck size={16} />
                      Assign Partner
                    </button>
-                   <button className="w-14 h-14 rounded-2xl border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all">
+                   <button className="w-14 h-14 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all">
                       <LuSearch size={18} />
                    </button>
                 </div>
@@ -193,7 +193,7 @@ const AssignDeliveryBoy = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setShowModal(false)}
-                className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
               />
               <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -202,12 +202,12 @@ const AssignDeliveryBoy = () => {
                 className="relative w-full max-w-xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden"
                 onClick={e => e.stopPropagation()}
               >
-                <div className="p-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+                <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                   <div>
-                    <h3 className="text-xl font-display font-black text-gray-900 uppercase italic">Select <span className="text-red-800">Partner</span></h3>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Available delivery boys in your region</p>
+                    <h3 className="text-xl font-display font-black text-slate-900 uppercase italic">Select <span className="text-seller-primary">Partner</span></h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Available delivery boys in your region</p>
                   </div>
-                  <button onClick={() => setShowModal(false)} className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center hover:bg-white transition-all">
+                  <button onClick={() => setShowModal(false)} className="w-10 h-10 border border-slate-200 rounded-full flex items-center justify-center hover:bg-white transition-all">
                     <LuX size={20} />
                   </button>
                 </div>
@@ -215,21 +215,21 @@ const AssignDeliveryBoy = () => {
                 <div className="p-8 max-h-[60vh] overflow-y-auto no-scrollbar space-y-4">
                   {deliveryBoys.length === 0 ? (
                     <div className="text-center py-10">
-                       <p className="text-sm font-bold text-gray-400">No active delivery boys found online.</p>
+                       <p className="text-sm font-bold text-slate-400">No active delivery boys found online.</p>
                     </div>
                   ) : deliveryBoys.map((boy) => (
                     <div 
                       key={boy._id}
-                      className="p-5 rounded-2xl border border-gray-100 hover:border-red-800/30 transition-all flex items-center justify-between group"
+                      className="p-5 rounded-2xl border border-slate-100 hover:border-seller-primary/30 transition-all flex items-center justify-between group"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-gray-900 flex items-center justify-center text-white relative">
+                        <div className="w-12 h-12 rounded-2xl bg-seller-primary flex items-center justify-center text-white relative shadow-lg shadow-seller-primary/10">
                           <LuUser size={20} />
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white" />
                         </div>
                         <div>
-                          <p className="text-sm font-black text-gray-900 uppercase tracking-tight">{boy.fullName}</p>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1 flex items-center gap-2">
+                          <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{boy.fullName}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 flex items-center gap-2">
                              <LuTruck size={12} /> {boy.vehicleType} • {boy.phone}
                           </p>
                         </div>
@@ -237,7 +237,7 @@ const AssignDeliveryBoy = () => {
                       <button 
                         onClick={() => handleAssignProcess(boy._id)}
                         disabled={assigning}
-                        className="bg-red-800 text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-red-900/20 disabled:opacity-50"
+                        className="bg-seller-primary text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20 disabled:opacity-50"
                       >
                         {assigning ? 'Assigning...' : 'Assign'}
                       </button>

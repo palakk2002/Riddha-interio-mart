@@ -1,18 +1,32 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
-import { LuPlus, LuSearch, LuFilter, LuBox, LuCheck, LuClock } from 'react-icons/lu';
+import { 
+  Plus, 
+  Search, 
+  Filter, 
+  Package, 
+  CheckCircle2, 
+  Clock, 
+  Grid2X2, 
+  LayoutList,
+  ChevronRight,
+  ExternalLink,
+  ArrowRight,
+  PlusCircle,
+  Database,
+  SearchCode
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../shared/utils/api';
 
 const BrowseCatalog = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [catalogProducts, setCatalogProducts] = useState([]);
   const [inventory, setInventory] = useState([]);
+  const [viewMode, setViewMode] = useState('list');
 
   useEffect(() => {
     fetchCatalog();
@@ -22,7 +36,6 @@ const BrowseCatalog = () => {
   const fetchCatalog = async () => {
     try {
       setLoading(true);
-      // Fetch all items from the master catalog
       const { data } = await api.get('/catalog');
       setCatalogProducts(data.data || []);
     } catch (err) {
@@ -48,170 +61,203 @@ const BrowseCatalog = () => {
     );
   }, [searchTerm, catalogProducts]);
 
-  const handleAddToShop = async (product) => {
-    try {
-      // Create a clean copy without internal DB metadata
-      const { _id, createdAt, updatedAt, __v, ...productData } = product;
-      
-      const res = await api.post('/products', {
-        ...productData,
-        countInStock: product.stock || 0,
-        source: 'catalog',
-        isApproved: true,
-        approvalStatus: 'approved'
-      });
-
-      if (res.data.success) {
-        setInventory([...inventory, res.data.data]);
-        setToastMessage(`${product.name} added to your shop!`);
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
-      }
-    } catch (err) {
-      console.error('Add to shop error:', err);
-      alert('Failed to add product to your shop.');
-    }
-  };
-
-  const isProductInInventory = (productId) => {
-    return inventory.some(p => p.sku === catalogProducts.find(cp => cp._id === productId)?.sku);
+  const isProductInInventory = (sku) => {
+    return inventory.some(p => p.sku === sku);
   };
 
   return (
     <PageWrapper>
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 md:px-0">
-          <div className="space-y-1 text-center md:text-left">
-            <h1 className="text-2xl md:text-4xl font-display font-bold text-deep-espresso">Browse Catalog</h1>
-            <p className="text-warm-sand text-[10px] md:text-sm font-bold uppercase tracking-widest">Select items from the master catalog to add to your shop.</p>
+      <div className="max-w-7xl mx-auto space-y-8 pb-10">
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Master Catalog</h1>
+            <p className="text-sm font-medium text-slate-500">Global product database for merchant selection</p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+             <div className="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2">
+                <Database size={16} className="text-seller-primary" />
+                <span className="text-xs font-bold text-slate-900">{catalogProducts.length} Products</span>
+             </div>
           </div>
         </div>
 
-        {/* Toolbar */}
-        <div className="bg-white p-3 rounded-2xl border border-soft-oatmeal shadow-sm flex flex-col md:flex-row gap-3 mx-4 md:mx-0">
-          <div className="relative flex-grow">
-            <LuSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand" size={16} />
+        {/* Toolbar Section */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="relative flex-grow w-full md:w-auto">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
               type="text"
-              placeholder="Search by name or code..."
+              placeholder="Search master catalog by name or code..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl pl-10 pr-4 py-2.5 md:py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all text-sm"
+              className="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-seller-primary/10 transition-all"
             />
           </div>
-          <button className="flex items-center justify-center gap-2 border border-soft-oatmeal text-deep-espresso px-6 py-2.5 md:py-0 rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest hover:bg-soft-oatmeal/20 transition-all">
-            <LuFilter size={14} />
-            Filters
-          </button>
+          
+          <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
+             <button 
+               onClick={() => setViewMode('list')}
+               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'list' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+             >
+               <LayoutList size={16} /> List
+             </button>
+             <button 
+               onClick={() => setViewMode('grid')}
+               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+             >
+               <Grid2X2 size={16} /> Grid
+             </button>
+          </div>
         </div>
 
-        {/* Catalog List / Table */}
-        <div className="space-y-4">
-          {loading ? (
-            <div className="py-20 flex flex-col items-center justify-center space-y-4 text-warm-sand">
-              <LuClock size={48} className="animate-spin opacity-20" />
-              <p className="font-bold text-[10px] uppercase tracking-widest">Fetching Catalog Data...</p>
+        {/* Catalog Content */}
+        {loading ? (
+          <div className="py-24 text-center space-y-4">
+             <div className="w-12 h-12 border-4 border-seller-light border-t-seller-primary rounded-full animate-spin mx-auto"></div>
+             <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Querying Global Catalog...</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="py-24 text-center space-y-4 bg-white rounded-[2.5rem] border border-dashed border-slate-200">
+            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
+               <SearchCode size={40} />
             </div>
-          ) : (
-            <>
-              {/* Desktop Table View */}
-              <div className="hidden md:block bg-white rounded-2xl border border-soft-oatmeal shadow-md overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead className="bg-soft-oatmeal/20 border-b border-soft-oatmeal">
-                      <tr>
-                        <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Image</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Product Name</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">SKU</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">Category</th>
-
-                        <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest text-right">Actions</th>
+            <div>
+               <h3 className="text-lg font-bold text-slate-900">No results found</h3>
+               <p className="text-sm text-slate-500 mt-1 max-w-xs mx-auto">Adjust your search terms or check back later for new catalog updates.</p>
+            </div>
+          </div>
+        ) : viewMode === 'list' ? (
+          <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-slate-50/50 border-b border-slate-100">
+                  <tr>
+                    <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Product Info</th>
+                    <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">SKU Code</th>
+                    <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Category</th>
+                    <th className="px-8 py-5 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Status / Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredProducts.map((product) => {
+                    const alreadyInShop = isProductInInventory(product.sku);
+                    return (
+                      <tr key={product._id} className="hover:bg-slate-50/50 transition-colors group">
+                        <td className="px-8 py-5">
+                          <div className="flex items-center gap-5">
+                            <div className="w-14 h-14 rounded-2xl overflow-hidden border border-slate-200 shadow-sm shrink-0">
+                               <img 
+                                 src={product.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80'} 
+                                 alt={product.name} 
+                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                               />
+                            </div>
+                            <div className="min-w-0">
+                               <p className="text-sm font-bold text-slate-900 truncate group-hover:text-seller-primary transition-colors">{product.name}</p>
+                               <div className="flex items-center gap-2 mt-1.5">
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Master</span>
+                                  <span className="w-1 h-1 rounded-full bg-slate-200"></span>
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.brand?.name || 'Standard'}</span>
+                               </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-8 py-5">
+                           <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                             {product.sku || 'N/A'}
+                           </span>
+                        </td>
+                        <td className="px-8 py-5">
+                           <span className="text-[11px] font-bold text-seller-primary bg-seller-light/40 px-3 py-1.5 rounded-xl uppercase tracking-wider border border-seller-primary/10">
+                             {product.category}
+                           </span>
+                        </td>
+                        <td className="px-8 py-5 text-right">
+                           {alreadyInShop ? (
+                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100 font-bold text-xs">
+                               <CheckCircle2 size={16} />
+                               In Your Shop
+                             </div>
+                           ) : (
+                             <button
+                               onClick={() => navigate(`/seller/product/add?catalogId=${product._id}`)}
+                               className="inline-flex items-center gap-2 px-5 py-2.5 bg-seller-primary text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-seller-dark transition-all shadow-md group/btn shadow-seller-primary/20"
+                             >
+                               Add to Shop
+                               <PlusCircle size={16} className="group-hover/btn:rotate-90 transition-transform" />
+                             </button>
+                           )}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-soft-oatmeal/50">
-                      {filteredProducts.map((product) => (
-                        <tr key={product._id} className="hover:bg-soft-oatmeal/5 transition-colors group">
-                          <td className="px-6 py-4">
-                            <img src={product.images?.[0] || 'https://via.placeholder.com/150'} alt={product.name} className="w-12 h-12 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" />
-                          </td>
-                          <td className="px-6 py-4">
-                            <p className="font-bold text-deep-espresso">{product.name}</p>
-                            <p className="text-[10px] text-warm-sand uppercase tracking-wider mt-0.5">In Catalog</p>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="text-[10px] font-black text-deep-espresso/60 bg-soft-oatmeal/30 px-2 py-1 rounded border border-soft-oatmeal">
-                              {product.sku || 'N/A'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="text-[10px] font-bold text-red-800 uppercase tracking-widest bg-red-800/5 px-2.5 py-1 rounded-full border border-red-800/10">
-                              {product.category}
-                            </span>
-                          </td>
-
-                          <td className="px-6 py-4 text-right">
-                            {isProductInInventory(product._id) ? (
-                              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 font-bold text-xs">
-                                <LuCheck size={14} />
-                                Added
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => navigate(`/seller/product/add?catalogId=${product._id}`)}
-                                className="p-2.5 bg-warm-sand/5 text-warm-sand hover:bg-deep-espresso hover:text-white rounded-lg transition-all duration-300"
-                                title="Add to Shop"
-                              >
-                                <LuPlus size={18} />
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Mobile Card View */}
-              <div className="md:hidden space-y-4">
-                {filteredProducts.map((product) => (
-                  <div key={product._id} className="bg-white p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex gap-4 items-center">
-                    <img src={product.images?.[0] || 'https://via.placeholder.com/150'} alt={product.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-deep-espresso truncate">{product.name}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[9px] font-black text-deep-espresso/40 bg-soft-oatmeal/30 px-1.5 py-0.5 rounded">{product.sku}</span>
-                        <span className="text-[9px] font-bold text-dusty-cocoa uppercase tracking-tighter">{product.category}</span>
-                      </div>
-
-                    </div>
-                    {isProductInInventory(product._id) ? (
-                      <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
-                        <LuCheck size={18} />
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => navigate(`/seller/product/add?catalogId=${product._id}`)}
-                        className="p-2.5 bg-soft-oatmeal/20 text-warm-sand rounded-xl hover:bg-deep-espresso hover:text-white transition-all shadow-sm active:scale-95"
-                      >
-                        <LuPlus size={18} />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Empty State */}
-          {filteredProducts.length === 0 && (
-            <div className="bg-white rounded-2xl border border-soft-oatmeal p-12 text-center text-warm-sand shadow-sm">
-              <LuBox size={48} className="mx-auto opacity-20 mb-4" />
-              <p className="font-medium italic">No products matched your search.</p>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map((product) => {
+              const alreadyInShop = isProductInInventory(product.sku);
+              return (
+                <motion.div 
+                  key={product._id} 
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden group hover:shadow-xl transition-all duration-500"
+                >
+                   <div className="relative h-52 overflow-hidden">
+                      <img 
+                        src={product.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80'} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      />
+                      <div className="absolute top-4 right-4">
+                         <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-slate-900 shadow-sm">
+                           {product.category}
+                         </span>
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                         {!alreadyInShop && (
+                            <button 
+                              onClick={() => navigate(`/seller/product/add?catalogId=${product._id}`)}
+                              className="w-full py-3 bg-white rounded-xl text-slate-900 font-bold text-sm flex items-center justify-center gap-2"
+                            >
+                              <Plus size={18} /> Quick Import
+                            </button>
+                         )}
+                      </div>
+                   </div>
+                   <div className="p-6">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{product.sku}</p>
+                      <h3 className="text-base font-bold text-slate-900 line-clamp-1 mb-4 group-hover:text-seller-primary transition-colors">{product.name}</h3>
+                      
+                      <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
+                         <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Master Catalog</span>
+                         {alreadyInShop ? (
+                            <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                               <CheckCircle2 size={18} />
+                            </div>
+                         ) : (
+                            <button 
+                              onClick={() => navigate(`/seller/product/add?catalogId=${product._id}`)}
+                              className="w-8 h-8 rounded-full bg-seller-primary text-white flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-seller-primary/20"
+                            >
+                               <ArrowRight size={18} />
+                            </button>
+                         )}
+                      </div>
+                   </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+
       </div>
     </PageWrapper>
   );

@@ -51,7 +51,9 @@ const PaymentPage = () => {
       const response = await api.post('/orders', orderData);
 
       if (response.data.success) {
-        localStorage.setItem('last_order_id', response.data.data._id);
+        // Now returns an array of created orders
+        const orderIds = response.data.data.map(order => order._id);
+        localStorage.setItem('last_order_ids', JSON.stringify(orderIds));
 
         setTimeout(() => {
           setIsProcessing(false);

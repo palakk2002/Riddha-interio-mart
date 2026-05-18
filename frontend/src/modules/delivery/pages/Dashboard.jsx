@@ -1,42 +1,110 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
-import { LuPackage, LuClock, LuCheck, LuTrendingUp, LuWallet } from 'react-icons/lu';
-import { initialAvailableOrders, initialMyOrders, earningsData } from '../data/deliveryData';
-
+import { 
+  LuPackage, 
+  LuClock, 
+  LuCheck, 
+  LuTrendingUp, 
+  LuWallet, 
+  LuPercent, 
+  LuZap, 
+  LuNavigation, 
+  LuUsers, 
+  LuTriangleAlert,
+  LuMapPin,
+  LuArrowRight,
+  LuLayoutGrid,
+  LuActivity,
+  LuSearch,
+  LuFilter,
+  LuTruck
+} from 'react-icons/lu';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell
+} from 'recharts';
+import { motion } from 'framer-motion';
 import api from '../../../shared/utils/api';
 import { useUser } from '../../user/data/UserContext';
 
 const Dashboard = () => {
   const { user, setUser } = useUser();
-  const [updating, setUpdating] = React.useState(false);
-  const partnerStatus = user?.status || 'Offline';
+  const [updating, setUpdating] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
+  const [analytics, setAnalytics] = useState({
+    stats: {
+      totalAssigned: 0,
+      completedDeliveries: 0,
+      pendingDeliveries: 0,
+      rejectedDeliveries: 0
+    },
+    earnings: {
+      totalEarnings: 0,
+      codToDeposit: 0
+    },
+    performance: {
+      successRate: 0,
+      avgDeliveryTimeHours: 0
+    },
+    recentDeliveries: []
+  });
 
-  React.useEffect(() => {
-    const syncProfile = async () => {
-      try {
-        const { data } = await api.get('/delivery/me');
-        if (data.success) {
-          // IMPORTANT: Preserve the existing token when updating user profile data
-          setUser(prev => ({ 
-            ...prev, 
-            ...data.data,
-            token: prev?.token // Explicitly keep the token
-          }));
-        }
-      } catch (err) {
-        console.error('Failed to sync partner profile:', err);
+  // Mock data for charts - keeping it realistic for logistics
+  const performanceData = [
+    { name: 'Mon', completed: 12, rejected: 1 },
+    { name: 'Tue', completed: 18, rejected: 2 },
+    { name: 'Wed', completed: 15, rejected: 0 },
+    { name: 'Thu', completed: 22, rejected: 3 },
+    { name: 'Fri', completed: 30, rejected: 1 },
+    { name: 'Sat', completed: 25, rejected: 2 },
+    { name: 'Sun', completed: 10, rejected: 0 },
+  ];
+
+  const revenueData = [
+    { name: '08:00', value: 400 },
+    { name: '10:00', value: 1200 },
+    { name: '12:00', value: 2400 },
+    { name: '14:00', value: 1800 },
+    { name: '16:00', value: 3600 },
+    { name: '18:00', value: 2800 },
+    { name: '20:00', value: 1500 },
+  ];
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const { data: profileData } = await api.get('/delivery/me');
+      if (profileData.success) {
+        setUser(prev => ({ ...prev, ...profileData.data }));
       }
-    };
-    syncProfile();
+      const { data: analyticsData } = await api.get('/delivery/analytics');
+      if (analyticsData.success) {
+        setAnalytics(analyticsData.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch dashboard data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
   }, []);
 
   const toggleStatus = async () => {
-    if (user?.approvalStatus !== 'Approved') {
-      alert('Verification Pending: You can go online once your account is verified by the admin.');
-      return;
-    }
+    if (user?.approvalStatus !== 'Approved') return;
     setUpdating(true);
     try {
       const nextStatus = user?.status === 'Available' ? 'Offline' : 'Available';
@@ -51,134 +119,254 @@ const Dashboard = () => {
     }
   };
 
-  const recentDeliveries = [
-    ...initialMyOrders,
-    { id: "ORD-1122", customerName: "Anjali Devi", status: "Delivered", dateTime: "05 Apr, 06:15 PM" },
-    { id: "ORD-4433", customerName: "Karan Johar", status: "Delivered", dateTime: "05 Apr, 02:40 PM" },
-  ].slice(0, 5);
+  const { stats, earnings, performance, recentDeliveries } = analytics;
 
   return (
     <PageWrapper>
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">
-              Partner Dashboard
-            </h1>
-            <p className="text-dusty-cocoa font-bold text-xs uppercase tracking-widest mt-2">
-              Welcome back, {user?.fullName || 'Partner'}! Here's your delivery summary.
-            </p>
-          </div>
-          
-          {/* Status Toggle */}
-          <div className="bg-white border text-deep-espresso border-soft-oatmeal p-4 rounded-[2rem] flex items-center gap-4 shadow-sm">
-             <div className="flex flex-col">
-               <span className="text-[10px] font-black uppercase tracking-widest text-warm-sand">{partnerStatus === 'Available' ? 'Online' : 'Offline'}</span>
-               <span className="text-xs font-bold">{partnerStatus === 'Available' ? 'Ready for Work' : 'Currently Resting'}</span>
-             </div>
-             <button 
-               onClick={toggleStatus}
-               disabled={updating}
-               className={`relative inline-flex h-10 w-20 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#001B4E] focus:ring-offset-2 ${partnerStatus === 'Available' ? 'bg-[#001B4E]' : 'bg-soft-oatmeal'}`}
+      <div className="max-w-[1600px] mx-auto space-y-4 pb-8">
+        
+        {/* Hero & Operations Command */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+           <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                 <div className="w-1.5 h-6 bg-[#2A458A] rounded-full"></div>
+                 <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    Delivery Dashboard
+                 </h1>
+              </div>
+              <p className="text-slate-500 font-medium text-xs flex items-center gap-1.5">
+                 <LuActivity className="text-[#2A458A]" />
+                 Overview of your delivery performance and earnings
+              </p>
+           </div>
+
+           <div className="flex flex-wrap items-center gap-3">
+              <div className="bg-white border border-slate-100 p-1.5 rounded-xl flex items-center gap-2 shadow-sm">
+                 <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-100">
+                    <LuClock size={14} className="text-[#189D91]" />
+                    <span className="text-xs font-semibold text-slate-600">Active Shift: 08h 12m</span>
+                 </div>
+                 <button 
+                   onClick={toggleStatus}
+                   disabled={updating}
+                   className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+                     user?.status === 'Available' 
+                       ? 'bg-emerald-50 text-emerald-600 border-emerald-100 shadow-sm' 
+                       : 'bg-slate-50 text-slate-500 border-slate-200'
+                   }`}
+                 >
+                    <div className={`w-1.5 h-1.5 rounded-full ${user?.status === 'Available' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">
+                       {user?.status === 'Available' ? 'Online' : 'Offline'}
+                    </span>
+                 </button>
+              </div>
+           </div>
+        </div>
+
+        {/* Premium KPI Cards Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+           {[
+             { label: 'Total Orders', value: stats.totalAssigned, icon: LuPackage, trend: '+12.5%', color: 'text-blue-600', bg: 'bg-blue-50' },
+             { label: 'Active Routes', value: stats.pendingDeliveries, icon: LuNavigation, trend: 'Normal', color: 'text-amber-600', bg: 'bg-amber-50' },
+             { label: 'Success Rate', value: `${performance.successRate}%`, icon: LuCheck, trend: '+2.1%', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+             { label: 'Partner Tier', value: 'Active', icon: LuZap, trend: 'Top 5%', color: 'text-[#2A458A]', bg: 'bg-[#2A458A]/10' },
+             { label: 'Total Earnings', value: `₹${earnings.totalEarnings.toLocaleString()}`, icon: LuWallet, trend: '+₹2.4k', color: 'text-slate-900', bg: 'bg-slate-100' },
+             { label: 'Pending COD', value: `₹${earnings.codToDeposit.toLocaleString()}`, icon: LuTriangleAlert, trend: 'To Deposit', color: 'text-rose-600', bg: 'bg-rose-50' },
+           ].map((card, i) => (
+             <motion.div 
+               key={i}
+               initial={{ opacity: 0, y: 10 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ delay: i * 0.05 }}
+               className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group"
              >
-               <span className={`pointer-events-none inline-block h-9 w-9 transform rounded-full bg-white shadow ring-0 transition duration-300 ease-in-out ${partnerStatus === 'Available' ? 'translate-x-10' : 'translate-x-0'}`} />
-             </button>
-          </div>
+                <div className="flex justify-between items-start mb-3">
+                   <div className={`w-8 h-8 rounded-xl ${card.bg} ${card.color} flex items-center justify-center transition-transform group-hover:scale-105`}>
+                      <card.icon size={16} />
+                   </div>
+                   <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${card.bg} ${card.color}`}>{card.trend}</span>
+                </div>
+                <div>
+                   <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-0.5">{card.label}</p>
+                   <p className="text-xl font-bold text-slate-900 tracking-tight">{loading ? '---' : card.value}</p>
+                </div>
+             </motion.div>
+           ))}
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard 
-            label="Total Orders" 
-            value="156" 
-            icon={LuPackage} 
-            color="bg-warm-sand" 
-          />
-          <StatCard 
-            label="Pending" 
-            value={initialMyOrders.length} 
-            icon={LuClock} 
-            color="bg-soft-oatmeal" 
-          />
-          <StatCard 
-            label="Completed" 
-            value="142" 
-            icon={LuCheck} 
-            color="bg-dusty-cocoa" 
-          />
-          <StatCard 
-            label="Earnings" 
-            value={`₹${earningsData.total}`} 
-            icon={LuWallet} 
-            color="bg-deep-espresso" 
-          />
+        {/* Live Operations & Analytics Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+           
+           {/* Performance Tracking Panel using Recharts */}
+           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                 <div>
+                    <h3 className="text-slate-900 font-bold text-base">Weekly Performance</h3>
+                    <p className="text-slate-500 text-xs">Completed vs Rejected deliveries</p>
+                 </div>
+                 <LuActivity className="text-[#189D91]" size={20} />
+              </div>
+
+              <div className="flex-1 min-h-[160px]">
+                 <ResponsiveContainer width="100%" height={160}>
+                    <BarChart data={performanceData} margin={{ top: 10, right: 0, left: -25, bottom: 0 }}>
+                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} dy={10} />
+                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
+                       <Tooltip 
+                         cursor={{ fill: '#f8fafc' }}
+                         contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '8px', fontSize: '12px', padding: '8px' }}
+                       />
+                       <Bar dataKey="completed" name="Completed" fill="#189D91" radius={[4, 4, 0, 0]} barSize={12} />
+                       <Bar dataKey="rejected" name="Rejected" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={12} />
+                    </BarChart>
+                 </ResponsiveContainer>
+              </div>
+           </div>
+
+           {/* Analytics Widget */}
+           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:col-span-2">
+              <div className="flex items-center justify-between mb-4">
+                 <div>
+                    <h3 className="text-slate-900 font-bold text-base">Revenue Analytics</h3>
+                    <p className="text-slate-500 text-xs">Daily earnings breakdown</p>
+                 </div>
+                 <div className="flex items-center gap-4">
+                    <div className="text-right hidden sm:block">
+                       <p className="text-[10px] font-semibold text-slate-500">Average Order Value</p>
+                       <p className="text-sm font-bold text-slate-900">₹842.00</p>
+                    </div>
+                    <LuTrendingUp className="text-[#189D91]" size={20} />
+                 </div>
+              </div>
+
+              <div className="flex-1 h-[160px]">
+                 <ResponsiveContainer width="100%" height={160}>
+                    <AreaChart data={revenueData} margin={{ top: 10, right: 0, left: -25, bottom: 0 }}>
+                       <defs>
+                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                             <stop offset="5%" stopColor="#189D91" stopOpacity={0.3}/>
+                             <stop offset="95%" stopColor="#189D91" stopOpacity={0}/>
+                          </linearGradient>
+                       </defs>
+                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} dy={10} />
+                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
+                       <Tooltip 
+                         contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '8px', fontSize: '12px', padding: '8px' }}
+                         itemStyle={{ color: '#189D91', fontWeight: 'bold' }}
+                       />
+                       <Area 
+                         type="monotone" 
+                         dataKey="value" 
+                         stroke="#189D91" 
+                         strokeWidth={3} 
+                         fillOpacity={1} 
+                         fill="url(#colorRevenue)" 
+                       />
+                    </AreaChart>
+                 </ResponsiveContainer>
+              </div>
+           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Recent Deliveries */}
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-soft-oatmeal overflow-hidden">
-            <div className="p-6 border-b border-soft-oatmeal flex items-center justify-between">
-              <h3 className="text-xl font-display font-bold flex items-center gap-2 text-deep-espresso">
-                <LuTrendingUp className="text-warm-sand" /> Recent Deliveries
-              </h3>
-              <button className="text-xs font-bold text-warm-sand uppercase tracking-wider hover:text-deep-espresso transition-colors">
-                View All
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-soft-oatmeal/10">
-                    <th className="px-6 py-4 text-[10px] font-bold text-warm-sand uppercase tracking-widest">Order ID</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-warm-sand uppercase tracking-widest">Customer</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-warm-sand uppercase tracking-widest">Status</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-warm-sand uppercase tracking-widest">Time</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-soft-oatmeal/50">
-                  {recentDeliveries.map((order) => (
-                    <tr key={order.id} className="hover:bg-soft-oatmeal/5 transition-colors group">
-                      <td className="px-6 py-4 text-sm font-bold text-deep-espresso">{order.id}</td>
-                      <td className="px-6 py-4 text-sm text-dusty-cocoa">{order.customerName}</td>
-                      <td className="px-6 py-4">
-                        <StatusBadge status={order.status} />
-                      </td>
-                      <td className="px-6 py-4 text-xs text-warm-sand font-medium">{order.dateTime}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Quick Stats/Tip */}
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-deep-espresso to-dusty-cocoa rounded-2xl p-8 text-white relative overflow-hidden shadow-xl">
-              <div className="relative z-10">
-                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6 backdrop-blur-md border border-white/10">
-                  <LuCheck size={24} className="text-warm-sand" />
-                </div>
-                <h3 className="text-2xl font-display font-bold mb-4 leading-tight">Partner Tip</h3>
-                <p className="text-soft-oatmeal/80 text-sm leading-relaxed">
-                  Completing 5 more deliveries today will unlock a bonus of ₹200! Keep up the great work.
-                </p>
+        {/* Table & Matrix Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+           
+           {/* Recent Missions Table */}
+           <div className="md:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+              <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                 <div>
+                    <h3 className="text-slate-900 font-bold text-base">Recent Deliveries</h3>
+                 </div>
+                 <div className="flex items-center gap-2">
+                    <button className="p-2 bg-white border border-slate-200 text-slate-500 hover:text-[#2A458A] hover:border-[#2A458A]/30 rounded-lg transition-all shadow-sm"><LuSearch size={16} /></button>
+                    <button className="p-2 bg-white border border-slate-200 text-slate-500 hover:text-[#2A458A] hover:border-[#2A458A]/30 rounded-lg transition-all shadow-sm"><LuFilter size={16} /></button>
+                 </div>
               </div>
-              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-warm-sand/20 rounded-full blur-3xl"></div>
-            </div>
 
-            <div className="bg-warm-sand/10 border border-warm-sand/20 rounded-2xl p-6">
-              <h4 className="text-sm font-bold text-deep-espresso mb-4 uppercase tracking-wider">Today's Goal</h4>
-              <div className="space-y-4">
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="font-bold text-deep-espresso">Deliveries</span>
-                  <span className="text-warm-sand">3/8</span>
-                </div>
-                <div className="h-2 bg-soft-oatmeal rounded-full overflow-hidden">
-                  <div className="h-full bg-warm-sand w-[37.5%] rounded-full shadow-sm"></div>
-                </div>
+              <div className="overflow-x-auto">
+                 <table className="w-full text-left border-collapse">
+                    <thead>
+                       <tr className="bg-slate-50 text-slate-500">
+                          <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200">Order ID</th>
+                          <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200">Customer</th>
+                          <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200">Status</th>
+                          <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200">Time</th>
+                       </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                       {loading ? (
+                          [...Array(3)].map((_, i) => (
+                             <tr key={i} className="animate-pulse">
+                                <td colSpan={4} className="px-5 py-4 h-12 bg-slate-50/30"></td>
+                             </tr>
+                          ))
+                       ) : recentDeliveries.length === 0 ? (
+                          <tr>
+                             <td colSpan={4} className="px-5 py-12 text-center">
+                                <div className="flex flex-col items-center gap-2">
+                                   <LuActivity className="text-slate-200" size={32} />
+                                   <p className="text-xs font-semibold text-slate-500">No Recent Deliveries</p>
+                                </div>
+                             </td>
+                          </tr>
+                       ) : (
+                          recentDeliveries.slice(0, 4).map((order) => (
+                             <tr key={order.id} className="hover:bg-slate-50 transition-colors group">
+                                <td className="px-5 py-3">
+                                   <span className="text-xs font-bold text-slate-900">#{order.id.slice(-8)}</span>
+                                </td>
+                                <td className="px-5 py-3">
+                                   <div className="flex items-center gap-2.5">
+                                      <div className="w-6 h-6 rounded-md bg-teal-50 text-[#189D91] flex items-center justify-center font-bold text-[10px] border border-teal-100">
+                                         {order.customerName.charAt(0)}
+                                      </div>
+                                      <span className="text-xs font-medium text-slate-700">{order.customerName}</span>
+                                   </div>
+                                </td>
+                                <td className="px-5 py-3">
+                                   <StatusBadge status={order.status} />
+                                </td>
+                                <td className="px-5 py-3">
+                                   <p className="text-[10px] font-medium text-slate-500">
+                                      {new Date(order.dateTime).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                   </p>
+                                </td>
+                             </tr>
+                          ))
+                       )}
+                    </tbody>
+                 </table>
               </div>
-            </div>
-          </div>
+           </div>
+
+           {/* Action Panels */}
+           <div className="space-y-4">
+              {/* Hub Deposit Action */}
+              <div className="bg-[#189D91] rounded-2xl p-5 text-white shadow-lg shadow-[#189D91]/20 relative overflow-hidden group h-full flex flex-col justify-between">
+                 <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-700"></div>
+                 
+                 <div className="relative z-10 flex-1">
+                    <div className="flex items-center gap-2 mb-3">
+                       <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
+                       <p className="text-[10px] font-bold uppercase tracking-wider text-white/90">Action Required</p>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-1">Cash Deposit</h3>
+                    <p className="text-white/80 text-xs font-medium mb-4">Cash collected requires deposit at hub</p>
+                    
+                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3.5 flex justify-between items-center mb-4">
+                       <span className="text-xs font-medium text-white/90">Amount Due</span>
+                       <span className="text-xl font-bold">₹{earnings.codToDeposit.toLocaleString()}</span>
+                    </div>
+                 </div>
+
+                 <button className="w-full relative z-10 bg-white text-[#189D91] py-2.5 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all shadow-sm">
+                    Pay Now
+                 </button>
+              </div>
+           </div>
         </div>
       </div>
     </PageWrapper>

@@ -8,8 +8,8 @@ const BottomNavbar = () => {
   const { cartCount } = useCart();
 
   const location = useLocation();
-  const hideOnRoutes = ['/cart', '/address', '/payment'];
-  const shouldHide = hideOnRoutes.includes(location.pathname);
+  const hideOnRoutes = ['/cart', '/address', '/payment', '/splash', '/onboarding'];
+  const shouldHide = hideOnRoutes.some(route => location.pathname.toLowerCase().includes(route));
 
   if (shouldHide) return null;
 

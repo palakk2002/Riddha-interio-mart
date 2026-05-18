@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 
+import { useLocation } from 'react-router-dom';
 import { getDeliveryEstimate } from '../../../shared/utils/delivery';
 import BulkOrderModal from './BulkOrderModal';
 
 const DeliveryBar = () => {
+  const location = useLocation();
   const [pincode, setPincode] = useState('');
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+
+  if (location.pathname.toLowerCase().includes('/splash') || location.pathname.toLowerCase().includes('/onboarding')) {
+    return null;
+  }
 
   useEffect(() => {
     const updatePincode = () => {
@@ -64,4 +70,4 @@ const DeliveryBar = () => {
   );
 };
 
-export default DeliveryBar;
+export default React.memo(DeliveryBar);

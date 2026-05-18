@@ -1,88 +1,123 @@
-import React from 'react';
-import { LuMapPin, LuPhone, LuPackage, LuClock, LuCheck, LuX } from 'react-icons/lu';
+import React, { useState } from 'react';
+import { 
+  LuMapPin, 
+  LuPhone, 
+  LuPackage, 
+  LuClock, 
+  LuCheck, 
+  LuX, 
+  LuNavigation, 
+  LuZap,
+  LuExternalLink,
+  LuChevronRight,
+  LuActivity
+} from 'react-icons/lu';
+import { motion, AnimatePresence } from 'framer-motion';
 import StatusBadge from './StatusBadge';
 
 const OrderCard = ({ order, onAccept, onReject, onUpdateStatus }) => {
+  const [showTracking, setShowTracking] = useState(false);
   const isAvailable = ['None', 'Pending', 'Rejected'].includes(order.status);
   
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-soft-oatmeal overflow-hidden hover:shadow-md transition-shadow">
-      {/* Header */}
-      <div className="p-4 border-b border-soft-oatmeal flex justify-between items-center bg-soft-oatmeal/5">
-        <div>
-          <span className="text-[10px] font-bold text-warm-sand uppercase tracking-tighter">Order ID</span>
-          <p className="text-sm font-bold text-deep-espresso">{order.id}</p>
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col"
+    >
+      {/* Dynamic Header */}
+      <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-[#189D91] group-hover:bg-[#189D91] group-hover:text-white transition-colors">
+             <LuPackage size={18} />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-500 mb-0.5 uppercase tracking-wider">Order ID</p>
+            <p className="text-sm font-bold text-slate-900 tracking-tight">#{order.id.slice(-8).toUpperCase()}</p>
+          </div>
         </div>
         <StatusBadge status={order.status} />
       </div>
 
-      {/* Content */}
-      <div className="p-4 space-y-4">
-        {/* Locations */}
-        <div className="space-y-3 relative">
-          <div className="absolute left-[11px] top-[24px] bottom-[24px] w-[1px] border-l border-dashed border-warm-sand/30"></div>
+      {/* Operations Content */}
+      <div className="p-4 space-y-4 flex-1">
+        {/* Logistics Path */}
+        <div className="space-y-4 relative">
+          <div className="absolute left-[13px] top-[28px] bottom-[28px] w-[2px] bg-gradient-to-b from-[#189D91] to-slate-200"></div>
           
-          <div className="flex gap-3 items-start">
-            <div className="w-6 h-6 rounded-full bg-soft-oatmeal flex items-center justify-center shrink-0 z-10">
-              <LuPackage size={12} className="text-warm-sand" />
+          <div className="flex gap-4 items-start relative z-10">
+            <div className="w-7 h-7 rounded-full bg-teal-50 border-4 border-white flex items-center justify-center shrink-0 shadow-sm">
+               <div className="w-1.5 h-1.5 rounded-full bg-[#189D91]"></div>
             </div>
             <div>
-              <p className="text-[10px] font-bold text-warm-sand uppercase tracking-tighter">Pickup From</p>
-              <p className="text-xs font-bold text-deep-espresso">{order.sellerLocation}</p>
+              <p className="text-xs font-semibold text-slate-500 mb-0.5">Pickup Location</p>
+              <p className="text-sm font-bold text-slate-900">{order.sellerLocation}</p>
             </div>
           </div>
 
-          <div className="flex gap-3 items-start">
-            <div className="w-6 h-6 rounded-full bg-warm-sand/20 flex items-center justify-center shrink-0 z-10 text-warm-sand">
-              <LuMapPin size={12} />
+          <div className="flex gap-4 items-start relative z-10">
+            <div className="w-7 h-7 rounded-full bg-[#189D91] border-4 border-white flex items-center justify-center shrink-0 shadow-sm">
+               <LuMapPin size={12} className="text-white" />
             </div>
-            <div>
-              <p className="text-[10px] font-bold text-warm-sand uppercase tracking-tighter">Deliver To</p>
-              <p className="text-xs font-bold text-deep-espresso">{order.customerName}</p>
-              <p className="text-xs text-dusty-cocoa mt-0.5 line-clamp-1">{order.address}</p>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                 <p className="text-xs font-bold text-[#189D91] mb-0.5">Delivery Address</p>
+                 <span className="text-xs font-semibold text-slate-500">4.2 KM</span>
+              </div>
+              <p className="text-sm font-bold text-slate-900">{order.customerName}</p>
+              <p className="text-sm text-slate-500 font-medium mt-1 line-clamp-2 leading-relaxed">
+                 {order.address}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Details List */}
-        <div className="bg-soft-oatmeal/10 rounded-xl p-3 space-y-2">
-          {order.items.map((item, idx) => (
-            <div key={idx} className="flex justify-between text-xs">
-              <span className="text-dusty-cocoa">{item.quantity}x {item.name}</span>
-              <span className="font-bold text-deep-espresso">₹{item.price * item.quantity}</span>
-            </div>
-          ))}
-          <div className="pt-2 border-t border-soft-oatmeal flex justify-between items-center">
-            <span className="text-[10px] font-bold text-warm-sand uppercase">Total Bill</span>
-            <span className="text-sm font-bold text-deep-espresso">₹{order.totalBill}</span>
+        {/* Cargo Manifest */}
+        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+          <div className="flex items-center justify-between mb-2 border-b border-slate-200 pb-2">
+             <p className="text-[11px] font-bold text-slate-500">Order Items</p>
+             <span className="text-[11px] font-bold text-[#189D91]">{order.items.length} Items</span>
+          </div>
+          <div className="space-y-1.5">
+            {order.items.map((item, idx) => (
+              <div key={idx} className="flex justify-between items-center">
+                <span className="text-xs font-medium text-slate-700">{item.quantity}x {item.name}</span>
+                <span className="text-xs font-bold text-slate-900">₹{item.price * item.quantity}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 pt-2 border-t border-slate-200 flex justify-between items-center">
+            <span className="text-[11px] font-bold text-slate-500">Total Amount</span>
+            <span className="text-base font-bold text-slate-900 tracking-tight">₹{order.totalBill}</span>
           </div>
         </div>
 
-        {/* Additional Info */}
-        <div className="flex justify-between items-center text-[10px] font-medium text-warm-sand">
-          <div className="flex items-center gap-1">
-            <LuClock size={12} />
-            {order.dateTime}
-          </div>
-          <div className="px-2 py-0.5 bg-deep-espresso/5 rounded text-deep-espresso">
-            {order.paymentMode}
-          </div>
+        {/* Intelligence Overlays */}
+        <div className="flex items-center justify-between gap-3">
+           <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 rounded-lg text-slate-600 border border-slate-100">
+              <LuClock size={12} className="text-[#189D91]" />
+              <span className="text-[10px] font-bold">{order.dateTime}</span>
+           </div>
+           <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-teal-50 rounded-lg text-[#189D91]">
+              <LuZap size={12} />
+              <span className="text-[10px] font-bold">{order.paymentMode}</span>
+           </div>
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="p-4 bg-soft-oatmeal/5 border-t border-soft-oatmeal">
+      {/* Directives Area */}
+      <div className="p-4 bg-slate-50/50 border-t border-slate-100">
         {isAvailable ? (
           <div className="grid grid-cols-2 gap-3">
             <button 
               onClick={() => onReject(order.id)}
-              className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-soft-oatmeal text-xs font-bold text-dusty-cocoa hover:bg-[#001B4E]/5 hover:text-[#001B4E] hover:border-[#001B4E]/20 transition-all uppercase tracking-wider"
+              className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
             >
-              <LuX size={14} /> Reject
+              <LuX size={14} /> Decline
             </button>
             <button 
               onClick={() => onAccept(order.id)}
-              className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-deep-espresso text-white text-xs font-bold hover:bg-warm-sand transition-all shadow-lg shadow-deep-espresso/10 uppercase tracking-wider"
+              className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#189D91] text-white text-xs font-bold hover:bg-[#137A71] transition-all shadow-sm"
             >
               <LuCheck size={14} /> Accept
             </button>
@@ -90,47 +125,119 @@ const OrderCard = ({ order, onAccept, onReject, onUpdateStatus }) => {
         ) : (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <a href={`tel:${order.phone}`} className="flex items-center gap-2 text-xs font-bold text-warm-sand hover:text-deep-espresso transition-colors">
-                <LuPhone size={14} /> Contact Customer
-              </a>
+               <a 
+                 href={`tel:${order.phone}`} 
+                 className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-[#189D91] transition-all group"
+               >
+                 <div className="p-1.5 bg-white rounded-lg border border-slate-200 group-hover:border-teal-100 group-hover:bg-teal-50 shadow-sm transition-colors">
+                    <LuPhone size={14} />
+                 </div>
+                 Call Customer
+               </a>
+               {order.status !== 'Delivered' && (
+                 <button 
+                   onClick={() => setShowTracking(true)}
+                   className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#189D91] bg-teal-50 hover:bg-[#189D91] hover:text-white rounded-lg transition-all"
+                 >
+                   <LuMapPin size={14} /> Track
+                 </button>
+               )}
             </div>
             
             {order.status === 'Accepted' && (
               <button 
                 onClick={() => onUpdateStatus(order.id, 'Picked')}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-deep-espresso text-white text-sm font-bold hover:bg-warm-sand transition-all shadow-lg shadow-deep-espresso/10"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#189D91] text-white text-xs font-bold hover:bg-[#137A71] transition-all shadow-sm"
               >
-                Mark as Picked
+                <LuPackage size={16} /> Mark as Picked
               </button>
             )}
             
             {order.status === 'Picked' && (
               <button 
                 onClick={() => onUpdateStatus(order.id, 'Out for Delivery')}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-deep-espresso text-white text-sm font-bold hover:bg-warm-sand transition-all shadow-lg shadow-deep-espresso/10"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#189D91] text-white text-xs font-bold hover:bg-[#137A71] transition-all shadow-sm"
               >
-                Mark as Out for Delivery
+                <LuNavigation size={16} className="animate-pulse" /> Start Delivery
               </button>
             )}
 
             {order.status === 'Out for Delivery' && (
               <button 
                 onClick={() => onUpdateStatus(order.id, 'Delivered')}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-green-600 text-white text-sm font-bold hover:bg-green-700 transition-all shadow-lg shadow-green-600/10"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-all shadow-sm shadow-emerald-500/20"
               >
-                Mark as Delivered
+                <LuCheck size={16} /> Complete Delivery
               </button>
             )}
 
             {order.status === 'Delivered' && (
-              <div className="text-center py-2 text-xs font-bold text-green-600 flex items-center justify-center gap-2">
-                <LuCheck size={16} /> Delivery Completed Successfully
+              <div className="bg-emerald-50 text-emerald-600 rounded-xl py-2.5 text-xs font-bold flex items-center justify-center gap-2 border border-emerald-100">
+                <LuCheck size={16} /> Delivered
               </div>
             )}
           </div>
         )}
       </div>
-    </div>
+
+      {/* Tracking Modal */}
+      <AnimatePresence>
+        {showTracking && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50"
+              onClick={() => setShowTracking(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              className="fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-white rounded-t-3xl md:rounded-3xl z-50 w-full md:w-[600px] max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+            >
+              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div className="flex items-center gap-2 text-slate-900">
+                  <LuNavigation className="text-[#189D91]" />
+                  <h3 className="font-bold">Live Tracking</h3>
+                </div>
+                <button onClick={() => setShowTracking(false)} className="p-2 bg-white rounded-full text-slate-400 hover:text-rose-500 shadow-sm border border-slate-100">
+                  <LuX size={16} />
+                </button>
+              </div>
+              <div className="flex-1 p-0 relative min-h-[400px] bg-slate-100">
+                {/* Fallback mockup overlay representing a map interface */}
+                <div className="absolute inset-0 bg-emerald-50/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+                   <div className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center text-[#189D91] mb-4 relative">
+                      <LuMapPin size={24} />
+                      <div className="absolute inset-0 bg-[#189D91] rounded-full animate-ping opacity-20"></div>
+                   </div>
+                   <h4 className="text-lg font-bold text-slate-900 mb-2">GPS Active</h4>
+                   <p className="text-sm font-medium text-slate-600 mb-6 max-w-xs">
+                     Navigating to: <span className="text-slate-900 font-bold">{order.address}</span>
+                   </p>
+                   
+                   <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 w-full max-w-sm space-y-3">
+                     <div className="flex justify-between items-center text-sm">
+                       <span className="text-slate-500 font-semibold">Distance Remaining</span>
+                       <span className="font-bold text-slate-900">4.2 km</span>
+                     </div>
+                     <div className="w-full bg-slate-100 rounded-full h-2">
+                       <div className="bg-[#189D91] h-2 rounded-full w-2/3"></div>
+                     </div>
+                     <div className="flex justify-between items-center text-sm">
+                       <span className="text-slate-500 font-semibold">ETA</span>
+                       <span className="font-bold text-[#189D91]">14 Mins</span>
+                     </div>
+                   </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 

@@ -9,24 +9,33 @@ const {
   assignOrderToDeliveryBoy,
   respondToDeliveryAssignment
 } = require('../controllers/orderController');
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
+const { check } = require('express-validator');
+const { validate } = require('../middleware/validationMiddleware');
 
 router.use(protect);
 
 router.route('/')
   .get(getOrders)
-  .post(addOrderItems);
+  .post([
+    check('orderItems', 'No order items').isArray({ min: 1 }),
+    check('shippingAddress', 'Shipping address is required').not().isEmpty(),
+    check('paymentMethod', 'Payment method is required').not().isEmpty(),
+    check('itemsPrice', 'Items price is required').isNumeric(),
+    check('totalPrice', 'Total price is required').isNumeric(),
+    validate
+  ], addOrderItems);
 
 router.route('/my-orders').get(getMyOrders);
 
 router.route('/:id/status')
-  .put(updateOrderStatus);
+  .put(authorize('admin', 'seller', 'delivery'), updateOrderStatus);
 
 router.route('/:id/assign-delivery')
-  .put(assignOrderToDeliveryBoy);
+  .put(authorize('admin', 'seller'), assignOrderToDeliveryBoy);
 
 router.route('/:id/delivery-response')
-  .put(respondToDeliveryAssignment);
+  .put(authorize('delivery'), respondToDeliveryAssignment);
 
 router.route('/:id').get(getOrderById);
 

@@ -4,6 +4,7 @@ import { FiShoppingCart, FiMinus, FiPlus, FiHeart } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { useCart } from '../data/CartContext';
 import { useWishlist } from '../data/WishlistContext';
+import OptimizedImage from '../../../shared/components/OptimizedImage';
 import Button from '../../../shared/components/Button';
 
 /* ─── Reusable Sub-Components (Enhancement Overlays) ─── */
@@ -104,7 +105,7 @@ const ProductCard = ({ product, index = 0, variant = 'grid' }) => {
         className={`relative block overflow-hidden shrink-0 bg-white ${isList ? 'w-[40%] md:w-full aspect-square md:aspect-auto md:h-40' : 'aspect-[4/3.2] md:aspect-video md:h-40 w-full'
           }`}
       >
-        <img
+        <OptimizedImage
           src={productImage}
           alt={product.name}
           className="h-full w-full object-contain md:object-cover object-center transition-transform duration-700 group-hover:scale-110"

@@ -2,7 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageWrapper from '../components/PageWrapper';
-import { LuBell, LuCheckCheck, LuTrash2, LuClock, LuCircleAlert, LuInfo, LuCircleCheck } from 'react-icons/lu';
+import { 
+  Bell, 
+  CheckCheck, 
+  Trash2, 
+  Clock, 
+  AlertCircle, 
+  Info, 
+  CheckCircle2, 
+  Volume2, 
+  VolumeX,
+  X,
+  ChevronRight,
+  Filter,
+  Inbox
+} from 'lucide-react';
 import { getSellerNotifications, setSellerNotifications } from '../utils/sellerNotifications';
 import { isSoundEnabled, setSoundEnabled } from '../utils/notificationSound';
 
@@ -19,40 +33,6 @@ const Notifications = () => {
   useEffect(() => {
     setSellerNotifications(notifications);
   }, [notifications]);
-
-  // Handle new order notifications for the frontend simulation
-  useEffect(() => {
-    // Socket.IO realtime notifications are handled in SellerLayout (no polling needed).
-    return undefined;
-    const checkNewOrders = () => {
-      const orders = JSON.parse(localStorage.getItem('riddha_full_orders') || '[]');
-      const pendingOrders = orders.filter(o => o.status === 'Pending Seller');
-
-      const newNotifs = [];
-      pendingOrders.forEach(order => {
-        // Check if we already notified about this order ID
-        const alreadyNotified = notifications.some(n => n.message.includes(order.orderId));
-        if (!alreadyNotified) {
-          newNotifs.push({
-            id: Date.now() + Math.random(),
-            title: 'New Order Received',
-            message: `You have received a new order ${order.orderId} for ₹${order.total.toLocaleString()}.`,
-            time: 'Just now',
-            status: 'unread',
-            type: 'warning'
-          });
-        }
-      });
-
-      if (newNotifs.length > 0) {
-        setNotifications(prev => [...newNotifs, ...prev]);
-      }
-    };
-
-    const interval = setInterval(checkNewOrders, 5000); // Poll every 5 seconds
-    checkNewOrders(); // Initial check
-    return () => clearInterval(interval);
-  }, []);
 
   const markAsRead = (id) => {
     setNotifications(notifications.map(n => n.id === id ? { ...n, status: 'read' } : n));
@@ -73,20 +53,23 @@ const Notifications = () => {
 
   const getIcon = (type) => {
     switch (type) {
-      case 'success': return <LuCircleCheck className="text-green-500" size={20} />;
-      case 'warning': return <LuCircleAlert className="text-amber-500" size={20} />;
-      default: return <LuInfo className="text-blue-500" size={20} />;
+      case 'success': return <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center"><CheckCircle2 size={20} /></div>;
+      case 'warning': return <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center"><AlertCircle size={20} /></div>;
+      default: return <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><Info size={20} /></div>;
     }
   };
 
   return (
     <PageWrapper>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="max-w-4xl mx-auto space-y-8 pb-20">
+        
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 px-4 md:px-0">
           <div className="space-y-1">
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-deep-espresso">Notifications</h1>
-            <p className="text-warm-sand text-sm">Stay updated with your shop's latest activity.</p>
+            <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Notification Center</h1>
+            <p className="text-sm font-medium text-slate-500">Stay synchronized with your store's latest events</p>
           </div>
+          
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
@@ -94,135 +77,150 @@ const Notifications = () => {
                 setSound(next);
                 setSoundEnabled(next);
               }}
-              className={`px-6 py-3 rounded-2xl font-bold transition-all text-sm shadow-sm border ${sound
-                  ? 'bg-deep-espresso text-white border-deep-espresso'
-                  : 'bg-white text-deep-espresso border-soft-oatmeal hover:bg-soft-oatmeal/20'
+              className={`p-3 rounded-xl transition-all shadow-sm border ${sound
+                  ? 'bg-seller-primary text-white hover:bg-seller-dark shadow-seller-primary/20'
+                  : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'
                 }`}
+              title={sound ? 'Disable Sound' : 'Enable Sound'}
             >
-              Sound: {sound ? 'On' : 'Off'}
+              {sound ? <Volume2 size={20} /> : <VolumeX size={20} />}
             </button>
             <button
               onClick={markAllAsRead}
-              className="flex items-center justify-center gap-2 bg-white border border-soft-oatmeal text-deep-espresso px-6 py-3 rounded-2xl font-bold hover:bg-soft-oatmeal/20 transition-all text-sm shadow-sm"
+              className="flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-all text-xs uppercase tracking-widest shadow-sm"
             >
-              <LuCheckCheck size={18} />
-              Mark all as read
+              <CheckCheck size={18} />
+              Mark All Read
             </button>
           </div>
         </div>
 
-        <div className="flex gap-2 p-1 bg-soft-oatmeal/20 rounded-xl w-fit">
+        {/* Filters */}
+        <div className="flex items-center gap-1 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm w-fit mx-4 md:mx-0">
           <button
             onClick={() => setActiveFilter('all')}
-            className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeFilter === 'all' ? 'bg-white text-deep-espresso shadow-sm' : 'text-warm-sand hover:text-deep-espresso'}`}
+            className={`px-6 py-2.5 rounded-xl text-xs font-semibold transition-all ${activeFilter === 'all' ? 'bg-seller-primary text-white shadow-lg shadow-seller-primary/20' : 'text-slate-500 hover:text-slate-900'}`}
           >
-            All Notifications
+            All Activity
           </button>
           <button
             onClick={() => setActiveFilter('unread')}
-            className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeFilter === 'unread' ? 'bg-white text-deep-espresso shadow-sm' : 'text-warm-sand hover:text-deep-espresso'}`}
+            className={`px-6 py-2.5 rounded-xl text-xs font-semibold transition-all ${activeFilter === 'unread' ? 'bg-seller-primary text-white shadow-lg shadow-seller-primary/20' : 'text-slate-500 hover:text-slate-900'}`}
           >
-            Unread
+            Unread Only
           </button>
         </div>
 
-        <div className="space-y-3">
+        {/* Notifications List */}
+        <div className="space-y-4 px-4 md:px-0">
           {filteredNotifications.length > 0 ? (
             filteredNotifications.map((notification) => (
-              <div
+              <motion.div
+                layout
                 key={notification.id}
                 onClick={() => {
                   markAsRead(notification.id);
                   setSelectedNotification(notification);
                 }}
-                className={`group bg-white p-6 rounded-3xl border transition-all cursor-pointer ${notification.status === 'unread' ? 'border-warm-sand/30 shadow-md ring-1 ring-warm-sand/5' : 'border-soft-oatmeal hover:border-warm-sand/20 shadow-sm'}`}
+                className={`group relative bg-white p-6 rounded-[2rem] border transition-all cursor-pointer hover:shadow-md ${notification.status === 'unread' ? 'border-seller-primary/20 bg-seller-light/5' : 'border-slate-200'}`}
               >
-                <div className="flex gap-4">
-                  <div className="mt-1 shrink-0">
+                {notification.status === 'unread' && (
+                  <div className="absolute top-6 right-8 w-2 h-2 bg-seller-primary rounded-full animate-pulse" />
+                )}
+                
+                <div className="flex gap-5">
+                  <div className="shrink-0">
                     {getIcon(notification.type)}
                   </div>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex justify-between items-start">
-                      <h3 className={`font-bold transition-colors ${notification.status === 'unread' ? 'text-deep-espresso' : 'text-dusty-cocoa'}`}>
-                        {notification.title}
-                      </h3>
-                      <div className="flex items-center gap-4">
-                        <span className="text-[10px] font-bold text-warm-sand uppercase tracking-wider flex items-center gap-1">
-                          <LuClock size={12} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1">
+                        <h3 className={`text-base font-semibold transition-colors ${notification.status === 'unread' ? 'text-slate-900' : 'text-slate-500'}`}>
+                          {notification.title}
+                        </h3>
+                        <p className={`text-sm line-clamp-2 leading-relaxed ${notification.status === 'unread' ? 'text-slate-700' : 'text-slate-400'}`}>
+                          {notification.message}
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 shrink-0">
+                        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg">
+                          <Clock size={12} />
                           {notification.time}
                         </span>
                         <button
                           onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
-                          className="opacity-0 group-hover:opacity-100 p-2 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                          className="opacity-0 group-hover:opacity-100 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                         >
-                          <LuTrash2 size={16} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>
-                    <p className={`text-sm leading-relaxed ${notification.status === 'unread' ? 'text-deep-espresso/80' : 'text-warm-sand'}`}>
-                      {notification.message}
-                    </p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))
           ) : (
-            <div className="text-center py-20 bg-white rounded-[40px] border border-soft-oatmeal border-dashed">
-              <div className="w-16 h-16 bg-soft-oatmeal/20 rounded-full flex items-center justify-center mx-auto mb-4 text-warm-sand">
-                <LuBell size={32} />
+            <div className="text-center py-24 bg-white rounded-[2.5rem] border border-dashed border-slate-200">
+              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200">
+                <Inbox size={40} />
               </div>
-              <h3 className="text-lg font-bold text-deep-espresso">Clear Skies!</h3>
-              <p className="text-warm-sand text-sm mt-1">No new notifications at the moment.</p>
+              <h3 className="text-xl font-semibold text-slate-900">All caught up!</h3>
+              <p className="text-slate-500 text-sm mt-2 max-w-xs mx-auto">Your notification inbox is empty. We'll alert you as soon as something happens.</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Notification Detail Modal */}
+      {/* Notification Detail Overlay */}
       <AnimatePresence>
         {selectedNotification && (
-          <div 
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            onClick={() => setSelectedNotification(null)}
-          >
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+              onClick={() => setSelectedNotification(null)}
+            />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white w-full max-w-lg rounded-[32px] overflow-hidden shadow-2xl border border-soft-oatmeal"
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 z-10"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-8 space-y-6">
+              <div className="p-10 space-y-8">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warm-sand">System Notification</p>
-                    <h2 className="text-2xl font-black text-deep-espresso italic tracking-tighter uppercase">{selectedNotification.title}</h2>
+                    <div className="flex items-center gap-2 text-[10px] font-semibold text-seller-primary uppercase tracking-widest mb-1">
+                       <Bell size={12} /> Merchant Alert
+                    </div>
+                    <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">{selectedNotification.title}</h2>
                   </div>
                   <button 
                     onClick={() => setSelectedNotification(null)}
-                    className="p-2 hover:bg-soft-oatmeal rounded-xl transition-colors"
+                    className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
                   >
-                    <LuTrash2 size={24} className="text-warm-sand" />
+                    <X size={24} className="text-slate-400" />
                   </button>
                 </div>
 
-                <div className="bg-soft-oatmeal/5 border border-soft-oatmeal/30 rounded-2xl p-6">
-                  <p className="text-sm text-dusty-cocoa leading-relaxed font-medium italic">
-                    "{selectedNotification.message}"
+                <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100">
+                  <p className="text-base text-slate-700 leading-relaxed font-medium">
+                    {selectedNotification.message}
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
-                  <div className="flex items-center gap-2 text-warm-sand">
-                    <div className="w-8 h-8 rounded-lg bg-soft-oatmeal/20 flex items-center justify-center">
-                      <LuBell size={14} />
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest">{selectedNotification.time}</span>
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <Clock size={16} />
+                    <span className="text-[11px] font-semibold uppercase tracking-widest">{selectedNotification.time}</span>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex gap-4">
                     <button 
                       onClick={() => setSelectedNotification(null)}
-                      className="px-6 py-3 rounded-2xl bg-soft-oatmeal/30 text-deep-espresso text-[10px] font-black uppercase tracking-widest hover:bg-soft-oatmeal/50 transition-colors"
+                      className="px-6 py-3.5 rounded-2xl bg-slate-100 text-slate-600 text-xs font-semibold uppercase tracking-widest hover:bg-slate-200 transition-colors"
                     >
                       Dismiss
                     </button>
@@ -232,9 +230,9 @@ const Notifications = () => {
                           navigate(selectedNotification.link);
                           setSelectedNotification(null);
                         }}
-                        className="px-6 py-3 rounded-2xl bg-deep-espresso text-white text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-black/10"
+                        className="px-8 py-3.5 rounded-2xl bg-seller-primary text-white text-xs font-semibold uppercase tracking-widest hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20 flex items-center gap-2"
                       >
-                        View Details
+                        Action <ChevronRight size={16} />
                       </button>
                     )}
                   </div>

@@ -34,6 +34,23 @@ const SellerSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  hsnNumber: {
+    type: String,
+    trim: true
+  },
+  gstDoc: {
+    type: String
+  },
+  panDoc: {
+    type: String
+  },
+  shopDoc: {
+    type: String
+  },
+  status: {
+    type: String,
+    default: ""
+  },
   avatar: {
     type: String,
     default: ""
@@ -71,5 +88,8 @@ SellerSchema.methods.getSignedJwtToken = function() {
 SellerSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+SellerSchema.index({ email: 1 });
+SellerSchema.index({ isVerified: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Seller', SellerSchema);

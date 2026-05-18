@@ -2,15 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useUser } from '../../user/data/UserContext';
-import { FiMenu, FiBell, FiUser, FiLogOut, FiChevronDown, FiShield } from 'react-icons/fi';
-import AdminNotifications from './AdminNotifications';
+import { FiMenu, FiUser, FiLogOut, FiChevronDown, FiShield } from 'react-icons/fi';
+import NotificationDropdown from '../../../shared/components/NotificationDropdown';
 import { RBACProvider, useRBAC } from '../data/RBACContext';
 import DemoRoleSwitcher from './DemoRoleSwitcher';
 
 const AdminLayoutContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const { logout, user } = useUser();
   const { role } = useRBAC();
   const navigate = useNavigate();
@@ -36,7 +35,6 @@ const AdminLayoutContent = () => {
       className={`flex h-screen w-full text-deep-espresso overflow-hidden ${role === 'admin' ? 'admin-theme bg-[#240046]/5' : 'assistant-theme bg-[#189D91]/5'}`}
       onClick={() => {
         setShowUserMenu(false);
-        setShowNotifications(false);
       }}
     >
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
@@ -73,24 +71,7 @@ const AdminLayoutContent = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="relative">
-              <button 
-                onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); }}
-                className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-soft-oatmeal text-deep-espresso' : 'text-white/60 lg:text-dusty-cocoa hover:bg-white/10 lg:hover:bg-soft-oatmeal'}`}
-              >
-                <FiBell size={20} />
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#240046] rounded-full border-2 border-white animate-pulse"></span>
-              </button>
-
-              {showNotifications && (
-                <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-soft-oatmeal overflow-hidden z-50">
-                  <div className="p-4 border-b border-soft-oatmeal flex items-center justify-between bg-soft-oatmeal/10">
-                    <h3 className="font-bold text-sm">Admin Alerts</h3>
-                  </div>
-                  <div className="p-4 text-center text-xs text-warm-sand">No new alerts</div>
-                </div>
-              )}
-            </div>
+            <NotificationDropdown isMobile={false} />
             
             <div className="h-8 w-[1px] bg-soft-oatmeal mx-2"></div>
             

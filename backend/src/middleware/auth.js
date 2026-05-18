@@ -25,8 +25,6 @@ exports.protect = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    console.log('Decoded Token:', decoded);
-
     // Find user in the correct collection based on role in token
     let Model;
     switch (decoded.role) {

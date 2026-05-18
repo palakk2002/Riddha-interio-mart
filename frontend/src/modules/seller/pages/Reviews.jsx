@@ -40,30 +40,32 @@ const SellerReviews = () => {
     <div className="p-4 md:p-8 space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black uppercase italic tracking-tight text-gray-900">
-          Reviews & <span className="text-[#189D91]">Ratings</span>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          Reviews & <span className="text-seller-primary font-bold">Ratings</span>
         </h1>
-        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">Monitor your premium brand reputation</p>
+        <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-1">Monitor your premium brand reputation</p>
       </div>
 
-      {/* Suggestion CTA */}
+      {/* Suggestion Professional Card */}
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-gradient-to-r from-[#bd3b64] to-[#8a2b49] p-8 rounded-[40px] shadow-xl text-white flex flex-col md:flex-row items-center justify-between gap-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 relative overflow-hidden group flex flex-col md:flex-row items-center justify-between gap-8"
       >
-        <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-md">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-seller-primary/5 rounded-full blur-[80px] -mr-40 -mt-40 group-hover:bg-seller-primary/10 transition-all duration-1000"></div>
+        
+        <div className="flex items-center gap-6 relative z-10">
+          <div className="w-16 h-16 bg-seller-primary/10 text-seller-primary rounded-3xl flex items-center justify-center border border-seller-primary/10">
             <FiMessageSquare size={32} />
           </div>
           <div>
-            <h2 className="text-xl font-black uppercase italic tracking-tight">Have an Idea for Riddha?</h2>
-            <p className="text-white/70 text-xs font-medium mt-1">Suggest new features or improvements directly to the admin team.</p>
+            <h2 className="text-xl font-bold tracking-tight text-slate-900">Have an Idea for <span className="text-seller-primary font-bold">Riddha?</span></h2>
+            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1.5">Suggest new features or improvements directly to the admin team.</p>
           </div>
         </div>
         <button 
           onClick={() => window.location.href = '/seller/recommendations'}
-          className="bg-white text-[#bd3b64] px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-warm-sand transition-all shadow-lg active:scale-95 whitespace-nowrap"
+          className="bg-seller-primary text-white px-10 py-5 rounded-[1.8rem] font-bold text-[10px] uppercase tracking-widest hover:bg-seller-dark transition-all shadow-2xl shadow-seller-primary/20 active:scale-95 whitespace-nowrap relative z-10"
         >
           Give Recommendation
         </button>
@@ -82,8 +84,8 @@ const SellerReviews = () => {
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 rounded-2xl bg-gray-50">{card.icon}</div>
             </div>
-            <p className="text-2xl font-black text-gray-900">{card.value}</p>
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-1">{card.label}</p>
+            <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mt-1">{card.label}</p>
             <p className="text-[9px] font-bold text-gray-300 mt-2 uppercase">{card.sub}</p>
           </motion.div>
         ))}
@@ -92,7 +94,7 @@ const SellerReviews = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Rating Distribution */}
         <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm h-fit">
-          <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 mb-8">Rating Distribution</h3>
+          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-900 mb-8">Rating Distribution</h3>
           <div className="space-y-4">
             {stats.ratingDistribution.map((count, i) => {
               const starLevel = 5 - i;
@@ -117,7 +119,7 @@ const SellerReviews = () => {
         {/* Review List */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900">Recent Feedbacks</h3>
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-900">Recent Feedbacks</h3>
             <div className="flex items-center gap-2">
               <button className="p-2 rounded-xl border border-gray-100 text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-all">
                 <FiFilter size={14} />
@@ -131,7 +133,7 @@ const SellerReviews = () => {
           {reviews.length === 0 ? (
             <div className="bg-white py-20 rounded-[32px] border border-gray-100 text-center">
               <FiMessageSquare className="mx-auto text-gray-100 mb-4" size={48} />
-              <p className="text-xs font-black text-gray-400 uppercase tracking-widest">No reviews received yet</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">No reviews received yet</p>
             </div>
           ) : (
             reviews.map((review, i) => (
@@ -144,11 +146,11 @@ const SellerReviews = () => {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 font-black text-xs">
+                    <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 font-bold text-xs">
                       {review.productName?.charAt(0) || 'P'}
                     </div>
                     <div>
-                      <p className="text-xs font-black text-gray-900 uppercase tracking-tight">{review.productName}</p>
+                      <p className="text-xs font-bold text-gray-900 uppercase tracking-tight">{review.productName}</p>
                       <div className="flex items-center gap-1 mt-0.5">
                         {[1, 2, 3, 4, 5].map(s => (
                           <FiStar key={s} size={10} className={`${s <= review.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}`} />
@@ -156,7 +158,7 @@ const SellerReviews = () => {
                       </div>
                     </div>
                   </div>
-                  <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">
+                  <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest">
                     {new Date(review.createdAt).toLocaleDateString()}
                   </span>
                 </div>
@@ -182,25 +184,25 @@ const SellerReviews = () => {
       >
         <div className="flex flex-col md:flex-row gap-10">
           <div className="md:w-1/3">
-            <h3 className="text-xl font-black uppercase italic tracking-tight text-gray-900 mb-4">Send Feedback <span className="text-[#bd3b64]">Directly</span></h3>
+            <h3 className="text-xl font-bold tracking-tight text-gray-900 mb-4">Send Feedback <span className="text-seller-primary font-bold">Directly</span></h3>
             <p className="text-gray-400 text-xs font-medium leading-relaxed">
               If you have any suggestions, issues, or recommendations for the platform, please share them here. Our admin team reviews every submission.
             </p>
             <div className="mt-8 p-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-               <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Response Time</p>
+               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Response Time</p>
                <p className="text-[11px] font-bold text-gray-700 mt-1">Usually within 24-48 hours</p>
             </div>
           </div>
           <div className="flex-1 space-y-4">
              <textarea 
                placeholder="Write your recommendation or feedback for the admin here..."
-               className="w-full h-40 bg-gray-50 border border-gray-100 focus:border-[#bd3b64] focus:bg-white rounded-[32px] p-8 outline-none text-sm font-medium transition-all resize-none"
+               className="w-full h-40 bg-gray-50 border border-gray-100 focus:border-seller-primary focus:bg-white rounded-[32px] p-8 outline-none text-sm font-medium transition-all resize-none"
              ></textarea>
              <button 
                onClick={() => {
                  toast.success('Your feedback has been sent to the admin!');
                }}
-               className="w-full md:w-auto px-12 py-4 bg-gray-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-[#bd3b64] transition-all shadow-lg active:scale-95"
+               className="w-full md:w-auto px-12 py-4 bg-slate-900 text-white rounded-2xl text-[11px] font-bold uppercase tracking-widest hover:bg-seller-primary transition-all shadow-lg active:scale-95"
              >
                Send to Admin
              </button>

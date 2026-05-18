@@ -8,13 +8,13 @@ const { notifyAdminNewDelivery, notifyDeliveryApproval } = require('../socket');
 // @access  Public
 exports.registerDelivery = async (req, res, next) => {
   try {
-    const { fullName, email, password, phone, vehicleType, vehicleNumber } = req.body;
+    const { fullName, email, password, phone, vehicleType, vehicleNumber, documents } = req.body;
 
     if (await checkEmailExists(email)) {
       return res.status(400).json({ success: false, error: 'Email already registered' });
     }
 
-    const delivery = await Delivery.create({ fullName, email, password, phone, vehicleType, vehicleNumber });
+    const delivery = await Delivery.create({ fullName, email, password, phone, vehicleType, vehicleNumber, documents });
     
     // Notify Admin about new registration
     notifyAdminNewDelivery({

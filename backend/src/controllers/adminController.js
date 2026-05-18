@@ -1,5 +1,6 @@
 const Admin = require('../models/Admin');
 const Seller = require('../models/Seller');
+const paginate = require('../utils/paginate');
 const sendTokenResponse = require('../utils/sendTokenResponse');
 const checkEmailExists = require('../utils/checkEmailExists');
 
@@ -22,37 +23,6 @@ exports.loginAdmin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (email === 'test@test.com') return res.status(200).json({ success: true, message: 'Backend Reached' });
-    console.log('Login attempt:', { email, password });
-    if (!email || !password) return res.status(400).json({ success: false, error: 'Please provide email and password' });
-
-    // ULTIMATE Admin Credentials Bypass (Lenient Mode)
-    const trimmedEmail = (email || '').toString().trim().toLowerCase();
-    const trimmedPassword = (password || '').toString().trim();
-    
-    console.log('--- LOGIN DEBUG ---');
-    console.log('Received Email:', `"${trimmedEmail}"`, 'Length:', trimmedEmail.length);
-    console.log('Received Password:', `"${trimmedPassword}"`, 'Length:', trimmedPassword.length);
-
-    if (trimmedEmail === 'riddhamart@gmail.com' && trimmedPassword === '123456') {
-      console.log('!!! ADMIN BYPASS MATCHED !!!');
-      try {
-        let admin = await Admin.findOne({ email: trimmedEmail });
-        if (!admin) {
-          console.log('Admin not found in DB, creating on-the-fly...');
-          admin = await Admin.create({
-            fullName: 'Riddha Admin',
-            email: trimmedEmail,
-            password: '123456',
-            type: 'superadmin'
-          });
-        }
-        console.log('Login successful for:', admin.email);
-        return sendTokenResponse(admin, 200, res);
-      } catch (bypassErr) {
-        console.error('CRITICAL: Admin bypass failed during DB operation:', bypassErr);
-      }
-    }
-
     const admin = await Admin.findOne({ email }).select('+password');
     if (!admin || !(await admin.matchPassword(password))) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
@@ -78,8 +48,16 @@ exports.getAdminMe = async (req, res, next) => {
 // @desc    Get all pending sellers
 exports.getPendingSellers = async (req, res, next) => {
   try {
-    const sellers = await Seller.find({ isVerified: false }).sort('-createdAt');
-    res.status(200).json({ success: true, data: sellers });
+    const result = await paginate(Seller, { isVerified: false }, req);
+    res.status(200).json({ 
+      success: true, 
+      count: result.data.length,
+      totalResults: result.totalResults,
+      totalPages: result.totalPages,
+      page: result.page,
+      limit: result.limit,
+      data: result.data 
+    });
   } catch (err) {
     next(err);
   }
@@ -90,25 +68,61 @@ exports.getActiveSellers = async (req, res, next) => {
   try {
     const Product = require('../models/Product');
     const Order = require('../models/Order');
-    let sellers = await Seller.find({ isVerified: true }).sort('-createdAt').lean();
+    
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const startIndex = (page - 1) * limit;
 
-    // Add stats for each seller
-    sellers = await Promise.all(sellers.map(async (seller) => {
-      const productCount = await Product.countDocuments({ seller: seller._id });
-      const orderStats = await Order.aggregate([
-        { $match: { seller: seller._id, status: 'Delivered' } },
-        { $group: { _id: null, total: { $sum: '$totalPrice' }, count: { $sum: 1 } } }
-      ]);
+    const sellersAgg = await Seller.aggregate([
+      { $match: { isVerified: true } },
+      { $sort: { createdAt: -1 } },
+      { $skip: startIndex },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: 'seller',
+          as: 'products'
+        }
+      },
+      {
+        $lookup: {
+          from: 'orders',
+          let: { sellerId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $and: [ { $eq: ['$seller', '$$sellerId'] }, { $eq: ['$status', 'Delivered'] } ] } } },
+            { $group: { _id: null, total: { $sum: '$totalPrice' }, count: { $sum: 1 } } }
+          ],
+          as: 'orderStats'
+        }
+      },
+      {
+        $addFields: {
+          productCount: { $size: '$products' },
+          totalSales: { $ifNull: [ { $arrayElemAt: ['$orderStats.total', 0] }, 0 ] },
+          orderCount: { $ifNull: [ { $arrayElemAt: ['$orderStats.count', 0] }, 0 ] }
+        }
+      },
+      {
+        $project: {
+          products: 0,
+          orderStats: 0
+        }
+      }
+    ]);
 
-      return {
-        ...seller,
-        productCount,
-        totalSales: orderStats[0]?.total || 0,
-        orderCount: orderStats[0]?.count || 0
-      };
-    }));
+    const totalResults = await Seller.countDocuments({ isVerified: true });
 
-    res.status(200).json({ success: true, data: sellers });
+    res.status(200).json({ 
+      success: true, 
+      count: sellersAgg.length,
+      totalResults,
+      totalPages: Math.ceil(totalResults / limit),
+      page,
+      limit,
+      data: sellersAgg 
+    });
   } catch (err) {
     next(err);
   }
@@ -389,15 +403,46 @@ exports.getUsers = async (req, res, next) => {
     const query = { role: 'user' };
     if (userType) query.userType = userType;
     
-    let users = await User.find(query).sort('-createdAt').lean();
-    
-    // Add order counts
-    users = await Promise.all(users.map(async (user) => {
-      const orderCount = await Order.countDocuments({ user: user._id });
-      return { ...user, totalOrders: orderCount };
-    }));
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const startIndex = (page - 1) * limit;
 
-    res.status(200).json({ success: true, data: users });
+    const usersAgg = await User.aggregate([
+      { $match: query },
+      { $sort: { createdAt: -1 } },
+      { $skip: startIndex },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: 'orders',
+          localField: '_id',
+          foreignField: 'user',
+          as: 'orders'
+        }
+      },
+      {
+        $addFields: {
+          totalOrders: { $size: '$orders' }
+        }
+      },
+      {
+        $project: {
+          orders: 0
+        }
+      }
+    ]);
+
+    const totalResults = await User.countDocuments(query);
+    
+    res.status(200).json({ 
+      success: true, 
+      count: usersAgg.length,
+      totalResults,
+      totalPages: Math.ceil(totalResults / limit),
+      page,
+      limit,
+      data: usersAgg 
+    });
   } catch (err) {
     next(err);
   }

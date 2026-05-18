@@ -4,6 +4,8 @@ const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
 const http = require('http');
+const helmet = require('helmet');
+const { limiter, authLimiter } = require('./middleware/rateLimiter');
 
 const connectDB = require('./config/db');
 
@@ -27,6 +29,10 @@ const favouriteSectionRoutes = require('./routes/favouriteSectionRoutes');
 const brandRoutes = require('./routes/brandRoutes');
 const catalogRoutes = require('./routes/catalogRoutes');
 const bulkOrderRoutes = require('./routes/bulkOrderRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const returnRoutes = require('./routes/returnRoutes');
 const errorHandler = require('./middleware/errorMiddleware');
 const { initSocket } = require('./socket');
 
@@ -39,7 +45,19 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Enable CORS
-app.use(cors());
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
+  credentials: true
+}));
+
+// Set security HTTP headers
+app.use(helmet());
+
+// Apply rate limiting to all routes
+app.use('/api', limiter);
+
+// Apply stricter rate limiting to auth routes
+app.use('/api/auth', authLimiter);
 
 // Dev logging middleware
 if (process.env.NODE_ENV === 'development') {
@@ -54,6 +72,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/auth/user', userRoutes);
 app.use('/api/auth/admin', adminRoutes);
 app.use('/api/auth/seller', sellerRoutes);
+app.use('/api/seller', sellerRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/auth/delivery', deliveryRoutes);
 app.use('/api/delivery', deliveryRoutes);
@@ -68,6 +87,10 @@ app.use('/api/favourite-section', favouriteSectionRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/catalog', catalogRoutes);
 app.use('/api/bulk-orders', bulkOrderRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/returns', returnRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Riddha Mart API' });

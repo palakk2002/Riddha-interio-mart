@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
+import ErrorBoundary from './shared/components/ErrorBoundary';
+import GlobalLoader from './shared/components/GlobalLoader';
 import Navbar from './modules/user/components/Navbar';
 import Footer from './modules/user/components/Footer';
 import BottomNavbar from './modules/user/components/BottomNavbar';
@@ -22,10 +24,11 @@ function App() {
   const isAdminPath = location.pathname.startsWith('/admin');
   const isSellerPath = location.pathname.startsWith('/seller');
   const isDeliveryPath = location.pathname.startsWith('/delivery');
-  const isAuthPath = location.pathname === '/login' || location.pathname === '/signup' || 
-                      location.pathname.endsWith('/login') || location.pathname.endsWith('/signup') ||
-                      location.pathname === '/search' || location.pathname.startsWith('/coming-soon');
-  const isDashboardLayout = isAdminPath || isSellerPath || isDeliveryPath || isAuthPath;
+  const isInitPath = location.pathname.includes('/splash') || location.pathname.includes('/onboarding');
+  const isAuthPath = location.pathname === '/login' || location.pathname === '/signup' ||
+    location.pathname.endsWith('/login') || location.pathname.endsWith('/signup') ||
+    location.pathname === '/search' || location.pathname.startsWith('/coming-soon');
+  const isDashboardLayout = isAdminPath || isSellerPath || isDeliveryPath || isAuthPath || isInitPath;
   const isProductPage = location.pathname.startsWith('/product/') || location.pathname.startsWith('/products/');
   const isCheckoutPath = ['/cart', '/address', '/payment'].includes(location.pathname);
 
@@ -45,14 +48,14 @@ function App() {
     <div className={`min-h-screen flex flex-col user-theme bg-white border-deep-espresso/5 ${(!isDashboardLayout && !isCheckoutPath && !isProductPage) ? 'pb-24 md:pb-0' : ''}`}>
       <Toaster position="top-center" reverseOrder={false} />
       {showPincodeModal && <PincodeModal onComplete={handlePincodeComplete} />}
-      
+
       {/* Global Notifications */}
       {user?.role === 'admin' ? (
         <AdminNotifications token={user.token} />
       ) : (
         user?.token && <UserNotifications token={user.token} />
       )}
-      
+
       {!isDashboardLayout && (
         <>
           {isProductPage ? (
@@ -72,13 +75,16 @@ function App() {
       )}
 
       <main className="flex-grow">
-        <Routes>
-          <Route path="/admin/*" element={<AdminRoutes />} />
-          <Route path="/seller/*" element={<SellerRoutes />} />
-          <Route path="/delivery/*" element={<DeliveryRoutes />} />
-          <Route path="/coming-soon/*" element={<ComingSoonRoutes />} />
-          <Route path="/*" element={<UserRoutes />} />
-        </Routes>
+        <ErrorBoundary>
+          <Suspense fallback={<GlobalLoader />}>
+            <Routes>
+              <Route path="/admin/*" element={<AdminRoutes />} />
+              <Route path="/seller/*" element={<SellerRoutes />} />
+              <Route path="/delivery/*" element={<DeliveryRoutes />} />
+              <Route path="/*" element={<UserRoutes />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </main>
       {!isDashboardLayout && <Footer />}
       {!isDashboardLayout && !isProductPage && <BottomNavbar />}

@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   optimizeDeps: {
-    include: ['recharts'],
+    include: ['recharts', 'lucide-react'],
   },
   server: {
     host: true,

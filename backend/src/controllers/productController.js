@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const Seller = require('../models/Seller');
+const paginate = require('../utils/paginate');
 
 // @desc    Get all products (Filter by Verified Sellers only for Public)
 exports.getProducts = async (req, res, next) => {
@@ -22,7 +23,7 @@ exports.getProducts = async (req, res, next) => {
     }
 
     if (req.query.search) {
-      filter.name = { $regex: req.query.search, $options: 'i' };
+      filter.$text = { $search: req.query.search };
     }
 
     // Default: only show approved products unless filter specifies otherwise
@@ -48,14 +49,28 @@ exports.getProducts = async (req, res, next) => {
       }
     }
 
-    // Newest first by default
-    const sortBy = req.query.sort || '-createdAt';
-    const products = await Product.find(filter)
-      .sort(sortBy)
-      .populate('seller', 'fullName shopName')
-      .populate('brand', 'name logo');
+    // If text search is used, sort by score unless another sort is specified
+    if (req.query.search && !req.query.sort) {
+      req.query.sort = '-score';
+      // In paginate util we don't have access to projection, but we can set lean()
+    }
 
-    res.status(200).json({ success: true, count: products.length, data: products });
+    const populateOptions = [
+      { path: 'seller', select: 'fullName shopName' },
+      { path: 'brand', select: 'name logo' }
+    ];
+
+    const result = await paginate(Product, filter, req, populateOptions);
+
+    res.status(200).json({ 
+      success: true, 
+      count: result.data.length,
+      totalResults: result.totalResults,
+      totalPages: result.totalPages,
+      page: result.page,
+      limit: result.limit,
+      data: result.data 
+    });
   } catch (error) {
     next(error);
   }
@@ -210,23 +225,18 @@ exports.getSellerProducts = async (req, res, next) => {
 // @desc    Delete product
 exports.deleteProduct = async (req, res, next) => {
   try {
-    console.log('Delete request received for ID:', req.params.id);
     const product = await Product.findById(req.params.id);
 
     if (!product) {
-      console.log('Product not found in DB');
       return res.status(404).json({ success: false, error: 'Product not found' });
     }
 
     // Make sure user is product owner or admin
-    console.log('Product seller:', product.seller.toString(), 'Current user:', req.user.id);
     if (product.seller.toString() !== req.user.id && req.user.role !== 'admin') {
-      console.log('Unauthorized delete attempt');
       return res.status(401).json({ success: false, error: 'User not authorized to delete this product' });
     }
 
     await Product.findByIdAndDelete(req.params.id);
-    console.log('Product successfully deleted from DB');
 
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
@@ -291,10 +301,7 @@ exports.createBulkProducts = async (req, res, next) => {
     const { products } = req.body;
     const Brand = require('../models/Brand');
 
-    console.log('Bulk Create Request Received. Count:', products?.length);
-
     if (!products || !Array.isArray(products)) {
-      console.log('Invalid products array provided');
       return res.status(400).json({ success: false, error: 'Please provide an array of products' });
     }
 
@@ -302,8 +309,6 @@ exports.createBulkProducts = async (req, res, next) => {
     const sellerType = req.user.role === 'admin' ? 'Admin' : 'Seller';
     const isApproved = req.user.role === 'admin';
     const approvalStatus = req.user.role === 'admin' ? 'approved' : 'pending';
-
-    console.log('Processing products for seller:', seller, 'sellerType:', sellerType);
 
     const productsToCreate = await Promise.all(products.map(async (p, index) => {
       let brandId = p.brand;
@@ -317,8 +322,6 @@ exports.createBulkProducts = async (req, res, next) => {
         }
         brandId = brand._id;
       } else if (!p.brand) {
-        // Fallback to a default brand if none provided to satisfy 'required' constraint
-        console.log(`No brand provided for product ${index}. Using fallback.`);
         let defaultBrand = await Brand.findOne({ name: 'General' });
         if (!defaultBrand) {
           defaultBrand = await Brand.create({ name: 'General' });
@@ -338,9 +341,7 @@ exports.createBulkProducts = async (req, res, next) => {
       };
     }));
 
-    console.log('Attempting to insert', productsToCreate.length, 'products into database');
     const createdProducts = await Product.insertMany(productsToCreate);
-    console.log('Successfully created', createdProducts.length, 'products');
 
     res.status(201).json({
       success: true,
@@ -353,6 +354,40 @@ exports.createBulkProducts = async (req, res, next) => {
       const messages = Object.values(error.errors).map(val => val.message);
       console.error('Validation Errors:', messages);
     }
+    next(error);
+  }
+};
+
+// @desc    Update stock for multiple products
+// @route   PATCH /api/products/bulk-stock
+// @access  Private/Admin or Seller
+exports.updateBulkStock = async (req, res, next) => {
+  try {
+    const { updates } = req.body; // Array of { productId, newStock }
+    const results = [];
+
+    for (const update of updates) {
+      const { productId, newStock } = update;
+      
+      const product = await Product.findById(productId);
+      if (!product) {
+        results.push({ productId, success: false, message: 'Product not found' });
+        continue;
+      }
+
+      // Sellers can only update their own products
+      if (req.user.role !== 'admin' && product.seller.toString() !== req.user.id) {
+        results.push({ productId, success: false, message: 'Not authorized' });
+        continue;
+      }
+
+      product.countInStock = newStock;
+      await product.save();
+      results.push({ productId, success: true, countInStock: newStock });
+    }
+
+    res.status(200).json({ success: true, data: results });
+  } catch (error) {
     next(error);
   }
 };

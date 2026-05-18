@@ -26,6 +26,7 @@ exports.getCart = async (req, res) => {
 // @access  Private
 exports.addToCart = async (req, res) => {
   const { productId, quantity } = req.body;
+  const requestedQuantity = quantity || 1;
 
   try {
     const product = await Product.findById(productId);
@@ -35,20 +36,36 @@ exports.addToCart = async (req, res) => {
 
     let cart = await Cart.findOne({ user: req.user.id });
 
+    // Validate Stock
+    let currentCartQuantity = 0;
+    if (cart) {
+      const existingItem = cart.items.find(item => item.product.toString() === productId);
+      if (existingItem) {
+        currentCartQuantity = existingItem.quantity;
+      }
+    }
+
+    if (product.countInStock < (currentCartQuantity + requestedQuantity)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Only ${product.countInStock} items available in stock.` 
+      });
+    }
+
     if (!cart) {
       cart = await Cart.create({
         user: req.user.id,
-        items: [{ product: productId, quantity: quantity || 1 }]
+        items: [{ product: productId, quantity: requestedQuantity }]
       });
     } else {
       const itemIndex = cart.items.findIndex(item => item.product.toString() === productId);
 
       if (itemIndex > -1) {
         // Product already exists in cart, update quantity
-        cart.items[itemIndex].quantity += (quantity || 1);
+        cart.items[itemIndex].quantity += requestedQuantity;
       } else {
         // Product not in cart, add new item
-        cart.items.push({ product: productId, quantity: quantity || 1 });
+        cart.items.push({ product: productId, quantity: requestedQuantity });
       }
       await cart.save();
     }
@@ -81,6 +98,16 @@ exports.updateQuantity = async (req, res) => {
 
     if (itemIndex === -1) {
       return res.status(404).json({ success: false, message: 'Item not found in cart' });
+    }
+
+    if (quantity > 0) {
+      const product = await Product.findById(productId);
+      if (product && product.countInStock < quantity) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Only ${product.countInStock} items available in stock.` 
+        });
+      }
     }
 
     if (quantity <= 0) {

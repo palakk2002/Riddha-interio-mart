@@ -6,17 +6,36 @@ const {
   getSellerProducts,
   deleteProduct,
   updateProduct,
-  updateApprovalStatus
+  updateApprovalStatus,
+  updateBulkStock
 } = require('../controllers/productController');
 const { protect, authorize, tryProtect } = require('../middleware/auth');
+const { check } = require('express-validator');
+const { validate } = require('../middleware/validationMiddleware');
+
+// Include other resource routers
+const reviewRouter = require('./reviewRoutes');
 
 const router = express.Router();
 
+// Re-route into other resource routers
+router.use('/:productId/reviews', reviewRouter);
+
 router.route('/')
   .get(tryProtect, getProducts)
-  .post(protect, authorize('seller', 'admin'), createProduct);
+  .post(protect, authorize('seller', 'admin'), [
+    check('name', 'Name is required').not().isEmpty(),
+    check('price', 'Price is required').isNumeric(),
+    check('category', 'Category is required').not().isEmpty(),
+    validate
+  ], createProduct);
 
 router.post('/bulk', protect, authorize('seller', 'admin'), require('../controllers/productController').createBulkProducts);
+
+router.patch('/bulk-stock', protect, authorize('seller', 'admin'), [
+  check('updates', 'Updates array is required').isArray({ min: 1 }),
+  validate
+], updateBulkStock);
 
 router.get('/my-products', protect, authorize('seller', 'admin'), getSellerProducts);
 

@@ -1,26 +1,28 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import DeliveryLayout from './components/DeliveryLayout';
-import Dashboard from './pages/Dashboard';
-import Orders from './pages/Orders';
-import DeliveryHistory from './pages/DeliveryHistory';
-import Earnings from './pages/Earnings';
-import Profile from './pages/Profile';
-import Wallet from './pages/Wallet';
-import Settings from './pages/Settings';
-import HelpSupport from './pages/HelpSupport';
-import About from './pages/About';
-import Notifications from './pages/Notifications';
-import LoginPage from '../user/pages/LoginPage';
-import SignupPage from '../user/pages/SignupPage';
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Orders = React.lazy(() => import('./pages/Orders'));
+const DeliveryHistory = React.lazy(() => import('./pages/DeliveryHistory'));
+const Earnings = React.lazy(() => import('./pages/Earnings'));
+const Profile = React.lazy(() => import('./pages/Profile'));
+const Wallet = React.lazy(() => import('./pages/Wallet'));
+const Settings = React.lazy(() => import('./pages/Settings'));
+const HelpSupport = React.lazy(() => import('./pages/HelpSupport'));
+const About = React.lazy(() => import('./pages/About'));
+const TermsConditions = React.lazy(() => import('./pages/TermsConditions'));
+const Notifications = React.lazy(() => import('./pages/Notifications'));
+const LoginPage = React.lazy(() => import('../user/pages/LoginPage'));
+const SignupPage = React.lazy(() => import('../user/pages/SignupPage'));
+const DeliveryLanding = React.lazy(() => import('./pages/DeliveryLanding'));
 
 const DeliveryRoutes = () => {
   return (
     <Routes>
+      <Route path="/" element={<DeliveryLanding />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route element={<DeliveryLayout />}>
-        <Route index element={<Dashboard />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/delivery-history" element={<DeliveryHistory />} />
@@ -30,6 +32,7 @@ const DeliveryRoutes = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/help" element={<HelpSupport />} />
         <Route path="/about" element={<About />} />
+        <Route path="/terms" element={<TermsConditions />} />
         <Route path="/notifications" element={<Notifications />} />
       </Route>
     </Routes>

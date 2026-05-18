@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import api from '../../../shared/utils/api';
+import { useUser } from './UserContext';
 
 const WishlistContext = createContext();
 
@@ -11,35 +13,70 @@ export const useWishlist = () => {
 };
 
 export const WishlistProvider = ({ children }) => {
+  const { isLoggedIn, user } = useUser();
   const [wishlistItems, setWishlistItems] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Load wishlist from localStorage on mount
-  useEffect(() => {
-    const savedWishlist = localStorage.getItem('userWishlist');
-    if (savedWishlist) {
-      try {
-        setWishlistItems(JSON.parse(savedWishlist));
-      } catch (e) {
-        console.error('Failed to parse wishlist from localStorage', e);
-      }
+  const fetchWishlist = useCallback(async () => {
+    if (!isLoggedIn || ['seller', 'admin', 'delivery'].includes(user?.role)) {
+      setWishlistItems([]);
+      return;
     }
-  }, []);
+    
+    try {
+      setLoading(true);
+      const res = await api.get('/wishlist');
+      if (res.data.success) {
+        setWishlistItems(res.data.data); // Array of populated products
+      }
+    } catch (error) {
+      console.error('Failed to fetch wishlist', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [isLoggedIn]);
 
-  // Save wishlist to localStorage whenever it changes
+  // Load wishlist when login status changes
   useEffect(() => {
-    localStorage.setItem('userWishlist', JSON.stringify(wishlistItems));
-  }, [wishlistItems]);
+    fetchWishlist();
+  }, [fetchWishlist]);
 
-  const addToWishlist = (product) => {
+  const addToWishlist = async (product) => {
+    if (!isLoggedIn) {
+      alert('Please login to add items to your wishlist');
+      return;
+    }
+
+    const productId = product._id || product.id;
+    
+    // Optimistic UI update
     setWishlistItems((prev) => {
-      const exists = prev.find((item) => (item._id || item.id) === (product._id || product.id));
-      if (exists) return prev;
+      if (prev.find((item) => (item._id || item.id) === productId)) return prev;
       return [...prev, product];
     });
+
+    try {
+      await api.post(`/wishlist/${productId}`);
+    } catch (error) {
+      console.error('Failed to add to wishlist API', error);
+      // Revert optimistic update on failure
+      fetchWishlist();
+    }
   };
 
-  const removeFromWishlist = (productId) => {
+  const removeFromWishlist = async (productId) => {
+    if (!isLoggedIn) return;
+
+    // Optimistic UI update
     setWishlistItems((prev) => prev.filter((item) => (item._id || item.id) !== productId));
+
+    try {
+      await api.delete(`/wishlist/${productId}`);
+    } catch (error) {
+      console.error('Failed to remove from wishlist API', error);
+      // Revert optimistic update on failure
+      fetchWishlist();
+    }
   };
 
   const isInWishlist = (productId) => {
@@ -58,6 +95,7 @@ export const WishlistProvider = ({ children }) => {
   return (
     <WishlistContext.Provider value={{ 
       wishlistItems, 
+      loading,
       addToWishlist, 
       removeFromWishlist, 
       isInWishlist,

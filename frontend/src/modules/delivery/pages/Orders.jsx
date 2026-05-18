@@ -2,13 +2,21 @@ import React from 'react';
 import PageWrapper from '../components/PageWrapper';
 import OrderCard from '../components/OrderCard';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuPackage, LuRefreshCw } from 'react-icons/lu';
+import { 
+  LuPackage, 
+  LuRefreshCw, 
+  LuSearch, 
+  LuFilter, 
+  LuActivity,
+  LuLayoutGrid,
+  LuZap
+} from 'react-icons/lu';
 import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
 import { toast } from 'react-hot-toast';
 
 const Orders = () => {
-  const [activeTab, setActiveTab] = React.useState('my'); // Default to my accepted orders
+  const [activeTab, setActiveTab] = React.useState('my');
   const [orders, setOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const { user } = useUser();
@@ -22,7 +30,7 @@ const Orders = () => {
       }
     } catch (err) {
       console.error('Failed to fetch orders:', err);
-      toast.error('Failed to sync shipment data');
+      toast.error('Logistics Sync Failure');
     } finally {
       setLoading(false);
     }
@@ -30,123 +38,125 @@ const Orders = () => {
 
   React.useEffect(() => {
     fetchOrders();
-    
-    // Refresh on new assignment
     const handleNewAssignment = () => {
       fetchOrders();
-      toast.success('New shipment assignment detected!');
+      toast.success('New Deployment Detected', { icon: '🚀' });
     };
     window.addEventListener('delivery:assigned', handleNewAssignment);
     return () => window.removeEventListener('delivery:assigned', handleNewAssignment);
   }, []);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
-    const loadingToast = toast.loading(`Updating status to ${newStatus}...`);
+    const loadingToast = toast.loading(`Updating Mission State: ${newStatus}`);
     try {
       const { data } = await api.put(`/orders/${orderId}/status`, { status: newStatus });
       if (data.success) {
-        toast.success(`Shipment successfully marked as ${newStatus}`, { id: loadingToast });
+        toast.success(`Mission State: ${newStatus} Validated`, { id: loadingToast });
         fetchOrders();
       }
     } catch (err) {
-      console.error('Failed to update status:', err);
-      toast.error(err.response?.data?.error || 'Failed to update shipment status', { id: loadingToast });
+      toast.error(err.response?.data?.error || 'Validation Failure', { id: loadingToast });
     }
   };
 
   const handleDeliveryResponse = async (orderId, status) => {
-    const loadingToast = toast.loading(`${status === 'Accepted' ? 'Accepting' : 'Rejecting'} shipment...`);
+    const loadingToast = toast.loading(`${status === 'Accepted' ? 'Authorizing' : 'Declining'} Deployment...`);
     try {
       const { data } = await api.put(`/orders/${orderId}/delivery-response`, { status });
       if (data.success) {
-        toast.success(`Shipment ${status.toLowerCase()} successfully`, { id: loadingToast });
+        toast.success(`Deployment ${status} Successfully`, { id: loadingToast });
         fetchOrders();
       }
     } catch (err) {
-      console.error('Failed to respond to assignment:', err);
-      toast.error(err.response?.data?.error || 'Failed to process shipment response', { id: loadingToast });
+      toast.error(err.response?.data?.error || 'Authorization Failure', { id: loadingToast });
     }
   };
 
-  // Filter orders for the delivery boy
-  // 1. Pool: Orders with deliveryStatus 'None' or 'Rejected' (Available to anyone)
   const availableOrders = orders.filter(o => 
     (o.deliveryStatus === 'None' || o.deliveryStatus === 'Rejected') && 
     o.status === 'Processing'
   );
 
-  // 2. Assigned: Orders where deliveryBoy is current user
   const myOrders = orders.filter(o => o.deliveryBoy?._id === user?._id || o.deliveryBoy === user?._id);
-
   const displayedOrders = activeTab === 'available' ? availableOrders : myOrders;
 
   return (
     <PageWrapper>
-      <div className="max-w-5xl mx-auto space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-deep-espresso">My Shipments</h1>
-            <p className="text-warm-sand mt-2">Track and manage your assigned deliveries.</p>
+      <div className="max-w-[1600px] mx-auto space-y-8 pb-10">
+        
+        {/* Operations Header */}
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-8 bg-[#189D91] rounded-full"></div>
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+                Active Deliveries
+              </h1>
+            </div>
+            <p className="text-slate-500 font-medium text-sm flex items-center gap-2">
+               <LuActivity className="text-[#189D91]" />
+               Track and manage your ongoing deliveries
+            </p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-4">
             <button 
               onClick={fetchOrders}
-              className="p-3 bg-white border border-soft-oatmeal rounded-xl text-warm-sand hover:text-deep-espresso transition-all"
+              className="p-3 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-[#189D91] transition-all shadow-sm"
             >
               <LuRefreshCw size={20} className={loading ? 'animate-spin' : ''} />
             </button>
-            <div className="flex p-1 bg-soft-oatmeal/30 rounded-2xl border border-soft-oatmeal w-fit">
+            
+            <div className="flex p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
               <button
                 onClick={() => setActiveTab('available')}
-                className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all uppercase tracking-widest ${
+                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                   activeTab === 'available' 
-                    ? 'bg-deep-espresso text-white shadow-lg shadow-deep-espresso/10' 
-                    : 'text-dusty-cocoa hover:text-deep-espresso'
+                    ? 'bg-white text-slate-900 shadow-sm' 
+                    : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
-                Pool ({availableOrders.length})
+                Available Orders 
+                <span className={`px-2 py-0.5 rounded-md text-xs ${activeTab === 'available' ? 'bg-slate-100' : 'bg-slate-200'}`}>
+                   {availableOrders.length}
+                </span>
               </button>
               <button
                 onClick={() => setActiveTab('my')}
-                className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all uppercase tracking-widest ${
+                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                   activeTab === 'my' 
-                    ? 'bg-deep-espresso text-white shadow-lg shadow-deep-espresso/10' 
-                    : 'text-dusty-cocoa hover:text-deep-espresso'
+                    ? 'bg-[#189D91] text-white shadow-md' 
+                    : 'text-slate-500 hover:text-[#189D91]'
                 }`}
               >
-                Assigned ({myOrders.length})
+                My Deliveries
+                <span className={`px-2 py-0.5 rounded-md text-xs ${activeTab === 'my' ? 'bg-white/20' : 'bg-slate-200'}`}>
+                   {myOrders.length}
+                </span>
               </button>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Deployment Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
           <AnimatePresence mode="popLayout">
             {loading ? (
-              <div className="col-span-full py-20 text-center">
-                <div className="w-10 h-10 border-4 border-soft-oatmeal border-t-deep-espresso rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-xs font-bold text-warm-sand uppercase tracking-widest">Synchronizing cargo data...</p>
-              </div>
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="bg-slate-50 rounded-[2.5rem] h-[400px] animate-pulse border border-slate-100"></div>
+              ))
             ) : displayedOrders.length > 0 ? (
               displayedOrders.map(order => (
-                <motion.div
-                  key={order._id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                >
+                <div key={order._id}>
                   <OrderCard 
                     order={{
                       id: order._id,
                       customerName: order.shippingAddress.fullName,
                       status: order.deliveryStatus || 'None',
                       dateTime: new Date(order.createdAt).toLocaleString(),
-                      address: `${order.shippingAddress.fullAddress}, ${order.shippingAddress.city} - ${order.shippingAddress.pincode}${order.shippingAddress.landmark ? ` (Landmark: ${order.shippingAddress.landmark})` : ''}`,
+                      address: `${order.shippingAddress.fullAddress}, ${order.shippingAddress.city}`,
                       phone: order.shippingAddress.mobileNumber,
-                      sellerLocation: "Main Warehouse",
+                      sellerLocation: "Operations Hub - 1",
                       items: order.orderItems.map(item => ({
                          name: item.name,
                          quantity: item.quantity,
@@ -159,20 +169,28 @@ const Orders = () => {
                     onReject={(id) => handleDeliveryResponse(id, 'Rejected')}
                     onUpdateStatus={(id, status) => handleUpdateStatus(id, status)} 
                   />
-                </motion.div>
+                </div>
               ))
             ) : (
               <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="col-span-full py-20 text-center bg-soft-oatmeal/10 rounded-[3rem] border border-dashed border-soft-oatmeal"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="col-span-full py-32 text-center bg-white rounded-3xl border border-slate-200 shadow-sm"
               >
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-soft-oatmeal">
-                  <LuPackage size={32} />
+                <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-[#189D91]">
+                  <LuZap size={40} />
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-deep-espresso">No orders found</h3>
-                  <p className="text-sm text-dusty-cocoa">Your shipment list is currently empty.</p>
+                <div className="max-w-md mx-auto px-6">
+                  <h3 className="text-xl font-bold text-slate-900">No Orders Found</h3>
+                  <p className="text-sm text-slate-500 font-medium mt-2 leading-relaxed">
+                    There are currently no active deliveries in this section. Refresh to check for new ones.
+                  </p>
+                  <button 
+                    onClick={fetchOrders}
+                    className="mt-6 px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition-all shadow-sm"
+                  >
+                    Refresh Orders
+                  </button>
                 </div>
               </motion.div>
             )}

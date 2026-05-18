@@ -32,6 +32,14 @@ const DeliverySchema = new mongoose.Schema({
   vehicleNumber: {
     type: String
   },
+  documents: {
+    rc: { type: String, default: "" },
+    dl: { type: String, default: "" },
+    aadhar: { type: String, default: "" },
+    bankDetails: { type: String, default: "" },
+    insurance: { type: String, default: "" },
+    pollution: { type: String, default: "" }
+  },
   role: {
     type: String,
     default: 'delivery'

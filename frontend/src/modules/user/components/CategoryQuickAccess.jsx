@@ -43,9 +43,9 @@ const QUICK_CATEGORIES = [
 
 const CategoryQuickAccess = () => {
   return (
-    <section className="py-1 md:py-10 bg-white overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12">
-        <div className="flex items-center overflow-x-auto no-scrollbar gap-2 md:gap-4 pb-2 md:pb-4 scroll-smooth">
+    <section className="pt-1 pb-1 md:pt-4 md:pb-0 bg-white overflow-hidden">
+      <div className="max-w-[1700px] mx-auto px-6 md:px-12">
+        <div className="flex items-center overflow-x-auto no-scrollbar gap-2 md:gap-2 pb-2 md:pb-4 scroll-smooth">
           {QUICK_CATEGORIES.map((category, idx) => {
             const config = getCategoryConfig(category.name);
             const Icon = config.icon;
@@ -58,19 +58,19 @@ const CategoryQuickAccess = () => {
               >
                 <Link
                   to={`/category/${category.slug}`}
-                  className="group flex flex-col items-center justify-center min-w-[72px] md:min-w-[135px] transition-all duration-300"
+                  className="group flex flex-col items-center justify-center min-w-[80px] md:min-w-[130px] transition-all duration-300"
                 >
                   <div 
-                    className="mb-2 md:mb-3 h-12 w-12 md:h-16 md:w-16 rounded-full flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300"
+                    className="mb-2 md:mb-3 h-14 w-14 md:h-22 md:w-32 rounded-full md:rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300"
                     style={{ backgroundColor: `${config.color}15` }}
                   >
                     <Icon 
-                      className="w-6 h-6 md:w-8 md:h-8" 
+                      className="w-7 h-7 md:w-11 md:h-11" 
                       style={{ color: config.color }}
                       strokeWidth={1.5}
                     />
                   </div>
-                  <span className="text-[10px] md:text-[12px] font-bold text-gray-700 text-center px-1 group-hover:text-black transition-colors leading-tight">
+                  <span className="text-[10px] md:text-[13px] font-bold text-gray-800 text-center px-1 group-hover:text-black transition-colors leading-tight">
                     {toTitleCase(category.name)}
                   </span>
                 </Link>
