@@ -100,6 +100,127 @@ const LoginPage = () => {
     }
   };
 
+  if (role === 'user') {
+    return (
+      <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center font-sans overflow-y-auto px-4 py-8">
+        {/* Device wrapper for desktop, seamless on mobile */}
+        <div className="w-full max-w-[420px] min-h-[820px] bg-white flex flex-col justify-between py-12 px-8 rounded-3xl md:shadow-2xl overflow-hidden relative border border-slate-100">
+          
+          <div className="w-full flex flex-col items-center">
+            {/* Logo */}
+            <div className="mt-6 mb-8 w-full max-w-[200px] flex justify-center">
+              <img src={logo} alt="Interio Mega Mart" className="w-full h-auto object-contain" />
+            </div>
+
+            {error && (
+              <div className="w-full mb-4 p-3.5 bg-rose-50 border border-rose-100 rounded-xl text-center">
+                <span className="text-rose-600 text-[10px] font-bold uppercase tracking-wider leading-relaxed">{error}</span>
+                {unverifiedEmail && (
+                  <button onClick={handleResendAndVerify} className="block mt-2 mx-auto bg-rose-600 text-white px-4 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-rose-700">
+                    Verify Email
+                  </button>
+                )}
+              </div>
+            )}
+
+            <form onSubmit={handleLogin} className="w-full space-y-5">
+              {/* Phone or Email Input */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-700 ml-0.5">Phone Number</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="or Email"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50/85 border border-slate-200/80 rounded-xl focus:bg-white focus:border-[#189D91] outline-none transition-all text-xs font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-semibold"
+                  />
+                </div>
+              </div>
+
+              {/* Password Input */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center px-0.5">
+                  <label className="text-[11px] font-bold text-slate-700">Password</label>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-4 pr-12 py-3 bg-slate-50/85 border border-slate-200/80 rounded-xl focus:bg-white focus:border-[#189D91] outline-none transition-all text-xs font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-semibold"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                    {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Remember Me & Forgot Password */}
+              <div className="flex items-center justify-between px-0.5 pt-1">
+                <button 
+                  type="button" 
+                  onClick={() => setRememberMe(!rememberMe)} 
+                  className="flex items-center gap-2 group"
+                >
+                  <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${rememberMe ? 'bg-[#189D91] border-[#189D91]' : 'border-slate-200 bg-white'}`}>
+                    {rememberMe && <FiCheck className="text-white text-[10px] stroke-[4]" />}
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400">Remember Me</span>
+                </button>
+                <button type="button" onClick={() => navigate('/forgot-password')} className="text-[10px] font-bold text-[#189D91] hover:underline">Forgot?</button>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#8A3B8B] hover:bg-[#722b73] text-white py-3.5 rounded-full font-bold text-[14px] uppercase tracking-wider transition-all active:scale-[0.98] shadow-md shadow-[#8A3B8B]/10 mt-6"
+              >
+                {loading ? 'Authenticating...' : 'Login'}
+              </button>
+            </form>
+
+            {/* Create Account */}
+            <div className="mt-4 text-center">
+              <Link to="/signup" className="text-[12px] font-bold text-slate-400 hover:text-slate-600 tracking-wider">
+                Create Account
+              </Link>
+            </div>
+          </div>
+
+          {/* Social login and footer at bottom */}
+          <div className="w-full mt-auto">
+            {/* Or continue with divider */}
+            <div className="relative flex items-center justify-center mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-100"></div>
+              </div>
+              <span className="relative px-3 bg-white text-[10px] font-bold text-slate-350 uppercase tracking-widest">Or continue with...</span>
+            </div>
+
+            {/* Circle social login buttons */}
+            <div className="flex justify-center gap-5 mb-8">
+              <button type="button" className="w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all hover:scale-105 active:scale-95 shadow-sm">
+                <FaGoogle size={18} className="text-rose-500" />
+              </button>
+              <button type="button" className="w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-[#1877F2] transition-all hover:scale-105 active:scale-95 shadow-sm">
+                <FaFacebookF size={18} className="text-[#1877F2]" />
+              </button>
+            </div>
+
+            {/* Footer Copyright */}
+            <p className="text-center text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+              © {new Date().getFullYear()} Riddha Interio Mart.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans">
       {/* Left Section - Branded, Bright & Clean (No Dark Colors!) */}
