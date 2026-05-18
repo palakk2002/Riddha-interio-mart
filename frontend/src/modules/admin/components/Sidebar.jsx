@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate, Link } from 'react-router-dom';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
@@ -28,143 +28,169 @@ import {
   FiGift,
   FiShield,
   FiDollarSign,
-  FiZap
+  FiZap,
+  FiActivity
 } from 'react-icons/fi';
-import { FiCheckCircle, FiXCircle, FiMessageCircle } from 'react-icons/fi';
-import sidebarBg from '../../../assets/seller_sidebar_bg.png';
+import logoImage from '../../../assets/transparent_logo.png';
 
-const menuItems = [
-  { path: '/admin', icon: FiLayout, label: 'Dashboard' },
-  { path: '/admin/analytics', icon: FiTrendingUp, label: 'Analytics' },
-  { 
-    label: 'Inventory', 
-    icon: FiBox, 
-    path: '/admin/inventory',
-    children: [
-      { path: '/admin/inventory', icon: FiGrid, label: 'All Products' },
-      { path: '/admin/inventory/pending', icon: FiClock, label: 'Pending Approval', showBadge: true, badgeType: 'product' },
-    ]
-  },
-  { path: '/admin/orders/tracking', icon: FiMapPin, label: 'Order Tracking' },
-  { 
-    label: 'Delivery Management', 
-    icon: FiTruck, 
-    path: '/admin/delivery',
-    children: [
-      { path: '/admin/delivery', icon: FiGrid, label: 'Manage Delivery' },
-      { path: '/admin/delivery/assign', icon: FiTruck, label: 'Assign Delivery' },
-    ]
-  },
-  { 
-    label: 'Create Listing', 
-    icon: FiPlus, 
-    path: '/admin/inventory/add-flow',
-    children: [
-      { path: '/admin/inventory/add', icon: FiPlus, label: 'Create Order' },
-      { path: '/admin/catalog', icon: FiPackage, label: 'Select from Catalog' },
-    ]
-  },
-  { path: '/admin/stock-management', icon: FiTrendingUp, label: 'Stock Management' },
-  { 
-    label: 'Order Management', 
-    icon: FiClipboard, 
-    path: '/admin/orders/all',
-    children: [
-      { path: '/admin/orders/all', icon: FiGrid, label: 'All Orders' },
-      { path: '/admin/orders/pending', icon: FiClock, label: 'Pending Orders' },
-    ]
-  },
-  { 
-    label: 'Product Catalog', 
-    icon: FiBox, 
-    path: '/admin/catalog',
-    children: [
-      { path: '/admin/catalog', icon: FiGrid, label: 'Master Catalog' },
-      { path: '/admin/catalog/add', icon: FiPlus, label: 'New Master Item' },
-      { path: '/admin/bulk-upload', icon: FiPlus, label: 'Bulk Upload' },
-    ]
-  },
-  { 
-    label: 'Manage Categories', 
-    icon: FiGrid, 
-    path: '/admin/manage-categories',
-    children: [
-      { path: '/admin/manage-categories', icon: FiGrid, label: 'All Categories' },
-      { path: '/admin/manage-categories/add', icon: FiPlus, label: 'Add Category' },
-    ]
-  },
-  { 
-    label: 'Seller Management', 
-    icon: FiUsers, 
-    path: '/admin/sellers',
-    children: [
-      { path: '/admin/sellers/pending', icon: FiGrid, label: 'Pending Sellers', showBadge: true },
-      { path: '/admin/sellers/active', icon: FiGrid, label: 'Active Sellers' },
-    ]
-  },
-  { path: '/admin/manage-hero', icon: FiImage, label: 'Home Banner' },
-  { path: '/admin/manage-promo', icon: FiPercent, label: 'Promo Banner' },
-  { 
-    label: 'Section', 
-    icon: FiGrid, 
-    path: '/admin/manage-section',
-    children: [
-      { path: '/admin/manage-section', icon: FiGrid, label: 'All Section' },
-      { path: '/admin/manage-section/create', icon: FiPlus, label: 'Create Section' },
+const menuGroups = [
+  {
+    title: 'Core Control',
+    items: [
+      { path: '/admin', icon: FiLayout, label: 'Dashboard' },
+      { path: '/admin/analytics', icon: FiTrendingUp, label: 'Analytics' },
+      { path: '/admin/activity', icon: FiActivity, label: 'System Logs' },
     ]
   },
   {
-    label: 'Favourite Section',
-    icon: FiStar,
-    path: '/admin/manage-favourites',
-    children: [
-      { path: '/admin/manage-favourites', icon: FiGrid, label: 'All Favourite Sections' },
-      { path: '/admin/manage-favourites/create', icon: FiPlus, label: 'Create Favourite Section' },
+    title: 'Operations',
+    items: [
+      { 
+        label: 'Inventory', 
+        icon: FiBox, 
+        path: '/admin/inventory',
+        children: [
+          { path: '/admin/inventory', icon: FiGrid, label: 'All Products' },
+          { path: '/admin/inventory/pending', icon: FiClock, label: 'Pending Approval', showBadge: true, badgeType: 'product' },
+        ]
+      },
+      { path: '/admin/orders/tracking', icon: FiMapPin, label: 'Order Tracking' },
+      { 
+        label: 'Delivery Management', 
+        icon: FiTruck, 
+        path: '/admin/delivery',
+        children: [
+          { path: '/admin/delivery', icon: FiGrid, label: 'Manage Delivery' },
+          { path: '/admin/delivery/assign', icon: FiTruck, label: 'Assign Delivery' },
+        ]
+      },
+      { 
+        label: 'Create Listing', 
+        icon: FiPlus, 
+        path: '/admin/inventory/add-flow',
+        children: [
+          { path: '/admin/inventory/add', icon: FiPlus, label: 'Create Order' },
+          { path: '/admin/catalog', icon: FiPackage, label: 'Select from Catalog' },
+        ]
+      },
+      { path: '/admin/stock-management', icon: FiTrendingUp, label: 'Stock Management' },
+      { 
+        label: 'Order Management', 
+        icon: FiClipboard, 
+        path: '/admin/orders/all',
+        children: [
+          { path: '/admin/orders/all', icon: FiGrid, label: 'All Orders' },
+          { path: '/admin/orders/pending', icon: FiClock, label: 'Pending Orders' },
+        ]
+      },
+      { 
+        label: 'Product Catalog', 
+        icon: FiBox, 
+        path: '/admin/catalog',
+        children: [
+          { path: '/admin/catalog', icon: FiGrid, label: 'Master Catalog' },
+          { path: '/admin/catalog/add', icon: FiPlus, label: 'New Master Item' },
+          { path: '/admin/bulk-upload', icon: FiPlus, label: 'Bulk Upload' },
+        ]
+      },
+      { 
+        label: 'Manage Categories', 
+        icon: FiGrid, 
+        path: '/admin/manage-categories',
+        children: [
+          { path: '/admin/manage-categories', icon: FiGrid, label: 'All Categories' },
+          { path: '/admin/manage-categories/add', icon: FiPlus, label: 'Add Category' },
+        ]
+      },
     ]
   },
-  { 
-    label: 'Top Brands', 
-    icon: FiTag, 
-    path: '/admin/manage-brands',
-    children: [
-      { path: '/admin/manage-brands', icon: FiGrid, label: 'All Brands' },
-      { path: '/admin/manage-brands/add', icon: FiPlus, label: 'Add Brand' },
+  {
+    title: 'Partners & Clients',
+    items: [
+      { 
+        label: 'Seller Management', 
+        icon: FiUsers, 
+        path: '/admin/sellers',
+        children: [
+          { path: '/admin/sellers/pending', icon: FiGrid, label: 'Pending Sellers', showBadge: true },
+          { path: '/admin/sellers/active', icon: FiGrid, label: 'Active Sellers' },
+        ]
+      },
+      { 
+        label: 'Customer Management', 
+        icon: FiUsers, 
+        path: '/admin/customers',
+        children: [
+          { path: '/admin/customers/individual', icon: FiGrid, label: 'Individual Customers' },
+          { path: '/admin/customers/enterpriser', icon: FiGrid, label: 'Enterprisers' },
+        ]
+      },
     ]
   },
-  { 
-    label: 'Featured Highlights', 
-    icon: FiStar, 
-    path: '/admin/manage-featured',
-    children: [
-      { path: '/admin/manage-featured', icon: FiGrid, label: 'All Featured' },
-      { path: '/admin/manage-featured/add', icon: FiPlus, label: 'Add Featured Product' },
+  {
+    title: 'Marketing & Content',
+    items: [
+      { path: '/admin/manage-hero', icon: FiImage, label: 'Home Banner' },
+      { path: '/admin/manage-promo', icon: FiPercent, label: 'Promo Banner' },
+      { 
+        label: 'Section', 
+        icon: FiGrid, 
+        path: '/admin/manage-section',
+        children: [
+          { path: '/admin/manage-section', icon: FiGrid, label: 'All Section' },
+          { path: '/admin/manage-section/create', icon: FiPlus, label: 'Create Section' },
+        ]
+      },
+      {
+        label: 'Favourite Section',
+        icon: FiStar,
+        path: '/admin/manage-favourites',
+        children: [
+          { path: '/admin/manage-favourites', icon: FiGrid, label: 'All Favourite Sections' },
+          { path: '/admin/manage-favourites/create', icon: FiPlus, label: 'Create Favourite Section' },
+        ]
+      },
+      { 
+        label: 'Top Brands', 
+        icon: FiTag, 
+        path: '/admin/manage-brands',
+        children: [
+          { path: '/admin/manage-brands', icon: FiGrid, label: 'All Brands' },
+          { path: '/admin/manage-brands/add', icon: FiPlus, label: 'Add Brand' },
+        ]
+      },
+      { 
+        label: 'Featured Highlights', 
+        icon: FiStar, 
+        path: '/admin/manage-featured',
+        children: [
+          { path: '/admin/manage-featured', icon: FiGrid, label: 'All Featured' },
+          { path: '/admin/manage-featured/add', icon: FiPlus, label: 'Add Featured Product' },
+        ]
+      },
     ]
   },
-  { path: '/admin/bulk-orders', icon: FiPackage, label: 'Bulk Orders' },
-  { 
-    label: 'Customer Management', 
-    icon: FiUsers, 
-    path: '/admin/customers',
-    children: [
-      { path: '/admin/customers/individual', icon: FiGrid, label: 'Individual Customers' },
-      { path: '/admin/customers/enterpriser', icon: FiGrid, label: 'Enterprisers' },
+  {
+    title: 'Financial & Core System',
+    items: [
+      { path: '/admin/bulk-orders', icon: FiPackage, label: 'Bulk Orders' },
+      { 
+        label: 'Payments', 
+        icon: FiDollarSign, 
+        path: '/admin/payments',
+        children: [
+          { path: '/admin/payments/users', icon: FiGrid, label: 'User Payments' },
+          { path: '/admin/payments/delivery', icon: FiGrid, label: 'Delivery Payments' },
+          { path: '/admin/payments/sellers', icon: FiGrid, label: 'Seller Payments' },
+        ]
+      },
+      { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
+      { path: '/admin/feedback', icon: FiSettings, label: 'Feedback' },
+      { path: '/admin/seller-recommendations', icon: FiZap, label: 'Seller Requests' },
+      { path: '/admin/referrals', icon: FiGift, label: 'Referral System' },
+      { path: '/admin/team', icon: FiShield, label: 'Team Management' },
     ]
-  },
-  { 
-    label: 'Payments', 
-    icon: FiDollarSign, 
-    path: '/admin/payments',
-    children: [
-      { path: '/admin/payments/users', icon: FiGrid, label: 'User Payments' },
-      { path: '/admin/payments/delivery', icon: FiGrid, label: 'Delivery Payments' },
-      { path: '/admin/payments/sellers', icon: FiGrid, label: 'Seller Payments' },
-    ]
-  },
-  { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
-  { path: '/admin/feedback', icon: FiMessageCircle, label: 'Feedback' },
-  { path: '/admin/seller-recommendations', icon: FiZap, label: 'Seller Requests' },
-  { path: '/admin/referrals', icon: FiGift, label: 'Referral System' },
-  { path: '/admin/team', icon: FiShield, label: 'Team Management' },
+  }
 ];
 
 const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCount, productCount }) => {
@@ -181,37 +207,36 @@ const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCoun
   const isChildActive = hasChildren && item.children.some(child => location.pathname === child.path);
   const isActive = isSelfActive || isChildActive;
 
-
   const headerContent = (
-    <div className="flex items-center gap-4 w-full text-left">
-      <item.icon size={20} className={`transition-transform duration-300 ${isActive ? 'scale-110 text-white' : 'text-white/70 group-hover:scale-110 group-hover:text-white'}`} />
-      <span className="font-medium text-white">{item.label}</span>
+    <div className="flex items-center gap-3 w-full text-left">
+      <item.icon size={17} className={`transition-all duration-300 ${isActive ? 'scale-110 text-[var(--color-primary)]' : 'text-slate-400 group-hover:scale-110 group-hover:text-slate-700'}`} />
+      <span className={`text-[12px] font-semibold tracking-wide transition-colors ${isActive ? 'text-slate-900 font-bold' : 'text-slate-600 group-hover:text-slate-900'}`}>{item.label}</span>
     </div>
   );
 
   return (
-    <div className="mb-2">
+    <div className="mb-1">
       <div 
         className={`
-          flex items-center justify-between p-3 rounded-xl transition-all duration-300 group border border-white/5
+          flex items-center justify-between px-4 py-2.5 rounded-lg transition-all duration-200 group border-l-4 cursor-pointer
           ${isActive 
-            ? `bg-gradient-to-r ${role === 'admin' ? 'from-purple-600/20' : 'from-[#189D91]/20'} to-transparent border-l-4 ${role === 'admin' ? 'border-purple-500' : 'border-[#189D91]'} text-white shadow-lg ${role === 'admin' ? 'shadow-purple-900/10' : 'shadow-teal-900/10'} scale-[1.02]` 
-            : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/10'}
+            ? 'bg-slate-50/80 border-[var(--color-primary)] text-slate-900 shadow-sm' 
+            : 'border-transparent hover:bg-slate-50/40 text-slate-600 hover:text-slate-900'}
         `}
       >
         <div className="flex-1" onClick={() => { if (window.innerWidth < 1024 && !hasChildren) onClose(); }}>
           {item.path ? (
-            <NavLink to={item.path} end={item.path === '/admin'} className="w-full">
+            <NavLink to={item.path} end={item.path === '/admin'} className="w-full block">
               {headerContent}
             </NavLink>
           ) : (
-            headerContent
+            <div className="w-full">{headerContent}</div>
           )}
         </div>
         
         {hasChildren && (
           <Motion.div
-            className="p-1 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+            className="p-1 hover:bg-slate-100 rounded transition-colors cursor-pointer"
             animate={{ rotate: expanded ? 90 : 0 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => {
@@ -219,10 +244,9 @@ const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCoun
               onToggle(item.label);
             }}
           >
-            <FiChevronRight size={16} className={`drop-shadow-md transition-colors ${isActive ? 'text-white' : 'text-white/60'}`} />
+            <FiChevronRight size={13} className={`transition-colors ${isActive ? 'text-slate-800' : 'text-slate-400'}`} />
           </Motion.div>
         )}
-        {!hasChildren && <FiChevronRight size={16} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-white/60" />}
       </div>
 
       <AnimatePresence>
@@ -231,38 +255,36 @@ const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCoun
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="overflow-hidden"
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden bg-slate-50/40 rounded-lg mt-0.5"
           >
-            <div className="ml-6 mt-1 space-y-1 py-1 text-left">
+            <div className="ml-5 pl-2 border-l border-slate-200 mt-1 space-y-0.5 py-1">
               {item.children.map((child) => {
                 let count = 0;
                 if (child.badgeType === 'delivery') count = deliveryCount;
                 else if (child.badgeType === 'product') count = productCount;
                 else count = sellersCount;
                 
+                const isChildActive = location.pathname === child.path;
+
                 return (
                   <NavLink
                     key={child.path + child.label}
                     to={child.path}
                     onClick={() => { if (window.innerWidth < 1024) onClose(); }}
-                    className={({ isActive: childActive }) => `
-                      flex items-center gap-4 p-2.5 rounded-xl transition-all duration-300 group border border-transparent
-                      ${childActive 
-                        ? 'text-white font-bold bg-white/10 border-white/5 shadow-sm' 
-                        : 'text-white/60 hover:text-white hover:bg-white/5'}
+                    className={`
+                      flex items-center gap-3 px-3 py-2 rounded-md text-[11px] tracking-wide transition-all duration-200 group
+                      ${isChildActive 
+                        ? 'text-[var(--color-accent-pink)] font-bold bg-slate-100/60' 
+                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/45'}
                     `}
                   >
-                    {({ isActive: isCurrentChildActive }) => (
-                      <>
-                        <child.icon size={16} className={`transition-transform duration-300 group-hover:scale-110 ${isCurrentChildActive ? 'text-white' : 'text-white/50'}`} />
-                        <span className="text-sm tracking-wide text-white">{child.label}</span>
-                        {child.showBadge && count > 0 && (
-                          <span className={`ml-auto w-5 h-5 ${role === 'admin' ? 'bg-[#a855f7]' : 'bg-[#189D91]'} text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse shadow-lg ${role === 'admin' ? 'shadow-purple-500/40' : 'shadow-teal-500/40'}`}>
-                            {count}
-                          </span>
-                        )}
-                      </>
+                    <child.icon size={12} className={`transition-transform duration-200 group-hover:scale-110 ${isChildActive ? 'text-[var(--color-accent-pink)]' : 'text-slate-400'}`} />
+                    <span>{child.label}</span>
+                    {child.showBadge && count > 0 && (
+                      <span className="ml-auto px-2 py-0.5 bg-[var(--color-accent-pink)] text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                        {count}
+                      </span>
                     )}
                   </NavLink>
                 );
@@ -278,14 +300,16 @@ const NavItem = ({ item, onClose, expanded, onToggle, sellersCount, deliveryCoun
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useUser();
+  const { logout, user } = useUser();
   const { role } = useRBAC();
   const [expandedItems, setExpandedItems] = useState(() => {
     const initial = {};
-    menuItems.forEach(item => {
-      if (item.children?.some(child => location.pathname === child.path)) {
-        initial[item.label] = true;
-      }
+    menuGroups.forEach(group => {
+      group.items.forEach(item => {
+        if (item.children?.some(child => location.pathname === child.path)) {
+          initial[item.label] = true;
+        }
+      });
     });
     return initial;
   });
@@ -337,7 +361,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           />
         )}
       </AnimatePresence>
@@ -345,68 +369,89 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Sidebar Content */}
       <aside
         className={`
-          fixed lg:static top-0 left-0 h-screen w-72 lg:shrink-0 ${role === 'admin' ? 'bg-[#240046]' : 'bg-[#112d2a]'} text-white z-50 flex flex-col shadow-2xl lg:shadow-none overflow-hidden
+          fixed lg:static top-0 left-0 h-screen w-[290px] lg:shrink-0 bg-white text-slate-800 z-50 flex flex-col shadow-2xl lg:shadow-none overflow-hidden border-r border-slate-200/60
           transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-        {/* Full Sidebar Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img 
-            src={sidebarBg} 
-            alt="Interior Decorative Lighting" 
-            className="w-full h-full object-cover opacity-10 grayscale"
-          />
-          <div className={`absolute inset-0 bg-gradient-to-b ${role === 'admin' ? 'from-[#240046] via-[#240046]/95 to-[#240046]' : 'from-[#112d2a] via-[#112d2a]/95 to-[#112d2a]'}`}></div>
-        </div>
-
-        {/* Header */}
-        <div className="relative z-10 p-6 flex items-center justify-between border-b border-white/5">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 ${role === 'admin' ? 'bg-white/10' : 'bg-[#189D91]'} rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-black/20 border border-white/20`}>
-              {role === 'admin' ? 'R' : 'A'}
-            </div>
-            <div className="flex flex-col">
-              <span className="font-display font-black text-xl tracking-tight uppercase text-white leading-none">
-                Riddha
-              </span>
-              <span className={`text-[10px] font-bold uppercase tracking-[0.2em] leading-none mt-1 ${role === 'admin' ? 'text-white/70' : 'text-[#189D91]'}`}>
-                {role === 'admin' ? 'Admin Panel' : 'Assistant Mode'}
-              </span>
-            </div>
-          </div>
-          <button onClick={onClose} className="lg:hidden text-white/60 hover:text-white">
-            <FiX size={24} />
+        {/* Header / Workspace Branding with Real Brand Logo */}
+        <div className="relative z-10 h-20 px-6 flex items-center justify-between border-b border-slate-100 bg-white">
+          <Link to="/admin" className="flex items-center w-full">
+            <img 
+              src={logoImage} 
+              alt="Riddha Interio Mart" 
+              className="h-16 w-auto object-contain max-w-[220px]" 
+            />
+          </Link>
+          <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-slate-600 transition-colors">
+            <FiX size={20} />
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="relative z-10 flex-1 p-4 mt-4 space-y-1 overflow-y-auto no-scrollbar">
-          {menuItems.map((item) => (
-            <NavItem 
-              key={item.label} 
-              item={item} 
-              onClose={onClose} 
-              expanded={expandedItems[item.label]}
-              onToggle={toggleExpand}
-              sellersCount={sellersCount}
-              deliveryCount={deliveryCount}
-              productCount={productCount}
-            />
+        {/* Navigation Categories */}
+        <nav className="relative z-10 flex-1 p-4 overflow-y-auto custom-scrollbar space-y-5 bg-white">
+          {menuGroups.map((group) => (
+            <div key={group.title} className="space-y-0.5">
+              <h3 className="px-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 mt-1">
+                {group.title}
+              </h3>
+              <div className="space-y-0.5">
+                {group.items.map((item) => (
+                  <NavItem 
+                    key={item.label} 
+                    item={item} 
+                    onClose={onClose} 
+                    expanded={expandedItems[item.label]}
+                    onToggle={toggleExpand}
+                    sellersCount={sellersCount}
+                    deliveryCount={deliveryCount}
+                    productCount={productCount}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
-        {/* Footer info and logout */}
-        <div className="relative z-10 p-6 border-t border-white/10 mt-auto backdrop-blur-sm bg-black/20">
+        {/* Live System Status Card */}
+        <div className="relative z-10 px-5 py-3.5 mx-4 mb-3 rounded-xl bg-slate-50 border border-slate-200/60">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">System Monitor</span>
+          </div>
+          <div className="flex items-center justify-between mt-2.5">
+            <div className="text-left">
+              <p className="text-[9px] text-slate-400">Database</p>
+              <p className="text-xs font-bold text-emerald-600">99.98%</p>
+            </div>
+            <div className="text-left">
+              <p className="text-[9px] text-slate-400">API Latency</p>
+              <p className="text-xs font-bold text-slate-600">12ms</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Profile Card & Logout */}
+        <div className="relative z-10 p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[var(--color-primary)] to-[var(--color-accent-pink)] flex items-center justify-center text-white text-xs font-bold shadow-sm">
+              {user?.fullName?.charAt(0) || 'A'}
+            </div>
+            <div className="flex flex-col">
+              <p className="text-xs font-bold text-slate-800 truncate max-w-[130px]">{user?.fullName || 'Super Admin'}</p>
+              <p className="text-[8px] text-[var(--color-accent-pink)] font-extrabold uppercase tracking-wider">Master Acc</p>
+            </div>
+          </div>
           <button 
             onClick={handleLogout}
-            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold ${role === 'admin' ? 'text-purple-300' : 'text-teal-300'} hover:bg-white/5 transition-colors group mb-4`}
+            className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 transition-all cursor-pointer"
+            title="Sign Out"
           >
-            <FiLogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
-            Sign Out
+            <FiLogOut size={14} />
           </button>
-          <p className="font-medium text-white/80 drop-shadow-md">© 2026 Riddha Interio Mart</p>
-          <p className="mt-1 text-[10px] tracking-wide uppercase drop-shadow-md">{role === 'admin' ? 'Master Control' : 'Operation Unit'} v1.0</p>
         </div>
       </aside>
     </>

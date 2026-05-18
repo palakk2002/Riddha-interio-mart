@@ -31,15 +31,15 @@ const LoginPage = () => {
   const role = getRole();
   const isDelivery = role === 'delivery';
   
-  // Theme styling based on role
+  // Unified signature brand colors
   const theme = {
-    primaryBtn: isDelivery ? 'bg-[#2A458A] hover:bg-[#1f346b]' : 'bg-slate-900 hover:bg-black',
-    accentText: isDelivery ? 'text-[#2A458A]' : 'text-[#189D91]',
-    focusBorder: isDelivery ? 'focus:border-[#2A458A] focus:ring-[#2A458A]/5' : 'focus:border-[#189D91] focus:ring-[#189D91]/5',
-    iconFocus: isDelivery ? 'group-focus-within:text-[#2A458A]' : 'group-focus-within:text-[#189D91]',
-    checkboxBg: isDelivery ? 'bg-[#2A458A] border-[#2A458A]' : 'bg-[#189D91] border-[#189D91]',
-    ambientGlow: isDelivery ? 'bg-[#2A458A]/20' : 'bg-[#189D91]/20',
-    lineGlow: isDelivery ? 'from-[#2A458A]' : 'from-[#189D91]'
+    primaryBtn: isDelivery ? 'bg-[#2A458A] hover:opacity-90' : 'bg-[var(--color-primary)] hover:opacity-90',
+    accentText: isDelivery ? 'text-[#2A458A]' : 'text-[var(--color-primary)]',
+    focusBorder: isDelivery ? 'focus:border-[#2A458A] focus:ring-[#2A458A]/5' : 'focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/5',
+    iconFocus: isDelivery ? 'group-focus-within:text-[#2A458A]' : 'group-focus-within:text-[var(--color-primary)]',
+    checkboxBg: isDelivery ? 'bg-[#2A458A] border-[#2A458A]' : 'bg-[var(--color-primary)] border-[var(--color-primary)]',
+    ambientGlow: isDelivery ? 'bg-[#2A458A]/10' : 'bg-[var(--color-primary)]/10',
+    lineGlow: isDelivery ? 'from-[#2A458A]' : 'from-[var(--color-primary)]'
   };
 
   const getSignupPath = () => {
@@ -102,43 +102,43 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans">
-      {/* Left Section - Branding & Visuals */}
-      <div className="hidden lg:flex flex-1 relative items-center justify-center overflow-hidden bg-gradient-to-br from-[#2A458A] via-[#1E3163] to-[#111A30]">
-        {/* Subtle Ambient Mesh Glows */}
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#189D91]/15 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#2A458A]/30 rounded-full blur-[100px] pointer-events-none translate-x-1/3 translate-y-1/3" />
+      {/* Left Section - Branded, Bright & Clean (No Dark Colors!) */}
+      <div className="hidden lg:flex flex-1 relative items-center justify-center overflow-hidden bg-gradient-to-br from-teal-50/50 via-slate-50 to-pink-50/30 border-r border-slate-200/80">
+        {/* Soft logo related gradients */}
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[var(--color-primary)]/5 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[var(--color-accent-pink)]/5 rounded-full blur-[100px] pointer-events-none translate-x-1/3 translate-y-1/3" />
         
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className="relative z-10 max-w-lg w-full p-12 text-center flex flex-col items-center"
         >
           {/* Logo Frame */}
-          <div className="mb-10 w-full max-w-[280px]">
+          <div className="mb-8 w-full max-w-[280px]">
              <img 
                src={logo} 
                alt="Riddha Logo" 
-               className="w-full h-auto object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.2)]" 
+               className="w-full h-auto object-contain" 
              />
           </div>
 
           {/* Typography Area */}
           <div className="space-y-4 text-center">
-             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/10 rounded-full backdrop-blur-sm">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#189D91]" />
-                <span className="text-[10px] font-bold text-white/95 uppercase tracking-[0.2em] leading-none">
-                   Premium Quality Supply
+             <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-50 border border-teal-200/50 rounded-full">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
+                <span className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider leading-none">
+                   Premium Interior Mart
                 </span>
              </div>
 
-             <h2 className="text-2xl font-bold text-white tracking-tight leading-snug">
-                India's Largest <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#B9C6E2]">Interior Supply Hub</span>
+             <h2 className="text-2xl font-bold text-slate-800 tracking-tight leading-snug">
+                India's Premium <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-700 to-[var(--color-primary)] font-black">Interior & Design Hub</span>
              </h2>
 
-             <p className="text-[#B9C6E2] text-xs font-normal leading-relaxed max-w-sm mx-auto">
-                Curating the finest collection of luxury interiors for over a decade.
+             <p className="text-slate-500 text-xs font-semibold leading-relaxed max-w-sm mx-auto">
+                Curating premium architectural collection of luxury fittings and design setups.
              </p>
           </div>
         </motion.div>
@@ -153,28 +153,30 @@ const LoginPage = () => {
           </div>
 
           {/* Header */}
-          <div className="mb-10 flex items-center justify-between">
+          <div className="mb-8 flex items-center justify-between">
             <div>
-                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Log In</h1>
-                <p className="text-sm font-medium text-slate-500 mt-1 capitalize">Access your {role} panel</p>
+                <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Log In</h1>
+                <p className="text-xs font-semibold text-slate-400 mt-1 capitalize">Access your secure {role} panel</p>
             </div>
-            <Link to="/" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all border border-slate-100">
-                <FiArrowLeft size={18} />
+            <Link to="/" className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors border border-slate-100">
+                <FiArrowLeft size={16} />
             </Link>
           </div>
 
-          {/* Role Selection for Admin */}
+          {/* Role Selection Switch (Compact pill toggle) */}
           {role === 'admin' && (
-            <div className="mb-8 p-1.5 bg-slate-50 rounded-2xl border border-slate-100 flex">
+            <div className="mb-6 p-1 bg-slate-100 rounded-xl border border-slate-200/60 flex">
               <button
+                type="button"
                 onClick={() => setRbacRole('admin')}
-                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${rbacRole === 'admin' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${rbacRole === 'admin' ? 'bg-[#189D91] text-white shadow-sm shadow-[#189D91]/20' : 'text-slate-600 hover:text-slate-800'}`}
               >
                 Super Admin
               </button>
               <button
+                type="button"
                 onClick={() => setRbacRole('assistant')}
-                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${rbacRole === 'assistant' ? 'bg-[#189D91] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${rbacRole === 'assistant' ? 'bg-[#EC008C] text-white shadow-sm shadow-[#EC008C]/20' : 'text-slate-600 hover:text-slate-800'}`}
               >
                 Assistant
               </button>
@@ -187,11 +189,11 @@ const LoginPage = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="mb-8 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col items-center gap-3"
+                className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl flex flex-col items-center gap-2"
               >
                 <span className="text-rose-600 text-[10px] font-bold uppercase tracking-wider text-center leading-relaxed">{error}</span>
                 {unverifiedEmail && (
-                  <button onClick={handleResendAndVerify} className="bg-rose-600 text-white px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-rose-700 transition-colors">
+                  <button onClick={handleResendAndVerify} className="bg-rose-600 text-white px-5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-rose-700 transition-colors">
                     Verify Email
                   </button>
                 )}
@@ -199,77 +201,77 @@ const LoginPage = () => {
             )}
           </AnimatePresence>
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-3.5">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email ID</label>
+                <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 ml-0.5">Email Address</label>
                 <div className="relative group">
-                  <FiUser className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 ${theme.iconFocus} transition-colors`} size={18} />
+                  <FiUser className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-350 ${theme.iconFocus} transition-colors`} size={16} />
                   <input
                     type="text"
                     placeholder="name@example.com"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white ${theme.focusBorder} outline-none transition-all font-semibold text-slate-800 placeholder:text-slate-300`}
+                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-xs font-semibold text-slate-700 placeholder:text-slate-300`}
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <div className="flex justify-between items-center px-1">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Password</label>
-                    <button type="button" onClick={() => navigate('/forgot-password')} className={`text-[9px] font-black ${theme.accentText} uppercase tracking-widest hover:underline`}>Forgot?</button>
+                <div className="flex justify-between items-center px-0.5">
+                    <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Password</label>
+                    <button type="button" onClick={() => navigate('/forgot-password')} className={`text-[9px] font-bold ${theme.accentText} uppercase tracking-wider hover:underline`}>Forgot?</button>
                 </div>
                 <div className="relative group">
-                  <FiLock className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 ${theme.iconFocus} transition-colors`} size={18} />
+                  <FiLock className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-355 ${theme.iconFocus} transition-colors`} size={16} />
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={`w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white ${theme.focusBorder} outline-none transition-all font-semibold text-slate-800 placeholder:text-slate-300`}
+                    className={`w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-xs font-semibold text-slate-700 placeholder:text-slate-300`}
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-600">
-                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
+                    {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 px-1">
+            <div className="flex items-center gap-2.5 px-0.5 pt-1">
               <button 
                 type="button" 
                 onClick={() => setRememberMe(!rememberMe)} 
-                className="flex items-center gap-2.5 group"
+                className="flex items-center gap-2 group"
               >
-                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${rememberMe ? theme.checkboxBg : 'border-slate-200 bg-white group-hover:border-slate-300'}`}>
-                  {rememberMe && <FiCheck className="text-white text-xs stroke-[4]" />}
+                <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${rememberMe ? theme.checkboxBg : 'border-slate-200 bg-white group-hover:border-slate-300'}`}>
+                  {rememberMe && <FiCheck className="text-white text-[10px] stroke-[4]" />}
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-600 transition-colors">Remember Me</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-550 transition-colors">Remember Me</span>
               </button>
             </div>
 
             <Button
               type="submit"
               disabled={loading}
-              className={`w-full py-4 rounded-xl ${theme.primaryBtn} text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-slate-200 transition-all active:scale-[0.98] mt-4`}
+              className={`w-full py-2.5 rounded-lg ${theme.primaryBtn} text-white font-bold text-[10px] uppercase tracking-wider transition-all active:scale-[0.98] mt-4`}
             >
               {loading ? 'Authenticating...' : 'Sign In Now'}
             </Button>
 
             {/* Social Logins */}
             {role !== 'admin' && (
-              <div className="pt-8">
-                <div className="relative flex items-center justify-center mb-8">
+              <div className="pt-6">
+                <div className="relative flex items-center justify-center mb-6">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-slate-100"></div>
                   </div>
-                  <span className="relative px-4 bg-white text-[9px] font-black text-slate-300 uppercase tracking-widest">Or Continue With</span>
+                  <span className="relative px-3 bg-white text-[9px] font-bold text-slate-300 uppercase tracking-wider">Or Continue With</span>
                 </div>
-                <div className="flex justify-center gap-4">
+                <div className="flex justify-center gap-3">
                   {[FaGoogle, FaFacebookF, FaXTwitter].map((Icon, idx) => (
-                    <button key={idx} type="button" className="w-12 h-12 rounded-xl border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-200 transition-all hover:scale-105 active:scale-95">
-                      <Icon size={18} />
+                    <button key={idx} type="button" className="w-10 h-10 rounded-lg border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-600 hover:border-slate-200 transition-all hover:scale-105 active:scale-95">
+                      <Icon size={14} />
                     </button>
                   ))}
                 </div>
@@ -277,19 +279,19 @@ const LoginPage = () => {
             )}
 
             {getSignupPath() && (
-              <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest mt-8">
+              <p className="text-center text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-6">
                 Don't have an account? <Link to={getSignupPath()} className={`${theme.accentText} hover:underline ml-1`}>Create Account</Link>
               </p>
             )}
           </form>
         </div>
+      </div>
 
-        {/* Footer info */}
-        <div className="absolute bottom-8 left-0 right-0 text-center">
-            <p className="text-[9px] font-black text-slate-200 uppercase tracking-[0.3em] italic">
-                © {new Date().getFullYear()} Riddha Interio Mart. All Rights Reserved.
-            </p>
-        </div>
+      {/* Footer Info */}
+      <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none">
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+              © {new Date().getFullYear()} Riddha Interio Mart. All Rights Reserved.
+          </p>
       </div>
     </div>
   );

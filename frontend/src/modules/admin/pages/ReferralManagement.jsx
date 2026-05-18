@@ -15,8 +15,8 @@ const ReferralManagement = () => {
   });
 
   const stats = [
-    { label: 'Total Referrals', value: '156', icon: FiUsers, color: 'bg-brand-purple' },
-    { label: 'Successful Referrals', value: '89', icon: FiCheck, color: 'bg-brand-teal' },
+    { label: 'Total Referrals', value: '156', icon: FiUsers, color: 'bg-[var(--color-primary)]' },
+    { label: 'Successful Referrals', value: '89', icon: FiCheck, color: 'bg-[var(--color-accent-pink)]' },
     { label: 'Total Rewards Given', value: '₹17,800', icon: FiDollarSign, color: 'bg-emerald-600' },
   ];
 
@@ -39,38 +39,38 @@ const ReferralManagement = () => {
 
   return (
     <PageWrapper>
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto space-y-5 pb-12">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="space-y-1">
-            <h1 className="text-3xl md:text-5xl font-display font-extrabold text-[#240046] tracking-tight leading-none">
-              Referral <span className="text-[#240046]">System</span>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm">
+          <div className="space-y-0.5">
+            <h1 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+              <FiGift className="text-[var(--color-primary)]" size={20} /> Referral System
             </h1>
-            <p className="subtitle mt-2">Manage user referrals and reward structures</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Configure client viral onboarding rewards</p>
           </div>
           
-          <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-lg border border-soft-oatmeal">
-             <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${isEnabled ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
-               System {isEnabled ? 'Active' : 'Disabled'}
+          <div className="flex items-center gap-3 bg-slate-50 p-1.5 rounded-lg border border-slate-200/60">
+             <div className={`px-2.5 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-all ${isEnabled ? 'bg-emerald-50 text-emerald-600 border border-emerald-100/55' : 'bg-rose-50 text-rose-600 border border-rose-100/55'}`}>
+               Engine {isEnabled ? 'Active' : 'Disabled'}
              </div>
              <button 
                onClick={() => setIsEnabled(!isEnabled)}
-               className={`w-14 h-8 rounded-full relative transition-all duration-300 ${isEnabled ? 'bg-brand-teal' : 'bg-gray-200'}`}
+               className={`w-10 h-5.5 rounded-full relative transition-all duration-300 ${isEnabled ? 'bg-[var(--color-primary)]' : 'bg-slate-200'}`}
              >
-                <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all duration-300 shadow-sm ${isEnabled ? 'right-1' : 'left-1'}`} />
+                <div className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full transition-all duration-300 shadow-sm ${isEnabled ? 'right-0.5' : 'left-0.5'}`} />
              </button>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex bg-white/50 p-1 rounded-[1.5rem] border border-soft-oatmeal backdrop-blur-md">
+        {/* Navigation Tabs (Compact Pill Bar) */}
+        <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
            {tabs.map((tab) => (
              <button
                key={tab.id}
                onClick={() => setActiveTab(tab.id)}
-               className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-[#240046] text-white shadow-xl' : 'text-gray-400 hover:text-[#240046]'}`}
+               className={`flex-1 flex items-center justify-center gap-2 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${activeTab === tab.id ? 'bg-white text-slate-800 shadow-sm border border-slate-200/30' : 'text-slate-400 hover:text-slate-600'}`}
              >
-                <tab.icon size={18} />
+                <tab.icon size={14} />
                 {tab.label}
              </button>
            ))}
@@ -81,68 +81,70 @@ const ReferralManagement = () => {
            {activeTab === 'dashboard' && (
              <motion.div
                key="dashboard"
-               initial={{ opacity: 0, y: 20 }}
+               initial={{ opacity: 0, y: 12 }}
                animate={{ opacity: 1, y: 0 }}
-               exit={{ opacity: 0, y: -20 }}
-               className="space-y-8"
+               exit={{ opacity: 0, y: -12 }}
+               className="space-y-5"
              >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Stats cards in grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                    {stats.map((stat, i) => (
                      <StatCard key={i} {...stat} />
                    ))}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-8">
-                   <div className="bg-white rounded-[2.5rem] shadow-xl border border-soft-oatmeal p-8 md:p-12">
-                      <div className="flex items-center justify-between mb-10">
+                {/* Dashboard layout with zero dark boxes */}
+                <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_0.7fr] gap-5">
+                   {/* Left Side: Referral Pulse */}
+                   <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 p-5">
+                      <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
                          <div>
-                            <h3 className="text-xl font-display font-bold flex items-center gap-3 text-deep-espresso">
-                               <FiActivity className="text-brand-teal" /> Referral Pulse
+                            <h3 className="text-xs font-bold flex items-center gap-2 text-slate-800">
+                               <FiActivity className="text-[var(--color-primary)]" /> Referral Activity Stream
                             </h3>
-                            <p className="text-xs text-brand-teal tracking-widest uppercase mt-1">Latest referral events</p>
+                            <p className="text-[9px] text-[var(--color-primary)] font-bold tracking-wider uppercase mt-0.5">Real-time conversions</p>
                          </div>
-                         <button className="text-[10px] font-black uppercase tracking-widest text-brand-purple border-b-2 border-brand-purple/10 pb-1">View All Activity</button>
+                         <button className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-accent-pink)] border-b border-transparent hover:border-[var(--color-accent-pink)] pb-0.5">
+                           Export Logs
+                         </button>
                       </div>
                       
-                      <div className="space-y-8">
+                      <div className="divide-y divide-slate-100">
                          {[1, 2, 3].map((item) => (
-                           <div key={item} className="flex gap-6 items-start group">
-                             <div className="w-3 h-3 rounded-full bg-brand-purple mt-2 shadow-[0_0_10px_rgba(153,27,27,0.3)] group-hover:scale-150 transition-transform"></div>
-                             <div className="flex-1 pb-6 border-b border-soft-oatmeal/30 last:border-0">
-                               <p className="text-sm font-medium text-deep-espresso/60">
-                                 <span className="font-black text-deep-espresso text-base">New Referral Completed</span> 
-                                 <span className="mx-2">by</span> 
-                                 <span className="text-[#240046] font-black">Rahul Sharma</span>
+                           <div key={item} className="flex gap-3 py-3 items-start group first:pt-0 last:pb-0">
+                             <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] mt-1.5 shadow-[0_0_6px_rgba(24,157,145,0.4)] group-hover:scale-125 transition-transform" />
+                             <div className="flex-1">
+                               <p className="text-xs font-semibold text-slate-600">
+                                 New Referral Completed by <span className="text-slate-800 font-bold">Rahul Sharma</span>
                                </p>
-                               <div className="flex items-center gap-3 mt-2 text-[10px] font-bold text-brand-teal uppercase tracking-widest">
-                                 <span>Reward: ₹100 Issued</span>
-                                 <span className="w-1 h-1 rounded-full bg-soft-oatmeal"></span>
+                               <div className="flex items-center gap-2 mt-1 text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                                 <span className="text-[var(--color-primary)]">Reward: ₹100 Issued</span>
+                                 <span className="w-1 h-1 rounded-full bg-slate-200"></span>
                                  <span>2 mins ago</span>
-                               </div>
+                                </div>
                              </div>
                            </div>
                          ))}
                       </div>
                    </div>
 
-                   <div className="bg-gradient-to-br from-[#240046] to-black rounded-[2.5rem] p-10 text-white relative overflow-hidden flex flex-col justify-between shadow-2xl min-h-[400px]">
+                   {/* Right Side: Clean Light Campaign Box (Zero dark color!) */}
+                   <div className="bg-gradient-to-br from-teal-50/50 to-pink-50/50 rounded-xl p-5 text-slate-800 border border-slate-200/60 relative overflow-hidden flex flex-col justify-between shadow-sm min-h-[220px]">
                       <div className="relative z-10">
-                        <div className="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md mb-8 border border-white/20">
-                          <FiGift size={16} /> Strategy Insight
+                        <div className="inline-flex items-center gap-1.5 bg-white/80 text-[var(--color-primary)] px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider border border-teal-200/20 backdrop-blur-sm mb-3">
+                          <FiGift size={13} /> Strategy Recommendation
                         </div>
-                        <h3 className="text-3xl font-display font-bold leading-tight">
-                          Referral conversions are up <span className="text-emerald-400">18%</span> this month.
+                        <h3 className="text-base font-bold text-slate-800 leading-snug">
+                          Referral sign-ups increased by <span className="text-[var(--color-primary)] font-black">18%</span> this period.
                         </h3>
-                        <p className="mt-6 text-white/50 text-sm font-medium leading-relaxed">
-                          The "Spring Luxury" campaign is driving high-quality leads. Consider increasing the Referrer Reward to ₹150 for the next weekend.
+                        <p className="mt-2 text-slate-500 text-[10px] font-semibold leading-relaxed">
+                          Your active campaign is performing at high-density conversion levels. Consider boosting parameters for seasonal rewards to expand metrics.
                         </p>
                       </div>
                       
-                      <button className="relative z-10 bg-white text-deep-espresso font-black text-[10px] uppercase tracking-[0.2em] py-5 px-8 rounded-2xl w-full transition-all hover:bg-brand-teal hover:scale-[1.02] active:scale-95 shadow-xl flex items-center justify-center gap-3">
-                        Launch Campaign <FiArrowRight />
+                      <button className="relative z-10 mt-4 bg-[var(--color-primary)] text-white hover:opacity-90 font-bold text-[9px] uppercase tracking-wider py-2 px-4 rounded-lg w-full transition-all shadow-sm flex items-center justify-center gap-1.5 active:scale-[0.98]">
+                        Optimize Referral Caps <FiArrowRight />
                       </button>
-
-                      <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-brand-purple/20 rounded-full blur-[100px]"></div>
                    </div>
                 </div>
              </motion.div>
@@ -151,37 +153,37 @@ const ReferralManagement = () => {
            {activeTab === 'users' && (
              <motion.div
                key="users"
-               initial={{ opacity: 0, x: 20 }}
+               initial={{ opacity: 0, x: 12 }}
                animate={{ opacity: 1, x: 0 }}
-               exit={{ opacity: 0, x: -20 }}
-               className="bg-white rounded-[2.5rem] shadow-xl border border-soft-oatmeal overflow-hidden"
+               exit={{ opacity: 0, x: -12 }}
+               className="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden"
              >
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
-                     <thead>
-                       <tr className="bg-soft-oatmeal/5 border-b border-soft-oatmeal/10">
-                         <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#240046]/40">User Name</th>
-                         <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#240046]/40">Referral Code</th>
-                         <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#240046]/40">Referred By</th>
-                         <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#240046]/40">Status</th>
-                         <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#240046]/40">Joined Date</th>
-                       </tr>
-                     </thead>
-                     <tbody className="divide-y divide-soft-oatmeal/10">
-                       {referralUsers.map((user) => (
-                         <tr key={user.id} className="hover:bg-soft-oatmeal/5 transition-colors">
-                           <td className="px-10 py-6 font-bold text-deep-espresso">{user.name}</td>
-                           <td className="px-10 py-6 font-black text-brand-purple tracking-widest text-xs uppercase">{user.code}</td>
-                           <td className="px-10 py-6 font-medium text-gray-500">{user.referredBy}</td>
-                           <td className="px-10 py-6">
-                              <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] ${user.status === 'Completed' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`}>
-                                {user.status}
-                              </span>
-                           </td>
-                           <td className="px-10 py-6 font-bold text-deep-espresso/40 text-xs">{user.date}</td>
-                         </tr>
-                       ))}
-                     </tbody>
+                      <thead>
+                        <tr className="bg-slate-50/30 border-b border-slate-150">
+                          <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">User Name</th>
+                          <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">Referral Code</th>
+                          <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">Referred By</th>
+                          <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">Status</th>
+                          <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">Joined Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {referralUsers.map((user) => (
+                          <tr key={user.id} className="hover:bg-slate-50/20 transition-colors">
+                            <td className="px-4 py-2.5 font-bold text-slate-700 text-xs">{user.name}</td>
+                            <td className="px-4 py-2.5 font-bold text-[var(--color-accent-pink)] tracking-wider text-xs uppercase">{user.code}</td>
+                            <td className="px-4 py-2.5 font-semibold text-slate-500 text-xs">{user.referredBy}</td>
+                            <td className="px-4 py-2.5">
+                               <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase border tracking-wider ${user.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100/50' : 'bg-amber-50 text-amber-600 border-amber-100/50'}`}>
+                                 {user.status}
+                               </span>
+                            </td>
+                            <td className="px-4 py-2.5 font-bold text-slate-400 text-[10px]">{user.date}</td>
+                          </tr>
+                        ))}
+                      </tbody>
                   </table>
                 </div>
              </motion.div>
@@ -190,85 +192,87 @@ const ReferralManagement = () => {
            {activeTab === 'settings' && (
              <motion.div
                key="settings"
-               initial={{ opacity: 0, y: 20 }}
+               initial={{ opacity: 0, y: 12 }}
                animate={{ opacity: 1, y: 0 }}
-               exit={{ opacity: 0, y: -20 }}
-               className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-8"
+               exit={{ opacity: 0, y: -12 }}
+               className="grid grid-cols-1 md:grid-cols-[1.3fr_0.7fr] gap-5"
              >
-                <div className="bg-white rounded-[2.5rem] shadow-xl border border-soft-oatmeal p-10 space-y-10">
-                   <div className="flex items-center gap-4 mb-2">
-                      <div className="h-12 w-12 bg-brand-purple/10 rounded-2xl flex items-center justify-center text-brand-purple">
-                        <FiDollarSign size={24} />
+                {/* Reward Configuration Left Box */}
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 p-5 space-y-6">
+                   <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+                      <div className="h-9 w-9 bg-teal-50 rounded-lg flex items-center justify-center text-[var(--color-primary)]">
+                        <FiDollarSign size={18} />
                       </div>
                       <div>
-                        <h3 className="text-xl font-display font-bold text-deep-espresso uppercase tracking-tight">Reward Configuration</h3>
-                        <p className="text-[10px] text-brand-teal font-black uppercase tracking-widest">Adjust monetary rewards for each milestone</p>
+                        <h3 className="text-xs font-bold text-slate-800 uppercase tracking-tight">Reward Settings</h3>
+                        <p className="text-[9px] text-[var(--color-primary)] font-bold uppercase tracking-wider">Set payouts for user cycles</p>
                       </div>
                    </div>
 
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="space-y-3">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Reward for Referrer (₹)</label>
-                         <div className="relative group">
-                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                         <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 ml-0.5">Referrer Bonus (₹)</label>
+                         <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-450 font-bold text-xs">₹</span>
                             <input 
                               type="number" 
                               value={referralSettings.referrerReward}
                               onChange={(e) => setReferralSettings({...referralSettings, referrerReward: e.target.value})}
-                              className="w-full pl-12 pr-6 py-4 rounded-2xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-brand-purple/20 focus:bg-white focus:outline-none text-lg font-black text-deep-espresso transition-all" 
+                              className="w-full pl-7 pr-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:border-[var(--color-primary)] text-xs font-bold text-slate-800 transition-all" 
                             />
                          </div>
-                         <p className="text-[9px] text-gray-400 italic">Issued after the new user's first order is completed.</p>
+                         <p className="text-[8px] text-slate-400 italic">Given once referred user settles their initial purchase.</p>
                       </div>
 
-                      <div className="space-y-3">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Reward for New User (₹)</label>
-                         <div className="relative group">
-                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                      <div className="space-y-1.5">
+                         <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 ml-0.5">Invited User Bonus (₹)</label>
+                         <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-450 font-bold text-xs">₹</span>
                             <input 
                               type="number" 
                               value={referralSettings.newUserReward}
                               onChange={(e) => setReferralSettings({...referralSettings, newUserReward: e.target.value})}
-                              className="w-full pl-12 pr-6 py-4 rounded-2xl bg-soft-oatmeal/10 border-2 border-transparent focus:border-brand-purple/20 focus:bg-white focus:outline-none text-lg font-black text-deep-espresso transition-all" 
+                              className="w-full pl-7 pr-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:border-[var(--color-primary)] text-xs font-bold text-slate-800 transition-all" 
                             />
                          </div>
-                         <p className="text-[9px] text-gray-400 italic">Applied as a discount on their very first purchase.</p>
+                         <p className="text-[8px] text-slate-400 italic">Disbursed as onboarding checkout coupons.</p>
                       </div>
                    </div>
 
-                   <div className="pt-6 border-t border-soft-oatmeal/20">
+                   <div className="pt-4 border-t border-slate-100 flex justify-end">
                       <button 
                         onClick={handleSaveSettings}
-                        className="bg-brand-purple text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-deep-espresso transition-all shadow-xl shadow-brand-purple/20 active:scale-95"
+                        className="bg-[var(--color-primary)] hover:opacity-90 text-white px-6 py-2 rounded-lg font-bold text-[9px] uppercase tracking-wider transition-all shadow-sm active:scale-[0.98]"
                       >
-                        Update Settings
+                        Apply Changes
                       </button>
                    </div>
                 </div>
 
-                <div className="bg-white rounded-[2.5rem] shadow-xl border border-soft-oatmeal p-10 space-y-8">
-                   <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-teal">System Status</h4>
-                   <div className="p-6 rounded-[2rem] border-2 border-dashed border-soft-oatmeal space-y-4">
+                {/* Right Side: Status Details */}
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 p-5 space-y-6">
+                   <h4 className="text-[9px] font-bold uppercase tracking-wider text-slate-400 pb-2 border-b border-slate-50">Logistics Settings</h4>
+                   <div className="p-3.5 rounded-lg border border-dashed border-slate-200 space-y-2">
                       <div className="flex items-center justify-between">
-                         <span className="text-xs font-bold text-deep-espresso uppercase tracking-widest">Referral Engine</span>
-                         <span className={`h-3 w-3 rounded-full ${isEnabled ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
+                         <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Referral Core API</span>
+                         <span className={`h-2 w-2 rounded-full ${isEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
                       </div>
-                      <p className="text-xs text-gray-400 leading-relaxed font-medium">
-                        Disabling the system will hide all referral-related UI components for users and prevent new referral codes from being generated or used.
+                      <p className="text-[9px] text-slate-400 leading-normal font-medium">
+                        Halting coordinates disables front-facing client interfaces immediately.
                       </p>
                    </div>
                    
-                   <div className="space-y-4 pt-4">
-                      <div className="flex items-center justify-between p-4 bg-soft-oatmeal/10 rounded-2xl">
-                         <span className="text-[10px] font-black uppercase tracking-widest text-deep-espresso">Auto-Verify Referrals</span>
-                         <div className="w-10 h-6 bg-brand-teal rounded-full relative">
-                            <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                   <div className="space-y-2.5">
+                      <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-100">
+                         <span className="text-[9px] font-bold uppercase tracking-wider text-slate-700">Auto-Approve Rewards</span>
+                         <div className="w-8 h-4.5 bg-[var(--color-primary)] rounded-full relative">
+                            <div className="absolute right-0.5 top-0.5 w-3.5 h-3.5 bg-white rounded-full"></div>
                          </div>
                       </div>
-                      <div className="flex items-center justify-between p-4 bg-soft-oatmeal/10 rounded-2xl">
-                         <span className="text-[10px] font-black uppercase tracking-widest text-deep-espresso">Fraud Detection</span>
-                         <div className="w-10 h-6 bg-brand-teal rounded-full relative">
-                            <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                      <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-100">
+                         <span className="text-[9px] font-bold uppercase tracking-wider text-slate-700">Fraud Telemetry</span>
+                         <div className="w-8 h-4.5 bg-[var(--color-primary)] rounded-full relative">
+                            <div className="absolute right-0.5 top-0.5 w-3.5 h-3.5 bg-white rounded-full"></div>
                          </div>
                       </div>
                    </div>

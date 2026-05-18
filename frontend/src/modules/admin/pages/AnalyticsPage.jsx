@@ -43,23 +43,34 @@ const AnalyticsPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-          <div>
-            <h1 className="text-3xl font-black text-deep-espresso tracking-tight uppercase italic flex items-center gap-3">
-              <FiActivity className="text-warm-sand" /> Performance <span className="text-warm-sand">Insights</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[30%] h-[100%] bg-gradient-to-l from-teal-50/10 to-transparent pointer-events-none" />
+          <div className="space-y-1 relative z-10">
+            <span className="bg-[#189D91]/10 text-[#189D91] text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1.5 w-fit">
+              <FiActivity size={11} className="animate-pulse" /> Telemetry & Intelligence
+            </span>
+            <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+              Performance Insights
             </h1>
-            <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mt-2">Real-time business intelligence and revenue metrics.</p>
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">
+              Real-time business intelligence and revenue metrics.
+            </p>
           </div>
           
-          <div className="flex items-center gap-3 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-200/60 w-fit shrink-0 relative z-10">
             {['Today', 'Last 7 Days', 'This Month'].map((range) => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${timeRange === range ? 'bg-deep-espresso text-white shadow-lg' : 'text-gray-400 hover:text-deep-espresso hover:bg-gray-50'}`}
+                className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all duration-200 ${
+                  timeRange === range 
+                    ? 'bg-[#189D91] text-white shadow-sm shadow-teal-500/10' 
+                    : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
+                }`}
               >
                 {range}
               </button>
@@ -68,122 +79,155 @@ const AnalyticsPage = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          {stats.map((stat, idx) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-200/20 group hover:scale-[1.02] transition-all"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className={`w-14 h-14 rounded-2xl ${stat.color} flex items-center justify-center text-2xl transition-transform group-hover:rotate-12`}>
-                  <stat.icon />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {stats.map((stat, idx) => {
+            const Icon = stat.icon;
+            const isUp = stat.isUp;
+            const brandBg = idx === 0 || idx === 2 ? 'bg-teal-50 text-[#189D91] border-teal-100/50' : 'bg-pink-50 text-[#EC008C] border-pink-100/50';
+            
+            return (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.05 }}
+                className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm hover:border-[#189D91]/40 hover:shadow-md transition-all group flex flex-col justify-between min-h-[135px]"
+              >
+                <div className="flex items-start justify-between">
+                  <div className={`w-10 h-10 rounded-lg ${brandBg} border flex items-center justify-center text-lg transition-transform group-hover:scale-105`}>
+                    <Icon size={18} />
+                  </div>
+                  <div className={`flex items-center gap-0.5 text-[9px] font-bold px-2 py-0.5 rounded-full border ${
+                    isUp 
+                      ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                      : 'bg-rose-50 text-rose-600 border-rose-100'
+                  }`}>
+                    {isUp ? <FiArrowUpRight size={10} /> : <FiArrowDownRight size={10} />}
+                    {stat.change}
+                  </div>
                 </div>
-                <div className={`flex items-center gap-1 text-[10px] font-black px-3 py-1 rounded-full ${stat.isUp ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
-                  {stat.isUp ? <FiArrowUpRight /> : <FiArrowDownRight />}
-                  {stat.change}
+                
+                <div className="mt-4">
+                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{stat.label}</p>
+                  <p className="text-2xl font-black text-slate-800 tracking-tight">{stat.value}</p>
                 </div>
-              </div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{stat.label}</p>
-              <p className="text-3xl font-black text-deep-espresso tracking-tighter">{stat.value}</p>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Revenue Chart Placeholder */}
-          <div className="lg:col-span-2 bg-white rounded-[3rem] p-10 border border-gray-100 shadow-xl shadow-gray-200/20 relative overflow-hidden">
-             <div className="flex items-center justify-between mb-12">
-               <div>
-                 <h3 className="text-xl font-black text-deep-espresso uppercase tracking-tight italic">Revenue Growth</h3>
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Daily sales performance analysis</p>
-               </div>
-               <div className="flex items-center gap-4">
-                 <div className="flex items-center gap-2">
-                   <div className="w-3 h-3 rounded-full bg-[#240046]" />
-                   <span className="text-[10px] font-black uppercase text-gray-400">Current</span>
-                 </div>
-                 <div className="flex items-center gap-2">
-                   <div className="w-3 h-3 rounded-full bg-gray-100" />
-                   <span className="text-[10px] font-black uppercase text-gray-400">Previous</span>
-                 </div>
-               </div>
-             </div>
+        {/* Core Charts & Distribution Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Revenue Chart Card */}
+          <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-50">
+              <div>
+                <h3 className="text-base font-bold text-slate-850 flex items-center gap-2">
+                  <FiTrendingUp className="text-[#189D91]" /> Revenue Growth
+                </h3>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">Daily sales performance analysis</p>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[#189D91]" />
+                  <span className="text-[10px] font-bold uppercase text-slate-400">Current</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[#EC008C]" />
+                  <span className="text-[10px] font-bold uppercase text-slate-400">Previous</span>
+                </div>
+              </div>
+            </div>
 
-             {/* Recharts Area Chart */}
-             <div className="h-72 w-full mt-4">
-               <ResponsiveContainer width="100%" height="100%">
-                 <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                   <defs>
-                     <linearGradient id="colorCurrent" x1="0" y1="0" x2="0" y2="1">
-                       <stop offset="5%" stopColor="#240046" stopOpacity={0.3}/>
-                       <stop offset="95%" stopColor="#240046" stopOpacity={0}/>
-                     </linearGradient>
-                     <linearGradient id="colorPrevious" x1="0" y1="0" x2="0" y2="1">
-                       <stop offset="5%" stopColor="#f5f3ff" stopOpacity={0.8}/>
-                       <stop offset="95%" stopColor="#f5f3ff" stopOpacity={0}/>
-                     </linearGradient>
-                   </defs>
-                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                   <XAxis 
-                     dataKey="day" 
-                     axisLine={false} 
-                     tickLine={false} 
-                     tick={{ fontSize: 10, fontWeight: 800, fill: '#9ca3af' }} 
-                     dy={15}
-                   />
-                   <YAxis 
-                     axisLine={false} 
-                     tickLine={false} 
-                     tick={{ fontSize: 10, fontWeight: 800, fill: '#9ca3af' }}
-                   />
-                   <Tooltip 
-                     contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-                     itemStyle={{ fontWeight: 900, color: '#240046' }}
-                     cursor={{ stroke: '#240046', strokeWidth: 1, strokeDasharray: '5 5' }}
-                   />
-                   <Area type="monotone" dataKey="previous" stroke="#e5e7eb" strokeWidth={3} fillOpacity={1} fill="url(#colorPrevious)" />
-                   <Area type="monotone" dataKey="current" stroke="#240046" strokeWidth={5} fillOpacity={1} fill="url(#colorCurrent)" activeDot={{ r: 8, strokeWidth: 0, fill: '#240046' }} />
-                 </AreaChart>
-               </ResponsiveContainer>
-             </div>
+            {/* Recharts Area Chart */}
+            <div className="h-[260px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="analyticsColorCurrent" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#189D91" stopOpacity={0.15}/>
+                      <stop offset="95%" stopColor="#189D91" stopOpacity={0.01}/>
+                    </linearGradient>
+                    <linearGradient id="analyticsColorPrevious" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#EC008C" stopOpacity={0.10}/>
+                      <stop offset="95%" stopColor="#EC008C" stopOpacity={0.01}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis 
+                    dataKey="day" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} 
+                    dy={10}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      borderRadius: '12px', 
+                      border: '1px solid #e2e8f0', 
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                      fontSize: '11px',
+                      fontWeight: '600'
+                    }}
+                    cursor={{ stroke: '#189D91', strokeWidth: 1.5 }}
+                  />
+                  <Area type="monotone" dataKey="previous" stroke="#EC008C" strokeWidth={2.5} fillOpacity={1} fill="url(#analyticsColorPrevious)" />
+                  <Area type="monotone" dataKey="current" stroke="#189D91" strokeWidth={3.5} fillOpacity={1} fill="url(#analyticsColorCurrent)" activeDot={{ r: 6, strokeWidth: 0, fill: '#189D91' }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
-          {/* Top Sellers */}
-          <div className="bg-deep-espresso rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-deep-espresso/40">
-             <div className="absolute top-0 right-0 w-48 h-48 bg-warm-sand/5 rounded-full -mr-24 -mt-24 blur-3xl" />
-             <h3 className="text-xl font-black uppercase tracking-tight italic mb-8 flex items-center gap-3">
-               <FiTrendingUp className="text-warm-sand" /> Top Performers
-             </h3>
+          {/* Top Sellers Card */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50/30 rounded-full -mr-16 -mt-16 blur-2xl pointer-events-none" />
+            
+            <div>
+              <h3 className="text-base font-bold text-slate-850 flex items-center gap-2 mb-1">
+                <FiTrendingUp className="text-[#EC008C]" /> Top Performers
+              </h3>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-5">High-volume marketplace channels</p>
+            </div>
 
-             <div className="space-y-6">
-                {topSellers.map((seller, i) => (
-                  <div key={i} className="flex items-center justify-between group">
-                    <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center font-black text-xs text-warm-sand group-hover:bg-warm-sand group-hover:text-deep-espresso transition-all">
-                         {i + 1}
-                       </div>
-                       <div>
-                         <p className="text-xs font-black uppercase tracking-tight">{seller.name}</p>
-                         <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">{seller.orders} Orders</p>
-                       </div>
+            <div className="space-y-3.5 flex-1 justify-center flex flex-col">
+              {topSellers.map((seller, i) => {
+                const accentColor = i % 2 === 0 ? 'text-[#189D91] bg-teal-50 border-teal-100/50' : 'text-[#EC008C] bg-pink-50 border-pink-100/50';
+                return (
+                  <div key={i} className="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100/60 rounded-xl border border-slate-100 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg ${accentColor} border flex items-center justify-center font-bold text-xs shrink-0`}>
+                        {i + 1}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-800 leading-none">{seller.name}</p>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1">{seller.orders} Orders</p>
+                      </div>
                     </div>
                     <div className="text-right">
-                       <p className="text-xs font-black tracking-tight">{seller.sales}</p>
-                       <p className={`text-[9px] font-black uppercase tracking-widest ${seller.growth.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
-                         {seller.growth}
-                       </p>
+                      <p className="text-xs font-bold text-slate-800 leading-none">{seller.sales}</p>
+                      <p className={`text-[9px] font-bold uppercase tracking-wider mt-1 ${
+                        seller.growth.startsWith('+') ? 'text-emerald-600' : 'text-rose-600'
+                      }`}>
+                        {seller.growth}
+                      </p>
                     </div>
                   </div>
-                ))}
-             </div>
+                );
+              })}
+            </div>
 
-             <button className="w-full mt-12 py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-warm-sand hover:text-deep-espresso transition-all">
-               View Full Leaderboard
-             </button>
+            <button className="w-full mt-5 py-3 rounded-xl border border-slate-200 hover:border-[#189D91] hover:bg-teal-50/20 text-[10px] font-bold uppercase tracking-widest text-slate-600 hover:text-[#189D91] transition-all">
+              View Full Leaderboard
+            </button>
           </div>
+          
         </div>
       </div>
     </div>

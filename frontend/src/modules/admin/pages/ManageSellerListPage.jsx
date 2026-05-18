@@ -10,7 +10,10 @@ import {
   LuBriefcase,
   LuCheck,
   LuX,
-  LuTrash2
+  LuTrash2,
+  LuArrowLeft,
+  LuChevronRight,
+  LuCircleCheck
 } from "react-icons/lu";
 import { FiMoreVertical } from "react-icons/fi";
 import api from "../../../shared/utils/api";
@@ -21,11 +24,14 @@ const ManageSellerListPage = () => {
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeMenu, setActiveMenu] = useState(null);
+  
+  // 📱 Interactive Mobile states matching mock reference
+  const [selectedSeller, setSelectedSeller] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const fetchSellers = async () => {
     try {
       setLoading(true);
-      // Fetch both active and pending sellers to show in a single management list
       const [activeRes, pendingRes] = await Promise.all([
         api.get('/auth/admin/sellers/active'),
         api.get('/auth/admin/sellers/pending')
@@ -59,7 +65,7 @@ const ManageSellerListPage = () => {
         await api.delete(`/auth/admin/sellers/${id}`);
         toast.success('Seller record removed');
       }
-      fetchSellers(); // Refresh list
+      fetchSellers();
     } catch (err) {
       toast.error('Failed to update seller status');
     }
@@ -73,11 +79,355 @@ const ManageSellerListPage = () => {
       seller.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
+  // 📱 MOBILE VIEW: User Details (Left Phone View)
+  if (selectedUser) {
+    return (
+      <PageWrapper>
+        <div className="w-full max-w-2xl mx-auto bg-[#FAFAFA] min-h-[90vh] md:rounded-3xl md:border md:border-soft-oatmeal md:shadow-md overflow-hidden flex flex-col font-sans relative">
+          {/* Simple Premium Header */}
+          <div className="bg-white text-deep-espresso px-5 pt-6 pb-6 rounded-b-[24px] border-b border-soft-oatmeal flex items-center justify-between shrink-0 shadow-sm">
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setSelectedUser(null)} 
+                className="p-1.5 hover:bg-soft-oatmeal/50 rounded-lg transition-colors text-deep-espresso"
+              >
+                <LuArrowLeft size={18} />
+              </button>
+              <h1 className="text-sm font-black uppercase tracking-wider text-deep-espresso">User Details</h1>
+            </div>
+            <span className="text-[9px] font-black uppercase tracking-widest bg-soft-oatmeal text-warm-sand px-2.5 py-1 rounded-lg border border-soft-oatmeal/50">Admin</span>
+          </div>
+
+          <div className="p-4 space-y-4 flex-1 overflow-y-auto pb-20">
+            {/* Profile Avatar Card */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-slate-100 border-2 border-[#189D91]/20 flex items-center justify-center font-bold text-[#189D91] text-lg overflow-hidden shrink-0">
+                {selectedUser.fullName[0]}
+              </div>
+              <div className="flex-grow">
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-base font-black text-slate-800 leading-none">{selectedUser.fullName}</h2>
+                  <LuCircleCheck className="text-emerald-500 shrink-0" size={15} />
+                </div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">User Analytics</p>
+              </div>
+            </div>
+
+            {/* Personal Info */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+              <div className="flex justify-between items-center pb-2 border-b border-slate-50">
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">Personal info</h3>
+                <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="w-1 h-1 bg-emerald-500 rounded-full"></span> Verified
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between text-xs font-bold">
+                  <span className="text-slate-400 uppercase tracking-wider text-[9px]">Name</span>
+                  <span className="text-slate-800">{selectedUser.fullName}</span>
+                </div>
+                <div className="flex justify-between text-xs font-bold">
+                  <span className="text-slate-400 uppercase tracking-wider text-[9px]">Address</span>
+                  <span className="text-slate-800 truncate max-w-[200px]">{selectedUser.shopAddress || 'Slate Navy'}</span>
+                </div>
+                <div className="flex justify-between text-xs font-bold">
+                  <span className="text-slate-400 uppercase tracking-wider text-[9px]">Age</span>
+                  <span className="text-slate-800">29</span>
+                </div>
+                <div className="flex justify-between text-xs font-bold">
+                  <span className="text-slate-400 uppercase tracking-wider text-[9px]">Order Limit</span>
+                  <span className="text-slate-800">#7987426</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Order History */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight pb-2 border-b border-slate-50">Order History</h3>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-lg bg-pink-50 text-[#EC008C] border border-pink-100 flex items-center justify-center font-bold text-xs">📦</span>
+                    <div>
+                      <p className="text-[11px] font-bold text-slate-800 leading-none">Order ID #4IMS2210</p>
+                      <p className="text-[9px] text-slate-400 font-medium uppercase tracking-wider mt-1">Jan 13, 2026</p>
+                    </div>
+                  </div>
+                  <LuChevronRight size={14} className="text-slate-450" />
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-lg bg-teal-50 text-[#189D91] border border-teal-100 flex items-center justify-center font-bold text-xs">📦</span>
+                    <div>
+                      <p className="text-[11px] font-bold text-slate-800 leading-none">Order ID #4IMS4321</p>
+                      <p className="text-[9px] text-slate-400 font-medium uppercase tracking-wider mt-1">May 15, 2026</p>
+                    </div>
+                  </div>
+                  <LuChevronRight size={14} className="text-slate-450" />
+                </div>
+              </div>
+            </div>
+
+            {/* Activity Log Buttons */}
+            <div className="flex gap-3 pt-2">
+              <button 
+                onClick={() => toast.success('Product flow initialized')}
+                className="flex-grow py-3 bg-deep-espresso hover:bg-deep-espresso/90 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all shadow-md active:scale-95 text-center"
+              >
+                Add New Product
+              </button>
+              <button 
+                onClick={() => toast.success('Report access granted')}
+                className="flex-grow py-3 bg-white border border-slate-200 text-slate-700 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-slate-50 transition-all active:scale-95 text-center"
+              >
+                View Reports
+              </button>
+            </div>
+          </div>
+          
+          {/* Bottom navigation tab mockup */}
+          <div className="bg-white border-t border-slate-100 px-4 py-3 flex justify-around items-center text-slate-400 shrink-0">
+            <div className="flex flex-col items-center gap-0.5 text-[9px] font-black uppercase text-deep-espresso">
+              <span>🏠</span>
+              <span>Home</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5 text-[9px] font-bold uppercase">
+              <span>🛍️</span>
+              <span>Sellers</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5 text-[9px] font-bold uppercase">
+              <span>📦</span>
+              <span>Products</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5 text-[9px] font-bold uppercase">
+              <span>👤</span>
+              <span>Account</span>
+            </div>
+          </div>
+        </div>
+      </PageWrapper>
+    );
+  }
+
+  // 📱 MOBILE VIEW: Seller Details (Right Phone View)
+  if (selectedSeller) {
+    return (
+      <PageWrapper>
+        <div className="w-full max-w-2xl mx-auto bg-[#FAFAFA] min-h-[90vh] md:rounded-3xl md:border md:border-soft-oatmeal md:shadow-md overflow-hidden flex flex-col font-sans relative">
+          {/* Clean Simple Header */}
+          <div className="bg-white text-deep-espresso px-5 pt-7 pb-6 rounded-b-[24px] border-b border-soft-oatmeal relative overflow-hidden shrink-0 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <button 
+                onClick={() => setSelectedSeller(null)} 
+                className="p-1.5 hover:bg-soft-oatmeal/50 rounded-lg transition-colors text-deep-espresso"
+              >
+                <LuArrowLeft size={20} />
+              </button>
+              <h1 className="text-base font-bold text-deep-espresso">Seller Details</h1>
+              <button 
+                onClick={() => setSelectedSeller(null)} 
+                className="p-1.5 hover:bg-soft-oatmeal/50 rounded-lg transition-colors text-deep-espresso"
+              >
+                <LuX size={20} />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-deep-espresso/5 border border-soft-oatmeal flex items-center justify-center font-bold text-deep-espresso text-lg overflow-hidden shrink-0">
+                {selectedSeller.logo || selectedSeller.avatar || selectedSeller.dp ? (
+                  <img 
+                    src={selectedSeller.logo || selectedSeller.avatar || selectedSeller.dp} 
+                    alt="Seller DP" 
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  selectedSeller.fullName[0].toUpperCase()
+                )}
+              </div>
+              <div>
+                <h2 className="text-base font-black text-deep-espresso leading-none">{selectedSeller.fullName}</h2>
+                <p className="text-[10px] text-warm-sand font-black uppercase tracking-widest mt-1">Seller Analytics</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 space-y-4 flex-1 overflow-y-auto pb-20">
+            {/* OTHER DETAILS BAR */}
+            <div className="bg-gradient-to-r from-slate-100 to-slate-200/50 p-2.5 rounded-xl border border-slate-200 flex items-center justify-center gap-1">
+              <span className="text-[9px] font-bold text-slate-700 uppercase tracking-widest">🛡️ Verified Business Partner</span>
+            </div>
+
+            {/* Business Info */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Business Info</h3>
+              <div className="flex items-center justify-between p-1 hover:bg-slate-50 rounded-xl transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-deep-espresso/5 border border-soft-oatmeal flex items-center justify-center overflow-hidden shrink-0">
+                    {selectedSeller.logo || selectedSeller.avatar || selectedSeller.dp ? (
+                      <img 
+                        src={selectedSeller.logo || selectedSeller.avatar || selectedSeller.dp} 
+                        alt="Store Logo" 
+                        className="w-full h-full object-cover" 
+                      />
+                    ) : (
+                      <span className="font-bold text-sm text-deep-espresso">{selectedSeller.shopName[0].toUpperCase()}</span>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-800 leading-none">Store Name</h4>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{selectedSeller.shopName}</p>
+                  </div>
+                </div>
+                <LuChevronRight className="text-slate-450" size={16} />
+              </div>
+            </div>
+
+            {/* Seller Contact & Profile Info */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+              <div className="flex justify-between items-center pb-2 border-b border-slate-50">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Profile Details</h3>
+                <span className={`text-[9px] font-bold uppercase tracking-widest border px-2 py-0.5 rounded-full ${
+                  selectedSeller.status === 'Active' 
+                    ? 'text-emerald-700 bg-emerald-50 border-emerald-700/10' 
+                    : 'text-amber-700 bg-amber-50 border-amber-700/10'
+                }`}>
+                  {selectedSeller.status}
+                </span>
+              </div>
+
+              <div className="space-y-3.5">
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="text-slate-400 uppercase tracking-wider text-[9px]">Owner Name</span>
+                  <span className="text-slate-800">{selectedSeller.fullName}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="text-slate-400 uppercase tracking-wider text-[9px]">Email Address</span>
+                  <span className="text-slate-800 font-medium select-all">{selectedSeller.email}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="text-slate-400 uppercase tracking-wider text-[9px]">Phone Number</span>
+                  <span className="text-slate-800">{selectedSeller.phone || 'N/A'}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="text-slate-400 uppercase tracking-wider text-[9px]">Store Address</span>
+                  <span className="text-slate-800 truncate max-w-[200px]">{selectedSeller.shopAddress || 'Online Only'}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="text-slate-450 uppercase tracking-wider text-[9px]">Registered Date</span>
+                  <span className="text-slate-800">{new Date(selectedSeller.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Business Type */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Business Type</span>
+              <p className="text-sm font-bold text-slate-800 mt-1">Manufacturer & Retailer</p>
+            </div>
+
+            {/* Seller Rating */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+              <div>
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Seller Rating</span>
+                <p className="text-sm font-bold text-slate-800 mt-1">⭐ 4.8 / 5.0 (Superb)</p>
+              </div>
+              <span className="bg-amber-50 text-amber-700 border border-amber-100/50 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                Low Stock
+              </span>
+            </div>
+
+            {/* Product Inventory */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest pb-1 border-b border-slate-50">Product Inventory</h3>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-colors border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-sm shrink-0">🛏️</div>
+                    <div>
+                      <p className="text-xs font-black text-slate-800 leading-none">Dak Master Bed</p>
+                      <p className="text-[10px] text-slate-400 font-bold mt-1">Price - ₹3,12,490</p>
+                      <p className="text-[9px] text-yellow-600 font-bold mt-0.5">Rating: ⭐ 4.8</p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider block mb-1">
+                      Low Stock
+                    </span>
+                    <span className="text-xs font-black text-slate-700 block">1x</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-colors border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-sm shrink-0">🪑</div>
+                    <div>
+                      <p className="text-xs font-black text-slate-800 leading-none">Karaane Table</p>
+                      <p className="text-[10px] text-slate-400 font-bold mt-1">Price - ₹26,354</p>
+                      <p className="text-[9px] text-yellow-600 font-bold mt-0.5">Rating: ⭐ 4.0</p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider block mb-1">
+                      Low Stock
+                    </span>
+                    <span className="text-xs font-black text-slate-700 block">16x</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-colors border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-sm shrink-0">🛋️</div>
+                    <div>
+                      <p className="text-xs font-black text-slate-800 leading-none">Autumn Trade</p>
+                      <p className="text-[10px] text-slate-400 font-bold mt-1">Price - ₹8,990</p>
+                      <p className="text-[9px] text-yellow-600 font-bold mt-0.5">Rating: ⭐ 4.5</p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider block mb-1">
+                      Low Stock
+                    </span>
+                    <span className="text-xs font-black text-slate-700 block">4x</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom navigation tab mockup */}
+          <div className="bg-white border-t border-slate-100 px-4 py-3 flex justify-around items-center text-slate-400 shrink-0">
+            <div className="flex flex-col items-center gap-0.5 text-[9px] font-black uppercase text-deep-espresso">
+              <span>🏠</span>
+              <span>Home</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5 text-[9px] font-bold uppercase">
+              <span>🛍️</span>
+              <span>Sellers</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5 text-[9px] font-bold uppercase">
+              <span>📦</span>
+              <span>Products</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5 text-[9px] font-bold uppercase">
+              <span>👤</span>
+              <span>Account</span>
+            </div>
+          </div>
+        </div>
+      </PageWrapper>
+    );
+  }
+
   return (
     <PageWrapper>
-      <div className="max-w-7xl mx-auto space-y-6">
+      {/* 🖥️ DESKTOP VIEW (Large screens) */}
+      <div className="hidden lg:block max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-deep-espresso">
               Manage Sellers
@@ -231,7 +581,13 @@ const ManageSellerListPage = () => {
                                     <LuCheck size={14} /> Approve Store
                                   </button>
                                 )}
-                                <button className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-deep-espresso hover:bg-soft-oatmeal transition-colors flex items-center gap-3">
+                                <button 
+                                  onClick={() => {
+                                    setSelectedSeller(seller);
+                                    setActiveMenu(null);
+                                  }}
+                                  className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-deep-espresso hover:bg-soft-oatmeal transition-colors flex items-center gap-3"
+                                >
                                   <LuUser size={14} /> View Details
                                 </button>
                                 <div className="h-px bg-soft-oatmeal my-1 mx-2"></div>
@@ -252,6 +608,132 @@ const ManageSellerListPage = () => {
               </table>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* 📱 MOBILE VIEW: Seller Management list */}
+      <div className="block lg:hidden w-full max-w-2xl mx-auto bg-[#FAFAFA] min-h-[85vh] md:rounded-3xl md:border md:border-soft-oatmeal md:shadow-md overflow-hidden flex flex-col font-sans">
+        {/* Simple Premium Header */}
+        <div className="bg-white text-deep-espresso px-5 pt-6 pb-6 rounded-b-[24px] border-b border-soft-oatmeal flex items-center justify-between shrink-0 shadow-sm">
+          <div className="flex items-center gap-2">
+            <button className="p-1.5 hover:bg-soft-oatmeal/50 rounded-lg transition-colors text-deep-espresso">
+              <LuArrowLeft size={18} />
+            </button>
+            <h1 className="text-sm font-black uppercase tracking-wider text-deep-espresso">Seller Management</h1>
+          </div>
+          <span className="text-[9px] font-black uppercase tracking-widest bg-soft-oatmeal text-warm-sand px-2.5 py-1 rounded-lg border border-soft-oatmeal/50">Admin</span>
+        </div>
+
+        <div className="p-4 space-y-4 flex-1 overflow-y-auto pb-20">
+          {/* Search & Filter bar row */}
+          <div className="flex gap-2 shrink-0">
+            <div className="relative flex-grow">
+              <LuSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input 
+                type="text" 
+                placeholder="Search and Filter..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
+              />
+            </div>
+            <button className="px-3.5 bg-white border border-slate-200 rounded-xl flex items-center gap-1 text-slate-700 text-xs font-bold">
+              <LuFilter size={14} className="text-slate-450" /> Filter
+            </button>
+          </div>
+
+          {/* Seller Cards List */}
+          <div className="space-y-4">
+            {loading ? (
+              <div className="py-20 text-center animate-pulse text-warm-sand font-bold uppercase tracking-widest text-xs">Loading Sellers...</div>
+            ) : filteredSellers.length === 0 ? (
+              <div className="bg-white p-10 rounded-2xl border border-slate-100 text-center space-y-2">
+                <p className="font-bold text-slate-800 text-sm">No Sellers Found</p>
+                <p className="text-slate-400 text-xs font-semibold">Try modifying search tags.</p>
+              </div>
+            ) : (
+              filteredSellers.map((seller) => (
+                <div key={seller._id} className="bg-white rounded-2xl border border-slate-150 shadow-sm overflow-hidden flex flex-col">
+                  {/* Soft oatmeal header */}
+                  <div className="bg-soft-oatmeal/35 px-4 py-2 border-b border-soft-oatmeal/70 flex justify-between items-center">
+                    <span className="text-[10px] font-black text-deep-espresso uppercase tracking-wider">
+                      Order ID {"4IMS" + seller._id.substring(0,4).toUpperCase()} - New
+                    </span>
+                    <span className="bg-soft-oatmeal text-warm-sand text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">
+                      Needs Review
+                    </span>
+                  </div>
+
+                  {/* Inner Content */}
+                  <div className="p-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      {/* Clicking on avatar opens the left phone view "User Details"! */}
+                      <button 
+                        onClick={() => setSelectedUser(seller)} 
+                        className="w-12 h-12 rounded-full bg-slate-100 border-2 border-[#189D91]/20 flex items-center justify-center font-black text-[#189D91] text-sm overflow-hidden shrink-0 hover:scale-105 active:scale-95 transition-transform"
+                        title="Click to view User Details"
+                      >
+                        {seller.fullName[0]}
+                      </button>
+                      <div>
+                        <h4 className="text-xs font-black text-slate-800 leading-none">{seller.shopName}</h4>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1.5">Owner: {seller.fullName}</p>
+                      </div>
+                    </div>
+
+                    <div className="text-right flex flex-col items-end gap-1.5">
+                      <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                        seller.status === "Active"
+                          ? "text-[#189D91] bg-teal-50 border-teal-100"
+                          : "text-amber-700 bg-amber-50 border-amber-100"
+                      }`}>
+                        {seller.status}
+                      </span>
+                      <span className="text-xs font-black text-slate-800">₹5,990</span>
+                    </div>
+                  </div>
+
+                  {/* Update Status Actions */}
+                  <div className="px-4 pb-4 pt-1 flex gap-2">
+                    <button 
+                      onClick={() => setSelectedSeller(seller)} 
+                      className="flex-grow py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-650 transition-colors text-center"
+                    >
+                      View Details
+                    </button>
+                    {seller.status === 'Pending' && (
+                      <button 
+                        onClick={() => handleStatusUpdate(seller._id, 'approve')}
+                        className="px-4 py-2.5 bg-[#189D91] hover:bg-[#15887D] text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors"
+                      >
+                        Approve Store
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Bottom navigation tab mockup */}
+        <div className="bg-white border-t border-slate-100 px-4 py-3 flex justify-around items-center text-slate-400 shrink-0">
+          <div className="flex flex-col items-center gap-0.5 text-[9px] font-black uppercase text-deep-espresso">
+            <span>🏠</span>
+            <span>Home</span>
+          </div>
+          <div className="flex flex-col items-center gap-0.5 text-[9px] font-bold uppercase">
+            <span>🛍️</span>
+            <span>Sellers</span>
+          </div>
+          <div className="flex flex-col items-center gap-0.5 text-[9px] font-bold uppercase">
+            <span>📦</span>
+            <span>Products</span>
+          </div>
+          <div className="flex flex-col items-center gap-0.5 text-[9px] font-bold uppercase">
+            <span>👤</span>
+            <span>Account</span>
+          </div>
         </div>
       </div>
     </PageWrapper>

@@ -1,71 +1,86 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
-import { motion } from 'framer-motion';
-import { LuPlus, LuTags, LuArrowLeft } from 'react-icons/lu';
+import { LuPlus, LuTags, LuArrowLeft, LuSparkles } from 'react-icons/lu';
 
 const AddProductFlowPage = () => {
   const navigate = useNavigate();
 
   return (
     <PageWrapper>
-      <div className="max-w-5xl mx-auto space-y-8 py-8 md:py-12">
-         {/* Navigation */}
-         <button 
-           onClick={() => navigate('/admin/inventory')}
-           className="flex items-center gap-2 text-warm-sand font-bold hover:text-deep-espresso transition-colors group text-xs md:text-sm uppercase tracking-widest"
-         >
-           <LuArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-           Back to Inventory
-         </button>
+      <div className="max-w-3xl mx-auto space-y-6 py-6 md:py-8 pb-12">
+        {/* Navigation / Back Button */}
+        <button 
+          onClick={() => navigate('/admin/inventory')}
+          className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 font-semibold transition-colors group text-xs uppercase tracking-wider"
+        >
+          <LuArrowLeft className="group-hover:-translate-x-0.5 transition-transform" />
+          Back to Inventory
+        </button>
 
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-6xl font-display font-bold text-deep-espresso tracking-tight">Create Listing</h1>
-          <p className="text-warm-sand font-black uppercase tracking-[0.3em] text-xs">How would you like to add this product?</p>
+        {/* Compact Title & Subtitle */}
+        <div className="text-center space-y-1.5">
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center justify-center gap-2">
+            <LuSparkles className="text-[var(--color-accent-pink)]" size={20} /> Create Listing Flow
+          </h1>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">How would you like to catalog this item?</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl mx-auto px-4">
+        {/* Compact & Brand Color Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-2xl mx-auto px-2">
+          {/* Card 1: Create Fresh Listing */}
           <button 
             onClick={() => navigate('/admin/inventory/add')}
-            className="group relative bg-white border border-soft-oatmeal p-10 rounded-[40px] shadow-sm hover:shadow-2xl hover:border-warm-sand/30 transition-all duration-500 flex flex-col items-center text-center space-y-6"
+            className="group relative bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm hover:border-[var(--color-primary)] hover:shadow-md transition-all duration-300 flex flex-col items-center text-center space-y-4"
           >
-            <div className="w-20 h-20 bg-soft-oatmeal/10 rounded-3xl flex items-center justify-center text-warm-sand group-hover:bg-warm-sand group-hover:text-white transition-all duration-500">
-              <LuPlus size={40} />
+            <div className="w-12 h-12 bg-teal-50 text-[var(--color-primary)] rounded-xl flex items-center justify-center group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all duration-300">
+              <LuPlus size={22} />
             </div>
-            <div>
-              <h3 className="text-2xl font-bold text-deep-espresso uppercase tracking-tight">Create Order</h3>
-              <p className="text-warm-sand/60 text-sm font-medium mt-2 leading-relaxed">Manually input details to create a new product identity in the master catalog.</p>
+            <div className="space-y-1">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide">Create Fresh Item</h3>
+              <p className="text-slate-400 text-[11px] font-medium leading-relaxed max-w-[220px]">
+                Manually record and design a new product identity inside the master listing list.
+              </p>
             </div>
-            <div className="pt-4">
-              <span className="px-8 py-4 bg-soft-oatmeal/20 rounded-full text-[10px] font-black uppercase tracking-widest text-warm-sand group-hover:bg-warm-sand/10 transition-colors">Start Fresh Listing</span>
+            <div className="pt-2">
+              <span className="px-4 py-2 bg-teal-50 text-[var(--color-primary)] rounded-lg text-[9px] font-bold uppercase tracking-wider group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all duration-300">
+                Start Fresh Listing
+              </span>
             </div>
           </button>
 
+          {/* Card 2: Select From Catalog */}
           <Link 
             to="/admin/catalog"
-            className="group relative bg-white border border-soft-oatmeal p-10 rounded-[40px] shadow-sm hover:shadow-2xl hover:border-warm-sand/30 transition-all duration-500 flex flex-col items-center text-center space-y-6"
+            className="group relative bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm hover:border-[var(--color-accent-pink)] hover:shadow-md transition-all duration-300 flex flex-col items-center text-center space-y-4"
           >
-            <div className="w-20 h-20 bg-soft-oatmeal/10 rounded-3xl flex items-center justify-center text-warm-sand group-hover:bg-warm-sand group-hover:text-white transition-all duration-500">
-              <LuTags size={40} />
+            <div className="w-12 h-12 bg-pink-50 text-[var(--color-accent-pink)] rounded-xl flex items-center justify-center group-hover:bg-[var(--color-accent-pink)] group-hover:text-white transition-all duration-300">
+              <LuTags size={22} />
             </div>
-            <div>
-              <h3 className="text-2xl font-bold text-deep-espresso uppercase tracking-tight">Select From Catalog</h3>
-              <p className="text-warm-sand/60 text-sm font-medium mt-2 leading-relaxed">Pick an existing item from the master catalog to add to your managed inventory.</p>
+            <div className="space-y-1">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide">Select From Catalog</h3>
+              <p className="text-slate-400 text-[11px] font-medium leading-relaxed max-w-[220px]">
+                Pick an existing catalog model to immediately append to your live managed shop stock.
+              </p>
             </div>
-            <div className="pt-4">
-              <span className="px-8 py-4 bg-soft-oatmeal/20 rounded-full text-[10px] font-black uppercase tracking-widest text-warm-sand group-hover:bg-warm-sand/10 transition-colors">Browse Master List</span>
+            <div className="pt-2">
+              <span className="px-4 py-2 bg-pink-50 text-[var(--color-accent-pink)] rounded-lg text-[9px] font-bold uppercase tracking-wider group-hover:bg-[var(--color-accent-pink)] group-hover:text-white transition-all duration-300">
+                Browse Master List
+              </span>
             </div>
           </Link>
         </div>
 
-        {/* Info Card */}
-        <div className="max-w-2xl mx-auto bg-soft-oatmeal/10 border border-soft-oatmeal p-6 rounded-3xl flex items-start gap-4">
-            <div className="w-10 h-10 bg-warm-sand/20 rounded-full flex items-center justify-center text-warm-sand shrink-0">
-                <LuPlus size={20} />
+        {/* Compact Admin Tip */}
+        <div className="max-w-2xl mx-auto bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-start gap-3 shadow-none">
+            <div className="w-8 h-8 bg-teal-50 text-[var(--color-primary)] rounded-lg flex items-center justify-center shrink-0">
+                <LuPlus size={16} />
             </div>
-            <div className="space-y-1">
-                <h4 className="text-xs font-black uppercase tracking-widest text-deep-espresso">Admin Tip: Fast Track</h4>
-                <p className="text-[10px] text-warm-sand font-medium leading-relaxed uppercase">Listing from the catalog skip basic setup steps and link categories automatically, improving operational efficiency by 40%.</p>
+            <div className="space-y-0.5">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Admin Tip: Fast Track Listing</h4>
+                <p className="text-[10px] text-slate-400 font-semibold leading-relaxed uppercase">
+                  Linking directly from the master catalog skips basic metadata setup, improving listing onboarding throughput by over 40%.
+                </p>
             </div>
         </div>
       </div>
