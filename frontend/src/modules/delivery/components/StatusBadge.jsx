@@ -4,24 +4,24 @@ const StatusBadge = ({ status }) => {
   const getStatusStyles = (status) => {
     switch (status) {
       case 'Pending':
-        return 'bg-amber-100 text-amber-700 border-amber-200';
+        return 'bg-amber-50 text-amber-600 border-amber-100';
       case 'Accepted':
-        return 'bg-[#001B4E]/10 text-[#001B4E] border-[#001B4E]/20';
+        return 'bg-slate-900 text-white border-slate-900';
       case 'Picked':
-        return 'bg-purple-100 text-purple-700 border-purple-200';
+        return 'bg-indigo-50 text-indigo-600 border-indigo-100';
       case 'Out for Delivery':
-        return 'bg-orange-100 text-orange-700 border-orange-200';
+        return 'bg-pink-50 text-[#D63384] border-[#D63384]/20';
       case 'Delivered':
-        return 'bg-green-100 text-green-700 border-green-200';
+        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
       case 'Rejected':
-        return 'bg-[#001B4E]/5 text-[#001B4E] border-[#001B4E]/20';
+        return 'bg-slate-100 text-slate-400 border-slate-200';
       default:
-        return 'bg-gray-100 text-gray-700 border-gray-200';
+        return 'bg-slate-50 text-slate-400 border-slate-100';
     }
   };
 
   return (
-    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusStyles(status)}`}>
+    <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border italic ${getStatusStyles(status)}`}>
       {status}
     </span>
   );

@@ -36,8 +36,9 @@ export const NotificationProvider = ({ children }) => {
     if (user && user.token) {
       fetchNotifications();
 
-      const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
-        auth: { token: user.token }
+      const newSocket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
+        auth: { token: user.token },
+        transports: ['websocket']
       });
 
       newSocket.on('connect', () => console.log('Socket connected for notifications'));

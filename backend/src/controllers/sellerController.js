@@ -7,13 +7,32 @@ const checkEmailExists = require('../utils/checkEmailExists');
 // @access  Public
 exports.registerSeller = async (req, res, next) => {
   try {
-    const { fullName, email, password, shopName, shopAddress, phone } = req.body;
+    const { fullName, email, phone, shopName, shopAddress, password, gstNumber, panNumber, hsnNumber } = req.body;
 
-    if (await checkEmailExists(email)) {
-      return res.status(400).json({ success: false, error: 'Email already registered' });
+    // Handle uploaded documents
+    const gstDoc = req.files && req.files.gstDoc ? req.files.gstDoc[0].path : undefined;
+    const panDoc = req.files && req.files.panDoc ? req.files.panDoc[0].path : undefined;
+    const shopDoc = req.files && req.files.shopDoc ? req.files.shopDoc[0].path : undefined;
+
+    const sellerExists = await Seller.findOne({ email });
+    if (sellerExists) {
+      return res.status(400).json({ success: false, error: 'Seller already exists' });
     }
 
-    const seller = await Seller.create({ fullName, email, password, shopName, shopAddress, phone });
+    const seller = await Seller.create({
+      fullName,
+      email,
+      phone,
+      shopName,
+      shopAddress,
+      password,
+      gstNumber,
+      panNumber,
+      hsnNumber,
+      gstDoc,
+      panDoc,
+      shopDoc
+    });
     sendTokenResponse(seller, 201, res);
   } catch (err) {
     next(err);
@@ -52,7 +71,7 @@ exports.getSellerMe = async (req, res, next) => {
 // @desc    Update Seller Profile
 exports.updateSellerProfile = async (req, res, next) => {
   try {
-    const { fullName, email, phone, shopName, shopAddress, avatar, gstNumber, panNumber } = req.body;
+    const { fullName, email, phone, shopName, shopAddress, avatar, gstNumber, panNumber, hsnNumber } = req.body;
     
     const seller = await Seller.findById(req.user.id);
     if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
@@ -73,7 +92,8 @@ exports.updateSellerProfile = async (req, res, next) => {
       shopAddress: shopAddress || seller.shopAddress,
       avatar: avatar || seller.avatar,
       gstNumber: gstNumber !== undefined ? gstNumber : seller.gstNumber,
-      panNumber: panNumber !== undefined ? panNumber : seller.panNumber
+      panNumber: panNumber !== undefined ? panNumber : seller.panNumber,
+      hsnNumber: hsnNumber !== undefined ? hsnNumber : seller.hsnNumber
     };
 
     const updatedSeller = await Seller.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
@@ -101,6 +121,54 @@ exports.getSellerStockStatus = async (req, res, next) => {
       success: true,
       count: products.length,
       data: products
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+// @desc    Get seller's customers (Unique users who placed orders)
+// @route   GET /api/auth/seller/customers
+// @access  Private/Seller
+exports.getSellerCustomers = async (req, res, next) => {
+  try {
+    const Order = require('../models/Order');
+    const User = require('../models/User');
+
+    // Get all orders for this seller
+    const orders = await Order.find({ seller: req.user.id }).populate('user', 'fullName email phone avatar createdAt');
+    
+    // Extract unique users
+    const userMap = new Map();
+    orders.forEach(order => {
+      if (order.user && !userMap.has(order.user._id.toString())) {
+        const u = order.user;
+        userMap.set(u._id.toString(), {
+          _id: u._id,
+          fullName: u.fullName,
+          email: u.email,
+          phone: u.phone,
+          avatar: u.avatar,
+          totalOrders: 1,
+          totalSpent: order.totalPrice,
+          lastOrderDate: order.createdAt,
+          memberSince: u.createdAt
+        });
+      } else if (order.user) {
+        const existing = userMap.get(order.user._id.toString());
+        existing.totalOrders += 1;
+        existing.totalSpent += order.totalPrice;
+        if (new Date(order.createdAt) > new Date(existing.lastOrderDate)) {
+          existing.lastOrderDate = order.createdAt;
+        }
+      }
+    });
+
+    const customers = Array.from(userMap.values());
+
+    res.status(200).json({
+      success: true,
+      count: customers.length,
+      data: customers
     });
   } catch (err) {
     next(err);

@@ -5,9 +5,15 @@ const { protect } = require('../middleware/auth');
 const { check } = require('express-validator');
 const { validate } = require('../middleware/validationMiddleware');
 
+const { upload } = require('../config/cloudinary');
+
 const router = express.Router();
 
-router.post('/register', [
+router.post('/register', upload.fields([
+  { name: 'gstDoc', maxCount: 1 },
+  { name: 'panDoc', maxCount: 1 },
+  { name: 'shopDoc', maxCount: 1 }
+]), [
   check('fullName', 'Name is required').not().isEmpty(),
   check('email', 'Please include a valid email').isEmail(),
   check('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 }),
