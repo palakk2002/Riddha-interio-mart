@@ -39,12 +39,24 @@ const NotificationPage = React.lazy(() => import('./pages/NotificationPage'));;
 const SplashPage = React.lazy(() => import('./pages/SplashPage'));;
 const OnboardingPage = React.lazy(() => import('./pages/OnboardingPage'));;
 
+import { useUser } from './data/UserContext';
+
+const RootRoute = () => {
+  const { user } = useUser();
+  const splashCompleted = sessionStorage.getItem('splashCompleted') === 'true';
+
+  if (user || splashCompleted) {
+    return <HomePage />;
+  }
+  return <SplashPage />;
+};
+
 const UserRoutes = () => {
   return (
     <Routes>
       <Route path="/splash" element={<SplashPage />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
-      <Route path="/" element={<HomePage />} />
+      <Route path="/" element={<RootRoute />} />
 
       <Route path="/contractor-registration" element={<ContractorRegistration />} />
       <Route path="/designer-registration" element={<DesignerRegistration />} />

@@ -9,6 +9,7 @@ const SplashPage = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      sessionStorage.setItem('splashCompleted', 'true');
       navigate('/onboarding');
     }, 3000);
     return () => clearTimeout(timer);
