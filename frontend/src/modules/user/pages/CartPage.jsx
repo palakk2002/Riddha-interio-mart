@@ -31,12 +31,17 @@ const CartPage = () => {
   if (cart.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
-        <div className="w-24 h-24 bg-soft-oatmeal/10 rounded-full flex items-center justify-center mb-6">
-          <FiShoppingBag className="text-4xl text-soft-oatmeal" />
+        <div className="w-20 h-20 bg-[#189D91]/5 rounded-full flex items-center justify-center mb-6 border border-[#189D91]/10">
+          <FiShoppingBag className="text-3xl text-[#189D91]/55" />
         </div>
-        <h2 className="text-2xl font-bold text-deep-espresso mb-2">Your cart is empty</h2>
-        <p className="text-warm-sand mb-8 text-sm">Add some beautiful pieces to your collection!</p>
-        <Button onClick={() => navigate('/products')} className="px-10 rounded-xl">START SHOPPING</Button>
+        <h2 className="text-xl font-bold text-slate-800 mb-2">Your cart is empty</h2>
+        <p className="text-gray-400 mb-8 text-xs font-semibold">Add some beautiful pieces to your collection!</p>
+        <button 
+          onClick={() => navigate('/products')} 
+          className="px-10 py-3.5 bg-[#189D91] hover:bg-[#14847a] text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-md shadow-[#189D91]/15 hover:shadow-lg active:scale-[0.98]"
+        >
+          START SHOPPING
+        </button>
       </div>
     );
   }
@@ -184,7 +189,7 @@ const CartPage = () => {
 
               <button
                 onClick={handleAction}
-                className="w-full mt-8 bg-gradient-to-r from-[#2A4B7C] to-[#D81B60] text-white py-4 rounded-xl font-bold text-[15px] shadow-lg hover:shadow-xl transition-all"
+                className="w-full mt-8 bg-[#189D91] hover:bg-[#14847a] text-white py-4 rounded-xl font-bold text-[15px] shadow-md shadow-[#189D91]/15 hover:shadow-lg transition-all"
               >
                 Continue to Delivery Method
               </button>
@@ -196,7 +201,7 @@ const CartPage = () => {
       {/* ======================= MOBILE VIEW ======================= */}
       <div className="md:hidden pb-40">
         {/* Mobile Header */}
-        <div className="bg-[#36A18B] text-white px-5 py-4 flex items-center justify-between sticky top-0 z-20">
+        <div className="bg-[#189D91] text-white px-5 py-4 flex items-center justify-between sticky top-0 z-20">
           <button onClick={() => window.history.back()} className="text-white hover:text-white/80 transition-colors">
             <FiArrowLeft size={22} />
           </button>
@@ -302,7 +307,7 @@ const CartPage = () => {
         <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg px-5 py-4 pb-6 z-40 border-t border-gray-100 shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
           <button
             onClick={handleAction}
-            className="w-full bg-[#E54876] hover:bg-[#d83f6b] text-white py-[18px] rounded-full font-bold text-[17px] shadow-sm transition-all active:scale-[0.98]"
+            className="w-full bg-[#189D91] hover:bg-[#14847a] text-white py-[18px] rounded-full font-bold text-[17px] shadow-sm transition-all active:scale-[0.98]"
           >
             Proceed to Checkout
           </button>
