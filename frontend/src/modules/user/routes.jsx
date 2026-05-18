@@ -39,6 +39,7 @@ const NotificationPage = React.lazy(() => import('./pages/NotificationPage'));;
 const SplashPage = React.lazy(() => import('./pages/SplashPage'));;
 const OnboardingPage = React.lazy(() => import('./pages/OnboardingPage'));;
 
+import { Navigate } from 'react-router-dom';
 import { useUser } from './data/UserContext';
 
 const RootRoute = () => {
@@ -48,7 +49,7 @@ const RootRoute = () => {
   if (user || splashCompleted) {
     return <HomePage />;
   }
-  return <SplashPage />;
+  return <Navigate to="/splash" replace />;
 };
 
 const UserRoutes = () => {
