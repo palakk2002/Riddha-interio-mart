@@ -282,17 +282,35 @@ exports.updateAdminProfile = async (req, res, next) => {
 // @desc    Get dashboard statistics
 // @route   GET /api/auth/admin/dashboard-stats
 // @access  Private/Admin
+let dashboardStatsCache = null;
+let dashboardStatsCacheExpiry = 0;
+
+// @desc    Get dashboard statistics
+// @route   GET /api/auth/admin/dashboard-stats
+// @access  Private/Admin
 exports.getDashboardStats = async (req, res, next) => {
   try {
+    const now = Date.now();
+    // Serve from cache if fresh and not explicitly bypassed
+    if (dashboardStatsCache && now < dashboardStatsCacheExpiry && req.query.refresh !== 'true') {
+      return res.status(200).json({
+        success: true,
+        cached: true,
+        data: dashboardStatsCache
+      });
+    }
+
     const Catalog = require('../models/Catalog');
     const Category = require('../models/Category');
     const Seller = require('../models/Seller');
     const Order = require('../models/Order');
     const User = require('../models/User');
     const Delivery = require('../models/Delivery');
+    const Product = require('../models/Product');
 
     const [
       productsCount,
+      liveProductsCount,
       categoriesCount,
       sellersCount,
       usersCount,
@@ -301,9 +319,12 @@ exports.getDashboardStats = async (req, res, next) => {
       recentOrders,
       orderStatusCounts,
       paymentMethodCounts,
-      userTypeCounts
+      userTypeCounts,
+      pendingApprovalsCount,
+      totalStockSum
     ] = await Promise.all([
       Catalog.countDocuments({ isActive: true }),
+      Product.countDocuments({ isActive: true, isApproved: true }),
       Category.countDocuments(),
       Seller.countDocuments({ isVerified: true }),
       User.countDocuments({ role: 'user' }),
@@ -325,6 +346,10 @@ exports.getDashboardStats = async (req, res, next) => {
       User.aggregate([
         { $match: { role: 'user' } },
         { $group: { _id: "$userType", count: { $sum: 1 } } }
+      ]),
+      Product.countDocuments({ approvalStatus: 'pending' }),
+      Product.aggregate([
+        { $group: { _id: null, total: { $sum: '$countInStock' } } }
       ])
     ]);
 
@@ -358,30 +383,40 @@ exports.getDashboardStats = async (req, res, next) => {
       });
     }
 
+    const payload = {
+      stats: {
+        products: productsCount,
+        liveProducts: liveProductsCount,
+        categories: categoriesCount,
+        sellers: sellersCount,
+        users: usersCount,
+        delivery: deliveryCount,
+        totalRevenue: revenueData[0]?.total || 0,
+        statusBreakdown: orderStatusCounts,
+        paymentBreakdown: paymentMethodCounts,
+        userTypeBreakdown: userTypeCounts,
+        pendingApprovals: pendingApprovalsCount,
+        warehouseStock: totalStockSum[0]?.total || 0
+      },
+      revenueChart: chartData,
+      recentActivity: recentOrders.map(o => ({
+        id: o._id,
+        action: `Order ${o.status}`,
+        target: `#${o._id.toString().slice(-6).toUpperCase()}`,
+        user: o.user?.fullName || 'Customer',
+        time: o.createdAt,
+        amount: o.totalPrice
+      }))
+    };
+
+    // Store in-memory cache for 60 seconds
+    dashboardStatsCache = payload;
+    dashboardStatsCacheExpiry = now + 60 * 1000;
+
     res.status(200).json({
       success: true,
-      data: {
-        stats: {
-          products: productsCount,
-          categories: categoriesCount,
-          sellers: sellersCount,
-          users: usersCount,
-          delivery: deliveryCount,
-          totalRevenue: revenueData[0]?.total || 0,
-          statusBreakdown: orderStatusCounts,
-          paymentBreakdown: paymentMethodCounts,
-          userTypeBreakdown: userTypeCounts
-        },
-        revenueChart: chartData,
-        recentActivity: recentOrders.map(o => ({
-          id: o._id,
-          action: `Order ${o.status}`,
-          target: `#${o._id.toString().slice(-6).toUpperCase()}`,
-          user: o.user?.fullName || 'Customer',
-          time: o.createdAt,
-          amount: o.totalPrice
-        }))
-      }
+      cached: false,
+      data: payload
     });
   } catch (err) {
     next(err);
@@ -729,12 +764,15 @@ exports.searchOrders = async (req, res, next) => {
     const Order = require('../models/Order');
     
     // Search by ID (if valid hex string of length 24) or customer name
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(query);
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(query.trim());
     
+    // Safely escape user input for regular expression to protect against ReDoS attacks
+    const escapedQuery = query.trim().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+
     const searchQuery = {
       $or: [
-        ...(isObjectId ? [{ _id: query }] : []),
-        { 'shippingAddress.fullName': { $regex: query, $options: 'i' } }
+        ...(isObjectId ? [{ _id: query.trim() }] : []),
+        { 'shippingAddress.fullName': { $regex: escapedQuery, $options: 'i' } }
       ]
     };
 
