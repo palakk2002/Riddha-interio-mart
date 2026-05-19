@@ -29,6 +29,10 @@ const ManageSellerListPage = () => {
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
 
+  // Live seller portfolio product fetching
+  const [sellerProducts, setSellerProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
   const fetchSellers = async () => {
     try {
       setLoading(true);
@@ -37,9 +41,16 @@ const ManageSellerListPage = () => {
         api.get('/auth/admin/sellers/pending')
       ]);
 
+      // Map backend database status cleanly
       const allSellers = [
-        ...activeRes.data.data.map(s => ({ ...s, status: 'Active' })),
-        ...pendingRes.data.data.map(s => ({ ...s, status: 'Pending' }))
+        ...activeRes.data.data.map(s => ({ 
+          ...s, 
+          status: s.status === 'suspended' ? 'Suspended' : 'Active' 
+        })),
+        ...pendingRes.data.data.map(s => ({ 
+          ...s, 
+          status: s.status === 'suspended' ? 'Suspended' : (s.status === 'approved' ? 'Active' : 'Pending')
+        }))
       ];
 
       setSellers(allSellers);
@@ -55,11 +66,39 @@ const ManageSellerListPage = () => {
     fetchSellers();
   }, []);
 
+  // Fetch real seller inventory products when View Details details is opened
+  useEffect(() => {
+    if (selectedSeller) {
+      const fetchSellerProducts = async () => {
+        try {
+          setLoadingProducts(true);
+          const res = await api.get(`/products?seller=${selectedSeller._id}`);
+          setSellerProducts(res.data.data || []);
+        } catch (err) {
+          console.error("Failed to fetch seller products:", err);
+          setSellerProducts([]);
+        } finally {
+          setLoadingProducts(false);
+        }
+      };
+      fetchSellerProducts();
+    } else {
+      setSellerProducts([]);
+    }
+  }, [selectedSeller]);
+
   const handleStatusUpdate = async (id, action) => {
     try {
       if (action === 'approve') {
         await api.put(`/auth/admin/sellers/${id}/approve`);
         toast.success('Seller approved successfully');
+      } else if (action === 'suspend') {
+        if (!window.confirm('Are you sure you want to suspend this seller account?')) return;
+        await api.put(`/auth/admin/sellers/${id}/suspend`);
+        toast.success('Seller account suspended successfully');
+      } else if (action === 'unsuspend') {
+        await api.put(`/auth/admin/sellers/${id}/unsuspend`);
+        toast.success('Seller account unsuspended successfully');
       } else if (action === 'delete') {
         if (!window.confirm('Are you sure you want to delete this seller?')) return;
         await api.delete(`/auth/admin/sellers/${id}`);
@@ -67,7 +106,7 @@ const ManageSellerListPage = () => {
       }
       fetchSellers();
     } catch (err) {
-      toast.error('Failed to update seller status');
+      toast.error(`Failed to ${action} seller`);
     }
     setActiveMenu(null);
   };
@@ -292,6 +331,8 @@ const ManageSellerListPage = () => {
                 <span className={`text-[9px] font-bold uppercase tracking-widest border px-2 py-0.5 rounded-full ${
                   selectedSeller.status === 'Active' 
                     ? 'text-emerald-700 bg-emerald-50 border-emerald-700/10' 
+                    : selectedSeller.status === 'Suspended'
+                    ? 'text-red-700 bg-red-50 border-red-700/10'
                     : 'text-amber-700 bg-amber-50 border-amber-700/10'
                 }`}>
                   {selectedSeller.status}
@@ -316,7 +357,7 @@ const ManageSellerListPage = () => {
                   <span className="text-slate-800 truncate max-w-[200px]">{selectedSeller.shopAddress || 'Online Only'}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-slate-450 uppercase tracking-wider text-[9px]">Registered Date</span>
+                  <span className="text-slate-455 uppercase tracking-wider text-[9px]">Registered Date</span>
                   <span className="text-slate-800">{new Date(selectedSeller.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                 </div>
               </div>
@@ -343,58 +384,48 @@ const ManageSellerListPage = () => {
             <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest pb-1 border-b border-slate-50">Product Inventory</h3>
               
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-colors border border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-sm shrink-0">🛏️</div>
-                    <div>
-                      <p className="text-xs font-black text-slate-800 leading-none">Dak Master Bed</p>
-                      <p className="text-[10px] text-slate-400 font-bold mt-1">Price - ₹3,12,490</p>
-                      <p className="text-[9px] text-yellow-600 font-bold mt-0.5">Rating: ⭐ 4.8</p>
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider block mb-1">
-                      Low Stock
-                    </span>
-                    <span className="text-xs font-black text-slate-700 block">1x</span>
-                  </div>
+              {loadingProducts ? (
+                <div className="py-8 text-center text-[10px] font-black uppercase tracking-wider text-warm-sand animate-pulse">
+                  Loading Live Portfolio...
                 </div>
-
-                <div className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-colors border border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-sm shrink-0">🪑</div>
-                    <div>
-                      <p className="text-xs font-black text-slate-800 leading-none">Karaane Table</p>
-                      <p className="text-[10px] text-slate-400 font-bold mt-1">Price - ₹26,354</p>
-                      <p className="text-[9px] text-yellow-600 font-bold mt-0.5">Rating: ⭐ 4.0</p>
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider block mb-1">
-                      Low Stock
-                    </span>
-                    <span className="text-xs font-black text-slate-700 block">16x</span>
-                  </div>
+              ) : sellerProducts.length === 0 ? (
+                <div className="py-8 text-center text-xs font-semibold text-slate-400 italic">
+                  No active store inventory listed yet.
                 </div>
-
-                <div className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-colors border border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-sm shrink-0">🛋️</div>
-                    <div>
-                      <p className="text-xs font-black text-slate-800 leading-none">Autumn Trade</p>
-                      <p className="text-[10px] text-slate-400 font-bold mt-1">Price - ₹8,990</p>
-                      <p className="text-[9px] text-yellow-600 font-bold mt-0.5">Rating: ⭐ 4.5</p>
+              ) : (
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                  {sellerProducts.map((prod) => (
+                    <div key={prod._id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-colors border border-slate-100">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="w-10 h-10 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden">
+                          {prod.images && prod.images[0] ? (
+                            <img src={prod.images[0]} alt={prod.name} className="w-full h-full object-cover" />
+                          ) : (
+                            '📦'
+                          )}
+                        </div>
+                        <div className="overflow-hidden">
+                          <p className="text-xs font-black text-slate-800 leading-none truncate">{prod.name}</p>
+                          <p className="text-[10px] text-slate-400 font-bold mt-1.5">Price - ₹{(prod.price || 0).toLocaleString('en-IN')}</p>
+                          <p className="text-[9px] text-yellow-600 font-bold mt-0.5">Rating: ⭐ {prod.averageRating || '0.0'}</p>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        {prod.countInStock <= 5 ? (
+                          <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider block mb-1">
+                            Low Stock
+                          </span>
+                        ) : (
+                          <span className="bg-green-50 text-green-700 border border-green-100 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider block mb-1">
+                            In Stock
+                          </span>
+                        )}
+                        <span className="text-xs font-black text-slate-700 block">{prod.countInStock} available</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider block mb-1">
-                      Low Stock
-                    </span>
-                    <span className="text-xs font-black text-slate-700 block">4x</span>
-                  </div>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -491,6 +522,15 @@ const ManageSellerListPage = () => {
                       Location
                     </th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
+                      Products
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
+                      Total Sales
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
+                      Sales Volume
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
                       Joined Date
                     </th>
                     <th className="px-6 py-4 text-[10px] font-black text-warm-sand uppercase tracking-widest">
@@ -504,7 +544,7 @@ const ManageSellerListPage = () => {
                 <tbody className="divide-y divide-soft-oatmeal/50">
                   {filteredSellers.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="px-6 py-20 text-center text-warm-sand font-bold uppercase tracking-widest italic text-sm">
+                      <td colSpan="9" className="px-6 py-20 text-center text-warm-sand font-bold uppercase tracking-widest italic text-sm">
                         No sellers found.
                       </td>
                     </tr>
@@ -547,6 +587,20 @@ const ManageSellerListPage = () => {
                             <span className="line-clamp-1">{seller.shopAddress || 'Online Only'}</span>
                           </div>
                         </td>
+                        {/* Real-time backend performance metrics */}
+                        <td className="px-6 py-4">
+                          <div className="text-xs font-bold text-deep-espresso/80 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg w-max flex items-center justify-center min-w-[32px]">
+                            {seller.productCount || 0}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-xs font-black text-deep-espresso">
+                          ₹{(seller.totalSales || 0).toLocaleString('en-IN')}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-[10px] font-bold text-slate-600 bg-slate-100/70 border border-slate-200/50 px-2 py-0.5 rounded-full">
+                            {seller.orderCount || 0} orders
+                          </span>
+                        </td>
                         <td className="px-6 py-4 text-xs text-deep-espresso/70 font-black uppercase tracking-tighter">
                           {new Date(seller.createdAt).toLocaleDateString()}
                         </td>
@@ -555,6 +609,8 @@ const ManageSellerListPage = () => {
                             className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
                               seller.status === "Active"
                                 ? "text-green-700 bg-green-50 border-green-700/10"
+                                : seller.status === "Suspended"
+                                ? "text-red-700 bg-red-50 border-red-700/10"
                                 : "text-amber-700 bg-amber-50 border-amber-700/10"
                             }`}
                           >
@@ -579,6 +635,22 @@ const ManageSellerListPage = () => {
                                     className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-3"
                                   >
                                     <LuCheck size={14} /> Approve Store
+                                  </button>
+                                )}
+                                {seller.status === 'Active' && (
+                                  <button 
+                                    onClick={() => handleStatusUpdate(seller._id, 'suspend')}
+                                    className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-amber-600 hover:bg-amber-50 transition-colors flex items-center gap-3"
+                                  >
+                                    <LuX size={14} /> Suspend Account
+                                  </button>
+                                )}
+                                {seller.status === 'Suspended' && (
+                                  <button 
+                                    onClick={() => handleStatusUpdate(seller._id, 'unsuspend')}
+                                    className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-emerald-650 hover:bg-emerald-50 transition-colors flex items-center gap-3"
+                                  >
+                                    <LuCheck size={14} /> Reactivate Account
                                   </button>
                                 )}
                                 <button 
@@ -657,7 +729,7 @@ const ManageSellerListPage = () => {
                   {/* Soft oatmeal header */}
                   <div className="bg-soft-oatmeal/35 px-4 py-2 border-b border-soft-oatmeal/70 flex justify-between items-center">
                     <span className="text-[10px] font-black text-deep-espresso uppercase tracking-wider">
-                      Order ID {"4IMS" + seller._id.substring(0,4).toUpperCase()} - New
+                      Seller ID {"4IMS" + seller._id.substring(0,4).toUpperCase()}
                     </span>
                     <span className="bg-soft-oatmeal text-warm-sand text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">
                       Needs Review
@@ -685,11 +757,13 @@ const ManageSellerListPage = () => {
                       <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
                         seller.status === "Active"
                           ? "text-[#189D91] bg-teal-50 border-teal-100"
+                          : seller.status === "Suspended"
+                          ? "text-red-700 bg-red-50 border-red-100"
                           : "text-amber-700 bg-amber-50 border-amber-100"
                       }`}>
                         {seller.status}
                       </span>
-                      <span className="text-xs font-black text-slate-800">₹5,990</span>
+                      <span className="text-xs font-black text-slate-800">₹{(seller.totalSales || 0).toLocaleString('en-IN')}</span>
                     </div>
                   </div>
 
@@ -706,7 +780,23 @@ const ManageSellerListPage = () => {
                         onClick={() => handleStatusUpdate(seller._id, 'approve')}
                         className="px-4 py-2.5 bg-[#189D91] hover:bg-[#15887D] text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors"
                       >
-                        Approve Store
+                        Approve
+                      </button>
+                    )}
+                    {seller.status === 'Active' && (
+                      <button 
+                        onClick={() => handleStatusUpdate(seller._id, 'suspend')}
+                        className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors animate-in fade-in duration-200"
+                      >
+                        Suspend
+                      </button>
+                    )}
+                    {seller.status === 'Suspended' && (
+                      <button 
+                        onClick={() => handleStatusUpdate(seller._id, 'unsuspend')}
+                        className="px-4 py-2.5 bg-[#189D91] hover:bg-[#15887D] text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors animate-in fade-in duration-200"
+                      >
+                        Reactivate
                       </button>
                     )}
                   </div>

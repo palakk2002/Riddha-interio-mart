@@ -4,6 +4,7 @@ import PageWrapper from '../components/PageWrapper';
 import { motion } from 'framer-motion';
 import { LuArrowLeft, LuCheck, LuImage, LuPackagePlus, LuStar, LuType, LuChevronRight } from 'react-icons/lu';
 import { manageFeaturedData } from '../data/manageFeaturedData';
+import { toast } from 'react-hot-toast';
 
 const AddFeaturedProductPage = () => {
   const navigate = useNavigate();
@@ -25,16 +26,23 @@ const AddFeaturedProductPage = () => {
     }
   };
 
+  const handleClearImage = () => {
+    setNewProduct({ ...newProduct, image: '' });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!newProduct.name || !newProduct.price) {
-      alert('Please provide at least a name and price for the featured item.');
+      toast.error('Please provide at least a name and price for the featured item.');
       return;
     }
 
     const productToAdd = {
       id: Date.now(),
-      name: newProduct.name,
+      name: newProduct.name.trim(),
       category: 'Featured',
       price: parseFloat(newProduct.price) || 0,
       originalPrice: Math.round((parseFloat(newProduct.price) || 0) * 1.2),
@@ -54,6 +62,7 @@ const AddFeaturedProductPage = () => {
     products = [...products, productToAdd];
     localStorage.setItem('admin_featured_products', JSON.stringify(products));
     
+    toast.success('Featured highlight added successfully!');
     navigate('/admin/manage-featured');
   };
 
@@ -103,6 +112,7 @@ const AddFeaturedProductPage = () => {
                 </div>
               </div>
               
+              <div className="w-full space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2 pl-1">
                     <LuImage size={12} /> Image Media
@@ -110,7 +120,7 @@ const AddFeaturedProductPage = () => {
                   {newProduct.image && (
                     <button 
                       type="button"
-                      onClick={() => setNewProduct({...newProduct, image: ''})}
+                      onClick={handleClearImage}
                       className="text-[9px] font-black text-red-400 uppercase tracking-widest hover:text-red-500 transition-colors"
                     >
                       Clear
@@ -153,6 +163,7 @@ const AddFeaturedProductPage = () => {
                     />
                   </div>
                 </div>
+              </div>
             </div>
 
             {/* Right: Detailed Fields */}

@@ -11,6 +11,7 @@ import {
 } from 'react-icons/lu';
 import api from '../../../shared/utils/api';
 import { uploadImage } from '../../../shared/utils/upload';
+import { toast } from 'react-hot-toast';
 
 const createEmptyBanner = () => ({
   title: '',
@@ -59,7 +60,6 @@ const ManageHeroBanner = () => {
   const [bannerForm, setBannerForm] = useState(createEmptyBanner());
   const [banners, setBanners] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  const [statusMessage, setStatusMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
@@ -76,7 +76,7 @@ const ManageHeroBanner = () => {
       setBanners(list);
     } catch (error) {
       console.error('Failed to fetch home banners:', error);
-      setStatusMessage(error.response?.data?.error || 'Failed to load banners.');
+      toast.error('Failed to load homepage banners.');
     } finally {
       setLoading(false);
     }
@@ -85,6 +85,11 @@ const ManageHeroBanner = () => {
   useEffect(() => {
     fetchBanners();
   }, []);
+
+  // Flush state leaks when changing tabs
+  useEffect(() => {
+    resetForm();
+  }, [activeTab]);
 
   const handleChange = (field, value) => {
     if (field.startsWith('bgImage.')) {
@@ -99,7 +104,6 @@ const ManageHeroBanner = () => {
     } else {
       setBannerForm((prev) => ({ ...prev, [field]: value }));
     }
-    setStatusMessage('');
   };
 
   const handleImageUpload = (e) => {
@@ -116,7 +120,6 @@ const ManageHeroBanner = () => {
           src: reader.result,
         },
       }));
-      setStatusMessage('');
     };
     reader.readAsDataURL(file);
   };
@@ -124,23 +127,28 @@ const ManageHeroBanner = () => {
   const resetForm = () => {
     setBannerForm(createEmptyBanner());
     setEditingId(null);
-    setStatusMessage('');
+    setImgFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSaveBanner = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
 
     const payload = buildPayload(bannerForm);
 
     if (!payload.title) {
-      setStatusMessage('Please add a banner title.');
+      toast.error('Please add a banner title.');
       return;
     }
 
     if (!payload.bgImage.src) {
-      setStatusMessage('Please add a background image URL or upload file.');
+      toast.error('Please add a background image URL or upload a file.');
       return;
     }
+
+    const saveToast = toast.loading(editingId ? 'Updating banner...' : 'Creating banner...');
 
     try {
       setSubmitting(true);
@@ -150,20 +158,20 @@ const ManageHeroBanner = () => {
         finalImageUrl = await uploadImage(imgFile);
       }
 
-      const payload = {
-        ...buildPayload(bannerForm),
+      const fullPayload = {
+        ...payload,
         bgImage: {
-          ...bannerForm.bgImage,
+          ...payload.bgImage,
           src: finalImageUrl
         }
       };
 
       if (editingId) {
-        await api.put(`/home-banner/${editingId}`, payload);
-        setStatusMessage('Banner updated successfully.');
+        await api.put(`/home-banner/${editingId}`, fullPayload);
+        toast.success('Banner updated successfully.', { id: saveToast });
       } else {
-        await api.post('/home-banner', payload);
-        setStatusMessage('Banner created successfully.');
+        await api.post('/home-banner', fullPayload);
+        toast.success('Banner created successfully.', { id: saveToast });
       }
 
       await fetchBanners();
@@ -171,7 +179,7 @@ const ManageHeroBanner = () => {
       setActiveTab('all');
     } catch (error) {
       console.error('Failed to save banner:', error);
-      setStatusMessage(error.response?.data?.error || 'Failed to save banner.');
+      toast.error(error.response?.data?.error || 'Failed to save banner.', { id: saveToast });
     } finally {
       setSubmitting(false);
     }
@@ -181,17 +189,18 @@ const ManageHeroBanner = () => {
     setBannerForm(mapBannerToForm(banner));
     setEditingId(banner._id);
     setActiveTab('create');
-    setStatusMessage(`Editing: ${banner.title}`);
+    toast.success(`Editing: ${banner.title.slice(0, 20)}...`);
   };
 
   const handleDelete = async (banner) => {
     const allowDelete = window.confirm(`Delete banner "${banner.title}"?`);
     if (!allowDelete) return;
 
+    const deleteToast = toast.loading('Deleting banner...');
     try {
       setDeletingId(banner._id);
       await api.delete(`/home-banner/${banner._id}`);
-      setStatusMessage('Banner deleted.');
+      toast.success('Banner deleted successfully.', { id: deleteToast });
       await fetchBanners();
 
       if (editingId === banner._id) {
@@ -199,7 +208,7 @@ const ManageHeroBanner = () => {
       }
     } catch (error) {
       console.error('Failed to delete banner:', error);
-      setStatusMessage(error.response?.data?.error || 'Failed to delete banner.');
+      toast.error(error.response?.data?.error || 'Failed to delete banner.', { id: deleteToast });
     } finally {
       setDeletingId(null);
     }
@@ -232,7 +241,7 @@ const ManageHeroBanner = () => {
             onClick={() => setActiveTab('create')}
             className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
               activeTab === 'create'
-                ? 'bg-deep-espresso text-white'
+                ? 'bg-deep-espresso text-white shadow-sm'
                 : 'text-deep-espresso hover:bg-soft-oatmeal/30'
             }`}
           >
@@ -243,7 +252,7 @@ const ManageHeroBanner = () => {
             onClick={() => setActiveTab('all')}
             className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
               activeTab === 'all'
-                ? 'bg-deep-espresso text-white'
+                ? 'bg-deep-espresso text-white shadow-sm'
                 : 'text-deep-espresso hover:bg-soft-oatmeal/30'
             }`}
           >
@@ -251,12 +260,6 @@ const ManageHeroBanner = () => {
             All Banners
           </button>
         </div>
-
-        {statusMessage && (
-          <div className="px-4 py-3 rounded-xl border border-soft-oatmeal bg-white text-sm text-deep-espresso">
-            {statusMessage}
-          </div>
-        )}
 
         {activeTab === 'create' && (
           <div className="space-y-8">
@@ -312,7 +315,7 @@ const ManageHeroBanner = () => {
                     <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Background Image</label>
                     <button
                       type="button"
-                      onClick={() => fileInputRef.current.click()}
+                      onClick={() => fileInputRef.current?.click()}
                       className="text-[10px] font-black text-deep-espresso uppercase tracking-widest hover:underline"
                     >
                       Upload File
@@ -456,64 +459,99 @@ const ManageHeroBanner = () => {
         {activeTab === 'all' && (
           <div className="space-y-6">
             {loading ? (
-              <div className="bg-white p-10 rounded-2xl border border-soft-oatmeal text-center text-brand-teal">
-                Loading banners...
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {[1, 2, 3].map((n) => (
+                  <div key={n} className="bg-white rounded-2xl border border-soft-oatmeal shadow-sm overflow-hidden animate-pulse">
+                    <div className="aspect-[16/9] bg-slate-200"></div>
+                    <div className="p-4 space-y-3">
+                      <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-slate-200 rounded w-1/2"></div>
+                      <div className="flex gap-2 pt-2">
+                        <div className="h-8 bg-slate-200 rounded-xl flex-1"></div>
+                        <div className="h-8 bg-slate-200 rounded-xl flex-1"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : banners.length === 0 ? (
-              <div className="bg-white p-10 rounded-2xl border border-soft-oatmeal text-center">
-                <p className="text-deep-espresso font-semibold">No banners yet.</p>
-                <p className="text-brand-teal text-sm mt-1">Create a banner and it will appear here.</p>
+              <div className="bg-white p-12 rounded-2xl border border-soft-oatmeal text-center">
+                <div className="w-16 h-16 bg-soft-oatmeal/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <LuImages size={32} className="text-warm-sand opacity-40" />
+                </div>
+                <h3 className="text-lg font-bold text-deep-espresso mb-2">No Banners Yet</h3>
+                <p className="text-warm-sand text-sm mb-6">Create a banner and it will appear here.</p>
+                <button
+                  onClick={() => setActiveTab('create')}
+                  className="inline-flex items-center gap-2 bg-deep-espresso text-white px-6 py-3 rounded-xl font-bold hover:bg-dusty-cocoa transition-all shadow-sm"
+                >
+                  Create First Banner
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {banners.map((item) => (
                   <div
                     key={item._id}
-                    className="bg-white rounded-2xl border border-soft-oatmeal shadow-sm overflow-hidden"
+                    className="bg-white rounded-2xl border border-soft-oatmeal shadow-sm overflow-hidden flex flex-col justify-between"
                   >
-                    <div className="aspect-[16/9] bg-soft-oatmeal/20 relative">
+                    <div className="aspect-[16/9] bg-soft-oatmeal/20 relative overflow-hidden">
                       {item.bgImage?.src ? (
                         <img
                           src={item.bgImage.src}
                           alt={item.bgImage?.alt || item.title}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.style.display = 'none';
+                            const fallback = e.target.parentNode.querySelector('.fallback-img');
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
                         />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-brand-teal text-sm">
-                          No image
-                        </div>
-                      )}
+                      ) : null}
+                      <div className="fallback-img absolute inset-0 bg-soft-oatmeal/20 flex flex-col items-center justify-center text-warm-sand" style={{ display: item.bgImage?.src ? 'none' : 'flex' }}>
+                        <LuImages size={28} className="opacity-40" />
+                        <span className="text-[10px] font-black uppercase tracking-widest mt-2 text-slate-400">Broken Link</span>
+                      </div>
                     </div>
 
-                    <div className="p-4 space-y-3">
-                      <h3 className="font-bold text-deep-espresso line-clamp-1">{item.title}</h3>
-                      <p className="text-sm text-brand-teal line-clamp-2 min-h-10">{item.subtitle}</p>
-
-                      <div className="flex flex-wrap gap-2 text-xs">
-                        <span className="px-2 py-1 rounded-full bg-soft-oatmeal/30 text-deep-espresso">
-                          {item.primaryBtnText}
-                        </span>
-                        <span className="px-2 py-1 rounded-full bg-soft-oatmeal/30 text-deep-espresso">
-                          {item.secondaryBtnText}
-                        </span>
+                    <div className="p-4 space-y-3 flex-grow flex flex-col justify-between">
+                      <div className="space-y-1">
+                        <h3 className="font-bold text-deep-espresso line-clamp-1">{item.title}</h3>
+                        <p className="text-xs text-warm-sand line-clamp-2 min-h-8">{item.subtitle}</p>
                       </div>
 
-                      <div className="pt-2 border-t border-soft-oatmeal/60 flex gap-2">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="flex-1 flex items-center justify-center gap-2 text-sm font-semibold px-3 py-2 rounded-xl bg-soft-oatmeal/30 text-deep-espresso hover:bg-soft-oatmeal/50 transition-all"
-                        >
-                          <LuPencil size={15} />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item)}
-                          disabled={deletingId === item._id}
-                          className="flex-1 flex items-center justify-center gap-2 text-sm font-semibold px-3 py-2 rounded-xl bg-[#240046]/5 text-[#240046] hover:bg-[#240046]/10 transition-all disabled:opacity-60"
-                        >
-                          {deletingId === item._id ? <LuLoader className="animate-spin" size={15} /> : <LuTrash2 size={15} />}
-                          Delete
-                        </button>
+                      <div className="space-y-3 pt-2">
+                        <div className="flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-wider">
+                          {item.primaryBtnText && (
+                            <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-650">
+                              {item.primaryBtnText}
+                            </span>
+                          )}
+                          {item.secondaryBtnText && (
+                            <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-650">
+                              {item.secondaryBtnText}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="pt-2 border-t border-soft-oatmeal/60 flex gap-2">
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="flex-1 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-2 rounded-xl bg-soft-oatmeal/30 text-deep-espresso hover:bg-soft-oatmeal/50 transition-all border border-soft-oatmeal/50"
+                          >
+                            <LuPencil size={13} />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item)}
+                            disabled={deletingId === item._id}
+                            className="flex-1 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-2 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 transition-all border border-red-200/50 disabled:opacity-60"
+                          >
+                            {deletingId === item._id ? <LuLoader className="animate-spin" size={13} /> : <LuTrash2 size={13} />}
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
