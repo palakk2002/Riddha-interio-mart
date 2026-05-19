@@ -180,10 +180,9 @@ exports.updateReturnStatus = async (req, res, next) => {
       }
 
       // 2. Restore Stock
-      const product = await Product.findById(returnReq.product);
-      if (product && itemIndex !== -1) {
-        product.countInStock += order.orderItems[itemIndex].quantity;
-        await product.save();
+      if (itemIndex !== -1) {
+        const inventoryService = require('../services/inventoryService');
+        await inventoryService.returnStock(returnReq.product, order.orderItems[itemIndex].quantity);
       }
 
       // 3. Process Wallet Refund Deduction & Tax Rollback Log
@@ -204,6 +203,23 @@ exports.updateReturnStatus = async (req, res, next) => {
     }
 
     await returnReq.save();
+
+    // Queue Refund Confirmation Email
+    if (status === 'Approved' || status === 'Completed') {
+      try {
+        const User = require('../models/User');
+        const customer = await User.findById(returnReq.user);
+        if (customer && customer.email) {
+          const emailService = require('../services/emailService');
+          await emailService.queueEmail(customer.email, 'Refund Processed - Riddha Mart', 'refund', {
+            order,
+            refundAmount: returnReq.refundAmount
+          });
+        }
+      } catch (emailErr) {
+        console.error('Failed to queue refund email:', emailErr.message);
+      }
+    }
 
     res.status(200).json({
       success: true,

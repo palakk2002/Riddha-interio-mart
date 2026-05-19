@@ -111,6 +111,14 @@ const startServer = async () => {
   try {
     await connectDB();
 
+    // Start background email queue processor daemon
+    const emailService = require('./services/emailService');
+    emailService.startDaemon();
+
+    // Start background stock reservation queue daemon
+    const inventoryService = require('./services/inventoryService');
+    inventoryService.startReservationDaemon();
+
     const server = http.createServer(app);
     initSocket(server);
     server.on('error', (error) => {

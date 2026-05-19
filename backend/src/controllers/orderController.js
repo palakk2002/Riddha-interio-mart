@@ -48,15 +48,24 @@ exports.addOrderItems = async (req, res) => {
   session.startTransaction();
 
   try {
-    // 2. Stock Validation (Consistent reads inside session to fail-fast)
-    for (const item of orderItems) {
-      const product = await Product.findById(item.product).session(session);
-      if (!product) {
-        throw new Error(`Product not found: ${item.name || 'Unknown'}`);
+    // 2. Reserve Stock atomically inside the Mongoose session
+    const inventoryService = require('../services/inventoryService');
+    const reservationsList = [];
+
+    try {
+      for (const item of orderItems) {
+        // Reserve stock hold for 15 minutes inside the session
+        const reservation = await inventoryService.reserveStock(
+          req.user.id,
+          item.product,
+          item.quantity,
+          15,
+          session
+        );
+        reservationsList.push(reservation);
       }
-      if (product.countInStock < item.quantity) {
-        throw new Error(`Insufficient stock for ${item.name}. Available: ${product.countInStock}`);
-      }
+    } catch (reserveError) {
+      throw new Error(`Checkout failed: ${reserveError.message}`);
     }
 
     // 3. Secure backend calculation of all items
@@ -79,7 +88,7 @@ exports.addOrderItems = async (req, res) => {
       groupedItems[sId].items.push(item);
     }
 
-    // 5. Create Orders and Deduct Stock
+    // 5. Create Orders and Commit Stock Reservations
     const createdOrders = [];
     const lowStockAlerts = [];
 
@@ -134,20 +143,18 @@ exports.addOrderItems = async (req, res) => {
       const savedOrder = await order.save({ session });
       createdOrders.push(savedOrder);
 
-      // Deduct stock (Atomic and Concurrency-Safe inside session)
+      // Commit reservations (Atomic and Concurrency-Safe inside session)
       for (const item of group.items) {
-        const updatedProduct = await Product.findOneAndUpdate(
-          { _id: item.product, countInStock: { $gte: item.quantity } },
-          { $inc: { countInStock: -item.quantity } },
-          { session, new: true }
-        );
-
-        if (!updatedProduct) {
-          throw new Error(`Race condition: Insufficient stock for ${item.name} during checkout.`);
+        const matchedRes = reservationsList.find(res => res.product.toString() === item.product.toString());
+        if (!matchedRes) {
+          throw new Error(`Active stock hold reservation not found for ${item.name}`);
         }
 
-        // Collect low stock alert payload
-        if (updatedProduct.countInStock <= 5) {
+        await inventoryService.commitReservation(matchedRes._id, session);
+
+        // Fetch updated product for low stock alerts check
+        const updatedProduct = await Product.findById(item.product).session(session);
+        if (updatedProduct && updatedProduct.countInStock <= 5) {
           lowStockAlerts.push({
             seller: updatedProduct.seller,
             data: {
@@ -237,6 +244,18 @@ exports.addOrderItems = async (req, res) => {
 
       // Fire and forget invoice generation (Asynchronous)
       processInvoiceAsync(savedOrder._id, req.user.id);
+
+      // Queue Order Confirmation Email
+      try {
+        const User = require('../models/User');
+        const customer = await User.findById(req.user.id);
+        if (customer && customer.email) {
+          const emailService = require('../services/emailService');
+          await emailService.queueEmail(customer.email, `Order Confirmation - #${savedOrder._id.toString().slice(-8).toUpperCase()}`, 'order_confirmation', { order: savedOrder });
+        }
+      } catch (emailErr) {
+        console.error('Failed to queue order confirmation email:', emailErr.message);
+      }
     }
 
     // Process Referral First Order reward for referrer
@@ -411,10 +430,9 @@ exports.updateOrderStatus = async (req, res) => {
 
       if (newStatus === 'Cancelled') {
         // Restore stock
+        const inventoryService = require('../services/inventoryService');
         for (const item of order.orderItems) {
-          await Product.findByIdAndUpdate(item.product, {
-            $inc: { countInStock: item.quantity }
-          });
+          await inventoryService.returnStock(item.product, item.quantity);
         }
       }
 

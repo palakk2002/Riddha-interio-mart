@@ -157,6 +157,18 @@ exports.approveSeller = async (req, res, next) => {
       status: 'approved'
     }, { new: true });
     if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
+
+    // Queue status change email
+    try {
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(seller.email, 'Riddha Mart - Seller Application Approved', 'seller_approval', {
+        shopName: seller.shopName,
+        status: 'approved'
+      });
+    } catch (emailErr) {
+      console.error('Failed to queue seller approval email:', emailErr.message);
+    }
+
     res.status(200).json({ success: true, data: seller });
   } catch (err) {
     next(err);
@@ -171,6 +183,18 @@ exports.deleteSeller = async (req, res, next) => {
       isVerified: false 
     }, { new: true });
     if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
+
+    // Queue status change email
+    try {
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(seller.email, 'Riddha Mart - Seller Application Update', 'seller_approval', {
+        shopName: seller.shopName,
+        status: 'rejected'
+      });
+    } catch (emailErr) {
+      console.error('Failed to queue seller rejection email:', emailErr.message);
+    }
+
     res.status(200).json({ success: true, data: {} });
   } catch (err) {
     next(err);
@@ -187,6 +211,18 @@ exports.suspendSeller = async (req, res, next) => {
       isVerified: false 
     }, { new: true });
     if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
+
+    // Queue status change email
+    try {
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(seller.email, 'Riddha Mart - Seller Account Suspended', 'seller_approval', {
+        shopName: seller.shopName,
+        status: 'suspended'
+      });
+    } catch (emailErr) {
+      console.error('Failed to queue seller suspension email:', emailErr.message);
+    }
+
     res.status(200).json({ success: true, data: seller });
   } catch (err) {
     next(err);
@@ -203,6 +239,18 @@ exports.unsuspendSeller = async (req, res, next) => {
       isVerified: true 
     }, { new: true });
     if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
+
+    // Queue status change email
+    try {
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(seller.email, 'Riddha Mart - Seller Account Unsuspended', 'seller_approval', {
+        shopName: seller.shopName,
+        status: 'approved'
+      });
+    } catch (emailErr) {
+      console.error('Failed to queue seller unsuspension email:', emailErr.message);
+    }
+
     res.status(200).json({ success: true, data: seller });
   } catch (err) {
     next(err);

@@ -5,15 +5,22 @@ const paginate = require('../utils/paginate');
 // @desc    Get all products (Filter by Verified Sellers only for Public)
 exports.getProducts = async (req, res, next) => {
   try {
-    const queryObj = { ...req.query };
-    const excludeFields = ['page', 'sort', 'limit', 'fields'];
-    excludeFields.forEach(param => delete queryObj[param]);
+    const searchService = require('../services/searchService');
 
-    // Handle name/category searches if needed (simple match for now)
-    // If isActive is not specified in query, default to true for public, but allow admin to see all
-    // Sanitize Boolean Filters to avoid CastError
+    // 1. Generate unique cache key based on query parameters
+    const cacheKey = JSON.stringify(req.query);
+    const cachedData = searchService.getCachedResult(cacheKey);
+    if (cachedData) {
+      return res.status(200).json({
+        success: true,
+        cached: true,
+        ...cachedData
+      });
+    }
+
     const filter = {};
-    
+
+    // 2. Apply Category, Brand, and Admin protections
     if (req.query.category && req.query.category !== 'all') {
       filter.category = req.query.category;
     }
@@ -28,45 +35,73 @@ exports.getProducts = async (req, res, next) => {
         if (foundBrand) {
           filter.brand = foundBrand._id;
         } else {
-          // Brand name not found, query a non-existent ObjectId to return 0 results cleanly without throwing CastError
           filter.brand = new mongoose.Types.ObjectId();
         }
       }
     }
 
-    if (req.query.search) {
-      filter.$text = { $search: req.query.search };
-    }
-
-    // Default: only show approved products unless filter specifies otherwise
-    // Admins can see everything
+    // Default protections: only show approved/active unless Admin overrides
     const isAdmin = req.user && req.user.role === 'admin';
-    
     if (!isAdmin) {
       filter.isApproved = true;
       filter.isActive = true;
     } else {
-      // Admin filters
       if (req.query.isActive !== undefined && req.query.isActive !== 'all') {
         filter.isActive = req.query.isActive === 'true' || req.query.isActive === true;
       }
-      
       if (req.query.isApproved !== undefined && req.query.isApproved !== 'all') {
         filter.isApproved = req.query.isApproved === 'true' || req.query.isApproved === true;
       }
-
-      // Special case for approvalStatus string
       if (req.query.approvalStatus && req.query.approvalStatus !== 'all') {
         filter.approvalStatus = req.query.approvalStatus;
       }
     }
 
-    // If text search is used, sort by score unless another sort is specified
-    if (req.query.search && !req.query.sort) {
-      req.query.sort = '-score';
-      // In paginate util we don't have access to projection, but we can set lean()
+    // 3. Dynamic Price Filters
+    if (req.query.minPrice || req.query.maxPrice) {
+      filter.price = {};
+      if (req.query.minPrice) filter.price.$gte = Number(req.query.minPrice);
+      if (req.query.maxPrice) filter.price.$lte = Number(req.query.maxPrice);
     }
 
+    // 4. Availability Filters (Only show items in stock)
+    if (req.query.inStock === 'true') {
+      filter.$expr = {
+        $gt: [{ $subtract: ['$countInStock', '$reservedStock'] }, 0]
+      };
+    }
+
+    // 5. Ratings Threshold Filters
+    if (req.query.rating) {
+      filter.averageRating = { $gte: Number(req.query.rating) };
+    }
+
+    // 6. Typo-Tolerant & Fuzzy Search Integration
+    let isFuzzyFallbackUsed = false;
+    if (req.query.search) {
+      const searchPhrase = req.query.search.trim();
+      
+      // Async log for trending analytics
+      searchService.logSearch(req.user ? req.user.id : null, searchPhrase);
+
+      // Attempt primary full-text match
+      filter.$text = { $search: searchPhrase };
+      
+      const primaryCount = await Product.countDocuments(filter);
+      if (primaryCount === 0) {
+        // Fallback to typo-tolerant regex bounds on search miss
+        delete filter.$text;
+        isFuzzyFallbackUsed = true;
+        
+        const fuzzyPatterns = searchService.getFuzzyRegex(searchPhrase);
+        filter.$or = [
+          { name: { $all: fuzzyPatterns } },
+          { description: { $all: fuzzyPatterns } }
+        ];
+      }
+    }
+
+    // 7. Paginate results
     const populateOptions = [
       { path: 'seller', select: 'fullName shopName' },
       { path: 'brand', select: 'name logo' }
@@ -74,14 +109,53 @@ exports.getProducts = async (req, res, next) => {
 
     const result = await paginate(Product, filter, req, populateOptions);
 
-    res.status(200).json({ 
-      success: true, 
+    // Apply ranking sort based on Levenshtein distances if fuzzy regex fallback is active
+    if (isFuzzyFallbackUsed && req.query.search) {
+      const searchPhrase = req.query.search.trim();
+      result.data.sort((a, b) => {
+        const distA = searchService.getLevenshteinDistance(a.name, searchPhrase);
+        const distB = searchService.getLevenshteinDistance(b.name, searchPhrase);
+        return distA - distB;
+      });
+    }
+
+    const outputPayload = {
       count: result.data.length,
       totalResults: result.totalResults,
       totalPages: result.totalPages,
       page: result.page,
       limit: result.limit,
-      data: result.data 
+      fuzzyFallback: isFuzzyFallbackUsed,
+      data: result.data
+    };
+
+    // Store in-memory cache
+    searchService.setCacheResult(cacheKey, outputPayload);
+
+    res.status(200).json({
+      success: true,
+      cached: false,
+      ...outputPayload
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get autocomplete recommendations, recent queries and trending terms
+// @route   GET /api/products/search/suggestions
+// @access  Public (Optional auth)
+exports.getSearchSuggestions = async (req, res, next) => {
+  try {
+    const searchService = require('../services/searchService');
+    const q = req.query.q || '';
+    const userId = req.user ? req.user.id : null;
+
+    const data = await searchService.getSuggestions(userId, q);
+    
+    res.status(200).json({
+      success: true,
+      data
     });
   } catch (error) {
     next(error);

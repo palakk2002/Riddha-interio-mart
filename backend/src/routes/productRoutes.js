@@ -7,7 +7,8 @@ const {
   deleteProduct,
   updateProduct,
   updateApprovalStatus,
-  updateBulkStock
+  updateBulkStock,
+  getSearchSuggestions
 } = require('../controllers/productController');
 const { protect, authorize, tryProtect } = require('../middleware/auth');
 const { check } = require('express-validator');
@@ -29,6 +30,8 @@ router.route('/')
     check('category', 'Category is required').not().isEmpty(),
     validate
   ], createProduct);
+
+router.get('/search/suggestions', tryProtect, getSearchSuggestions);
 
 router.post('/bulk', protect, authorize('seller', 'admin'), require('../controllers/productController').createBulkProducts);
 

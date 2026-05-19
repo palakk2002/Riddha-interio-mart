@@ -87,7 +87,27 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const config = error.config;
+    
+    // 1. Exponential retry logic for network errors and transient 5xx errors
+    if (config && (!error.response || (error.response.status >= 500 && error.response.status <= 504))) {
+      config.__retryCount = config.__retryCount || 0;
+      
+      const MAX_RETRIES = 3;
+      if (config.__retryCount < MAX_RETRIES) {
+        config.__retryCount += 1;
+        const delay = config.__retryCount * 1500;
+        
+        console.warn(`[Network Retry] Transient error on ${config.url}. Retry attempt #${config.__retryCount} in ${delay}ms...`);
+        
+        // Wait for exponential delay and retry request
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return api(config);
+      }
+    }
+
+    // 2. Authentication 401 redirect logic
     if (error?.response?.status === 401 && typeof window !== 'undefined') {
       const path = window.location.pathname || '';
       const loginPath = resolveLoginPath(path);
@@ -95,7 +115,7 @@ api.interceptors.response.use(
       // Important: Only clear token and redirect if it was a PRIVATE request
       // If it was a public request (like categories) that failed with 401,
       // we might just have a stale token. We should clear it but stay on the page.
-      const wasPublic = isPublicRequest(error.config || {});
+      const wasPublic = isPublicRequest(config || {});
 
       localStorage.removeItem(AUTH_STORAGE_KEY);
 

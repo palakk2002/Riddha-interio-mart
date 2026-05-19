@@ -4,10 +4,13 @@ const {
   createReview,
   updateReview,
   deleteReview,
-  moderateReview
+  moderateReview,
+  voteHelpful,
+  reportReview,
+  respondToReview
 } = require('../controllers/reviewController');
 
-const { protect, authorize, tryProtect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 const { check } = require('express-validator');
 const { validate } = require('../middleware/validationMiddleware');
 
@@ -32,5 +35,12 @@ router.put('/:id/moderation', protect, authorize('admin'), [
   check('isApproved', 'isApproved boolean is required').isBoolean(),
   validate
 ], moderateReview);
+
+router.post('/:id/helpful', protect, voteHelpful);
+router.post('/:id/report', protect, [
+  check('reason', 'reason text is required').not().isEmpty(),
+  validate
+], reportReview);
+router.post('/:id/response', protect, authorize('seller', 'admin'), respondToReview);
 
 module.exports = router;
