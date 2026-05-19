@@ -110,10 +110,11 @@ async function persistNotification({ recipient, recipientModel, title, message, 
 
 async function persistForAdmins({ title, message, type, metadata }) {
   try {
-    const admins = await User.find({ role: 'admin' });
+    const Admin = require('./models/Admin');
+    const admins = await Admin.find({});
     const notifications = admins.map(admin => ({
       recipient: admin._id,
-      recipientModel: 'User',
+      recipientModel: 'Admin',
       title,
       message,
       type,
@@ -152,7 +153,7 @@ async function notifyAdminNewOrder(adminId, payload) {
   if (adminId) {
     const notif = await persistNotification({
       recipient: adminId,
-      recipientModel: 'User',
+      recipientModel: 'Admin',
       title: 'New Order',
       message: payload.message || 'A new order was placed.',
       type: 'order_update',
@@ -232,7 +233,7 @@ async function notifyAdminDeliveryResponse(adminId, payload) {
   if (adminId) {
     const notif = await persistNotification({
       recipient: adminId,
-      recipientModel: 'User',
+      recipientModel: 'Admin',
       title: 'Delivery Status Update',
       message: payload.message || 'A delivery status has been updated.',
       type: 'delivery_update',

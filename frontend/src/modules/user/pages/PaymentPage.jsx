@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../data/CartContext';
 import { useUser } from '../data/UserContext';
-import { FiArrowLeft, FiChevronDown, FiChevronUp, FiSmartphone, FiCreditCard, FiSearch, FiUser, FiShoppingCart, FiMenu, FiMapPin, FiCheck, FiGlobe, FiGift } from 'react-icons/fi';
+import { FiArrowLeft, FiChevronDown, FiChevronUp, FiSmartphone, FiCreditCard, FiSearch, FiUser, FiShoppingCart, FiMenu, FiMapPin, FiCheck, FiGlobe, FiGift, FiX } from 'react-icons/fi';
 import Button from '../../../shared/components/Button';
 import api from '../../../shared/utils/api';
 
@@ -15,9 +15,100 @@ const PaymentPage = () => {
   const [selectedMethod, setSelectedMethod] = useState('gpay');
   const [showRazorpay, setShowRazorpay] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [codEligibility, setCodEligibility] = useState({ eligible: false, loading: true, reason: '' });
+
+  React.useEffect(() => {
+    const checkEligibility = async () => {
+      try {
+        const payload = {
+          orderItems: cart.map(item => ({
+            product: item._id || item.id,
+            name: item.name,
+            quantity: item.quantity
+          })),
+          pincode: address?.pincode
+        };
+        const { data } = await api.post('/orders/cod-eligibility', payload);
+        if (data.success) {
+          setCodEligibility({
+            eligible: data.eligible,
+            loading: false,
+            reason: data.reason
+          });
+        }
+      } catch (err) {
+        console.error('Failed to check COD eligibility:', err);
+        setCodEligibility({
+          eligible: false,
+          loading: false,
+          reason: 'Failed to verify Cash On Delivery eligibility.'
+        });
+      }
+    };
+
+    if (cart && cart.length > 0 && address?.pincode) {
+      checkEligibility();
+    } else {
+      setCodEligibility({
+        eligible: false,
+        loading: false,
+        reason: 'Please select a delivery address first.'
+      });
+    }
+  }, [cart, address]);
 
   const handlePayNow = () => {
-    setShowRazorpay(true);
+    if (selectedSection === 'cod') {
+      handleCodPayment();
+    } else {
+      setShowRazorpay(true);
+    }
+  };
+
+  const handleCodPayment = async () => {
+    setIsProcessing(true);
+    try {
+      const orderData = {
+        orderItems: cart.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          image: Array.isArray(item.images) ? item.images[0] : item.image,
+          price: item.price,
+          product: item._id || item.id,
+          seller: item.seller
+        })),
+        shippingAddress: {
+          fullName: address.fullName,
+          mobileNumber: address.mobileNumber,
+          pincode: address.pincode,
+          city: address.city,
+          fullAddress: address.fullAddress,
+          landmark: address.landmark
+        },
+        paymentMethod: 'COD',
+        itemsPrice: cartTotal,
+        shippingPrice: 0,
+        totalPrice: cartTotal,
+        businessDetails: user?.businessDetails
+      };
+
+      const response = await api.post('/orders', orderData);
+
+      if (response.data.success) {
+        const orderIds = response.data.data.map(order => order._id);
+        localStorage.setItem('last_order_ids', JSON.stringify(orderIds));
+
+        setTimeout(() => {
+          setIsProcessing(false);
+          clearCart();
+          navigate('/order-success');
+        }, 1500);
+      }
+    } catch (err) {
+      console.error('Failed to place COD order:', err);
+      setIsProcessing(false);
+      alert(err.response?.data?.message || 'Failed to place Cash On Delivery order. Please try again.');
+    }
   };
 
   const handleMockPayment = async () => {
@@ -246,7 +337,7 @@ const PaymentPage = () => {
             </div>
 
             {/* Card Section */}
-            <div>
+            <div className="border-b border-gray-50">
               <button
                 onClick={() => setSelectedSection(selectedSection === 'card' ? null : 'card')}
                 className="w-full flex items-center justify-between p-4 md:p-5"
@@ -263,6 +354,63 @@ const PaymentPage = () => {
                 {selectedSection === 'card' ? <FiChevronUp className="text-gray-400" /> : <FiChevronDown className="text-gray-400" />}
               </button>
             </div>
+
+            {/* Cash On Delivery Section */}
+            <div>
+              <button
+                onClick={() => setSelectedSection(selectedSection === 'cod' ? null : 'cod')}
+                className="w-full flex items-center justify-between p-4 md:p-5"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-10 rounded-lg bg-amber-50 flex items-center justify-center border border-amber-100">
+                    <FiCheck className="text-amber-600" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-black text-gray-800 uppercase tracking-tighter">CASH ON DELIVERY (COD)</p>
+                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">PAY WITH CASH ON DELIVERY</p>
+                  </div>
+                </div>
+                {selectedSection === 'cod' ? <FiChevronUp className="text-gray-400" /> : <FiChevronDown className="text-gray-400" />}
+              </button>
+
+              <AnimatePresence>
+                {selectedSection === 'cod' && (
+                  <motion.div
+                    initial={{ height: 0 }}
+                    animate={{ height: 'auto' }}
+                    exit={{ height: 0 }}
+                    className="overflow-hidden bg-gray-50/30 px-4 md:px-5 pb-4 md:pb-5 space-y-2 md:space-y-3"
+                  >
+                    {codEligibility.loading ? (
+                      <div className="p-4 flex items-center justify-center gap-3">
+                        <div className="w-4 h-4 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin" />
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Checking Eligibility...</span>
+                      </div>
+                    ) : codEligibility.eligible ? (
+                      <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl space-y-2">
+                        <div className="flex items-center gap-2 text-emerald-700">
+                          <FiCheck size={16} />
+                          <span className="text-xs font-black uppercase tracking-wider">Eligible for COD</span>
+                        </div>
+                        <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wide leading-relaxed">
+                          Your address and cart items are fully eligible for Cash On Delivery!
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl space-y-2">
+                        <div className="flex items-center gap-2 text-rose-700">
+                          <FiX size={16} />
+                          <span className="text-xs font-black uppercase tracking-wider">Ineligible for COD</span>
+                        </div>
+                        <p className="text-[10px] text-rose-600 font-bold uppercase tracking-wide leading-relaxed">
+                          {codEligibility.reason}
+                        </p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
@@ -275,11 +423,29 @@ const PaymentPage = () => {
         </div>
         <button
           onClick={handlePayNow}
-          className="bg-[#702D8B] text-white px-10 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:opacity-90 transition-all"
+          disabled={selectedSection === 'cod' && (!codEligibility.eligible || codEligibility.loading)}
+          className={`px-10 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all ${
+            selectedSection === 'cod'
+              ? (!codEligibility.eligible || codEligibility.loading)
+                ? 'bg-gray-300 text-gray-400 cursor-not-allowed'
+                : 'bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-100'
+              : 'bg-[#702D8B] text-white hover:opacity-90'
+          }`}
         >
-          PAY NOW
+          {selectedSection === 'cod' ? 'PLACE COD ORDER' : 'PAY NOW'}
         </button>
       </div>
+
+      {/* Processing Loader Overlay */}
+      {isProcessing && selectedSection === 'cod' && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center space-y-6 max-w-sm w-full mx-4">
+            <div className="w-16 h-16 border-4 border-amber-100 border-t-amber-500 rounded-full animate-spin" />
+            <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest text-center">Placing COD Order</h3>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em] text-center">Please do not refresh or close this tab</p>
+          </div>
+        </div>
+      )}
 
       {/* Razorpay Mock UI */}
       <AnimatePresence>

@@ -31,9 +31,14 @@ exports.registerSeller = async (req, res, next) => {
       hsnNumber,
       gstDoc,
       panDoc,
-      shopDoc
+      shopDoc,
+      status: 'pending'
     });
-    sendTokenResponse(seller, 201, res);
+
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful! Your seller account is pending admin approval. You will receive an email once approved.'
+    });
   } catch (err) {
     next(err);
   }
@@ -50,6 +55,26 @@ exports.loginSeller = async (req, res, next) => {
     const seller = await Seller.findOne({ email }).select('+password');
     if (!seller || !(await seller.matchPassword(password))) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
+    }
+
+    // Check Seller Status
+    if (seller.status === 'pending') {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Your seller registration is pending admin approval. You will receive an email once approved.' 
+      });
+    }
+    if (seller.status === 'rejected') {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Your seller registration was rejected. Please contact support if you believe this is an error.' 
+      });
+    }
+    if (seller.status === 'suspended') {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Your seller account has been suspended for policy violations. Access denied.' 
+      });
     }
 
     sendTokenResponse(seller, 200, res);
@@ -131,39 +156,54 @@ exports.getSellerStockStatus = async (req, res, next) => {
 // @access  Private/Seller
 exports.getSellerCustomers = async (req, res, next) => {
   try {
+    const mongoose = require('mongoose');
     const Order = require('../models/Order');
-    const User = require('../models/User');
 
-    // Get all orders for this seller
-    const orders = await Order.find({ seller: req.user.id }).populate('user', 'fullName email phone avatar createdAt');
-    
-    // Extract unique users
-    const userMap = new Map();
-    orders.forEach(order => {
-      if (order.user && !userMap.has(order.user._id.toString())) {
-        const u = order.user;
-        userMap.set(u._id.toString(), {
-          _id: u._id,
-          fullName: u.fullName,
-          email: u.email,
-          phone: u.phone,
-          avatar: u.avatar,
-          totalOrders: 1,
-          totalSpent: order.totalPrice,
-          lastOrderDate: order.createdAt,
-          memberSince: u.createdAt
-        });
-      } else if (order.user) {
-        const existing = userMap.get(order.user._id.toString());
-        existing.totalOrders += 1;
-        existing.totalSpent += order.totalPrice;
-        if (new Date(order.createdAt) > new Date(existing.lastOrderDate)) {
-          existing.lastOrderDate = order.createdAt;
+    const sellerId = new mongoose.Types.ObjectId(req.user.id);
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 50; // Prevent memory overload with safe pagination limit
+    const skip = (page - 1) * limit;
+
+    const pipeline = [
+      { $match: { seller: sellerId } },
+      {
+        $group: {
+          _id: '$user',
+          totalOrders: { $sum: 1 },
+          totalSpent: { $sum: '$totalPrice' },
+          lastOrderDate: { $max: '$createdAt' }
         }
-      }
-    });
+      },
+      // Exclude null/undefined users (e.g. deleted accounts)
+      { $match: { _id: { $ne: null } } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      { $unwind: '$userDetails' },
+      {
+        $project: {
+          _id: 1,
+          totalOrders: 1,
+          totalSpent: 1,
+          lastOrderDate: 1,
+          fullName: '$userDetails.fullName',
+          email: '$userDetails.email',
+          phone: '$userDetails.phone',
+          avatar: '$userDetails.avatar',
+          memberSince: '$userDetails.createdAt'
+        }
+      },
+      { $sort: { totalOrders: -1 } },
+      { $skip: skip },
+      { $limit: limit }
+    ];
 
-    const customers = Array.from(userMap.values());
+    const customers = await Order.aggregate(pipeline);
 
     res.status(200).json({
       success: true,

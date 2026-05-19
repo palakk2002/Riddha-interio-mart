@@ -34,6 +34,10 @@ const CategorySchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  defaultGstRate: {
+    type: Number,
+    default: 18
+  },
   createdAt: {
     type: Date,
     default: Date.now

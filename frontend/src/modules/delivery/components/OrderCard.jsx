@@ -164,10 +164,21 @@ const OrderCard = ({ order, onAccept, onReject, onUpdateStatus }) => {
 
             {order.status === 'Out for Delivery' && (
               <button 
-                onClick={() => onUpdateStatus(order.id, 'Delivered')}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-all shadow-sm shadow-emerald-500/20"
+                onClick={() => {
+                  if (order.paymentMode === 'COD') {
+                    const confirmCollect = window.confirm(`Please collect cash of ₹${order.totalBill.toLocaleString()} before completing the delivery. Proceed?`);
+                    if (!confirmCollect) return;
+                  }
+                  onUpdateStatus(order.id, 'Delivered');
+                }}
+                className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-xs font-bold transition-all shadow-sm ${
+                  order.paymentMode === 'COD' 
+                    ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-500/20' 
+                    : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20'
+                }`}
               >
-                <LuCheck size={16} /> Complete Delivery
+                <LuCheck size={16} /> 
+                {order.paymentMode === 'COD' ? `Deliver & Collect Cash (₹${order.totalBill.toLocaleString()})` : 'Complete Delivery'}
               </button>
             )}
 

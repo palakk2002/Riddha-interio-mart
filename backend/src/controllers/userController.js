@@ -3,13 +3,14 @@ const sendTokenResponse = require('../utils/sendTokenResponse');
 const checkEmailExists = require('../utils/checkEmailExists');
 const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
+const referralService = require('../services/referralService');
 
 // @desc    Register User
 // @route   POST /api/auth/register
 // @access  Public
 exports.registerUser = async (req, res, next) => {
   try {
-    const { fullName, email, password, userType, businessDetails } = req.body;
+    const { fullName, email, password, userType, businessDetails, referralCode } = req.body;
 
     if (await checkEmailExists(email)) {
       return res.status(400).json({ success: false, error: 'Email already registered' });
@@ -23,6 +24,18 @@ exports.registerUser = async (req, res, next) => {
       businessDetails: userType === 'enterpriser' ? businessDetails : undefined,
       isEmailVerified: false
     });
+
+    // Track Referral if referralCode is supplied
+    if (referralCode) {
+      try {
+        const clientIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
+        await referralService.trackReferral(user, referralCode, clientIp, req.body.fingerprint);
+      } catch (refErr) {
+        // Rollback created user to ensure registration integrity on invalid referral input
+        await User.findByIdAndDelete(user._id);
+        return res.status(400).json({ success: false, error: refErr.message });
+      }
+    }
 
     // Generate Verification OTP
     const otp = user.getVerificationOtp();
@@ -148,6 +161,13 @@ exports.verifyEmailOtp = async (req, res, next) => {
     user.emailVerificationOtp = undefined;
     user.emailVerificationOtpExpire = undefined;
     await user.save({ validateBeforeSave: false });
+
+    // Process Referral Signup reward
+    try {
+      await referralService.processSignupReward(user._id);
+    } catch (refRewardErr) {
+      console.error('Signup reward processing failed:', refRewardErr.message);
+    }
 
     // Log them in immediately after verification
     sendTokenResponse(user, 200, res);

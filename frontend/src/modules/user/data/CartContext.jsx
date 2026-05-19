@@ -145,7 +145,46 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const cartTotal = cart.reduce((total, item) => total + (item.price || 0) * item.quantity, 0);
+  const [pricingBreakdown, setPricingBreakdown] = useState({
+    subtotal: 0,
+    discountAmount: 0,
+    taxAmount: 0,
+    shippingPrice: 0,
+    totalPrice: 0
+  });
+
+  useEffect(() => {
+    const calculatePricing = async () => {
+      if (cart.length === 0) {
+        setPricingBreakdown({
+          subtotal: 0,
+          discountAmount: 0,
+          taxAmount: 0,
+          shippingPrice: 0,
+          totalPrice: 0
+        });
+        return;
+      }
+      try {
+        const payload = {
+          orderItems: cart.map(item => ({
+            product: item._id || item.id,
+            quantity: item.quantity
+          }))
+        };
+        const response = await api.post('/orders/calculate-pricing', payload);
+        if (response.data.success) {
+          setPricingBreakdown(response.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to calculate pricing breakdown:', err);
+      }
+    };
+
+    calculatePricing();
+  }, [cart]);
+
+  const cartTotal = pricingBreakdown.totalPrice;
 
   return (
     <CartContext.Provider
@@ -158,6 +197,7 @@ export const CartProvider = ({ children }) => {
         getItemQuantity,
         clearCart,
         cartTotal,
+        pricingBreakdown,
         cartCount: cart.length,
       }}
     >

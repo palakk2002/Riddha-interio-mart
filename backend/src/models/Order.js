@@ -79,6 +79,43 @@ const OrderSchema = new mongoose.Schema({
     required: true,
     default: 0.0
   },
+  taxAmount: {
+    type: Number,
+    required: true,
+    default: 0.0
+  },
+  cgst: {
+    type: Number,
+    default: 0.0
+  },
+  sgst: {
+    type: Number,
+    default: 0.0
+  },
+  igst: {
+    type: Number,
+    default: 0.0
+  },
+  taxType: {
+    type: String,
+    enum: ['intra-state', 'inter-state'],
+    default: 'intra-state'
+  },
+  discountAmount: {
+    type: Number,
+    required: true,
+    default: 0.0
+  },
+  pricingBreakdown: {
+    subtotal: { type: Number, default: 0.0 },
+    taxAmount: { type: Number, default: 0.0 },
+    cgst: { type: Number, default: 0.0 },
+    sgst: { type: Number, default: 0.0 },
+    igst: { type: Number, default: 0.0 },
+    shippingPrice: { type: Number, default: 0.0 },
+    discountAmount: { type: Number, default: 0.0 },
+    totalPrice: { type: Number, default: 0.0 }
+  },
   totalPrice: {
     type: Number,
     required: true,
@@ -91,6 +128,11 @@ const OrderSchema = new mongoose.Schema({
   },
   paidAt: {
     type: Date
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'paid', 'failed'],
+    default: 'pending'
   },
   isDelivered: {
     type: Boolean,
@@ -136,5 +178,6 @@ const OrderSchema = new mongoose.Schema({
 OrderSchema.index({ seller: 1, createdAt: -1, status: 1 });
 OrderSchema.index({ 'orderItems.product': 1 }); // Useful for top products aggregation if needed
 OrderSchema.index({ deliveryBoy: 1, deliveryStatus: 1, createdAt: -1 });
+OrderSchema.index({ seller: 1, user: 1 });
 
 module.exports = mongoose.model('Order', OrderSchema);

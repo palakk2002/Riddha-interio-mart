@@ -117,7 +117,9 @@ const OrderDetail = () => {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Payment Method</p>
-                  <p className="text-sm font-bold text-slate-800 capitalize">{order.paymentMethod} Payment</p>
+                  <p className="text-sm font-bold text-slate-800 capitalize">
+                    {order.paymentMethod} ({order.paymentStatus || (order.isPaid ? 'Paid' : 'Pending')})
+                  </p>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Amount</p>

@@ -8,11 +8,18 @@ import { FiArrowRight, FiShoppingBag, FiInfo, FiTrash2 } from 'react-icons/fi';
 import Button from '../../../../views/shared/Button';
 
 const CartPage = () => {
-  const { cart, cartTotal, clearCart, updateQuantity, removeFromCart } = useCart();
+  const { cart, cartTotal, clearCart, updateQuantity, removeFromCart, pricingBreakdown } = useCart();
   const { isLoggedIn, address, user } = useUser();
   const navigate = useNavigate();
   // We'll use the address pincode if available, otherwise default
   const displayPincode = address ? address.pincode : '560001';
+
+  // Secure backend price mapping
+  const mrpValue = pricingBreakdown?.subtotal || 0;
+  const discountOnMRP = pricingBreakdown?.discountAmount || 0;
+  const deliveryCharges = pricingBreakdown?.shippingPrice || 0;
+  const gstAmount = pricingBreakdown?.taxAmount || 0;
+  const totalPrice = pricingBreakdown?.totalPrice || 0;
 
   const handleAction = () => {
     if (!isLoggedIn) {
@@ -228,26 +235,28 @@ const CartPage = () => {
                <div className="p-4 space-y-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">MRP Value</span>
-                    <span className="text-deep-espresso font-medium">₹{cartTotal + 500}</span>
+                    <span className="text-deep-espresso font-medium">₹{mrpValue}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Discount on MRP</span>
-                    <span className="text-warm-sand font-medium">-₹500</span>
+                    <span className="text-warm-sand font-medium">-₹{discountOnMRP}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Delivery Charges</span>
-                    <span className="text-warm-sand font-bold uppercase text-[10px]">Free</span>
+                    <span className="text-warm-sand font-bold uppercase text-[10px]">
+                      {deliveryCharges === 0 ? 'Free' : `₹${deliveryCharges}`}
+                    </span>
                   </div>
                   <div className="border-t border-dashed border-gray-200 pt-4 flex justify-between items-baseline">
                     <div>
                       <span className="text-base font-bold text-deep-espresso tracking-tight">Total</span>
-                      <p className="text-[8px] text-gray-400 font-medium">(Including ₹0 as GST)</p>
+                      <p className="text-[8px] text-gray-400 font-medium">(Including ₹{gstAmount} as GST)</p>
                     </div>
-                    <span className="text-xl font-black text-deep-espresso tracking-tighter">₹{cartTotal}</span>
+                    <span className="text-xl font-black text-deep-espresso tracking-tighter">₹{totalPrice}</span>
                   </div>
                </div>
                 <div className="bg-warm-sand/10 px-4 py-2 border-t border-warm-sand/20">
-                   <p className="text-[10px] text-warm-sand font-bold text-center">You saved ₹500 on this purchase.</p>
+                   <p className="text-[10px] text-warm-sand font-bold text-center">You saved ₹{discountOnMRP} on this purchase.</p>
                </div>
             </div>
 
@@ -265,11 +274,21 @@ const CartPage = () => {
               <div className="space-y-6 mb-12">
                 <div className="flex justify-between text-deep-espresso/60 font-medium">
                   <span className="text-sm uppercase tracking-widest">Subtotal</span>
-                  <span className="text-lg font-bold text-deep-espresso">₹{cartTotal.toFixed(2)}</span>
+                  <span className="text-lg font-bold text-deep-espresso">₹{mrpValue.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-deep-espresso/60 font-medium">
+                  <span className="text-sm uppercase tracking-widest">Discount</span>
+                  <span className="text-lg font-bold text-warm-sand">-₹{discountOnMRP.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-deep-espresso/60 font-medium">
+                  <span className="text-sm uppercase tracking-widest">Inclusive GST</span>
+                  <span className="text-lg font-bold text-deep-espresso">₹{gstAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-deep-espresso/40">
                   <span className="text-xs uppercase tracking-widest">Shipping</span>
-                  <span className="text-xs font-black text-warm-sand uppercase tracking-widest">Complimentary</span>
+                  <span className="text-xs font-black text-warm-sand uppercase tracking-widest">
+                    {deliveryCharges === 0 ? 'Complimentary' : `₹${deliveryCharges.toFixed(2)}`}
+                  </span>
                 </div>
               </div>
 
@@ -277,7 +296,7 @@ const CartPage = () => {
 
               <div className="flex justify-between mb-12 items-end">
                 <span className="text-xs uppercase tracking-[0.3em] font-black text-warm-sand pb-1.5">Total Amount</span>
-                <span className="text-4xl font-bold text-deep-espresso tracking-tight">₹{cartTotal.toFixed(2)}</span>
+                <span className="text-4xl font-bold text-deep-espresso tracking-tight">₹{totalPrice.toFixed(2)}</span>
               </div>
 
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>

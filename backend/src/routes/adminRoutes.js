@@ -8,6 +8,8 @@ const {
   getActiveSellers,
   approveSeller,
   deleteSeller,
+  suspendSeller,
+  unsuspendSeller,
   getDashboardStats,
   getStockStatus,
   getAssistants,
@@ -45,6 +47,8 @@ router.get('/sellers/pending', protect, authorize('admin'), getPendingSellers);
 router.get('/sellers/active', protect, authorize('admin'), getActiveSellers);
 router.put('/sellers/:id/approve', protect, authorize('admin'), approveSeller);
 router.delete('/sellers/:id', protect, authorize('admin'), deleteSeller);
+router.put('/sellers/:id/suspend', protect, authorize('admin'), suspendSeller);
+router.put('/sellers/:id/unsuspend', protect, authorize('admin'), unsuspendSeller);
 router.get('/dashboard-stats', protect, authorize('admin'), getDashboardStats);
 router.get('/stock-status', protect, authorize('admin'), getStockStatus);
 

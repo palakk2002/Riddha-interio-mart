@@ -135,20 +135,34 @@ const generateInvoicePDF = (order, user) => {
       
       // Summary
       const summaryY = rowY + 20;
-      doc.fontSize(10).font('Helvetica').fillColor('#888888');
-      doc.text('Subtotal', 370, summaryY);
-      doc.font('Helvetica-Bold').fillColor('#000000').text(`Rs. ${order.itemsPrice.toLocaleString()}`, 470, summaryY, { width: 80, align: 'right' });
+      
+      const subExclTax = (order.pricingBreakdown?.subtotal || order.itemsPrice) - (order.pricingBreakdown?.taxAmount || order.taxAmount || 0);
+      const taxAmt = order.pricingBreakdown?.taxAmount || order.taxAmount || 0;
+      const discAmt = order.pricingBreakdown?.discountAmount || order.discountAmount || 0;
+      const shippingAmt = order.pricingBreakdown?.shippingPrice || order.shippingPrice || 0;
       
       doc.fontSize(10).font('Helvetica').fillColor('#888888');
-      doc.text('Shipping', 370, summaryY + 20);
-      const shippingText = order.shippingPrice === 0 ? 'FREE' : `Rs. ${order.shippingPrice}`;
-      doc.font('Helvetica-Bold').fillColor('#000000').text(shippingText, 470, summaryY + 20, { width: 80, align: 'right' });
+      doc.text('Subtotal (excl. GST)', 340, summaryY);
+      doc.font('Helvetica-Bold').fillColor('#000000').text(`Rs. ${Number(subExclTax.toFixed(2)).toLocaleString()}`, 470, summaryY, { width: 80, align: 'right' });
+      
+      doc.fontSize(10).font('Helvetica').fillColor('#888888');
+      doc.text('Inclusive GST', 340, summaryY + 20);
+      doc.font('Helvetica-Bold').fillColor('#000000').text(`Rs. ${Number(taxAmt.toFixed(2)).toLocaleString()}`, 470, summaryY + 20, { width: 80, align: 'right' });
 
-      doc.moveTo(370, summaryY + 45).lineTo(550, summaryY + 45).strokeColor('#000000').stroke();
+      doc.fontSize(10).font('Helvetica').fillColor('#888888');
+      doc.text('Discount', 340, summaryY + 40);
+      doc.font('Helvetica-Bold').fillColor('#B71C1C').text(`-Rs. ${Number(discAmt.toFixed(2)).toLocaleString()}`, 470, summaryY + 40, { width: 80, align: 'right' });
+
+      doc.fontSize(10).font('Helvetica').fillColor('#888888');
+      doc.text('Shipping', 340, summaryY + 60);
+      const shippingText = shippingAmt === 0 ? 'FREE' : `Rs. ${shippingAmt}`;
+      doc.font('Helvetica-Bold').fillColor('#000000').text(shippingText, 470, summaryY + 60, { width: 80, align: 'right' });
+
+      doc.moveTo(340, summaryY + 85).lineTo(550, summaryY + 85).strokeColor('#000000').stroke();
       
       doc.fontSize(12).font('Helvetica-Bold').fillColor('#000000');
-      doc.text('GRAND TOTAL', 350, summaryY + 60);
-      doc.fontSize(14).text(`Rs. ${order.totalPrice.toLocaleString()}`, 450, summaryY + 59, { width: 100, align: 'right' });
+      doc.text('GRAND TOTAL', 340, summaryY + 100);
+      doc.fontSize(14).text(`Rs. ${order.totalPrice.toLocaleString()}`, 450, summaryY + 99, { width: 100, align: 'right' });
 
       // Footer
       doc.fontSize(8).font('Helvetica-Bold').fillColor('#888888').text('Computer Generated Invoice', 50, 700, { align: 'center', letterSpacing: 1 });

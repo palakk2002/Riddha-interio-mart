@@ -83,6 +83,7 @@ const ManageDeliveryBoyPage = () => {
     const styles = {
       Approved: 'text-green-700 bg-green-50 border-green-700/10',
       Rejected: 'text-red-700 bg-red-50 border-red-700/10',
+      Suspended: 'text-red-700 bg-red-50 border-red-700/10',
       Pending: 'text-amber-700 bg-amber-50 border-amber-700/10',
       Available: 'text-emerald-700 bg-emerald-50 border-emerald-700/10',
       Busy: 'text-blue-700 bg-blue-50 border-blue-700/10',
@@ -252,7 +253,7 @@ const ManageDeliveryBoyPage = () => {
                                 onClick={() => setActiveMenu(null)}
                               ></div>
                               <div className="absolute right-6 top-14 w-52 bg-white rounded-2xl shadow-2xl border border-soft-oatmeal py-2 z-20 overflow-hidden animate-in fade-in zoom-in duration-200">
-                                {boy.approvalStatus !== 'Approved' && (
+                                {boy.approvalStatus !== 'Approved' && boy.approvalStatus !== 'Suspended' && (
                                   <button 
                                     onClick={() => handleStatusUpdate(boy._id, 'Approved')}
                                     className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-3"
@@ -260,7 +261,23 @@ const ManageDeliveryBoyPage = () => {
                                     <LuCheck size={14} /> Approve Partner
                                   </button>
                                 )}
-                                {boy.approvalStatus !== 'Rejected' && (
+                                {boy.approvalStatus === 'Approved' && (
+                                  <button 
+                                    onClick={() => handleStatusUpdate(boy._id, 'Suspended')}
+                                    className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-amber-600 hover:bg-amber-50 transition-colors flex items-center gap-3"
+                                  >
+                                    <LuX size={14} /> Suspend Partner
+                                  </button>
+                                )}
+                                {boy.approvalStatus === 'Suspended' && (
+                                  <button 
+                                    onClick={() => handleStatusUpdate(boy._id, 'Approved')}
+                                    className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-3"
+                                  >
+                                    <LuCheck size={14} /> Unsuspend Partner
+                                  </button>
+                                )}
+                                {boy.approvalStatus !== 'Rejected' && boy.approvalStatus !== 'Suspended' && (
                                   <button 
                                     onClick={() => handleStatusUpdate(boy._id, 'Rejected')}
                                     className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-3"

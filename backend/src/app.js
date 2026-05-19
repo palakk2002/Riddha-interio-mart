@@ -33,6 +33,9 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const returnRoutes = require('./routes/returnRoutes');
+const referralRoutes = require('./routes/referralRoutes');
+const taxRoutes = require('./routes/taxRoutes');
+const walletRoutes = require('./routes/walletRoutes');
 const errorHandler = require('./middleware/errorMiddleware');
 const { initSocket } = require('./socket');
 
@@ -91,6 +94,9 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/returns', returnRoutes);
+app.use('/api/referrals', referralRoutes);
+app.use('/api/tax', taxRoutes);
+app.use('/api/wallets', walletRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Riddha Mart API' });

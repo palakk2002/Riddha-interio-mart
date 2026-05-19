@@ -185,6 +185,22 @@ exports.updateReturnStatus = async (req, res, next) => {
         product.countInStock += order.orderItems[itemIndex].quantity;
         await product.save();
       }
+
+      // 3. Process Wallet Refund Deduction & Tax Rollback Log
+      try {
+        const walletService = require('../services/walletService');
+        await walletService.recordRefundDeduction(order, returnReq.refundAmount);
+
+        if (itemIndex !== -1) {
+          const taxService = require('../services/taxService');
+          await taxService.processRefundTax(order, [{
+            product: returnReq.product,
+            quantity: order.orderItems[itemIndex].quantity
+          }]);
+        }
+      } catch (refundErr) {
+        console.error('Failed to log wallet refund deduction:', refundErr.message);
+      }
     }
 
     await returnReq.save();

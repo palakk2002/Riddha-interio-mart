@@ -14,6 +14,7 @@ const {
   notifyLowStock
 } = require('../socket');
 const { processInvoiceAsync } = require('../utils/invoiceService');
+const pricingService = require('../services/pricingService');
 
 // @desc    Create new order(s) handling multi-seller cart
 // @route   POST /api/orders
@@ -30,60 +31,71 @@ exports.addOrderItems = async (req, res) => {
     return res.status(400).json({ success: false, message: 'No order items' });
   }
 
+  // 1. COD Eligibility Validation (Fast, read-only pre-checks before transaction)
+  if (paymentMethod === 'COD') {
+    try {
+      const eligibility = await getCodEligibility(orderItems, shippingAddress ? shippingAddress.pincode : null);
+      if (!eligibility.eligible) {
+        return res.status(400).json({ success: false, message: eligibility.reason });
+      }
+    } catch (err) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  const mongoose = require('mongoose');
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    // 1. Stock Validation (Fail-Fast: if any item is out of stock, fail entire order)
+    // 2. Stock Validation (Consistent reads inside session to fail-fast)
     for (const item of orderItems) {
-      const product = await Product.findById(item.product);
+      const product = await Product.findById(item.product).session(session);
       if (!product) {
-        return res.status(404).json({ success: false, message: `Product not found: ${item.name}` });
+        throw new Error(`Product not found: ${item.name || 'Unknown'}`);
       }
       if (product.countInStock < item.quantity) {
-        return res.status(400).json({ 
-          success: false, 
-          message: `Insufficient stock for ${item.name}. Available: ${product.countInStock}` 
-        });
+        throw new Error(`Insufficient stock for ${item.name}. Available: ${product.countInStock}`);
       }
     }
 
-    // 2. Group items by Seller
+    // 3. Secure backend calculation of all items
+    const checkoutPricing = await pricingService.calculateCartPricing(orderItems);
+
+    // 4. Group items by Seller
     const groupedItems = {};
-    for (const item of orderItems) {
-      const product = await Product.findById(item.product);
-      
-      const sId = product.seller.toString();
-      const sType = product.sellerType || (product.brand ? 'Admin' : 'Seller');
+    for (const item of checkoutPricing.enrichedItems) {
+      const sId = item.seller.toString();
+      const sType = item.sellerType || 'Seller';
       
       if (!groupedItems[sId]) {
         groupedItems[sId] = {
           seller: sId,
           sellerType: sType,
-          items: [],
-          itemsPrice: 0,
-          shippingPrice: 0,
-          totalPrice: 0
+          items: []
         };
       }
       
-      const enrichedItem = {
-        name: item.name,
-        quantity: item.quantity,
-        image: item.image,
-        price: item.price,
-        product: item.product,
-        seller: sId,
-        sellerType: sType
-      };
-
-      groupedItems[sId].items.push(enrichedItem);
-      const lineTotal = item.price * item.quantity;
-      groupedItems[sId].itemsPrice += lineTotal;
-      groupedItems[sId].totalPrice += lineTotal;
+      groupedItems[sId].items.push(item);
     }
 
-    // 3. Create Orders and Deduct Stock
+    // 5. Create Orders and Deduct Stock
     const createdOrders = [];
+    const lowStockAlerts = [];
+
     for (const sellerId in groupedItems) {
       const group = groupedItems[sellerId];
+      
+      // Calculate exact pricing details for this seller order group
+      const groupPricing = await pricingService.calculateCartPricing(
+        group.items.map(i => ({ product: i.product, quantity: i.quantity }))
+      );
+
+      // Perform secure inter-state vs intra-state tax breakdown
+      const taxService = require('../services/taxService');
+      const taxCalculation = await taxService.calculateTaxes(groupPricing.enrichedItems, shippingAddress);
+      
+      const isCod = paymentMethod === 'COD';
       
       const order = new Order({
         orderItems: group.items,
@@ -92,41 +104,108 @@ exports.addOrderItems = async (req, res) => {
         sellerType: group.sellerType,
         shippingAddress,
         paymentMethod,
-        itemsPrice: group.itemsPrice,
-        shippingPrice: group.shippingPrice,
-        totalPrice: group.totalPrice,
-        isPaid: true,
-        paidAt: Date.now(),
-        status: 'Processing',
+        itemsPrice: Number((groupPricing.subtotal - groupPricing.discountAmount).toFixed(2)),
+        shippingPrice: groupPricing.shippingPrice,
+        taxAmount: taxCalculation.totalTax,
+        cgst: taxCalculation.cgst,
+        sgst: taxCalculation.sgst,
+        igst: taxCalculation.igst,
+        taxType: taxCalculation.items[0] ? taxCalculation.items[0].taxType : 'intra-state',
+        discountAmount: groupPricing.discountAmount,
+        pricingBreakdown: {
+          subtotal: groupPricing.subtotal,
+          taxAmount: taxCalculation.totalTax,
+          cgst: taxCalculation.cgst,
+          sgst: taxCalculation.sgst,
+          igst: taxCalculation.igst,
+          shippingPrice: groupPricing.shippingPrice,
+          discountAmount: groupPricing.discountAmount,
+          totalPrice: groupPricing.totalPrice
+        },
+        totalPrice: groupPricing.totalPrice,
+        isPaid: !isCod,
+        paidAt: isCod ? undefined : Date.now(),
+        paymentStatus: isCod ? 'pending' : 'paid',
+        status: isCod ? 'Pending' : 'Processing',
         businessDetails
       });
 
-      const savedOrder = await order.save();
+      // Save order inside database transaction session
+      const savedOrder = await order.save({ session });
       createdOrders.push(savedOrder);
 
-      // Deduct stock (Atomic)
+      // Deduct stock (Atomic and Concurrency-Safe inside session)
       for (const item of group.items) {
         const updatedProduct = await Product.findOneAndUpdate(
           { _id: item.product, countInStock: { $gte: item.quantity } },
           { $inc: { countInStock: -item.quantity } },
-          { new: true }
+          { session, new: true }
         );
 
         if (!updatedProduct) {
           throw new Error(`Race condition: Insufficient stock for ${item.name} during checkout.`);
         }
 
-        // Low stock alert
+        // Collect low stock alert payload
         if (updatedProduct.countInStock <= 5) {
-          notifyLowStock(updatedProduct.seller, {
-            productId: updatedProduct._id,
-            name: updatedProduct.name,
-            remainingStock: updatedProduct.countInStock
+          lowStockAlerts.push({
+            seller: updatedProduct.seller,
+            data: {
+              productId: updatedProduct._id,
+              name: updatedProduct.name,
+              remainingStock: updatedProduct.countInStock
+            }
           });
         }
       }
+    }
 
-      // Notify seller
+    // 6. Clear user cart inside transaction
+    await Cart.findOneAndUpdate({ user: req.user.id }, { items: [] }, { session });
+
+    // Commit transaction atomically
+    await session.commitTransaction();
+    session.endSession();
+
+    // 7. Post-Commit Actions (Low stock alerts, invoice processing, socket notifications)
+    for (const alert of lowStockAlerts) {
+      notifyLowStock(alert.seller, alert.data);
+    }
+
+    for (const savedOrder of createdOrders) {
+      // Create Tax Audit Log for taxation system records
+      try {
+        const taxService = require('../services/taxService');
+        const taxCalculation = {
+          totalTax: savedOrder.taxAmount,
+          cgst: savedOrder.cgst,
+          sgst: savedOrder.sgst,
+          igst: savedOrder.igst,
+          taxableAmount: Number((savedOrder.totalPrice - savedOrder.taxAmount).toFixed(2)),
+          items: savedOrder.orderItems.map(item => {
+            const isIntraState = savedOrder.taxType === 'intra-state';
+            const gstFactor = 1 + ((item.gstRate || 18) / 100);
+            const lineTax = (item.price * item.quantity) - ((item.price * item.quantity) / gstFactor);
+            return {
+              product: item.product,
+              name: item.name,
+              gstRate: item.gstRate || 18,
+              taxAmount: Number(lineTax.toFixed(2)),
+              cgst: isIntraState ? Number((lineTax / 2).toFixed(2)) : 0,
+              sgst: isIntraState ? Number((lineTax / 2).toFixed(2)) : 0,
+              igst: isIntraState ? 0 : Number(lineTax.toFixed(2)),
+              sellerState: isIntraState ? (savedOrder.shippingAddress.state || 'Delhi') : 'Gujarat',
+              shippingState: savedOrder.shippingAddress.state || 'Delhi',
+              taxType: savedOrder.taxType
+            };
+          })
+        };
+        await taxService.createAuditLog(savedOrder, req.user.id, savedOrder.seller, taxCalculation, 'sale');
+      } catch (logErr) {
+        console.error('Audit logging error:', logErr.message);
+      }
+
+      // Fire notifications
       try {
         const payload = {
           orderId: String(savedOrder._id),
@@ -138,30 +217,52 @@ exports.addOrderItems = async (req, res) => {
           shippingCity: savedOrder.shippingAddress?.city
         };
 
-        if (group.sellerType === 'Admin') {
+        const group = groupedItems[savedOrder.seller.toString()];
+        if (group && group.sellerType === 'Admin') {
           notifyAdminNewOrder(null, payload);
         } else {
-          notifySellerNewOrder(group.seller, payload);
+          notifySellerNewOrder(savedOrder.seller, payload);
         }
       } catch (e) {
         console.error('Socket notify failed:', e.message);
+      }
+
+      // Credit pending earnings to Seller Wallet
+      try {
+        const walletService = require('../services/walletService');
+        await walletService.recordPendingSale(savedOrder);
+      } catch (walletErr) {
+        console.error('Failed to log pending earnings:', walletErr.message);
       }
 
       // Fire and forget invoice generation (Asynchronous)
       processInvoiceAsync(savedOrder._id, req.user.id);
     }
 
-    // Clear cart
-    await Cart.findOneAndUpdate({ user: req.user.id }, { items: [] });
+    // Process Referral First Order reward for referrer
+    try {
+      const referralService = require('../services/referralService');
+      await referralService.processFirstOrderReward(req.user.id, createdOrders[0]._id);
+    } catch (refOrderRewardErr) {
+      console.error('Referral order reward processing failed:', refOrderRewardErr.message);
+    }
 
     res.status(201).json({
       success: true,
-      data: createdOrders // Return array of orders
+      data: createdOrders
     });
 
   } catch (error) {
-    console.error('Order creation error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    // Abort transaction and roll back all mutations safely
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Order creation transaction aborted:', error.message);
+
+    const isNotFound = error.message.includes('Product not found');
+    res.status(isNotFound ? 404 : 400).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 
@@ -299,6 +400,13 @@ exports.updateOrderStatus = async (req, res) => {
         order.deliveredAt = Date.now();
         order.status = 'Delivered';
         order.deliveryStatus = 'Delivered';
+        
+        // COD Payment Cash Collection transition
+        if (order.paymentMethod === 'COD') {
+          order.isPaid = true;
+          order.paidAt = Date.now();
+          order.paymentStatus = 'paid';
+        }
       }
 
       if (newStatus === 'Cancelled') {
@@ -311,6 +419,25 @@ exports.updateOrderStatus = async (req, res) => {
       }
 
       const updatedOrder = await order.save();
+
+      // Clear pending seller escrow earnings and credit delivery partner wallet
+      if (newStatus === 'Delivered') {
+        try {
+          const walletService = require('../services/walletService');
+          await walletService.clearPendingSale(updatedOrder._id);
+          
+          if (updatedOrder.deliveryBoy) {
+            await walletService.recordDeliveryEarning(
+              updatedOrder.deliveryBoy,
+              updatedOrder._id,
+              updatedOrder.paymentMethod === 'COD',
+              updatedOrder.totalPrice
+            );
+          }
+        } catch (walletErr) {
+          console.error('Failed to update wallets upon delivery:', walletErr.message);
+        }
+      }
       
       // Notify user about order status update
       notifyUserOrderStatus(order.user, {
@@ -399,3 +526,87 @@ exports.respondToDeliveryAssignment = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+const RESTRICTED_COD_PINCODES = ['110001', '400001', '700001'];
+
+const getCodEligibility = async (orderItems, pincode) => {
+  // 1. Check pincode restriction
+  if (pincode && RESTRICTED_COD_PINCODES.includes(pincode.trim())) {
+    return {
+      eligible: false,
+      reason: `Cash On Delivery (COD) is not available for pincode ${pincode}.`
+    };
+  }
+
+  // 2. Check product restriction
+  if (orderItems && orderItems.length > 0) {
+    for (const item of orderItems) {
+      const productId = item.product || item._id || item.id;
+      const product = await Product.findById(productId);
+      if (!product) {
+        return {
+          eligible: false,
+          reason: `Product not found: ${item.name || 'Unknown Item'}.`
+        };
+      }
+      if (product.isCodAllowed === false) {
+        return {
+          eligible: false,
+          reason: `The product "${product.name}" is restricted from Cash On Delivery (COD) payments.`
+        };
+      }
+    }
+  }
+
+  return { eligible: true };
+};
+
+// @desc    Check Cash On Delivery (COD) eligibility
+// @route   POST /api/orders/cod-eligibility
+// @access  Private
+exports.checkCodEligibility = async (req, res) => {
+  const { orderItems, pincode } = req.body;
+
+  if (!orderItems || orderItems.length === 0) {
+    return res.status(400).json({ success: false, message: 'No order items provided' });
+  }
+  if (!pincode) {
+    return res.status(400).json({ success: false, message: 'Shipping pincode is required' });
+  }
+
+  try {
+    const eligibility = await getCodEligibility(orderItems, pincode);
+    return res.status(200).json({
+      success: true,
+      eligible: eligibility.eligible,
+      reason: eligibility.reason || ''
+    });
+  } catch (error) {
+    console.error('COD eligibility check error:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Calculate complete pricing breakdown for a cart
+// @route   POST /api/orders/calculate-pricing
+// @access  Private
+exports.calculateOrderPricing = async (req, res, next) => {
+  const { orderItems } = req.body;
+  if (!orderItems || orderItems.length === 0) {
+    return res.status(400).json({ success: false, message: 'No cart items provided for pricing calculation' });
+  }
+
+  try {
+    const pricing = await pricingService.calculateCartPricing(orderItems);
+    return res.status(200).json({
+      success: true,
+      data: pricing
+    });
+  } catch (error) {
+    console.error('Pricing calculation error:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.getCodEligibility = getCodEligibility;
+

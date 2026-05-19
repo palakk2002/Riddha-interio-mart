@@ -8,15 +8,16 @@ import Button from '../../../shared/components/Button';
 import { getDeliveryEstimate } from '../../../shared/utils/delivery';
 
 const CartPage = () => {
-  const { cart, updateQuantity, removeFromCart } = useCart();
+  const { cart, updateQuantity, removeFromCart, pricingBreakdown } = useCart();
   const { isLoggedIn, address } = useUser();
   const navigate = useNavigate();
 
-  // Price Calculations
-  const mrpValue = cart.reduce((total, item) => total + (item.price || 0) * item.quantity, 0);
-  const discountOnMRP = mrpValue > 1000 ? 500 : 0; // matching image example logic
-  const deliveryCharges = mrpValue > 500 ? 0 : 49;
-  const totalPrice = mrpValue - discountOnMRP + deliveryCharges;
+  // Price Calculations (securely driven by backend pricing engine)
+  const mrpValue = pricingBreakdown?.subtotal || 0;
+  const discountOnMRP = pricingBreakdown?.discountAmount || 0;
+  const deliveryCharges = pricingBreakdown?.shippingPrice || 0;
+  const gstAmount = pricingBreakdown?.taxAmount || 0;
+  const totalPrice = pricingBreakdown?.totalPrice || 0;
 
   const handleAction = () => {
     if (!isLoggedIn) {
@@ -177,8 +178,8 @@ const CartPage = () => {
                   </span>
                 </div>
                 <div className="flex justify-between text-[15px]">
-                  <span className="text-gray-500 font-medium">GST (18%)</span>
-                  <span className="text-gray-900 font-bold">₹{Math.round(totalPrice * 0.18).toLocaleString('en-IN')}</span>
+                  <span className="text-gray-500 font-medium">Inclusive GST</span>
+                  <span className="text-gray-900 font-bold">₹{gstAmount?.toLocaleString('en-IN')}</span>
                 </div>
                 
                 <div className="pt-4 mt-2 border-t border-gray-100 flex justify-between items-center">
@@ -286,8 +287,8 @@ const CartPage = () => {
             <span className="font-semibold text-gray-900">₹{deliveryCharges?.toLocaleString('en-IN')}</span>
           </div>
           <div className="flex justify-between items-center text-[15px] font-medium text-gray-800">
-            <span>Tax</span>
-            <span className="font-semibold text-gray-900">₹0.00</span>
+            <span>Inclusive GST</span>
+            <span className="font-semibold text-gray-900">₹{gstAmount?.toLocaleString('en-IN')}</span>
           </div>
           
           {discountOnMRP > 0 && (

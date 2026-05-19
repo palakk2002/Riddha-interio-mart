@@ -27,6 +27,10 @@ const ProductSchema = new mongoose.Schema({
     type: Number,
     default: 0 // Percentage
   },
+  gstRate: {
+    type: Number,
+    default: 18
+  },
   discountPrice: {
     type: Number
   },
@@ -100,6 +104,10 @@ const ProductSchema = new mongoose.Schema({
     type: String,
     enum: ['new', 'catalog'],
     default: 'new'
+  },
+  isCodAllowed: {
+    type: Boolean,
+    default: true
   },
   averageRating: {
     type: Number,

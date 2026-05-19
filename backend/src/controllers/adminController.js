@@ -48,7 +48,14 @@ exports.getAdminMe = async (req, res, next) => {
 // @desc    Get all pending sellers
 exports.getPendingSellers = async (req, res, next) => {
   try {
-    const result = await paginate(Seller, { isVerified: false }, req);
+    const query = { 
+      $or: [
+        { status: 'pending' }, 
+        { isVerified: false, status: { $exists: false } }, 
+        { isVerified: false, status: '' }
+      ] 
+    };
+    const result = await paginate(Seller, query, req);
     res.status(200).json({ 
       success: true, 
       count: result.data.length,
@@ -74,7 +81,15 @@ exports.getActiveSellers = async (req, res, next) => {
     const startIndex = (page - 1) * limit;
 
     const sellersAgg = await Seller.aggregate([
-      { $match: { isVerified: true } },
+      { 
+        $match: { 
+          $or: [
+            { status: 'approved' }, 
+            { isVerified: true, status: { $exists: false } }, 
+            { isVerified: true, status: '' }
+          ] 
+        } 
+      },
       { $sort: { createdAt: -1 } },
       { $skip: startIndex },
       { $limit: limit },
@@ -112,7 +127,13 @@ exports.getActiveSellers = async (req, res, next) => {
       }
     ]);
 
-    const totalResults = await Seller.countDocuments({ isVerified: true });
+    const totalResults = await Seller.countDocuments({ 
+      $or: [
+        { status: 'approved' }, 
+        { isVerified: true, status: { $exists: false } }, 
+        { isVerified: true, status: '' }
+      ] 
+    });
 
     res.status(200).json({ 
       success: true, 
@@ -131,7 +152,10 @@ exports.getActiveSellers = async (req, res, next) => {
 // @desc    Approve a seller registration
 exports.approveSeller = async (req, res, next) => {
   try {
-    const seller = await Seller.findByIdAndUpdate(req.params.id, { isVerified: true }, { new: true });
+    const seller = await Seller.findByIdAndUpdate(req.params.id, { 
+      isVerified: true,
+      status: 'approved'
+    }, { new: true });
     if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
     res.status(200).json({ success: true, data: seller });
   } catch (err) {
@@ -139,12 +163,47 @@ exports.approveSeller = async (req, res, next) => {
   }
 };
 
-// @desc    Delete/Reject a seller registration
+// @desc    Delete/Reject a seller registration (Audit-safe non-destructive)
 exports.deleteSeller = async (req, res, next) => {
   try {
-    const seller = await Seller.findByIdAndDelete(req.params.id);
+    const seller = await Seller.findByIdAndUpdate(req.params.id, { 
+      status: 'rejected',
+      isVerified: false 
+    }, { new: true });
     if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
     res.status(200).json({ success: true, data: {} });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Suspend a seller account
+// @route   PUT /api/auth/admin/sellers/:id/suspend
+// @access  Private/Admin
+exports.suspendSeller = async (req, res, next) => {
+  try {
+    const seller = await Seller.findByIdAndUpdate(req.params.id, { 
+      status: 'suspended', 
+      isVerified: false 
+    }, { new: true });
+    if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
+    res.status(200).json({ success: true, data: seller });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Unsuspend/Approve a seller account
+// @route   PUT /api/auth/admin/sellers/:id/unsuspend
+// @access  Private/Admin
+exports.unsuspendSeller = async (req, res, next) => {
+  try {
+    const seller = await Seller.findByIdAndUpdate(req.params.id, { 
+      status: 'approved', 
+      isVerified: true 
+    }, { new: true });
+    if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
+    res.status(200).json({ success: true, data: seller });
   } catch (err) {
     next(err);
   }

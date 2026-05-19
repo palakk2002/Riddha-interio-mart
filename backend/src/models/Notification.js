@@ -9,7 +9,7 @@ const NotificationSchema = new mongoose.Schema({
   recipientModel: {
     type: String,
     required: true,
-    enum: ['User', 'Seller', 'Delivery']
+    enum: ['User', 'Seller', 'Delivery', 'Admin']
   },
   title: {
     type: String,

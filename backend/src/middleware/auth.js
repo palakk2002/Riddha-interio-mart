@@ -40,6 +40,33 @@ exports.protect = async (req, res, next) => {
       return res.status(401).json({ success: false, error: `Account with role ${decoded.role} not found.` });
     }
 
+    // Secure Middleware Check: prevent suspended/rejected/pending sellers from making requests
+    if (decoded.role === 'seller') {
+      if (req.user.status === 'suspended') {
+        return res.status(403).json({ success: false, error: 'Your seller account has been suspended.' });
+      }
+      if (req.user.status === 'rejected') {
+        return res.status(403).json({ success: false, error: 'Your seller registration was rejected.' });
+      }
+      if (req.user.status === 'pending') {
+        return res.status(403).json({ success: false, error: 'Your seller registration is pending approval.' });
+      }
+    }
+
+    // Secure Middleware Check: prevent suspended/rejected/pending delivery partners from making requests
+    if (decoded.role === 'delivery') {
+      const appStatus = req.user.approvalStatus || 'Approved';
+      if (appStatus === 'Suspended') {
+        return res.status(403).json({ success: false, error: 'Your delivery partner account has been suspended.' });
+      }
+      if (appStatus === 'Rejected') {
+        return res.status(403).json({ success: false, error: 'Your delivery partner registration was rejected.' });
+      }
+      if (appStatus === 'Pending') {
+        return res.status(403).json({ success: false, error: 'Your delivery partner registration is pending approval.' });
+      }
+    }
+
     // Safety: ensure role is available for authorize middleware
     if (!req.user.role) {
       req.user.role = decoded.role;

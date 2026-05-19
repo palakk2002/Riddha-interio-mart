@@ -24,6 +24,18 @@ const ActiveSellers = () => {
     }
   };
 
+  const handleSuspend = async (sellerId) => {
+    const confirmSuspend = window.confirm("Are you sure you want to suspend this seller account? They will lose access immediately.");
+    if (!confirmSuspend) return;
+    try {
+      await api.put(`/auth/admin/sellers/${sellerId}/suspend`);
+      fetchActiveSellers();
+    } catch (err) {
+      console.error('Failed to suspend seller:', err);
+      alert(err.response?.data?.error || 'Failed to suspend seller.');
+    }
+  };
+
   const filteredSellers = sellers.filter(s => 
     s.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.shopName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -114,7 +126,11 @@ const ActiveSellers = () => {
                   <button className="flex-1 flex items-center justify-center gap-2 py-4 bg-deep-espresso text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-dusty-cocoa transition-all shadow-lg active:scale-95">
                     <LuShieldCheck size={16} /> Dashboard
                   </button>
-                  <button className="p-4 bg-white border border-soft-oatmeal text-red-400 rounded-2xl hover:bg-red-50 transition-all active:scale-95" title="Suspend Seller">
+                  <button 
+                    onClick={() => handleSuspend(seller._id)}
+                    className="p-4 bg-white border border-soft-oatmeal text-red-400 rounded-2xl hover:bg-red-50 transition-all active:scale-95" 
+                    title="Suspend Seller"
+                  >
                     <LuBan size={18} />
                   </button>
                 </div>

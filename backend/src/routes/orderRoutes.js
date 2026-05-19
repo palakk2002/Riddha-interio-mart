@@ -7,13 +7,18 @@ const {
   getOrders,
   updateOrderStatus,
   assignOrderToDeliveryBoy,
-  respondToDeliveryAssignment
+  respondToDeliveryAssignment,
+  checkCodEligibility,
+  calculateOrderPricing
 } = require('../controllers/orderController');
 const { protect, authorize } = require('../middleware/auth');
 const { check } = require('express-validator');
 const { validate } = require('../middleware/validationMiddleware');
 
 router.use(protect);
+
+router.route('/cod-eligibility').post(checkCodEligibility);
+router.route('/calculate-pricing').post(calculateOrderPricing);
 
 router.route('/')
   .get(getOrders)

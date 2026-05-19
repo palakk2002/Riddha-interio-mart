@@ -25,7 +25,10 @@ exports.registerDelivery = async (req, res, next) => {
       vehicleType: delivery.vehicleType
     });
 
-    sendTokenResponse(delivery, 201, res);
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful! Your delivery partner account is pending admin approval.'
+    });
   } catch (err) {
     next(err);
   }
@@ -42,6 +45,17 @@ exports.loginDelivery = async (req, res, next) => {
     const delivery = await Delivery.findOne({ email }).select('+password');
     if (!delivery || !(await delivery.matchPassword(password))) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
+    }
+
+    const appStatus = delivery.approvalStatus || 'Approved';
+    if (appStatus === 'Pending') {
+      return res.status(403).json({ success: false, error: 'Your delivery partner account is pending admin approval.' });
+    }
+    if (appStatus === 'Rejected') {
+      return res.status(403).json({ success: false, error: 'Your delivery partner registration was rejected. Please contact support.' });
+    }
+    if (appStatus === 'Suspended') {
+      return res.status(403).json({ success: false, error: 'Your delivery partner account has been suspended for policy violations.' });
     }
 
     sendTokenResponse(delivery, 200, res);
@@ -130,19 +144,71 @@ exports.updateDeliveryStatus = async (req, res, next) => {
 // @access  Private/Admin
 exports.getAllDeliveryPartners = async (req, res, next) => {
   try {
-    const Order = require('../models/Order');
-    let partners = await Delivery.find().select('-password').sort('-createdAt').lean();
-    
-    // Add order counts for each partner
-    partners = await Promise.all(partners.map(async (partner) => {
-      const orderCount = await Order.countDocuments({ deliveryBoy: partner._id, deliveryStatus: 'Delivered' });
-      const pendingCount = await Order.countDocuments({ deliveryBoy: partner._id, deliveryStatus: { $in: ['Accepted', 'Picked', 'Out for Delivery'] } });
-      return { 
-        ...partner, 
-        totalDeliveries: orderCount,
-        activeDeliveries: pendingCount
-      };
-    }));
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 100; // Prevent memory overload with safe pagination limit
+    const skip = (page - 1) * limit;
+
+    const pipeline = [
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $project: {
+          password: 0
+        }
+      },
+      {
+        $lookup: {
+          from: 'orders',
+          let: { partnerId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$deliveryBoy', '$$partnerId'] }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                totalDeliveries: {
+                  $sum: {
+                    $cond: [{ $eq: ['$deliveryStatus', 'Delivered'] }, 1, 0]
+                  }
+                },
+                activeDeliveries: {
+                  $sum: {
+                    $cond: [
+                      { $in: ['$deliveryStatus', ['Accepted', 'Picked', 'Out for Delivery']] },
+                      1,
+                      0
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          as: 'counts'
+        }
+      },
+      {
+        $addFields: {
+          counts: { $arrayElemAt: ['$counts', 0] }
+        }
+      },
+      {
+        $addFields: {
+          totalDeliveries: { $ifNull: ['$counts.totalDeliveries', 0] },
+          activeDeliveries: { $ifNull: ['$counts.activeDeliveries', 0] }
+        }
+      },
+      {
+        $project: {
+          counts: 0
+        }
+      }
+    ];
+
+    const partners = await Delivery.aggregate(pipeline);
 
     res.status(200).json({ success: true, data: partners });
   } catch (err) {
@@ -155,22 +221,35 @@ exports.getAllDeliveryPartners = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateDeliveryApprovalStatus = async (req, res, next) => {
   try {
-    const { approvalStatus } = req.body; // 'Approved' or 'Rejected'
+    const { approvalStatus } = req.body; // 'Approved', 'Rejected', or 'Suspended'
+    
+    const updateData = { approvalStatus };
+    if (approvalStatus === 'Suspended') {
+      updateData.status = 'Offline';
+    }
+
     const partner = await Delivery.findByIdAndUpdate(
       req.params.id,
-      { approvalStatus },
+      updateData,
       { new: true, runValidators: true }
     );
 
     if (!partner) return res.status(404).json({ success: false, error: 'Partner not found' });
 
+    let message = '';
+    if (approvalStatus === 'Approved') {
+      message = 'Congratulations! Your delivery partner account has been approved.';
+    } else if (approvalStatus === 'Rejected') {
+      message = 'Your delivery partner account application has been rejected.';
+    } else if (approvalStatus === 'Suspended') {
+      message = 'Your delivery partner account has been suspended for policy violations.';
+    }
+
     // Notify partner about approval status
     notifyDeliveryApproval(partner._id, {
       id: partner._id,
       status: approvalStatus,
-      message: approvalStatus === 'Approved' 
-        ? 'Congratulations! Your delivery partner account has been approved.' 
-        : 'Your delivery partner account application has been rejected.'
+      message
     });
 
     res.status(200).json({ success: true, data: partner });

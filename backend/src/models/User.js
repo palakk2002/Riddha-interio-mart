@@ -57,6 +57,18 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  referralCode: {
+    type: String,
+    unique: true
+  },
+  referredBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  referralCount: {
+    type: Number,
+    default: 0
+  },
   emailVerificationOtp: String,
   emailVerificationOtpExpire: Date,
   resetPasswordOtp: String,
@@ -67,8 +79,11 @@ const UserSchema = new mongoose.Schema({
   }
 });
 
-// Encrypt password using bcrypt
+// Encrypt password and generate referral code using bcrypt & crypto
 UserSchema.pre('save', async function() {
+  if (!this.referralCode) {
+    this.referralCode = 'RIDDHA' + crypto.randomBytes(3).toString('hex').toUpperCase();
+  }
   if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
@@ -109,5 +124,6 @@ UserSchema.methods.getResetPasswordOtp = function() {
 
 UserSchema.index({ email: 1 });
 UserSchema.index({ role: 1 });
+UserSchema.index({ referralCode: 1 });
 
 module.exports = mongoose.model('User', UserSchema);

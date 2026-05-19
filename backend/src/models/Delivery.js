@@ -57,7 +57,7 @@ const DeliverySchema = new mongoose.Schema({
   },
   approvalStatus: {
     type: String,
-    enum: ['Pending', 'Approved', 'Rejected'],
+    enum: ['Pending', 'Approved', 'Rejected', 'Suspended'],
     default: 'Pending'
   },
   createdAt: {
@@ -79,5 +79,7 @@ DeliverySchema.methods.getSignedJwtToken = function() {
 DeliverySchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+DeliverySchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('Delivery', DeliverySchema);
