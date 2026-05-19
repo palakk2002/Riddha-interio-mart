@@ -18,7 +18,6 @@ const SellerSignup = () => {
     shopAddress: '',
     gstNumber: '',
     panNumber: '',
-    hsnNumber: '',
     password: '',
     confirmPassword: '',
     referralCode: ''
@@ -261,7 +260,7 @@ const SellerSignup = () => {
                   <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Compliance & Documents</h3>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                   <div className="space-y-1 md:space-y-0.5">
                     <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">GST Number</label>
                     <input
@@ -282,18 +281,6 @@ const SellerSignup = () => {
                       value={formData.panNumber}
                       onChange={handleChange}
                       placeholder="PAN"
-                      className="w-full px-4 py-4 md:py-2.5 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1 md:space-y-0.5">
-                    <label className="text-[10px] md:text-[8px] font-semibold uppercase tracking-widest text-slate-400 ml-1">HSN Number</label>
-                    <input
-                      type="text"
-                      name="hsnNumber"
-                      value={formData.hsnNumber}
-                      onChange={handleChange}
-                      placeholder="HSN"
                       className="w-full px-4 py-4 md:py-2.5 rounded-xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-sm md:text-[11px] font-medium text-slate-700 transition-all"
                       required
                     />

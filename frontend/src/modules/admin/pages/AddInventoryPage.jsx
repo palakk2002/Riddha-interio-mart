@@ -306,7 +306,7 @@ const AddInventoryPage = () => {
                        <LuPackage size={12} /> HSN Code
                     </label>
                     <input 
-                      type="text"
+                      type="text" required
                       placeholder="e.g. 6802"
                       value={formData.hsnCode}
                       onChange={(e) => setFormData({...formData, hsnCode: e.target.value})}

@@ -343,6 +343,7 @@ const AddProduct = () => {
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">HSN Code</label>
                   <input 
+                    required
                     type="text" placeholder="6802"
                     value={formData.hsnCode} onChange={(e) => setFormData({...formData, hsnCode: e.target.value})}
                     readOnly={selection === 'catalog'}

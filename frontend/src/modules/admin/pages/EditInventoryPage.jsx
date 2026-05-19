@@ -248,7 +248,7 @@ const EditInventoryPage = () => {
                     <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
                        <LuPackage size={12} /> HSN Code
                     </label>
-                    <input type="text" placeholder="e.g. 6802" value={formData.hsnCode} onChange={(e) => setFormData({...formData, hsnCode: e.target.value})} className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none" />
+                    <input type="text" required placeholder="e.g. 6802" value={formData.hsnCode} onChange={(e) => setFormData({...formData, hsnCode: e.target.value})} className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none" />
                   </div>
                 </div>
 
