@@ -8,7 +8,8 @@ const {
   updateProduct,
   updateApprovalStatus,
   updateBulkStock,
-  getSearchSuggestions
+  getSearchSuggestions,
+  checkProductSku
 } = require('../controllers/productController');
 const { protect, authorize, tryProtect } = require('../middleware/auth');
 const { check } = require('express-validator');
@@ -21,6 +22,8 @@ const router = express.Router();
 
 // Re-route into other resource routers
 router.use('/:productId/reviews', reviewRouter);
+
+router.get('/check-sku/:sku', protect, authorize('seller', 'admin'), checkProductSku);
 
 router.route('/')
   .get(tryProtect, getProducts)

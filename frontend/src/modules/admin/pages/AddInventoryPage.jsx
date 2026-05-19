@@ -38,6 +38,9 @@ const AddInventoryPage = () => {
     unit: 'piece',
     unitValue: '1',
   });
+  
+  // SKU availability tracking state
+  const [skuStatus, setSkuStatus] = useState({ checking: false, exists: false, checked: false });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,6 +63,7 @@ const AddInventoryPage = () => {
               sku: itm.sku || '',
               hsnCode: itm.hsnCode || '',
               category: itm.category || '',
+              subcategory: itm.subcategory || '',
               brand: itm.brand || '',
               price: itm.price || '',
               images: itm.images || [],
@@ -81,6 +85,31 @@ const AddInventoryPage = () => {
     };
     fetchData();
   }, [catalogId]);
+
+  // Debounced SKU uniqueness validation check
+  useEffect(() => {
+    if (!formData.sku || formData.sku.trim() === '') {
+      setSkuStatus({ checking: false, exists: false, checked: false });
+      return;
+    }
+
+    setSkuStatus(prev => ({ ...prev, checking: true, checked: true }));
+    const delayDebounce = setTimeout(async () => {
+      try {
+        const response = await api.get(`/products/check-sku/${encodeURIComponent(formData.sku.trim())}`);
+        setSkuStatus({
+          checking: false,
+          exists: response.data.exists,
+          checked: true
+        });
+      } catch (err) {
+        console.error('SKU check failed:', err);
+        setSkuStatus({ checking: false, exists: false, checked: false });
+      }
+    }, 600);
+
+    return () => clearTimeout(delayDebounce);
+  }, [formData.sku]);
 
   const filteredCategories = categories.filter(cat => 
     cat.name.toLowerCase().includes(catSearch.toLowerCase())
@@ -140,6 +169,8 @@ const AddInventoryPage = () => {
     e.preventDefault();
     if (!formData.category) return alert('Please select or enter a category');
     if (!formData.brand) return alert('Please select a brand partner.');
+    if (skuStatus.exists) return alert('Cannot save product: The entered SKU code already exists. Please enter a unique SKU.');
+    if (formData.images.length === 0) return alert('Cannot save product: Please upload or select at least 1 image for this product.');
     
     try {
       setLoading(true);
@@ -297,8 +328,19 @@ const AddInventoryPage = () => {
                       placeholder="e.g. TLE-MAR-001"
                       value={formData.sku}
                       onChange={(e) => setFormData({...formData, sku: e.target.value})}
-                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none"
+                      className={`w-full bg-soft-oatmeal/10 border rounded-xl px-4 py-3 text-sm focus:outline-none transition-all ${skuStatus.checked ? (skuStatus.checking ? 'border-yellow-400' : (skuStatus.exists ? 'border-red-500 bg-red-50/50' : 'border-green-500 bg-green-50/30')) : 'border-soft-oatmeal'}`}
                     />
+                    {skuStatus.checked && (
+                      <div className="mt-1 flex items-center gap-1">
+                         {skuStatus.checking ? (
+                           <span className="text-[9px] font-bold text-yellow-600 animate-pulse">Checking SKU availability...</span>
+                         ) : skuStatus.exists ? (
+                           <span className="text-[9px] font-bold text-red-600 flex items-center gap-1">❌ Code (SKU) already exists</span>
+                         ) : (
+                           <span className="text-[9px] font-bold text-green-600 flex items-center gap-1">✓ Code (SKU) is available</span>
+                         )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -350,7 +392,11 @@ const AddInventoryPage = () => {
                                      key={cat._id}
                                      type="button"
                                      onClick={() => {
-                                       setFormData({...formData, category: cat.name});
+                                       setFormData({
+                                         ...formData,
+                                         category: cat.name,
+                                         subcategory: '' // Reset subcategory when parent changes
+                                       });
                                        setCatSearch('');
                                        setIsCatOpen(false);
                                      }}
@@ -370,7 +416,32 @@ const AddInventoryPage = () => {
                          </>
                        )}
                     </div>
+                    {/* GST auto tax rate display badge */}
+                    {categories.find(c => c.name === formData.category) && (
+                      <div className="text-[9px] font-bold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-lg w-fit flex items-center gap-1.5 mt-1.5">
+                        <LuInfo size={11} /> Default Category GST Rate: {categories.find(c => c.name === formData.category).defaultGstRate || 18}%
+                      </div>
+                    )}
                   </div>
+
+                  {/* Active Subcategories Dynamic Selector Dropdown */}
+                  {formData.category && categories.find(c => c.name === formData.category)?.subcategories?.length > 0 && (
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
+                          <LuGrid2X2 size={12} /> Subcategory
+                       </label>
+                       <select 
+                         value={formData.subcategory || ''}
+                         onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
+                         className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none cursor-pointer appearance-none font-medium"
+                       >
+                         <option value="">Select Subcategory</option>
+                         {categories.find(c => c.name === formData.category).subcategories.map(sub => (
+                           <option key={sub._id || sub.name} value={sub.name}>{sub.name}</option>
+                         ))}
+                       </select>
+                    </div>
+                  )}
 
                   {/* Brand */}
                   <div className="space-y-2">

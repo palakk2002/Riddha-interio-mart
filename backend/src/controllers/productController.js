@@ -477,3 +477,16 @@ exports.updateBulkStock = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Check SKU uniqueness in live products
+// @route   GET /api/products/check-sku/:sku
+// @access  Private/Admin
+exports.checkProductSku = async (req, res, next) => {
+  try {
+    const { sku } = req.params;
+    const exists = await Product.findOne({ sku: sku.trim() });
+    res.status(200).json({ success: true, exists: !!exists });
+  } catch (error) {
+    next(error);
+  }
+};

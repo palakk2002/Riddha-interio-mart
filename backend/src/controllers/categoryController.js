@@ -68,12 +68,19 @@ exports.updateCategory = async (req, res, next) => {
       session
     });
 
-    // Cascade name changes to products if name is updated
+    // Cascade name changes to products and catalog if name is updated
     if (req.body.name && req.body.name !== oldName) {
-      await Product.updateMany(
-        { category: oldName },
-        { $set: { category: req.body.name } }
-      ).session(session);
+      const Catalog = require('../models/Catalog');
+      await Promise.all([
+        Product.updateMany(
+          { category: oldName },
+          { $set: { category: req.body.name } }
+        ).session(session),
+        Catalog.updateMany(
+          { category: oldName },
+          { $set: { category: req.body.name } }
+        ).session(session)
+      ]);
     }
 
     await session.commitTransaction();

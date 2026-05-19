@@ -74,3 +74,16 @@ exports.deleteCatalogItem = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Check SKU uniqueness in master catalog
+// @route   GET /api/catalog/check-sku/:sku
+// @access  Private/Admin
+exports.checkCatalogSku = async (req, res, next) => {
+  try {
+    const { sku } = req.params;
+    const exists = await Catalog.findOne({ sku: sku.trim() });
+    res.status(200).json({ success: true, exists: !!exists });
+  } catch (error) {
+    next(error);
+  }
+};
