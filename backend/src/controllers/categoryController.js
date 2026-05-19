@@ -47,14 +47,42 @@ exports.createCategory = async (req, res, next) => {
 
 // @desc    Update category
 exports.updateCategory = async (req, res, next) => {
+  const mongoose = require('mongoose');
+  const session = await mongoose.startSession();
   try {
+    session.startTransaction();
+    const Product = require('../models/Product');
+
+    const oldCategory = await Category.findById(req.params.id).session(session);
+    if (!oldCategory) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ success: false, error: 'Category not found' });
+    }
+
+    const oldName = oldCategory.name;
+
     const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true
+      runValidators: true,
+      session
     });
-    if (!category) return res.status(404).json({ success: false, error: 'Category not found' });
+
+    // Cascade name changes to products if name is updated
+    if (req.body.name && req.body.name !== oldName) {
+      await Product.updateMany(
+        { category: oldName },
+        { $set: { category: req.body.name } }
+      ).session(session);
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
     res.status(200).json({ success: true, data: category });
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
     next(err);
   }
 };
@@ -62,8 +90,20 @@ exports.updateCategory = async (req, res, next) => {
 // @desc    Delete category
 exports.deleteCategory = async (req, res, next) => {
   try {
-    const category = await Category.findByIdAndDelete(req.params.id);
+    const Product = require('../models/Product');
+    const category = await Category.findById(req.params.id);
     if (!category) return res.status(404).json({ success: false, error: 'Category not found' });
+
+    // Safeguard check: reject deletion if active products exist in the category
+    const productCount = await Product.countDocuments({ category: category.name });
+    if (productCount > 0) {
+      return res.status(400).json({
+        success: false,
+        error: `Cannot delete category because it has ${productCount} active products associated with it. Please reassign the products first.`
+      });
+    }
+
+    await Category.findByIdAndDelete(req.params.id);
     res.status(200).json({ success: true, data: {} });
   } catch (err) {
     next(err);
