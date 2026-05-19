@@ -395,6 +395,21 @@ exports.updateOrderStatus = async (req, res) => {
     if (order) {
       const newStatus = req.body.status;
       
+      // Early exit if status is identical to avoid double-processing
+      if (order.status === newStatus) {
+        return res.status(200).json({ success: true, data: order });
+      }
+
+      // 1. Guard against modifications to already Cancelled orders
+      if (order.status === 'Cancelled') {
+        return res.status(400).json({ success: false, error: 'Cancelled orders cannot be modified.' });
+      }
+
+      // 2. Guard against invalid transitions on Delivered orders
+      if (order.status === 'Delivered' && newStatus === 'Cancelled') {
+        return res.status(400).json({ success: false, error: 'Delivered orders cannot be cancelled.' });
+      }
+      
       // Define valid overall statuses for the Order model
       const validOverallStatuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
       
@@ -429,7 +444,7 @@ exports.updateOrderStatus = async (req, res) => {
       }
 
       if (newStatus === 'Cancelled') {
-        // Restore stock
+        // Restore stock atomically
         const inventoryService = require('../services/inventoryService');
         for (const item of order.orderItems) {
           await inventoryService.returnStock(item.product, item.quantity);
