@@ -22,7 +22,8 @@ const {
   getCashCollections,
   confirmCashDeposit,
   getSellerTransactions,
-  searchOrders
+  searchOrders,
+  getActivityLogs
 } = require('../controllers/adminController');
 const { protect, authorize } = require('../middleware/auth');
 const { check } = require('express-validator');
@@ -65,5 +66,8 @@ router.delete('/users/:id', protect, authorize('admin'), deleteUser);
 router.get('/payments/delivery', protect, authorize('admin'), getCashCollections);
 router.put('/payments/delivery/confirm/:deliveryBoyId', protect, authorize('admin'), confirmCashDeposit);
 router.get('/payments/sellers', protect, authorize('admin'), getSellerTransactions);
+
+// Activity Logs route
+router.get('/activity-logs', protect, authorize('admin'), getActivityLogs);
 
 module.exports = router;
