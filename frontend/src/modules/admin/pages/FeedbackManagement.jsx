@@ -1,16 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiStar, FiMessageSquare, FiTrash2, FiSearch, FiFilter, FiDownload, FiCheckCircle } from 'react-icons/fi';
+import { 
+  FiStar, 
+  FiMessageSquare, 
+  FiTrash2, 
+  FiSearch, 
+  FiFilter, 
+  FiDownload, 
+  FiCheckCircle, 
+  FiEye, 
+  FiEyeOff 
+} from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import api from '../../../shared/utils/api';
+import * as XLSX from 'xlsx';
 
 const FeedbackManagement = () => {
   const [reviews, setReviews] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRating, setFilterRating] = useState('all');
+  const [loading, setLoading] = useState(true);
 
-  const fetchReviews = () => {
-    const savedReviews = JSON.parse(localStorage.getItem('riddha_reviews') || '[]');
-    setReviews(savedReviews);
+  const fetchReviews = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/reviews/admin?limit=100');
+      if (data.success) {
+        setReviews(data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch reviews:', err);
+      toast.error('Failed to fetch platform reviews');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -18,18 +41,86 @@ const FeedbackManagement = () => {
   }, []);
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
-      const savedReviews = JSON.parse(localStorage.getItem('riddha_reviews') || '[]');
-      const updated = savedReviews.filter(r => r.id !== id);
-      localStorage.setItem('riddha_reviews', JSON.stringify(updated));
-      setReviews(updated);
-      toast.success('Review deleted successfully');
+    toast((t) => (
+      <div className="flex flex-col gap-2 p-1 text-left">
+        <p className="text-sm font-bold text-gray-800">
+          Are you sure you want to delete this review? This action cannot be undone.
+        </p>
+        <div className="flex justify-end gap-2 mt-1">
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                const { data } = await api.delete(`/reviews/${id}`);
+                if (data.success) {
+                  toast.success("Review deleted successfully");
+                  fetchReviews();
+                }
+              } catch (err) {
+                console.error(err);
+                toast.error("Failed to delete review");
+              }
+            }}
+            className="px-3 py-1 bg-red-800 text-white rounded-lg text-xs font-bold hover:bg-red-900 transition-colors"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-gray-200 text-gray-800 rounded-lg text-xs font-bold hover:bg-gray-300 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: 6000 });
+  };
+
+  const handleToggleApproval = async (id, currentStatus) => {
+    try {
+      const { data } = await api.put(`/reviews/${id}/moderation`, {
+        isApproved: !currentStatus
+      });
+      if (data.success) {
+        toast.success(`Review ${!currentStatus ? 'approved' : 'hidden'} successfully`);
+        fetchReviews();
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update review moderation');
     }
   };
 
+  const exportToExcel = () => {
+    if (reviews.length === 0) {
+      toast.error('No reviews available to export.');
+      return;
+    }
+    const dataToExport = reviews.map(r => ({
+      'Review ID': r._id,
+      'Product Name': r.product?.name || 'Unknown Product',
+      'User Name': r.user?.fullName || 'Guest',
+      'Rating': r.rating,
+      'Title': r.title || '',
+      'Review Text': r.review || '',
+      'Status': r.isApproved ? 'Approved' : 'Hidden',
+      'Helpful Votes': r.helpfulCount || 0,
+      'Report Count': r.reportCount || 0,
+      'Date': r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '-'
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Product Reviews");
+    XLSX.writeFile(wb, `Review_Logs_${new Date().toLocaleDateString()}.xlsx`);
+    toast.success('Logs exported successfully!');
+  };
+
   const filteredReviews = reviews.filter(r => {
-    const matchesSearch = r.productName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         r.comment?.toLowerCase().includes(searchTerm.toLowerCase());
+    const productName = r.product?.name || '';
+    const comment = r.review || '';
+    const matchesSearch = productName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          comment.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRating = filterRating === 'all' || r.rating.toString() === filterRating;
     return matchesSearch && matchesRating;
   });
@@ -44,7 +135,10 @@ const FeedbackManagement = () => {
           </h1>
           <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">Platform-wide review oversight</p>
         </div>
-        <button className="flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-teal-600 transition-all shadow-lg active:scale-95">
+        <button 
+          onClick={exportToExcel}
+          className="flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-teal-600 transition-all shadow-lg active:scale-95"
+        >
           <FiDownload /> Export Logs
         </button>
       </div>
@@ -74,9 +168,6 @@ const FeedbackManagement = () => {
             <option value="2">2 Stars</option>
             <option value="1">1 Star</option>
           </select>
-          <button className="p-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-400 hover:text-teal-600 transition-all">
-            <FiFilter />
-          </button>
         </div>
       </div>
 
@@ -88,7 +179,7 @@ const FeedbackManagement = () => {
             </div>
             <div>
                <p className="text-2xl font-black text-gray-900">{reviews.length}</p>
-               <p className="text-[10px] font-black uppercase tracking-widest text-teal-600">Total Approved</p>
+               <p className="text-[10px] font-black uppercase tracking-widest text-teal-600">Total Reviews</p>
             </div>
          </div>
          <div className="bg-amber-50/50 border border-amber-100 p-6 rounded-[32px] flex items-center gap-5">
@@ -113,9 +204,19 @@ const FeedbackManagement = () => {
          </div>
       </div>
 
-      {/* Review Cards/Table */}
+      {/* Review Cards */}
       <div className="grid grid-cols-1 gap-4">
-        {filteredReviews.length === 0 ? (
+        {loading ? (
+          Array(3).fill(0).map((_, i) => (
+            <div key={i} className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6 animate-pulse">
+              <div className="flex-1 space-y-4">
+                <div className="h-6 bg-gray-100 rounded w-1/3"></div>
+                <div className="h-12 bg-gray-50 rounded"></div>
+              </div>
+              <div className="md:w-40 h-16 bg-gray-100 rounded"></div>
+            </div>
+          ))
+        ) : filteredReviews.length === 0 ? (
           <div className="bg-white py-24 rounded-[40px] border border-dashed border-gray-200 text-center">
             <FiMessageSquare className="mx-auto text-gray-100 mb-6" size={64} />
             <h3 className="text-lg font-black text-gray-900 uppercase italic">No reviews found</h3>
@@ -124,7 +225,7 @@ const FeedbackManagement = () => {
         ) : (
           filteredReviews.map((review, i) => (
             <motion.div
-              key={review.id}
+              key={review._id}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.05 }}
@@ -134,11 +235,15 @@ const FeedbackManagement = () => {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100 font-black text-xs">
-                      #{review.id.slice(-4)}
+                      #{review._id.slice(-4).toUpperCase()}
                     </div>
                     <div>
-                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-tight">{review.productName}</h4>
-                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Order: {review.orderId.slice(-8).toUpperCase()}</p>
+                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-tight">
+                        {review.product?.name || 'Unknown Product'}
+                      </h4>
+                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">
+                        User: {review.user?.fullName || 'Guest'}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
@@ -148,7 +253,7 @@ const FeedbackManagement = () => {
                   </div>
                 </div>
                 <p className="text-xs text-gray-600 font-medium leading-relaxed bg-gray-50 p-4 rounded-2xl italic border border-gray-50 group-hover:bg-teal-50/30 group-hover:border-teal-50 transition-all">
-                  "{review.comment}"
+                  "{review.review}"
                 </p>
                 {review.images && review.images.length > 0 && (
                   <div className="flex gap-2 mt-4">
@@ -161,15 +266,32 @@ const FeedbackManagement = () => {
               <div className="md:w-40 border-t md:border-t-0 md:border-l border-gray-100 pt-6 md:pt-0 md:pl-6 flex md:flex-col justify-between items-center md:items-end">
                 <div className="text-right">
                   <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest">Submitted On</p>
-                  <p className="text-[11px] font-bold text-gray-700">{new Date(review.createdAt).toLocaleDateString()}</p>
+                  <p className="text-[11px] font-bold text-gray-700">
+                    {new Date(review.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </p>
                 </div>
-                <button 
-                  onClick={() => handleDelete(review.id)}
-                  className="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95"
-                  title="Delete Review"
-                >
-                  <FiTrash2 size={18} />
-                </button>
+                
+                <div className="flex items-center gap-2 mt-4 md:mt-0">
+                  <button
+                    onClick={() => handleToggleApproval(review._id, review.isApproved)}
+                    className={`p-3 rounded-2xl transition-all shadow-sm active:scale-95 ${
+                      review.isApproved 
+                        ? 'bg-teal-50 text-teal-600 hover:bg-teal-600 hover:text-white' 
+                        : 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white'
+                    }`}
+                    title={review.isApproved ? "Hide Review" : "Approve Review"}
+                  >
+                    {review.isApproved ? <FiEye size={18} /> : <FiEyeOff size={18} />}
+                  </button>
+
+                  <button 
+                    onClick={() => handleDelete(review._id)}
+                    className="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95"
+                    title="Delete Review"
+                  >
+                    <FiTrash2 size={18} />
+                  </button>
+                </div>
               </div>
             </motion.div>
           ))

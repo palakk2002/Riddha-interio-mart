@@ -2,14 +2,12 @@ import React, { useState, useEffect } from "react";
 import PageWrapper from "../components/PageWrapper";
 import {
   LuSearch,
-  LuFilter,
   LuDollarSign,
   LuCreditCard,
   LuShoppingBag,
   LuArrowRight,
   LuClock,
 } from "react-icons/lu";
-import { FiCheckCircle, FiClock, FiXCircle } from "react-icons/fi";
 import api from "../../../shared/utils/api";
 import { useNavigate } from "react-router-dom";
 
@@ -17,13 +15,14 @@ const UserPaymentsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filterStatus, setFilterStatus] = useState("All");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        // If searchTerm exists, use the new search endpoint, otherwise get all orders
+        // If searchTerm exists, use the search endpoint, otherwise get all orders
         const endpoint = searchTerm.trim() 
           ? `/auth/admin/orders/search?query=${searchTerm}`
           : '/orders';
@@ -46,7 +45,11 @@ const UserPaymentsPage = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const filteredOrders = orders; // Now filtered by the API call logic above
+  const filteredOrders = orders.filter((o) => {
+    if (filterStatus === "Paid") return o.isPaid;
+    if (filterStatus === "Unpaid") return !o.isPaid;
+    return true;
+  });
 
   return (
     <PageWrapper>
@@ -107,7 +110,7 @@ const UserPaymentsPage = () => {
         </div>
 
         {/* Toolbar */}
-        <div className="bg-white p-3 md:p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex flex-col md:flex-row gap-3 md:gap-4">
+        <div className="bg-white p-3 md:p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex flex-col md:flex-row gap-3 md:gap-4 items-stretch md:items-center">
           <div className="relative flex-grow">
             <LuSearch
               className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand"
@@ -121,10 +124,17 @@ const UserPaymentsPage = () => {
               className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all text-sm font-bold"
             />
           </div>
-          <button className="flex items-center justify-center gap-2 border border-soft-oatmeal text-deep-espresso px-6 py-3 md:py-0 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-soft-oatmeal/20 transition-all">
-            <LuFilter size={16} />
-            Filters
-          </button>
+          <div className="flex items-center gap-2">
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="w-full md:w-auto border border-soft-oatmeal text-deep-espresso px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-widest bg-white cursor-pointer focus:outline-none hover:bg-soft-oatmeal/20 transition-all"
+            >
+              <option value="All">All Payments</option>
+              <option value="Paid">Paid Only</option>
+              <option value="Unpaid">Unpaid Only</option>
+            </select>
+          </div>
         </div>
 
         {/* Payments Table */}
@@ -163,52 +173,60 @@ const UserPaymentsPage = () => {
                          <td colSpan="7" className="px-6 py-4 h-16 bg-gray-50/50"></td>
                       </tr>
                    ))
-                ) : filteredOrders.map((o) => (
-                  <tr
-                    key={o._id}
-                    className="hover:bg-soft-oatmeal/5 transition-colors group"
-                  >
-                    <td className="px-6 py-4 text-xs font-black text-[#240046]">
-                      #{o._id.toString().slice(-8).toUpperCase()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="font-bold text-deep-espresso text-sm">
-                        {o.user?.fullName || 'Guest'}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
-                         <LuCreditCard size={14} className="text-warm-sand" />
-                         {o.paymentMethod}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-black text-deep-espresso text-sm">
-                      ₹{o.totalPrice.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${
-                          o.isPaid
-                            ? "text-green-700 bg-green-50 border-green-700/10"
-                            : "text-amber-700 bg-amber-50 border-amber-700/10"
-                        }`}
-                      >
-                        {o.isPaid ? 'Paid' : 'Unpaid'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-xs text-deep-espresso/70 font-bold uppercase">
-                      {new Date(o.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                       <button 
-                         onClick={() => navigate(`/admin/orders/view/${o._id}`)}
-                         className="p-2 hover:bg-soft-oatmeal/30 rounded-lg text-warm-sand transition-all hover:scale-110"
-                       >
-                          <LuArrowRight size={18} />
-                       </button>
+                ) : filteredOrders.length > 0 ? (
+                  filteredOrders.map((o) => (
+                    <tr
+                      key={o._id}
+                      className="hover:bg-soft-oatmeal/5 transition-colors group"
+                    >
+                      <td className="px-6 py-4 text-xs font-black text-[#240046]">
+                        #{o._id.toString().slice(-8).toUpperCase()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="font-bold text-deep-espresso text-sm">
+                          {o.user?.fullName || 'Guest'}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
+                           <LuCreditCard size={14} className="text-warm-sand" />
+                           {o.paymentMethod}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-black text-deep-espresso text-sm">
+                        ₹{o.totalPrice.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                            o.isPaid
+                              ? "text-green-700 bg-green-50 border-green-700/10"
+                              : "text-amber-700 bg-amber-50 border-amber-700/10"
+                          }`}
+                        >
+                          {o.isPaid ? 'Paid' : 'Unpaid'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-xs text-deep-espresso/70 font-bold uppercase">
+                        {new Date(o.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                         <button 
+                           onClick={() => navigate(`/admin/orders/view/${o._id}`)}
+                           className="p-2 hover:bg-soft-oatmeal/30 rounded-lg text-warm-sand transition-all hover:scale-110"
+                         >
+                            <LuArrowRight size={18} />
+                         </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-10 text-center text-gray-400 font-bold">
+                      No payments found.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

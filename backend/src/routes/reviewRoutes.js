@@ -7,7 +7,8 @@ const {
   moderateReview,
   voteHelpful,
   reportReview,
-  respondToReview
+  respondToReview,
+  getAdminReviews
 } = require('../controllers/reviewController');
 
 const { protect, authorize } = require('../middleware/auth');
@@ -23,6 +24,8 @@ router.route('/')
     check('review', 'Review text is required').not().isEmpty(),
     validate
   ], createReview);
+
+router.get('/admin', protect, authorize('admin'), getAdminReviews);
 
 router.route('/:id')
   .put(protect, authorize('user', 'admin'), [

@@ -280,3 +280,31 @@ exports.respondToReview = async (req, res, next) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+// @desc    Get all reviews (Admin only)
+// @route   GET /api/reviews/admin
+// @access  Private/Admin
+exports.getAdminReviews = async (req, res) => {
+  try {
+    const query = {};
+    const populateOptions = [
+      { path: 'user', select: 'fullName avatar' },
+      { path: 'product', select: 'name' }
+    ];
+
+    const result = await paginate(Review, query, req, populateOptions);
+
+    res.status(200).json({
+      success: true,
+      count: result.data.length,
+      totalResults: result.totalResults,
+      totalPages: result.totalPages,
+      page: result.page,
+      limit: result.limit,
+      data: result.data
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

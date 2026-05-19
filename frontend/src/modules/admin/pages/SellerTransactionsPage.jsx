@@ -2,20 +2,19 @@ import React, { useState, useEffect } from "react";
 import PageWrapper from "../components/PageWrapper";
 import {
   LuSearch,
-  LuFilter,
   LuArrowUpRight,
   LuArrowDownLeft,
 } from "react-icons/lu";
 import { FiDownload, FiDollarSign } from "react-icons/fi";
-
-
-
 import api from "../../../shared/utils/api";
+import * as XLSX from 'xlsx';
+import { toast } from "react-hot-toast";
 
 const SellerTransactionsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filterType, setFilterType] = useState("All");
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -27,6 +26,7 @@ const SellerTransactionsPage = () => {
         }
       } catch (err) {
         console.error('Failed to fetch seller transactions:', err);
+        toast.error('Failed to fetch seller transactions.');
       } finally {
         setLoading(false);
       }
@@ -34,11 +34,35 @@ const SellerTransactionsPage = () => {
     fetchTransactions();
   }, []);
 
-  const filteredTransactions = transactions.filter(
-    (t) =>
-      t.sellerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.shopName.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredTransactions = transactions.filter((t) => {
+    const matchesSearch = t.sellerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.shopName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterType === "All" || t.type === filterType;
+    return matchesSearch && matchesFilter;
+  });
+
+  const exportToExcel = () => {
+    if (transactions.length === 0) {
+      toast.error('No transactions available to export.');
+      return;
+    }
+    const dataToExport = transactions.map(t => ({
+      'Transaction ID': t.id ? `#TXN-00${t.id}` : '#TXN-N/A',
+      'Seller Name': t.sellerName,
+      'Shop Name': t.shopName,
+      'Type': t.type,
+      'Amount (₹)': t.amount,
+      'Commission (₹)': t.commission,
+      'Status': t.status,
+      'Date': t.date ? new Date(t.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Seller Payouts");
+    XLSX.writeFile(wb, `Seller_Payouts_${new Date().toLocaleDateString()}.xlsx`);
+    toast.success('Report exported successfully!');
+  };
 
   const totalPayout = transactions.reduce((sum, t) => sum + t.amount, 0);
   const totalCommission = transactions.reduce((sum, t) => sum + t.commission, 0);
@@ -56,7 +80,10 @@ const SellerTransactionsPage = () => {
               Monitor payouts and financial adjustments for all sellers.
             </p>
           </div>
-          <button className="flex items-center justify-center gap-2 bg-red-800 text-white px-6 py-3.5 rounded-2xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20 active:scale-95 text-sm">
+          <button 
+            onClick={exportToExcel}
+            className="flex items-center justify-center gap-2 bg-red-800 text-white px-6 py-3.5 rounded-2xl font-bold hover:bg-deep-espresso transition-all shadow-md shadow-red-900/20 active:scale-95 text-sm"
+          >
             <FiDownload size={18} />
             Export Report
           </button>
@@ -102,7 +129,7 @@ const SellerTransactionsPage = () => {
         </div>
 
         {/* Toolbar */}
-        <div className="bg-white p-3 md:p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex flex-col md:flex-row gap-3 md:gap-4">
+        <div className="bg-white p-3 md:p-4 rounded-2xl border border-soft-oatmeal shadow-sm flex flex-col md:flex-row gap-3 md:gap-4 items-stretch md:items-center">
           <div className="relative flex-grow">
             <LuSearch
               className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-sand"
@@ -113,13 +140,20 @@ const SellerTransactionsPage = () => {
               placeholder="Search by seller or shop..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all text-sm"
+              className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-warm-sand/20 transition-all text-sm font-bold"
             />
           </div>
-          <button className="flex items-center justify-center gap-2 border border-soft-oatmeal text-deep-espresso px-6 py-3 md:py-0 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-soft-oatmeal/20 transition-all">
-            <LuFilter size={16} />
-            Filters
-          </button>
+          <div className="flex items-center gap-2">
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="w-full md:w-auto border border-soft-oatmeal text-deep-espresso px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-widest bg-white cursor-pointer focus:outline-none hover:bg-soft-oatmeal/20 transition-all"
+            >
+              <option value="All">All Types</option>
+              <option value="Payout">Payout</option>
+              <option value="Refund">Refund</option>
+            </select>
+          </div>
         </div>
 
         {/* Transactions Table */}
@@ -155,55 +189,63 @@ const SellerTransactionsPage = () => {
                       <td colSpan="6" className="h-16 bg-gray-50/50 px-6"></td>
                     </tr>
                   ))
-                ) : filteredTransactions.map((t) => (
-                  <tr
-                    key={t._id}
-                    className="hover:bg-soft-oatmeal/5 transition-colors group"
-                  >
-                    <td className="px-6 py-4 text-xs font-bold text-deep-espresso/60">
-                      #TXN-00{t.id}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="font-bold text-deep-espresso text-sm">
-                          {t.sellerName}
-                        </p>
-                        <p className="text-[10px] text-warm-sand uppercase tracking-wider font-bold">
-                          {t.shopName}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div
-                        className={`flex items-center gap-1.5 text-xs font-bold ${t.type === "Payout" ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {t.type === "Payout" ? (
-                          <LuArrowUpRight size={14} />
-                        ) : (
-                          <LuArrowDownLeft size={14} />
-                        )}
-                        {t.type}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-black text-deep-espresso text-sm">
-                      ₹{t.amount.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
-                          t.status === "Completed"
-                            ? "text-green-700 bg-green-50 border-green-700/10"
-                            : "text-amber-700 bg-amber-50 border-amber-700/10"
-                        }`}
-                      >
-                        {t.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-xs text-deep-espresso/70 font-medium">
-                      {t.date}
+                ) : filteredTransactions.length > 0 ? (
+                  filteredTransactions.map((t) => (
+                    <tr
+                      key={t._id}
+                      className="hover:bg-soft-oatmeal/5 transition-colors group"
+                    >
+                      <td className="px-6 py-4 text-xs font-bold text-deep-espresso/60">
+                        {t.id ? `#TXN-00${t.id}` : '#TXN-N/A'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-bold text-deep-espresso text-sm">
+                            {t.sellerName}
+                          </p>
+                          <p className="text-[10px] text-warm-sand uppercase tracking-wider font-bold">
+                            {t.shopName}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div
+                          className={`flex items-center gap-1.5 text-xs font-bold ${t.type === "Payout" ? "text-green-600" : "text-red-600"}`}
+                        >
+                          {t.type === "Payout" ? (
+                            <LuArrowUpRight size={14} />
+                          ) : (
+                            <LuArrowDownLeft size={14} />
+                          )}
+                          {t.type}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-black text-deep-espresso text-sm">
+                        ₹{t.amount.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                            t.status === "Completed"
+                              ? "text-green-700 bg-green-50 border-green-700/10"
+                              : "text-amber-700 bg-amber-50 border-amber-700/10"
+                          }`}
+                        >
+                          {t.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-xs text-deep-espresso/70 font-bold uppercase">
+                        {t.date ? new Date(t.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-10 text-center text-gray-400 font-bold">
+                      No transactions found.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
