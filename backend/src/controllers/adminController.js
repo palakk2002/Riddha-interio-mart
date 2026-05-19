@@ -520,6 +520,31 @@ exports.adjustStock = async (req, res, next) => {
     await session.commitTransaction();
     session.endSession();
 
+    // Trigger Real-time Sockets and Low Stock Alerts after commit
+    try {
+      const socketModule = require('../socket');
+      const io = socketModule.getIO();
+      if (io) {
+        // Broadcast to all active users/admins
+        io.emit('product:stock_update', {
+          productId: product._id,
+          countInStock: product.countInStock
+        });
+
+        // Trigger low stock alert if it falls below the critical limit
+        if (product.countInStock <= 10) {
+          socketModule.notifyLowStock(product.seller, {
+            productId: product._id,
+            name: product.name,
+            remainingStock: product.countInStock,
+            message: `Product "${product.name}" (SKU: ${product.sku || 'N/A'}) has fallen to a critical level of ${product.countInStock} units.`
+          });
+        }
+      }
+    } catch (socketErr) {
+      console.error('[Socket Notification Error] Failed to broadcast inventory adjustment:', socketErr.message);
+    }
+
     res.status(200).json({
       success: true,
       data: product
@@ -599,6 +624,37 @@ exports.batchAdjustStock = async (req, res, next) => {
 
     await session.commitTransaction();
     session.endSession();
+
+    // Trigger Real-time Sockets and Low Stock Alerts after commit
+    try {
+      const socketModule = require('../socket');
+      const io = socketModule.getIO();
+      if (io) {
+        for (const res of results) {
+          if (res.success) {
+            // Find the product in the DB to get its seller info and current name
+            const updatedProd = await Product.findOne({ sku: res.sku });
+            if (updatedProd) {
+              io.emit('product:stock_update', {
+                productId: updatedProd._id,
+                countInStock: updatedProd.countInStock
+              });
+
+              if (updatedProd.countInStock <= 10) {
+                socketModule.notifyLowStock(updatedProd.seller, {
+                  productId: updatedProd._id,
+                  name: updatedProd.name,
+                  remainingStock: updatedProd.countInStock,
+                  message: `Product "${updatedProd.name}" (SKU: ${updatedProd.sku || 'N/A'}) has fallen to a critical level of ${updatedProd.countInStock} units.`
+                });
+              }
+            }
+          }
+        }
+      }
+    } catch (socketErr) {
+      console.error('[Socket Notification Error] Failed to broadcast batch inventory adjustments:', socketErr.message);
+    }
 
     res.status(200).json({
       success: true,
