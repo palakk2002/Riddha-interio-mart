@@ -130,3 +130,44 @@ exports.tryProtect = async (req, res, next) => {
     next(); // Just proceed without user
   }
 };
+
+// Enforce granular RBAC permission validations for assistants
+exports.checkPermission = (permission) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required for this operation.' });
+    }
+
+    // superadmin has full access
+    if (req.user.type === 'superadmin') {
+      return next();
+    }
+
+    // assistant check
+    if (req.user.type === 'assistant') {
+      const hasAccess = req.user.permissions && req.user.permissions.get(permission) === true;
+      if (hasAccess) {
+        return next();
+      }
+    }
+
+    // Log administrative unauthorized access attempt
+    try {
+      const { logSystemActivity } = require('../utils/activityLogger');
+      logSystemActivity({
+        action: 'Unauthorized Access Attempt',
+        target: `Route: ${req.originalUrl || req.url} | Missing Permission: ${permission}`,
+        user: req.user.fullName || req.user.email,
+        role: req.user.type === 'superadmin' ? 'Super Admin' : 'Admin',
+        ipAddress: req.ip
+      });
+    } catch (e) {
+      console.error('Failed to log security warning:', e.message);
+    }
+
+    return res.status(403).json({
+      success: false,
+      error: `Staff account is not authorized to perform this operation (missing permission: ${permission})`
+    });
+  };
+};

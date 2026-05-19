@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Referral = require('../models/Referral');
 const Wallet = require('../models/Wallet');
+const ReferralSettings = require('../models/ReferralSettings');
 const referralService = require('../services/referralService');
 
 /**
@@ -173,6 +174,87 @@ exports.adminGetAllReferrals = async (req, res, next) => {
         totalPages: Math.ceil(total / limit)
       },
       data: referrals
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+   * @desc    Admin views referral statistics dashboard metrics
+   * @route   GET /api/referrals/admin/stats
+   * @access  Private (Admin)
+   */
+exports.adminGetReferralStats = async (req, res, next) => {
+  try {
+    const totalReferrals = await Referral.countDocuments();
+    const successfulReferrals = await Referral.countDocuments({ rewardStatus: 'rewarded' });
+    
+    // Sum rewards given for completed referrals
+    const rewardsAgg = await Referral.aggregate([
+      { $match: { rewardStatus: 'rewarded' } },
+      { $group: { _id: null, total: { $sum: { $add: ["$referrerReward", "$referredUserReward"] } } } }
+    ]);
+    const totalRewardsGiven = rewardsAgg.length > 0 ? rewardsAgg[0].total : 0;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalReferrals,
+        successfulReferrals,
+        totalRewardsGiven
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+   * @desc    Admin views referral configuration settings
+   * @route   GET /api/referrals/admin/settings
+   * @access  Private (Admin)
+   */
+exports.adminGetReferralSettings = async (req, res, next) => {
+  try {
+    let settings = await ReferralSettings.findOne();
+    if (!settings) {
+      settings = await ReferralSettings.create({
+        isEnabled: true,
+        referrerReward: 100,
+        newUserReward: 50
+      });
+    }
+    res.status(200).json({
+      success: true,
+      data: settings
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+   * @desc    Admin updates referral configuration settings
+   * @route   PUT /api/referrals/admin/settings
+   * @access  Private (Admin)
+   */
+exports.adminUpdateReferralSettings = async (req, res, next) => {
+  try {
+    const { isEnabled, referrerReward, newUserReward } = req.body;
+    let settings = await ReferralSettings.findOne();
+    if (!settings) {
+      settings = new ReferralSettings();
+    }
+
+    if (isEnabled !== undefined) settings.isEnabled = isEnabled;
+    if (referrerReward !== undefined) settings.referrerReward = Number(referrerReward);
+    if (newUserReward !== undefined) settings.newUserReward = Number(newUserReward);
+
+    await settings.save();
+    res.status(200).json({
+      success: true,
+      data: settings
     });
   } catch (err) {
     next(err);

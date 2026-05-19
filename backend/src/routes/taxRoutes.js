@@ -6,7 +6,7 @@ const {
   getTaxAuditLogs,
   getTaxSummary
 } = require('../controllers/taxController');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize, checkPermission } = require('../middleware/auth');
 
 // Apply protection to all taxation routes
 router.use(protect);
@@ -16,7 +16,7 @@ router.post('/category', authorize('admin', 'seller'), configureCategoryTax);
 router.post('/product', authorize('admin', 'seller'), configureProductTax);
 
 // Immutable tax logs and aggregate summaries exclusive for Admins
-router.get('/logs', authorize('admin'), getTaxAuditLogs);
-router.get('/summary', authorize('admin'), getTaxSummary);
+router.get('/logs', authorize('admin'), checkPermission('settings'), getTaxAuditLogs);
+router.get('/summary', authorize('admin'), checkPermission('settings'), getTaxSummary);
 
 module.exports = router;
