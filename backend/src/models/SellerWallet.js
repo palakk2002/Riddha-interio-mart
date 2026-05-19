@@ -55,6 +55,4 @@ const SellerWalletSchema = new mongoose.Schema({
   transactions: [SellerWalletTransactionSchema]
 }, { timestamps: true });
 
-SellerWalletSchema.index({ seller: 1 });
-
 module.exports = mongoose.model('SellerWallet', SellerWalletSchema);

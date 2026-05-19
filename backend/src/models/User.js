@@ -122,8 +122,6 @@ UserSchema.methods.getResetPasswordOtp = function() {
   return otp;
 };
 
-UserSchema.index({ email: 1 });
 UserSchema.index({ role: 1 });
-UserSchema.index({ referralCode: 1 });
 
 module.exports = mongoose.model('User', UserSchema);

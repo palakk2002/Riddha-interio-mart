@@ -19,7 +19,19 @@ exports.getProducts = async (req, res, next) => {
     }
     
     if (req.query.brand && req.query.brand !== 'all') {
-      filter.brand = req.query.brand;
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(req.query.brand)) {
+        filter.brand = req.query.brand;
+      } else {
+        const Brand = require('../models/Brand');
+        const foundBrand = await Brand.findOne({ name: { $regex: new RegExp(`^${req.query.brand.trim()}$`, 'i') } });
+        if (foundBrand) {
+          filter.brand = foundBrand._id;
+        } else {
+          // Brand name not found, query a non-existent ObjectId to return 0 results cleanly without throwing CastError
+          filter.brand = new mongoose.Types.ObjectId();
+        }
+      }
     }
 
     if (req.query.search) {

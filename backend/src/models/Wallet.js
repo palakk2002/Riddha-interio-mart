@@ -45,7 +45,4 @@ const WalletSchema = new mongoose.Schema({
   transactions: [WalletTransactionSchema]
 }, { timestamps: true });
 
-// Ensure fast queries for balance checks
-WalletSchema.index({ user: 1 });
-
 module.exports = mongoose.model('Wallet', WalletSchema);
