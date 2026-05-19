@@ -65,10 +65,22 @@ exports.updateCatalogItem = async (req, res, next) => {
 // @access  Private/Admin
 exports.deleteCatalogItem = async (req, res, next) => {
   try {
-    const item = await Catalog.findByIdAndDelete(req.params.id);
+    const item = await Catalog.findById(req.params.id);
     if (!item) {
       return res.status(404).json({ success: false, error: 'Catalog item not found' });
     }
+
+    // Safeguard check: reject deletion if active shop inventory references this SKU
+    const Product = require('../models/Product');
+    const productCount = await Product.countDocuments({ sku: item.sku });
+    if (productCount > 0) {
+      return res.status(400).json({
+        success: false,
+        error: `Cannot delete catalog item because its SKU code (${item.sku}) is currently referenced by ${productCount} active products in active shop inventory. Please remove those inventory records first.`
+      });
+    }
+
+    await Catalog.findByIdAndDelete(req.params.id);
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
     next(error);

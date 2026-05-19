@@ -98,6 +98,8 @@ exports.updateCategory = async (req, res, next) => {
 exports.deleteCategory = async (req, res, next) => {
   try {
     const Product = require('../models/Product');
+    const Catalog = require('../models/Catalog');
+    
     const category = await Category.findById(req.params.id);
     if (!category) return res.status(404).json({ success: false, error: 'Category not found' });
 
@@ -106,7 +108,16 @@ exports.deleteCategory = async (req, res, next) => {
     if (productCount > 0) {
       return res.status(400).json({
         success: false,
-        error: `Cannot delete category because it has ${productCount} active products associated with it. Please reassign the products first.`
+        error: `Cannot delete category because it has ${productCount} active products associated with it in inventory. Please reassign the products first.`
+      });
+    }
+
+    // Safeguard check: reject deletion if master catalog registry records exist under this category
+    const catalogCount = await Catalog.countDocuments({ category: category.name });
+    if (catalogCount > 0) {
+      return res.status(400).json({
+        success: false,
+        error: `Cannot delete category because it has ${catalogCount} master catalog registry items associated with it. Please reassign the catalog items first.`
       });
     }
 
