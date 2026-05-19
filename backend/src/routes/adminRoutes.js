@@ -23,7 +23,11 @@ const {
   confirmCashDeposit,
   getSellerTransactions,
   searchOrders,
-  getActivityLogs
+  getActivityLogs,
+  adjustStock,
+  batchAdjustStock,
+  getProductInventoryHistory,
+  getActiveReservations
 } = require('../controllers/adminController');
 const { protect, authorize } = require('../middleware/auth');
 const { check } = require('express-validator');
@@ -52,6 +56,12 @@ router.put('/sellers/:id/suspend', protect, authorize('admin'), suspendSeller);
 router.put('/sellers/:id/unsuspend', protect, authorize('admin'), unsuspendSeller);
 router.get('/dashboard-stats', protect, authorize('admin'), getDashboardStats);
 router.get('/stock-status', protect, authorize('admin'), getStockStatus);
+
+// Advanced Inventory Management routes
+router.put('/inventory/adjust/:id', protect, authorize('admin'), adjustStock);
+router.post('/inventory/batch-adjust', protect, authorize('admin'), batchAdjustStock);
+router.get('/inventory/history/:id', protect, authorize('admin'), getProductInventoryHistory);
+router.get('/inventory/reservations', protect, authorize('admin'), getActiveReservations);
 
 // Assistant Management routes (Superadmin only or restricted)
 router.get('/assistants', protect, authorize('admin'), getAssistants);

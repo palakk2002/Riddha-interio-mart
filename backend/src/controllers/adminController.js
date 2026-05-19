@@ -458,6 +458,200 @@ exports.getStockStatus = async (req, res, next) => {
   }
 };
 
+// @desc    Adjust single product stock atomically
+// @route   PUT /api/auth/admin/inventory/adjust/:id
+// @access  Private/Admin
+exports.adjustStock = async (req, res, next) => {
+  const mongoose = require('mongoose');
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const Product = require('../models/Product');
+    const InventoryHistoryLog = require('../models/InventoryHistoryLog');
+    const { logSystemActivity } = require('../utils/activityLogger');
+
+    const { quantityDelta } = req.body;
+    if (quantityDelta === undefined || isNaN(quantityDelta)) {
+      return res.status(400).json({ success: false, error: 'Please provide a valid quantity delta' });
+    }
+
+    const delta = parseInt(quantityDelta);
+
+    // Fetch the product inside transaction
+    const product = await Product.findById(req.params.id).session(session);
+    if (!product) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ success: false, error: 'Product not found' });
+    }
+
+    const originalStock = product.countInStock;
+    const newStock = originalStock + delta;
+
+    if (newStock < 0) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ success: false, error: `Stock cannot be adjusted below zero. Current stock: ${originalStock}` });
+    }
+
+    // Atomically update product stock
+    product.countInStock = newStock;
+    await product.save({ session });
+
+    // Log to inventory history log
+    await InventoryHistoryLog.create([{
+      product: product._id,
+      action: 'manual_adjustment',
+      quantity: Math.abs(delta),
+      stockBefore: originalStock,
+      stockAfter: newStock,
+      details: `Manual adjustment of ${delta > 0 ? '+' : ''}${delta} units by ${req.user ? req.user.fullName : 'Admin'}`
+    }], { session });
+
+    // Log System Activity
+    await logSystemActivity({
+      action: 'Adjusted Stock Level',
+      target: `${product.name} (SKU: ${product.sku || 'N/A'})`,
+      user: req.user ? req.user.fullName : 'Admin',
+      role: 'Super Admin',
+      ipAddress: req.ip
+    });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      success: true,
+      data: product
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    next(err);
+  }
+};
+
+// @desc    Batch adjust multiple product stocks atomically
+// @route   POST /api/auth/admin/inventory/batch-adjust
+// @access  Private/Admin
+exports.batchAdjustStock = async (req, res, next) => {
+  const mongoose = require('mongoose');
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const Product = require('../models/Product');
+    const InventoryHistoryLog = require('../models/InventoryHistoryLog');
+    const { logSystemActivity } = require('../utils/activityLogger');
+
+    const { adjustments } = req.body;
+    if (!adjustments || !Array.isArray(adjustments)) {
+      return res.status(400).json({ success: false, error: 'Adjustments array is required' });
+    }
+
+    const results = [];
+
+    for (const adj of adjustments) {
+      const { sku, quantityDelta } = adj;
+      if (!sku || quantityDelta === undefined || isNaN(quantityDelta)) {
+        results.push({ sku, success: false, error: 'Invalid payload parameters' });
+        continue;
+      }
+
+      const delta = parseInt(quantityDelta);
+      const product = await Product.findOne({ sku }).session(session);
+
+      if (!product) {
+        results.push({ sku, success: false, error: 'SKU not found' });
+        continue;
+      }
+
+      const originalStock = product.countInStock;
+      const newStock = originalStock + delta;
+
+      if (newStock < 0) {
+        results.push({ sku, success: false, error: `Adjustment would result in negative stock: ${newStock}` });
+        continue;
+      }
+
+      product.countInStock = newStock;
+      await product.save({ session });
+
+      await InventoryHistoryLog.create([{
+        product: product._id,
+        action: 'manual_adjustment',
+        quantity: Math.abs(delta),
+        stockBefore: originalStock,
+        stockAfter: newStock,
+        details: `Batch adjustment of ${delta > 0 ? '+' : ''}${delta} units by ${req.user ? req.user.fullName : 'Admin'}`
+      }], { session });
+
+      results.push({ sku, success: true, originalStock, newStock });
+    }
+
+    // Log System Activity
+    await logSystemActivity({
+      action: 'Batch Stock Adjustment',
+      target: `${results.filter(r => r.success).length} items restocked successfully`,
+      user: req.user ? req.user.fullName : 'Admin',
+      role: 'Super Admin',
+      ipAddress: req.ip
+    });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      success: true,
+      data: results
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    next(err);
+  }
+};
+
+// @desc    Get inventory history logs for a specific product
+// @route   GET /api/auth/admin/inventory/history/:id
+// @access  Private/Admin
+exports.getProductInventoryHistory = async (req, res, next) => {
+  try {
+    const InventoryHistoryLog = require('../models/InventoryHistoryLog');
+    const logs = await InventoryHistoryLog.find({ product: req.params.id })
+      .sort('-createdAt')
+      .limit(100);
+
+    res.status(200).json({
+      success: true,
+      count: logs.length,
+      data: logs
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get active temporary stock reservations
+// @route   GET /api/auth/admin/inventory/reservations
+// @access  Private/Admin
+exports.getActiveReservations = async (req, res, next) => {
+  try {
+    const InventoryReservation = require('../models/InventoryReservation');
+    const reservations = await InventoryReservation.find({ status: 'reserved' })
+      .populate('product', 'name sku price')
+      .populate('user', 'fullName email')
+      .sort('-createdAt');
+
+    res.status(200).json({
+      success: true,
+      count: reservations.length,
+      data: reservations
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // --- Assistant Management ---
 // @desc    Create a new assistant
 // @route   POST /api/auth/admin/assistants
