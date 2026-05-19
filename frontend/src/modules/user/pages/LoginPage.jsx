@@ -30,6 +30,7 @@ const LoginPage = () => {
 
   const role = getRole();
   const isDelivery = role === 'delivery';
+  const isDesktop = typeof window !== 'undefined' ? window.innerWidth >= 768 : false;
   
   // Unified signature brand colors
   const theme = {
@@ -101,6 +102,162 @@ const LoginPage = () => {
   };
 
   if (role === 'user') {
+    if (isDesktop) {
+      return (
+        <div className="min-h-screen w-full overflow-hidden font-sans bg-[radial-gradient(circle_at_top_left,rgba(24,157,145,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(236,0,140,0.08),transparent_28%),linear-gradient(180deg,#f8fafc_0%,#eef5f5_100%)]">
+          <div className="hidden md:flex min-h-screen w-full">
+            <div className="flex-1 relative overflow-hidden border-r border-slate-200/70">
+              <img src={LOGIN_BG} alt="Luxury Showroom" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,249,252,0.92)_0%,rgba(246,249,252,0.72)_42%,rgba(246,249,252,0.2)_100%)]" />
+              <div className="relative z-10 h-full flex items-center justify-center px-12 xl:px-20">
+                <div className="max-w-xl text-left">
+                  <div className="mb-7 w-full max-w-[260px]">
+                    <img src={logo} alt="Riddha Logo" className="w-full h-auto object-contain" />
+                  </div>
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 border border-white/90 shadow-sm">
+                      <span className="w-2 h-2 rounded-full bg-[#189D91]" />
+                      <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#189D91]">Premium Interior Mart</span>
+                    </div>
+                    <h1 className="text-[3.4rem] xl:text-[4.2rem] font-black leading-[0.95] tracking-tight text-slate-950">
+                      Sign in to your
+                      <span className="block bg-clip-text text-transparent bg-gradient-to-r from-[#189D91] via-slate-700 to-[#EC008C]">
+                        Riddha account
+                      </span>
+                    </h1>
+                    <p className="max-w-lg text-base xl:text-lg font-medium leading-relaxed text-slate-600">
+                      Access saved addresses, order tracking, wishlist items, and faster checkout with a cleaner desktop experience.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 flex items-center justify-center px-10 xl:px-16 py-12 relative">
+              <button
+                onClick={() => navigate(-1)}
+                className="absolute top-10 right-10 flex items-center gap-2 group text-slate-500 hover:text-slate-700 transition-all font-bold text-xs tracking-widest uppercase z-50"
+              >
+                <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
+                Back
+              </button>
+
+              <div className="w-full max-w-[540px] bg-transparent border-0 shadow-none">
+                <div className="flex items-center justify-between mb-10">
+                  <div>
+                    <h2 className="text-3xl font-black text-slate-950">Log In</h2>
+                    <p className="text-sm font-semibold text-slate-500 mt-1">Access your secure user panel</p>
+                  </div>
+                  {getSignupPath() && (
+                    <button
+                      type="button"
+                      onClick={() => navigate(getSignupPath())}
+                      className="inline-flex items-center justify-center rounded-2xl border border-[#189D91]/20 bg-white/70 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-[#189D91] shadow-sm hover:bg-white transition-all"
+                    >
+                      Sign Up
+                    </button>
+                  )}
+                </div>
+
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="mb-5 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col items-center gap-2"
+                    >
+                      <span className="text-rose-600 text-[10px] font-bold uppercase tracking-wider text-center leading-relaxed">{error}</span>
+                      {unverifiedEmail && (
+                        <button onClick={handleResendAndVerify} className="bg-rose-600 text-white px-5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-rose-700 transition-colors">
+                          Verify Email
+                        </button>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 ml-0.5">Email Address</label>
+                      <div className="relative group">
+                        <FiUser className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-350 ${theme.iconFocus} transition-colors`} size={16} />
+                        <input
+                          type="text"
+                          placeholder="name@example.com"
+                          value={identifier}
+                          onChange={(e) => setIdentifier(e.target.value)}
+                          className={`w-full pl-10 pr-4 py-3 bg-white/75 border border-slate-200 rounded-2xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-sm font-semibold text-slate-700 placeholder:text-slate-300 shadow-sm`}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center px-0.5">
+                        <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Password</label>
+                        <button type="button" onClick={() => navigate('/forgot-password')} className={`text-[10px] font-black ${theme.accentText} uppercase tracking-[0.18em] hover:underline`}>
+                          Forgot?
+                        </button>
+                      </div>
+                      <div className="relative group">
+                        <FiLock className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-355 ${theme.iconFocus} transition-colors`} size={16} />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className={`w-full pl-10 pr-10 py-3 bg-white/75 border border-slate-200 rounded-2xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-sm font-semibold text-slate-700 placeholder:text-slate-300 shadow-sm`}
+                        />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
+                          {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between px-0.5 pt-1">
+                    <button type="button" onClick={() => setRememberMe(!rememberMe)} className="flex items-center gap-2 group">
+                      <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${rememberMe ? theme.checkboxBg : 'border-slate-200 bg-white group-hover:border-slate-300'}`}>
+                        {rememberMe && <FiCheck className="text-white text-[10px] stroke-[4]" />}
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-slate-600 transition-colors">Remember Me</span>
+                    </button>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className={`w-full py-3.5 rounded-2xl ${theme.primaryBtn} text-white font-black text-[11px] uppercase tracking-[0.22em] transition-all active:scale-[0.98] mt-3 shadow-lg shadow-[#189D91]/15`}
+                  >
+                    {loading ? 'Authenticating...' : 'Sign In Now'}
+                  </Button>
+
+                  {role !== 'admin' && (
+                    <div className="pt-3">
+                      <div className="relative flex items-center justify-center mb-4">
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="w-full border-t border-slate-100"></div>
+                        </div>
+                        <span className="relative px-3 bg-transparent text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">Or Continue With</span>
+                      </div>
+                      <div className="flex justify-center gap-3">
+                        {[FaGoogle, FaFacebookF, FaXTwitter].map((Icon, idx) => (
+                          <button key={idx} type="button" className="w-10 h-10 rounded-xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-600 hover:border-slate-200 transition-all hover:scale-105 active:scale-95 shadow-sm">
+                            <Icon size={14} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center font-sans overflow-y-auto px-4 py-8">
         {/* Device wrapper for desktop, seamless on mobile */}
@@ -231,9 +388,9 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans">
+    <div className="min-h-screen flex font-sans overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(24,157,145,0.10),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(236,0,140,0.08),transparent_28%),linear-gradient(180deg,#f8fafc_0%,#f2f7f7_100%)]">
       {/* Left Section - Branded, Bright & Clean (No Dark Colors!) */}
-      <div className="hidden lg:flex flex-1 relative items-center justify-center overflow-hidden bg-gradient-to-br from-teal-50/50 via-slate-50 to-pink-50/30 border-r border-slate-200/80">
+      <div className="hidden lg:flex flex-[1.08] relative items-center justify-center overflow-hidden bg-gradient-to-br from-teal-50/50 via-slate-50 to-pink-50/30 border-r border-slate-200/80">
         {/* Soft logo related gradients */}
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[var(--color-primary)]/5 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[var(--color-accent-pink)]/5 rounded-full blur-[100px] pointer-events-none translate-x-1/3 translate-y-1/3" />
@@ -242,10 +399,10 @@ const LoginPage = () => {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative z-10 max-w-lg w-full p-12 text-center flex flex-col items-center"
+          className="relative z-10 max-w-xl w-full px-10 xl:px-14 py-10 text-center flex flex-col items-center"
         >
           {/* Logo Frame */}
-          <div className="mb-8 w-full max-w-[280px]">
+          <div className="mb-7 w-full max-w-[250px]">
              <img 
                src={logo} 
                alt="Riddha Logo" 
@@ -254,20 +411,20 @@ const LoginPage = () => {
           </div>
 
           {/* Typography Area */}
-          <div className="space-y-4 text-center">
-             <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-50 border border-teal-200/50 rounded-full">
+          <div className="space-y-3 text-center max-w-[460px]">
+             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/80 border border-white/90 rounded-full shadow-sm">
                 <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
                 <span className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider leading-none">
                    Premium Interior Mart
                 </span>
              </div>
 
-             <h2 className="text-2xl font-bold text-slate-800 tracking-tight leading-snug">
+             <h2 className="text-[2.1rem] xl:text-4xl font-black text-slate-950 tracking-tight leading-[1.02]">
                 India's Premium <br/>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-700 to-[var(--color-primary)] font-black">Interior & Design Hub</span>
              </h2>
 
-             <p className="text-slate-500 text-xs font-semibold leading-relaxed max-w-sm mx-auto">
+             <p className="text-slate-700 text-sm xl:text-base font-medium leading-relaxed max-w-md mx-auto">
                 Curating premium architectural collection of luxury fittings and design setups.
              </p>
           </div>
@@ -275,38 +432,38 @@ const LoginPage = () => {
       </div>
 
       {/* Right Section - Login Form */}
-      <div className="flex-1 flex flex-col justify-center bg-white relative">
-        <div className="max-w-md w-full mx-auto px-8 md:px-0">
+      <div className="hidden lg:flex flex-[0.92] flex-col justify-center bg-transparent relative px-10 xl:px-16">
+        <div className="w-full max-w-none">
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8 flex justify-center">
             <img src={logo} alt="Riddha Logo" className="w-48 md:w-56 h-auto object-contain" />
           </div>
 
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-6 flex items-center justify-between gap-4 max-w-[460px]">
             <div>
-                <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Log In</h1>
-                <p className="text-xs font-semibold text-slate-400 mt-1 capitalize">Access your secure {role} panel</p>
+                <h1 className="text-2xl xl:text-[2rem] font-black text-slate-900 tracking-tight">Log In</h1>
+                <p className="text-sm font-semibold text-slate-500 mt-1 capitalize">Access your secure {role} panel</p>
             </div>
-            <Link to="/" className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors border border-slate-100">
+            <Link to="/" className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors border border-slate-100 shrink-0">
                 <FiArrowLeft size={16} />
             </Link>
           </div>
 
           {/* Role Selection Switch (Compact pill toggle) */}
           {role === 'admin' && (
-            <div className="mb-6 p-1 bg-slate-100 rounded-xl border border-slate-200/60 flex">
+            <div className="mb-5 p-1 bg-slate-100 rounded-2xl border border-slate-200/60 flex max-w-[460px]">
               <button
                 type="button"
                 onClick={() => setRbacRole('admin')}
-                className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${rbacRole === 'admin' ? 'bg-[#189D91] text-white shadow-sm shadow-[#189D91]/20' : 'text-slate-600 hover:text-slate-800'}`}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${rbacRole === 'admin' ? 'bg-[#189D91] text-white shadow-sm shadow-[#189D91]/20' : 'text-slate-600 hover:text-slate-800'}`}
               >
                 Super Admin
               </button>
               <button
                 type="button"
                 onClick={() => setRbacRole('assistant')}
-                className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${rbacRole === 'assistant' ? 'bg-[#EC008C] text-white shadow-sm shadow-[#EC008C]/20' : 'text-slate-600 hover:text-slate-800'}`}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${rbacRole === 'assistant' ? 'bg-[#EC008C] text-white shadow-sm shadow-[#EC008C]/20' : 'text-slate-600 hover:text-slate-800'}`}
               >
                 Assistant
               </button>
@@ -319,7 +476,7 @@ const LoginPage = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl flex flex-col items-center gap-2"
+                className="mb-5 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col items-center gap-2 max-w-[460px]"
               >
                 <span className="text-rose-600 text-[10px] font-bold uppercase tracking-wider text-center leading-relaxed">{error}</span>
                 {unverifiedEmail && (
@@ -331,10 +488,10 @@ const LoginPage = () => {
             )}
           </AnimatePresence>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-3.5">
+          <form onSubmit={handleLogin} className="space-y-4 max-w-[460px]">
+            <div className="space-y-3">
               <div className="space-y-1.5">
-                <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 ml-0.5">Email Address</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 ml-0.5">Email Address</label>
                 <div className="relative group">
                   <FiUser className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-350 ${theme.iconFocus} transition-colors`} size={16} />
                   <input
@@ -342,15 +499,15 @@ const LoginPage = () => {
                     placeholder="name@example.com"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-xs font-semibold text-slate-700 placeholder:text-slate-300`}
+                    className={`w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-sm font-semibold text-slate-700 placeholder:text-slate-300`}
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center px-0.5">
-                    <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Password</label>
-                    <button type="button" onClick={() => navigate('/forgot-password')} className={`text-[9px] font-bold ${theme.accentText} uppercase tracking-wider hover:underline`}>Forgot?</button>
+                    <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Password</label>
+                    <button type="button" onClick={() => navigate('/forgot-password')} className={`text-[10px] font-black ${theme.accentText} uppercase tracking-[0.18em] hover:underline`}>Forgot?</button>
                 </div>
                 <div className="relative group">
                   <FiLock className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-355 ${theme.iconFocus} transition-colors`} size={16} />
@@ -359,7 +516,7 @@ const LoginPage = () => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={`w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-xs font-semibold text-slate-700 placeholder:text-slate-300`}
+                    className={`w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-sm font-semibold text-slate-700 placeholder:text-slate-300`}
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
                     {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
@@ -377,30 +534,30 @@ const LoginPage = () => {
                 <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${rememberMe ? theme.checkboxBg : 'border-slate-200 bg-white group-hover:border-slate-300'}`}>
                   {rememberMe && <FiCheck className="text-white text-[10px] stroke-[4]" />}
                 </div>
-                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-550 transition-colors">Remember Me</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-slate-600 transition-colors">Remember Me</span>
               </button>
             </div>
 
             <Button
               type="submit"
               disabled={loading}
-              className={`w-full py-2.5 rounded-lg ${theme.primaryBtn} text-white font-bold text-[10px] uppercase tracking-wider transition-all active:scale-[0.98] mt-4`}
+              className={`w-full py-3.5 rounded-2xl ${theme.primaryBtn} text-white font-black text-[11px] uppercase tracking-[0.22em] transition-all active:scale-[0.98] mt-3`}
             >
               {loading ? 'Authenticating...' : 'Sign In Now'}
             </Button>
 
             {/* Social Logins */}
             {role !== 'admin' && (
-              <div className="pt-6">
-                <div className="relative flex items-center justify-center mb-6">
+              <div className="pt-3">
+                <div className="relative flex items-center justify-center mb-4">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-slate-100"></div>
                   </div>
-                  <span className="relative px-3 bg-white text-[9px] font-bold text-slate-300 uppercase tracking-wider">Or Continue With</span>
+                  <span className="relative px-3 bg-transparent text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">Or Continue With</span>
                 </div>
                 <div className="flex justify-center gap-3">
                   {[FaGoogle, FaFacebookF, FaXTwitter].map((Icon, idx) => (
-                    <button key={idx} type="button" className="w-10 h-10 rounded-lg border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-600 hover:border-slate-200 transition-all hover:scale-105 active:scale-95">
+                    <button key={idx} type="button" className="w-10 h-10 rounded-xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-600 hover:border-slate-200 transition-all hover:scale-105 active:scale-95 shadow-sm">
                       <Icon size={14} />
                     </button>
                   ))}
@@ -409,16 +566,21 @@ const LoginPage = () => {
             )}
 
             {getSignupPath() && (
-              <p className="text-center text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-6">
-                Don't have an account? <Link to={getSignupPath()} className={`${theme.accentText} hover:underline ml-1`}>Create Account</Link>
-              </p>
+              <div className="pt-2">
+                <Link
+                  to={getSignupPath()}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-2xl border border-[#189D91]/20 bg-[#189D91]/8 px-5 py-3.5 text-[11px] font-black uppercase tracking-[0.22em] text-[#189D91] hover:bg-[#189D91]/12 hover:border-[#189D91]/30 transition-all shadow-sm"
+                >
+                  Create Account
+                </Link>
+              </div>
             )}
           </form>
         </div>
       </div>
 
       {/* Footer Info */}
-      <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none">
+      <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none hidden lg:block">
           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
               © {new Date().getFullYear()} Riddha Interio Mart. All Rights Reserved.
           </p>

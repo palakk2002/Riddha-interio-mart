@@ -105,7 +105,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-[#F4F7FA] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
       {/* Desktop Background Layer */}
       <div className="hidden md:block absolute inset-0 z-0">
         <img
@@ -113,7 +113,7 @@ const LoginPage = () => {
           alt="Luxury Showroom"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-black/45 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(245,248,252,0.88)_0%,rgba(245,248,252,0.62)_38%,rgba(245,248,252,0.18)_72%,rgba(245,248,252,0.05)_100%)]" />
       </div>
 
       {/* Main Content Container */}
@@ -123,13 +123,13 @@ const LoginPage = () => {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className="hidden md:flex flex-1 items-center justify-center p-20"
+          className="hidden md:flex flex-1 items-center justify-center p-16 xl:p-20"
         >
-          <div className="max-w-2xl space-y-6">
-            <h1 className="text-[140px] font-display font-black text-white italic leading-none drop-shadow-2xl">
+          <div className="max-w-2xl space-y-5">
+            <h1 className="text-[120px] xl:text-[140px] font-display font-black text-slate-900 italic leading-none drop-shadow-[0_12px_24px_rgba(255,255,255,0.35)]">
               Riddha
             </h1>
-            <p className="text-2xl font-medium text-white/70 italic tracking-wider ml-4">
+            <p className="text-2xl font-medium text-slate-600 italic tracking-wider ml-4">
               Interio Mart
             </p>
           </div>
@@ -162,11 +162,11 @@ const LoginPage = () => {
           </div>
 
           {/* Form Area Wrapper */}
-          <div className="flex-1 flex items-center justify-center p-6 md:p-12 lg:p-24 relative">
+          <div className="flex-1 flex items-center justify-center p-6 md:p-12 lg:p-20 relative">
             {/* Desktop Back Button */}
             <button
               onClick={() => navigate(-1)}
-              className="hidden md:flex absolute top-10 right-10 flex items-center gap-2 group text-white/50 hover:text-white transition-all font-bold text-xs tracking-widest uppercase z-50"
+            className="hidden md:flex absolute top-10 right-10 flex items-center gap-2 group text-slate-500 hover:text-slate-700 transition-all font-bold text-xs tracking-widest uppercase z-50"
             >
               <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
               Back
@@ -177,14 +177,14 @@ const LoginPage = () => {
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="w-full max-w-[560px] md:max-w-md bg-white md:bg-white/10 md:backdrop-blur-3xl md:border md:border-white/20 py-5 px-8 md:p-12 rounded-[50px] md:rounded-[40px] shadow-2xl md:shadow-none relative mx-auto"
+              className="w-full max-w-[560px] md:max-w-none bg-white md:bg-transparent md:border-0 md:backdrop-blur-0 py-5 px-8 md:p-0 rounded-[50px] md:rounded-none shadow-2xl md:shadow-none relative mx-auto"
             >
               {/* Login/Signup Toggle UI */}
               <div className="hidden md:flex justify-between items-center mb-10">
-                <h2 className="text-3xl font-display font-bold text-white">Log In</h2>
+                <h2 className="text-3xl font-display font-black text-slate-900">Log In</h2>
                 <div className="flex gap-2 text-[10px] font-black uppercase tracking-wider">
-                  <span className="text-white border-b border-white pb-0.5 pointer-events-none">Log In</span>
-                  <span className="text-white/40 hover:text-white cursor-pointer transition-colors" onClick={() => navigate(getSignupPath())}>Sign Up</span>
+                  <span className="text-slate-900 border-b border-slate-900 pb-0.5 pointer-events-none">Log In</span>
+                  <span className="text-slate-500 hover:text-slate-900 cursor-pointer transition-colors" onClick={() => navigate(getSignupPath())}>Sign Up</span>
                 </div>
               </div>
 
@@ -212,7 +212,7 @@ const LoginPage = () => {
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-5">
                   <div className="space-y-1">
-                    <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-2 ml-1">Email</label>
+                    <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">Email</label>
                     <div className="relative group">
                       <FiUser className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-5 w-5" />
                       <input
@@ -220,13 +220,13 @@ const LoginPage = () => {
                         placeholder={window.innerWidth < 768 ? "Email ID" : "Enter your email"}
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
-                        className="w-full md:pl-6 pl-16 pr-6 py-5 md:py-4 rounded-full md:rounded-2xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-bold transition-all md:text-white placeholder:text-gray-400 md:placeholder:text-white/40"
+                        className="w-full md:pl-6 pl-16 pr-6 py-5 md:py-4 rounded-full md:rounded-2xl bg-blue-50/50 md:bg-white/90 border-2 border-transparent md:border-slate-200 focus:border-[#189D91]/20 md:focus:border-[#189D91]/35 focus:bg-white md:focus:bg-white focus:outline-none text-sm md:text-base font-bold transition-all md:text-slate-900 placeholder:text-gray-400 md:placeholder:text-slate-400 md:shadow-sm"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-2 ml-1">Password</label>
+                    <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">Password</label>
                     <div className="relative group">
                       <FiLock className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-[#189D91]/40 group-focus-within:text-[#189D91] transition-colors h-5 w-5" />
                       <input
@@ -234,9 +234,9 @@ const LoginPage = () => {
                         placeholder={window.innerWidth < 768 ? "••••••" : "••••••••"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full md:pl-6 pl-16 pr-14 py-5 md:py-4 rounded-full md:rounded-2xl bg-blue-50/50 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-[#189D91]/20 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm md:text-base font-bold transition-all md:text-white placeholder:text-gray-400 md:placeholder:text-white/40"
+                        className="w-full md:pl-6 pl-16 pr-14 py-5 md:py-4 rounded-full md:rounded-2xl bg-blue-50/50 md:bg-white/90 border-2 border-transparent md:border-slate-200 focus:border-[#189D91]/20 md:focus:border-[#189D91]/35 focus:bg-white md:focus:bg-white focus:outline-none text-sm md:text-base font-bold transition-all md:text-slate-900 placeholder:text-gray-400 md:placeholder:text-slate-400 md:shadow-sm"
                       />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 md:text-white/50 hover:text-white">
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 md:text-slate-400 hover:text-slate-700">
                         {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-4 w-4 opacity-50" />}
                       </button>
                     </div>
@@ -245,12 +245,12 @@ const LoginPage = () => {
 
                 <div className="flex items-center justify-between px-2">
                   <button type="button" onClick={() => setRememberMe(!rememberMe)} className="hidden md:flex items-center gap-2 group">
-                    <div className={`h-4 w-4 rounded-md border-2 flex items-center justify-center transition-all ${rememberMe ? 'bg-white border-white' : 'border-white/30 group-hover:border-white/50'}`}>
-                      {rememberMe && <FiCheck className="text-deep-espresso text-[10px] stroke-[4]" />}
+                    <div className={`h-4 w-4 rounded-md border-2 flex items-center justify-center transition-all ${rememberMe ? 'bg-[#189D91] border-[#189D91]' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                      {rememberMe && <FiCheck className="text-white text-[10px] stroke-[4]" />}
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 group-hover:text-white">Remember Me</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-slate-700">Remember Me</span>
                   </button>
-                  <button type="button" className="text-[10px] font-black text-gray-400 md:text-white/40 uppercase tracking-widest hover:text-[#189D91] md:hover:text-white mx-auto md:mx-0">
+                  <button type="button" className="text-[10px] font-black text-gray-400 md:text-[#189D91] uppercase tracking-widest hover:text-[#189D91] mx-auto md:mx-0">
                     Forgot Password?
                   </button>
                 </div>
@@ -258,30 +258,30 @@ const LoginPage = () => {
                 <div className="flex flex-col md:flex-row items-center gap-6 pt-4">
                   <Button
                     type="submit"
-                    className="w-full md:w-auto md:ml-auto h-16 md:h-12 px-10 rounded-full md:rounded-xl bg-[#189D91] md:bg-white hover:bg-black md:hover:bg-warm-sand text-white md:text-deep-espresso md:hover:text-white font-black text-sm md:text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#189D91]/20 transition-all active:scale-[0.98]"
+                    className="w-full md:w-auto md:ml-auto h-16 md:h-12 px-10 rounded-full md:rounded-xl bg-[#189D91] md:bg-[#189D91] hover:bg-black md:hover:bg-[#14847a] text-white font-black text-sm md:text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#189D91]/20 transition-all active:scale-[0.98]"
                   >
                     Log In
                   </Button>
                 </div>
 
                 {/* Social Logins - Desktop Only */}
-                <div className="hidden md:block pt-10 border-t border-white/10">
+                <div className="hidden md:block pt-10 border-t border-slate-200">
                   <div className="flex items-center gap-4 mb-8">
-                    <div className="flex-1 h-[1px] bg-white/10"></div>
-                    <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">OR</span>
-                    <div className="flex-1 h-[1px] bg-white/10"></div>
+                    <div className="flex-1 h-[1px] bg-slate-200"></div>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">OR</span>
+                    <div className="flex-1 h-[1px] bg-slate-200"></div>
                   </div>
                   <div className="flex justify-center items-center gap-8">
                     {[FaGoogle, FaFacebookF, FaXTwitter].map((Icon, idx) => (
-                      <button key={idx} type="button" className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-deep-espresso transition-all hover:scale-110 active:scale-90">
+                      <button key={idx} type="button" className="w-12 h-12 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all hover:scale-110 active:scale-90 shadow-sm">
                         <Icon size={20} />
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <p className="hidden md:block text-center text-[10px] font-black text-white/50 uppercase tracking-widest mt-8">
-                  Don't have an account? <span onClick={() => navigate(getSignupPath())} className="text-white cursor-pointer border-b border-white/30 pb-0.5 hover:text-white/100 transition-colors">Sign up</span>
+                <p className="hidden md:block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest mt-8">
+                  Don't have an account? <span onClick={() => navigate(getSignupPath())} className="text-[#189D91] cursor-pointer border-b border-[#189D91]/30 pb-0.5 hover:text-[#14847a] transition-colors">Sign up</span>
                 </p>
 
                 {/* Mobile Sign Up Link */}

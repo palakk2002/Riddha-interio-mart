@@ -98,9 +98,9 @@ const BrandPage = () => {
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + brand.banners.length) % brand.banners.length);
 
   return (
-    <div className="bg-white min-h-screen pb-20 font-sans">
+    <div className="bg-white min-h-screen pb-14 md:pb-20 font-sans">
       {/* Brand Hero Carousel */}
-      <section className="relative w-full aspect-[21/9] md:aspect-[3/1] overflow-hidden bg-gray-50 group/carousel">
+      <section className="relative w-full aspect-[21/9] md:aspect-[4.2/1] lg:aspect-[4.8/1] overflow-hidden bg-gray-50 group/carousel">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
@@ -117,8 +117,8 @@ const BrandPage = () => {
             />
             {/* Overlay if it's a URL or generic image */}
             {(brand.banners[currentSlide]?.startsWith('http') || brand.banners[currentSlide]?.startsWith('data:')) && (
-              <div className="absolute inset-0 bg-black/10 flex items-center px-6 md:px-20">
-                 <h1 className="text-4xl md:text-7xl font-black text-white italic uppercase tracking-tighter drop-shadow-2xl">
+              <div className="absolute inset-0 bg-black/10 flex items-center px-6 md:px-12 lg:px-16">
+                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white italic uppercase tracking-tighter drop-shadow-2xl">
                     {brand.name}
                  </h1>
               </div>
@@ -137,12 +137,12 @@ const BrandPage = () => {
                   <LuChevronRight className="w-6 h-6 md:w-8 md:h-8" />
                </button>
             </div>
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+            <div className="absolute bottom-4 md:bottom-5 left-1/2 -translate-x-1/2 flex gap-2.5 z-10">
                {brand.banners.map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => setCurrentSlide(idx)}
-                    className={`h-1 rounded-full transition-all duration-500 ${currentSlide === idx ? 'w-10 bg-white' : 'w-4 bg-white/40'}`}
+                    className={`h-1 rounded-full transition-all duration-500 ${currentSlide === idx ? 'w-8 md:w-10 bg-white' : 'w-3.5 md:w-4 bg-white/40'}`}
                   />
                ))}
             </div>
@@ -151,23 +151,23 @@ const BrandPage = () => {
       </section>
 
       {/* Shop By Category - Horizontal Scroll */}
-      <section className="max-w-7xl mx-auto py-12 md:py-20">
-        <div className="px-4 md:px-12 flex items-center justify-between mb-8 md:mb-12">
-          <h2 className="text-xl md:text-4xl font-display font-bold text-gray-900 tracking-tight">Shop By Category</h2>
+      <section className="max-w-7xl mx-auto py-10 md:py-14 lg:py-16">
+        <div className="px-4 md:px-10 lg:px-12 flex items-center justify-between mb-6 md:mb-8">
+          <h2 className="text-xl md:text-3xl lg:text-4xl font-display font-bold text-gray-900 tracking-tight">Shop By Category</h2>
           <Link to="/categories" className="text-xs md:text-sm font-bold text-[#189D91] flex items-center gap-1 hover:underline uppercase tracking-widest">
             View All <LuChevronRight />
           </Link>
         </div>
         
-        <div className="flex overflow-x-auto no-scrollbar gap-4 md:gap-8 px-4 md:px-12 pb-6 snap-x">
+        <div className="flex overflow-x-auto no-scrollbar gap-3.5 md:gap-5 lg:gap-6 px-4 md:px-10 lg:px-12 pb-4 md:pb-5 snap-x">
           {brand.categories?.map((cat, idx) => (
             <Link 
               key={cat.id || idx}
               to={`/products?brand=${brand.name}&category=${cat.slug}`}
-              className="flex flex-col flex-shrink-0 items-center gap-2 md:gap-4 w-24 md:w-56 snap-start group relative transition-all"
+              className="flex flex-col flex-shrink-0 items-center gap-2 md:gap-3 w-24 md:w-40 lg:w-48 snap-start group relative transition-all"
             >
               <div className="relative aspect-square w-full bg-white border-[1px] md:border-2 border-[#189D91] rounded-lg md:rounded-2xl overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300">
-                <div className="w-full h-full flex items-center justify-center p-2 md:p-4 bg-[#F9F9F9]">
+                <div className="w-full h-full flex items-center justify-center p-2 md:p-3 lg:p-4 bg-[#F9F9F9]">
                   <img 
                     src={cat.image} 
                     alt={cat.name} 
@@ -176,7 +176,7 @@ const BrandPage = () => {
                 </div>
               </div>
               <div className="text-center">
-                <span className="text-[9px] md:text-lg font-bold text-[#189D91] group-hover:text-[#127F75] transition-colors tracking-tight line-clamp-1 uppercase">
+                <span className="text-[9px] md:text-sm lg:text-base font-bold text-[#189D91] group-hover:text-[#127F75] transition-colors tracking-tight line-clamp-1 uppercase">
                   {cat.name}
                 </span>
               </div>
@@ -186,13 +186,13 @@ const BrandPage = () => {
       </section>
 
       {/* Brand Products Section */}
-      <section className="max-w-7xl mx-auto py-12 md:py-20 bg-soft-oatmeal/5">
-        <div className="px-4 md:px-12 flex items-center justify-between mb-8 md:mb-12">
+      <section className="max-w-7xl mx-auto py-10 md:py-14 lg:py-16 bg-soft-oatmeal/5">
+        <div className="px-4 md:px-10 lg:px-12 flex items-center justify-between mb-6 md:mb-8">
           <div className="space-y-1">
-            <h2 className="text-xl md:text-4xl font-display font-bold text-gray-900 tracking-tight">
+            <h2 className="text-xl md:text-3xl lg:text-4xl font-display font-bold text-gray-900 tracking-tight">
               {brand.name} Collection
             </h2>
-            <p className="text-warm-sand font-medium text-xs md:text-sm uppercase tracking-widest">
+            <p className="text-warm-sand font-medium text-[10px] md:text-xs uppercase tracking-widest">
               {products.length} Premium Pieces
             </p>
           </div>
@@ -203,36 +203,36 @@ const BrandPage = () => {
             <div className="h-10 w-10 border-4 border-[#189D91]/20 border-t-[#189D91] rounded-full animate-spin"></div>
           </div>
         ) : products.length > 0 ? (
-          <div className="px-4 md:px-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
+          <div className="px-4 md:px-10 lg:px-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
             {products.map((product, index) => (
               <ProductCard key={product._id} product={product} index={index} />
             ))}
           </div>
         ) : (
-          <div className="px-4 md:px-12 py-20 text-center bg-white rounded-3xl mx-4 md:mx-12">
+          <div className="px-4 md:px-10 lg:px-12 py-14 md:py-16 text-center bg-white rounded-3xl mx-4 md:mx-10 lg:mx-12">
             <p className="text-warm-sand font-bold text-lg">No products found for this brand yet.</p>
           </div>
         )}
       </section>
 
       {/* Brand Highlight Promo */}
-      <section className="max-w-7xl mx-auto px-4 md:px-12 py-8">
-         <div className="rounded-[40px] bg-[#F2F2F2] p-8 md:p-16 flex flex-col md:flex-row items-center gap-8 md:gap-16 border border-gray-100">
+      <section className="max-w-7xl mx-auto px-4 md:px-10 lg:px-12 py-8 md:py-10">
+         <div className="rounded-[32px] md:rounded-[36px] bg-[#F2F2F2] p-6 md:p-10 lg:p-12 flex flex-col md:flex-row items-center gap-6 md:gap-10 border border-gray-100">
             <div className="flex-1 space-y-4 md:space-y-6 text-center md:text-left">
                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#189D91]">Official Brand Partner</span>
-               <h2 className="text-3xl md:text-5xl font-display font-bold text-deep-espresso leading-tight">
+               <h2 className="text-2xl md:text-4xl lg:text-5xl font-display font-bold text-deep-espresso leading-tight">
                   Authentic {brand.name} <br /> Products at Wholesale.
                </h2>
-               <p className="text-sm md:text-lg text-warm-sand max-w-xl">
+               <p className="text-sm md:text-base lg:text-lg text-warm-sand max-w-xl">
                   Get the best deals on {brand.name} electrical and interior solutions. Direct from warehouse with guaranteed quality and fast delivery.
                </p>
-               <button className="bg-deep-espresso text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs shadow-2xl transition-all hover:bg-[#189D91] hover:scale-105 active:scale-95">
+               <button className="bg-deep-espresso text-white px-8 md:px-10 py-3.5 md:py-4 rounded-full font-bold uppercase tracking-widest text-xs shadow-2xl transition-all hover:bg-[#189D91] hover:scale-105 active:scale-95">
                   Explore Catalog
                </button>
             </div>
-            <div className="hidden md:block w-1/3 aspect-square bg-white rounded-full p-12 border-4 border-white shadow-2xl">
+            <div className="hidden md:block w-1/3 aspect-square bg-white rounded-full p-8 lg:p-10 border-4 border-white shadow-2xl">
                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-4xl font-black italic tracking-tighter uppercase text-[#189D91]/20">
+                  <span className="text-3xl lg:text-4xl font-black italic tracking-tighter uppercase text-[#189D91]/20">
                      {brand.name}
                   </span>
                </div>
