@@ -1,5 +1,17 @@
 const mongoose = require('mongoose');
 
+const SubSubcategorySchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Please add a sub-subcategory name'],
+    trim: true
+  },
+  image: {
+    type: String,
+    default: ''
+  }
+});
+
 const SubcategorySchema = new mongoose.Schema({
   name: {
     type: String,
@@ -9,7 +21,8 @@ const SubcategorySchema = new mongoose.Schema({
   image: {
     type: String,
     default: ''
-  }
+  },
+  subsubcategories: [SubSubcategorySchema]
 });
 
 const CategorySchema = new mongoose.Schema({
@@ -28,6 +41,10 @@ const CategorySchema = new mongoose.Schema({
   image: {
     type: String,
     default: 'no-photo.jpg'
+  },
+  icon: {
+    type: String,
+    default: ''
   },
   subcategories: [SubcategorySchema],
   productCount: {

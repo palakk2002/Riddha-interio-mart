@@ -1,0 +1,27 @@
+[
+  {
+    "_id": "6a0e9b1c8cf557a669106022",
+    "name": "Traditional Terracotta Tile",
+    "category": "Flooring",
+    "subcategory": "Terracotta Tiles"
+  },
+  {
+    "_id": "6a0e9b1c8cf557a669106023",
+    "name": "Polished Vitrified Tile",
+    "category": "Flooring",
+    "subcategory": "Vitrified Tiles"
+  },
+  {
+    "_id": "6a0e9b1c8cf557a669106024",
+    "name": "Carrara Marble Slab",
+    "category": "Flooring",
+    "subcategory": "Carrara Marble"
+  },
+  {
+    "_id": "6a0e9e4f8cf557a669106462",
+    "name": "Swan Neck Golden Faucet",
+    "category": "Bath",
+    "subcategory": "",
+    "subsubcategory": ""
+  }
+]

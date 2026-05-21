@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { 
   LuLayoutDashboard, 
@@ -15,19 +15,56 @@ import {
   LuSettings, 
   LuCircleHelp,
   LuLogOut,
-  LuShieldCheck,
-  LuClock
+  LuShieldCheck
 } from 'react-icons/lu';
 
 import { useUser } from '../../user/data/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { toast } from 'react-hot-toast';
+import api from '../../../shared/utils/api';
+import { getSocket } from '../../../shared/utils/socket';
 import logoImage from '../../../assets/image copy 2.png';
 
 const DeliverySidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
+  const [pendingCount, setPendingCount] = useState(0);
+
+  const fetchAnalytics = async () => {
+    try {
+      const { data } = await api.get('/delivery/analytics');
+      if (data.success && data.data?.stats) {
+        setPendingCount(data.data.stats.pendingDeliveries || 0);
+      }
+    } catch (err) {
+      console.error('Failed to fetch delivery analytics:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleDeliveryAssigned = (payload) => {
+      toast.success(payload.message || 'New Delivery Assigned!', {
+        position: 'top-right',
+        duration: 4000,
+        icon: '🛵'
+      });
+      fetchAnalytics();
+    };
+
+    socket.on('delivery:assigned', handleDeliveryAssigned);
+    return () => {
+      socket.off('delivery:assigned', handleDeliveryAssigned);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -92,8 +129,6 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
             </Link>
           </div>
 
-
-
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto custom-scrollbar">
             {menuGroups.map((group) => (
@@ -114,6 +149,13 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
                       >
                         <item.icon size={18} className="shrink-0 transition-transform group-hover:scale-110" />
                         <span>{item.name}</span>
+                        {item.name === 'Orders' && pendingCount > 0 && (
+                          <span className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            location.pathname === item.path ? 'bg-white text-[#2A458A]' : 'bg-[#2A458A] text-white'
+                          }`}>
+                            {pendingCount}
+                          </span>
+                        )}
                       </NavLink>
                     ))}
                  </div>
@@ -138,3 +180,4 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
 };
 
 export default DeliverySidebar;
+

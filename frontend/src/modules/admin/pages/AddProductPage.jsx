@@ -23,6 +23,7 @@ const AddProductPage = () => {
     hsnCode: '',
     category: '',
     subcategory: '',
+    subsubcategory: '',
     brand: '',
     price: '',
     description: '',
@@ -376,7 +377,8 @@ const AddProductPage = () => {
                                           setFormData({
                                             ...formData,
                                             category: cat.name,
-                                            subcategory: ''
+                                            subcategory: '',
+                                            subsubcategory: ''
                                           });
                                           setCatSearch('');
                                           setIsCatOpen(false);
@@ -415,7 +417,7 @@ const AddProductPage = () => {
                          </label>
                          <select 
                            value={formData.subcategory || ''}
-                           onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
+                           onChange={(e) => setFormData({...formData, subcategory: e.target.value, subsubcategory: ''})}
                            className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand cursor-pointer appearance-none font-medium"
                          >
                            <option value="">Select Subcategory</option>
@@ -425,6 +427,25 @@ const AddProductPage = () => {
                          </select>
                       </div>
                     )}
+
+                     {/* Active Sub-subcategories Dynamic Selector Dropdown */}
+                     {formData.category && formData.subcategory && categories.find(c => c.name === formData.category)?.subcategories?.find(s => s.name === formData.subcategory)?.subsubcategories?.length > 0 && (
+                       <div className="space-y-2">
+                          <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
+                             <FiTag size={12} /> Sub-subcategory
+                          </label>
+                          <select 
+                            value={formData.subsubcategory || ''}
+                            onChange={(e) => setFormData({...formData, subsubcategory: e.target.value})}
+                            className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand cursor-pointer appearance-none font-medium"
+                          >
+                            <option value="">Select Sub-subcategory</option>
+                            {categories.find(c => c.name === formData.category).subcategories.find(s => s.name === formData.subcategory).subsubcategories.map(subsub => (
+                              <option key={subsub._id || subsub.name} value={subsub.name}>{subsub.name}</option>
+                            ))}
+                          </select>
+                       </div>
+                     )}
                     
                     <div className="space-y-2">
                        <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">

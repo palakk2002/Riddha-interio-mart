@@ -58,6 +58,10 @@ const isPublicRequest = (config) => {
     return true;
   }
 
+  if (method === 'post' && url.startsWith('/orders/calculate-pricing')) {
+    return true;
+  }
+
   return false;
 };
 

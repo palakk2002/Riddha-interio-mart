@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-05-21T13:17:21.869Z",
+  "query": {
+    "category": "Bathroom"
+  },
+  "builtFilter": {
+    "category": "Bathroom",
+    "isApproved": true,
+    "isActive": true
+  },
+  "resultCount": 0,
+  "results": []
+}

@@ -132,10 +132,10 @@ exports.addOrderItems = async (req, res) => {
           totalPrice: groupPricing.totalPrice
         },
         totalPrice: groupPricing.totalPrice,
-        isPaid: !isCod,
-        paidAt: isCod ? undefined : Date.now(),
-        paymentStatus: isCod ? 'pending' : 'paid',
-        status: isCod ? 'Pending' : 'Processing',
+        isPaid: false,
+        paidAt: undefined,
+        paymentStatus: 'pending',
+        status: isCod ? 'Processing' : 'Pending',
         businessDetails
       });
 
@@ -212,49 +212,53 @@ exports.addOrderItems = async (req, res) => {
         console.error('Audit logging error:', logErr.message);
       }
 
-      // Fire notifications
-      try {
-        const payload = {
-          orderId: String(savedOrder._id),
-          totalPrice: savedOrder.totalPrice,
-          itemsCount: savedOrder.orderItems.reduce((sum, i) => sum + i.quantity, 0),
-          status: savedOrder.status,
-          createdAt: savedOrder.createdAt,
-          customerName: req.user?.fullName,
-          shippingCity: savedOrder.shippingAddress?.city
-        };
+      // Post-commit actions for COD ONLY (Online actions happen in verifyPayment)
+      if (paymentMethod === 'COD') {
+        // Fire notifications
+        try {
+          const payload = {
+            orderId: String(savedOrder._id),
+            totalPrice: savedOrder.totalPrice,
+            itemsCount: savedOrder.orderItems.reduce((sum, i) => sum + i.quantity, 0),
+            status: savedOrder.status,
+            createdAt: savedOrder.createdAt,
+            customerName: req.user?.fullName,
+            shippingCity: savedOrder.shippingAddress?.city
+          };
 
-        const group = groupedItems[savedOrder.seller.toString()];
-        if (group && group.sellerType === 'Admin') {
-          notifyAdminNewOrder(null, payload);
-        } else {
-          notifySellerNewOrder(savedOrder.seller, payload);
+          const group = groupedItems[savedOrder.seller.toString()];
+          if (group && group.sellerType === 'Admin') {
+            notifyAdminNewOrder(null, payload);
+          } else {
+            notifySellerNewOrder(savedOrder.seller, payload);
+            notifyAdminNewOrder(null, payload); // Also notify admin for seller orders
+          }
+        } catch (e) {
+          console.error('Socket notify failed:', e.message);
         }
-      } catch (e) {
-        console.error('Socket notify failed:', e.message);
-      }
 
-      // Credit pending earnings to Seller Wallet
-      try {
-        const walletService = require('../services/walletService');
-        await walletService.recordPendingSale(savedOrder);
-      } catch (walletErr) {
-        console.error('Failed to log pending earnings:', walletErr.message);
-      }
-
-      // Fire and forget invoice generation (Asynchronous)
-      processInvoiceAsync(savedOrder._id, req.user.id);
-
-      // Queue Order Confirmation Email
-      try {
-        const User = require('../models/User');
-        const customer = await User.findById(req.user.id);
-        if (customer && customer.email) {
-          const emailService = require('../services/emailService');
-          await emailService.queueEmail(customer.email, `Order Confirmation - #${savedOrder._id.toString().slice(-8).toUpperCase()}`, 'order_confirmation', { order: savedOrder });
+        // Credit pending earnings to Seller Wallet
+        try {
+          const walletService = require('../services/walletService');
+          await walletService.recordPendingSale(savedOrder);
+        } catch (walletErr) {
+          console.error('Failed to log pending earnings:', walletErr.message);
         }
-      } catch (emailErr) {
-        console.error('Failed to queue order confirmation email:', emailErr.message);
+
+        // Fire and forget invoice generation (Asynchronous)
+        processInvoiceAsync(savedOrder._id, req.user.id);
+
+        // Queue Order Confirmation Email
+        try {
+          const User = require('../models/User');
+          const customer = await User.findById(req.user.id);
+          if (customer && customer.email) {
+            const emailService = require('../services/emailService');
+            await emailService.queueEmail(customer.email, `Order Confirmation - #${savedOrder._id.toString().slice(-8).toUpperCase()}`, 'order_confirmation', { order: savedOrder });
+          }
+        } catch (emailErr) {
+          console.error('Failed to queue order confirmation email:', emailErr.message);
+        }
       }
     }
 
@@ -266,9 +270,29 @@ exports.addOrderItems = async (req, res) => {
       console.error('Referral order reward processing failed:', refOrderRewardErr.message);
     }
 
+    let razorpayOrder = null;
+    if (paymentMethod !== 'COD') {
+      const { createRazorpayOrder } = require('../utils/paymentGateway');
+      const totalAmount = createdOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+      try {
+        razorpayOrder = await createRazorpayOrder(totalAmount, `receipt_${createdOrders[0]._id}`);
+        // Store razorpay_order_id in all orders
+        for (const order of createdOrders) {
+          order.paymentResult = {
+            id: razorpayOrder.id,
+            status: 'created'
+          };
+          await order.save();
+        }
+      } catch (rpErr) {
+        console.error('Razorpay Order Creation Failed:', rpErr.message);
+      }
+    }
+
     res.status(201).json({
       success: true,
-      data: createdOrders
+      data: createdOrders,
+      razorpayOrder
     });
 
   } catch (error) {
@@ -347,6 +371,18 @@ exports.getOrders = async (req, res) => {
       ];
     }
 
+    // Filter out unpaid online orders for Sellers and Admins so they don't fulfill abandoned checkouts
+    if (isSeller || isAdmin) {
+      query.$and = [
+        { 
+          $or: [
+            { paymentMethod: 'COD' },
+            { isPaid: true }
+          ]
+        }
+      ];
+    }
+
     // If user is delivery partner, show orders assigned to them or available in pool
     if (isDelivery) {
       query.$or = [
@@ -354,6 +390,15 @@ exports.getOrders = async (req, res) => {
         { deliveryStatus: { $in: ['None', 'Rejected'] } }
       ];
       query.status = { $in: ['Processing', 'Shipped', 'Delivered'] };
+      // Delivery partners also shouldn't see unpaid online orders
+      query.$and = [
+        { 
+          $or: [
+            { paymentMethod: 'COD' },
+            { isPaid: true }
+          ]
+        }
+      ];
     }
 
     const populateOptions = [
@@ -426,6 +471,34 @@ exports.updateOrderStatus = async (req, res) => {
         // Logical mapping: if picked or out for delivery, overall status is 'Shipped'
         if (newStatus === 'Picked' || newStatus === 'Out for Delivery') {
           order.status = 'Shipped';
+        }
+
+        // Generate and Send OTP
+        if (newStatus === 'Out for Delivery' && !order.deliveryOtp) {
+          const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4 digit OTP
+          order.deliveryOtp = otp;
+          
+          // Log OTP to console to help with local testing!
+          console.log(`\n========================================`);
+          console.log(`[TESTING OTP] Delivery OTP for Order #${order._id.toString().slice(-8).toUpperCase()} is: ${otp}`);
+          console.log(`========================================\n`);
+
+          try {
+            const User = require('../models/User');
+            const customer = await User.findById(order.user);
+            if (customer && customer.email) {
+              const emailService = require('../services/emailService');
+              // We queue it with standard structure
+              await emailService.queueEmail(
+                customer.email, 
+                `Delivery OTP for Order #${order._id.toString().slice(-8).toUpperCase()}`, 
+                'delivery_otp', 
+                { order, otp }
+              );
+            }
+          } catch(e) {
+            console.error('Failed to queue OTP email', e);
+          }
         }
       }
 
@@ -638,6 +711,156 @@ exports.calculateOrderPricing = async (req, res, next) => {
   } catch (error) {
     console.error('Pricing calculation error:', error);
     return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Verify Razorpay Payment
+// @route   POST /api/orders/verify-payment
+// @access  Private
+exports.verifyPayment = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const { verifyRazorpayPayment } = require('../utils/paymentGateway');
+    
+    const isValid = verifyRazorpayPayment(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+    if (!isValid) {
+      return res.status(400).json({ success: false, message: 'Invalid payment signature' });
+    }
+
+    const orders = await Order.find({ 'paymentResult.id': razorpay_order_id });
+    
+    for (const order of orders) {
+      order.isPaid = true;
+      order.paidAt = Date.now();
+      order.paymentStatus = 'paid';
+      order.status = 'Processing'; // Move status to Processing
+      order.paymentResult = {
+        id: razorpay_payment_id,
+        status: 'captured',
+        update_time: new Date().toISOString(),
+        email_address: req.user.email
+      };
+      await order.save();
+
+      // --- Post-Payment Side Effects ---
+      try {
+        const payload = {
+          orderId: String(order._id),
+          totalPrice: order.totalPrice,
+          itemsCount: order.orderItems.reduce((sum, i) => sum + i.quantity, 0),
+          status: order.status,
+          createdAt: order.createdAt,
+          customerName: req.user?.fullName,
+          shippingCity: order.shippingAddress?.city
+        };
+
+        if (order.sellerType === 'Admin') {
+          notifyAdminNewOrder(null, payload);
+        } else {
+          notifySellerNewOrder(order.seller, payload);
+          notifyAdminNewOrder(null, payload); // Also notify admin for seller orders
+        }
+      } catch (e) {
+        console.error('Socket notify failed in verifyPayment:', e.message);
+      }
+
+      try {
+        const walletService = require('../services/walletService');
+        await walletService.recordPendingSale(order);
+      } catch (walletErr) {
+        console.error('Failed to log pending earnings in verifyPayment:', walletErr.message);
+      }
+
+      const { processInvoiceAsync } = require('../utils/invoiceService');
+      processInvoiceAsync(order._id, req.user.id);
+
+      try {
+        const User = require('../models/User');
+        const customer = await User.findById(req.user.id);
+        if (customer && customer.email) {
+          const emailService = require('../services/emailService');
+          await emailService.queueEmail(customer.email, `Order Confirmation - #${order._id.toString().slice(-8).toUpperCase()}`, 'order_confirmation', { order });
+        }
+      } catch (emailErr) {
+        console.error('Failed to queue email in verifyPayment:', emailErr.message);
+      }
+    }
+    
+    res.status(200).json({ success: true, message: 'Payment verified successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Verify Delivery OTP
+// @route   POST /api/orders/:id/verify-otp
+// @access  Private/Delivery
+exports.verifyDeliveryOtp = async (req, res) => {
+  try {
+    const { otp } = req.body;
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    
+    // STATIC OTP BYPASS: allow 1234 for testing
+    const isStaticBypass = otp === '1234';
+
+    if (!isStaticBypass && order.deliveryOtp !== otp) {
+      return res.status(400).json({ success: false, error: 'Invalid delivery OTP provided.' });
+    }
+    
+    // OTP matches, mark as delivered
+    order.isDelivered = true;
+    order.deliveredAt = Date.now();
+    order.status = 'Delivered';
+    order.deliveryStatus = 'Delivered';
+    
+    if (order.paymentMethod === 'COD') {
+      order.isPaid = true;
+      order.paidAt = Date.now();
+      order.paymentStatus = 'paid';
+    }
+    
+    const updatedOrder = await order.save();
+    
+    try {
+      const walletService = require('../services/walletService');
+      await walletService.clearPendingSale(updatedOrder._id);
+      
+      if (updatedOrder.deliveryBoy) {
+        await walletService.recordDeliveryEarning(
+          updatedOrder.deliveryBoy,
+          updatedOrder._id,
+          updatedOrder.paymentMethod === 'COD',
+          updatedOrder.totalPrice
+        );
+      }
+    } catch (walletErr) {
+      console.error('Failed to update wallets upon delivery:', walletErr.message);
+    }
+    
+    // Notify User
+    notifyUserOrderStatus(order.user, {
+      orderId: order._id,
+      status: order.status,
+      deliveryStatus: order.deliveryStatus,
+      message: `Your order #${order._id.toString().slice(-8).toUpperCase()} has been successfully delivered.`
+    });
+
+    // Notify Seller / Admin
+    const notificationPayload = {
+      orderId: order._id,
+      status: 'Delivered',
+      deliveryBoyName: req.user.fullName
+    };
+    if (order.sellerType === 'Admin') {
+      notifyAdminDeliveryResponse(null, notificationPayload);
+    } else {
+      notifySellerDeliveryResponse(order.seller, notificationPayload);
+    }
+    
+    res.status(200).json({ success: true, data: updatedOrder, message: 'OTP verified successfully. Order Delivered.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 

@@ -159,6 +159,9 @@ const OrderSchema = new mongoose.Schema({
   deliveryAssignmentTime: {
     type: Date
   },
+  deliveryOtp: {
+    type: String
+  },
   businessDetails: {
     shopName: String,
     gstNumber: String,

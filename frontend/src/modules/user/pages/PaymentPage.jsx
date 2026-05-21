@@ -61,7 +61,7 @@ const PaymentPage = () => {
     if (selectedSection === 'cod') {
       handleCodPayment();
     } else {
-      setShowRazorpay(true);
+      handleOnlinePayment();
     }
   };
 
@@ -111,9 +111,26 @@ const PaymentPage = () => {
     }
   };
 
-  const handleMockPayment = async () => {
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => { resolve(true); };
+      script.onerror = () => { resolve(false); };
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleOnlinePayment = async () => {
     setIsProcessing(true);
     try {
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded) {
+        alert('Razorpay SDK failed to load. Are you online?');
+        setIsProcessing(false);
+        return;
+      }
+
       // Prepare order data for backend
       const orderData = {
         orderItems: cart.map(item => ({
@@ -141,17 +158,65 @@ const PaymentPage = () => {
 
       const response = await api.post('/orders', orderData);
 
-      if (response.data.success) {
-        // Now returns an array of created orders
-        const orderIds = response.data.data.map(order => order._id);
-        localStorage.setItem('last_order_ids', JSON.stringify(orderIds));
+      if (response.data.success && response.data.razorpayOrder) {
+        const { razorpayOrder, data: createdOrders } = response.data;
+        const orderIds = createdOrders.map(order => order._id);
+        
+        // Get razorpay key from backend
+        const configRes = await api.get('/config/razorpay');
+        const rzpKey = configRes.data.key;
+        
+        const options = {
+          key: rzpKey,
+          amount: razorpayOrder.amount,
+          currency: razorpayOrder.currency,
+          name: 'Riddha Interio Mart',
+          description: 'Purchase Payment',
+          order_id: razorpayOrder.id,
+          handler: async function (res) {
+            try {
+              setIsProcessing(true);
+              const verifyRes = await api.post('/orders/verify-payment', {
+                razorpay_order_id: res.razorpay_order_id,
+                razorpay_payment_id: res.razorpay_payment_id,
+                razorpay_signature: res.razorpay_signature
+              });
+              
+              if (verifyRes.data.success) {
+                localStorage.setItem('last_order_ids', JSON.stringify(orderIds));
+                clearCart();
+                navigate('/order-success');
+              }
+            } catch (err) {
+              console.error('Payment verification failed:', err);
+              alert('Payment verification failed. Please contact support.');
+            } finally {
+              setIsProcessing(false);
+            }
+          },
+          modal: {
+            ondismiss: function() {
+              setIsProcessing(false);
+            }
+          },
+          prefill: {
+            name: address?.fullName || user?.fullName,
+            email: user?.email,
+            contact: address?.mobileNumber
+          },
+          theme: {
+            color: '#189D91'
+          }
+        };
 
-        setTimeout(() => {
-          setIsProcessing(false);
-          setShowRazorpay(false);
-          clearCart();
-          navigate('/order-success');
-        }, 1500);
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (response) {
+          alert(`Payment failed: ${response.error.description}`);
+        });
+        rzp.open();
+      } else {
+        alert('Failed to initialize payment gateway.');
+        setIsProcessing(false);
       }
     } catch (err) {
       console.error('Failed to place order:', err);

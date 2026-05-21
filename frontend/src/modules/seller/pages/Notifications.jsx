@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageWrapper from '../components/PageWrapper';
@@ -14,49 +14,33 @@ import {
   VolumeX,
   X,
   ChevronRight,
-  Filter,
   Inbox
 } from 'lucide-react';
-import { getSellerNotifications, setSellerNotifications } from '../utils/sellerNotifications';
 import { isSoundEnabled, setSoundEnabled } from '../utils/notificationSound';
+import { useNotification } from '../../user/data/NotificationContext';
+import { formatDistanceToNow } from 'date-fns';
 
 const Notifications = () => {
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState(() => {
-    return getSellerNotifications();
-  });
-
+  const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotification();
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [sound, setSound] = useState(() => isSoundEnabled());
 
-  useEffect(() => {
-    setSellerNotifications(notifications);
-  }, [notifications]);
-
-  const markAsRead = (id) => {
-    setNotifications(notifications.map(n => n.id === id ? { ...n, status: 'read' } : n));
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, status: 'read' })));
-  };
-
-  const deleteNotification = (id) => {
-    setNotifications(notifications.filter(n => n.id !== id));
-  };
-
-  const filteredNotifications = notifications.filter(n => {
-    if (activeFilter === 'unread') return n.status === 'unread';
+  const filteredNotifications = (notifications || []).filter(n => {
+    if (activeFilter === 'unread') return !n.read;
     return true;
   });
 
   const getIcon = (type) => {
-    switch (type) {
-      case 'success': return <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center"><CheckCircle2 size={20} /></div>;
-      case 'warning': return <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center"><AlertCircle size={20} /></div>;
-      default: return <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><Info size={20} /></div>;
+    const t = (type || '').toLowerCase();
+    if (t.includes('success') || t.includes('delivered') || t.includes('approved')) {
+      return <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center"><CheckCircle2 size={20} /></div>;
     }
+    if (t.includes('warning') || t.includes('cancelled') || t.includes('rejected')) {
+      return <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center"><AlertCircle size={20} /></div>;
+    }
+    return <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><Info size={20} /></div>;
   };
 
   return (
@@ -117,14 +101,14 @@ const Notifications = () => {
             filteredNotifications.map((notification) => (
               <motion.div
                 layout
-                key={notification.id}
+                key={notification._id}
                 onClick={() => {
-                  markAsRead(notification.id);
+                  markAsRead(notification._id);
                   setSelectedNotification(notification);
                 }}
-                className={`group relative bg-white p-6 rounded-[2rem] border transition-all cursor-pointer hover:shadow-md ${notification.status === 'unread' ? 'border-seller-primary/20 bg-seller-light/5' : 'border-slate-200'}`}
+                className={`group relative bg-white p-6 rounded-[2rem] border transition-all cursor-pointer hover:shadow-md ${!notification.read ? 'border-seller-primary/20 bg-seller-light/5' : 'border-slate-200'}`}
               >
-                {notification.status === 'unread' && (
+                {!notification.read && (
                   <div className="absolute top-6 right-8 w-2 h-2 bg-seller-primary rounded-full animate-pulse" />
                 )}
                 
@@ -135,10 +119,10 @@ const Notifications = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start gap-4">
                       <div className="space-y-1">
-                        <h3 className={`text-base font-semibold transition-colors ${notification.status === 'unread' ? 'text-slate-900' : 'text-slate-500'}`}>
+                        <h3 className={`text-base font-semibold transition-colors ${!notification.read ? 'text-slate-900' : 'text-slate-500'}`}>
                           {notification.title}
                         </h3>
-                        <p className={`text-sm line-clamp-2 leading-relaxed ${notification.status === 'unread' ? 'text-slate-700' : 'text-slate-400'}`}>
+                        <p className={`text-sm line-clamp-2 leading-relaxed ${!notification.read ? 'text-slate-700' : 'text-slate-400'}`}>
                           {notification.message}
                         </p>
                       </div>
@@ -146,10 +130,10 @@ const Notifications = () => {
                       <div className="flex items-center gap-4 shrink-0">
                         <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg">
                           <Clock size={12} />
-                          {notification.time}
+                          {notification.createdAt ? formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true }) : 'Just now'}
                         </span>
                         <button
-                          onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
+                          onClick={(e) => { e.stopPropagation(); deleteNotification(notification._id); }}
                           className="opacity-0 group-hover:opacity-100 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                         >
                           <Trash2 size={16} />
@@ -215,7 +199,7 @@ const Notifications = () => {
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-2 text-slate-400">
                     <Clock size={16} />
-                    <span className="text-[11px] font-semibold uppercase tracking-widest">{selectedNotification.time}</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-widest">{selectedNotification.createdAt ? formatDistanceToNow(new Date(selectedNotification.createdAt), { addSuffix: true }) : 'Just now'}</span>
                   </div>
                   <div className="flex gap-4">
                     <button 

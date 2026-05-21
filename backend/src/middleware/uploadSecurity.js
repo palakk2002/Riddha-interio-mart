@@ -66,9 +66,10 @@ const validateFileSignature = (filePath, originalExt) => {
 
   const hexSignature = buffer.toString('hex', 0, 4).toLowerCase();
   
-  // 1. Check direct match in static signatures (Images, PDFs)
-  if (ALLOWED_SIGNATURES[hexSignature]) {
-    const config = ALLOWED_SIGNATURES[hexSignature];
+  // 1. Check match in static signatures (Images, PDFs) using prefix matching
+  const matchingKey = Object.keys(ALLOWED_SIGNATURES).find(key => hexSignature.startsWith(key));
+  if (matchingKey) {
+    const config = ALLOWED_SIGNATURES[matchingKey];
     return config.ext.includes(originalExt.toLowerCase());
   }
 

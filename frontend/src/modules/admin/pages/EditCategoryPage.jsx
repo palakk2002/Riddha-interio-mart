@@ -2,24 +2,47 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { FiArrowLeft, FiPlus, FiTrash2, FiImage, FiSave, FiUploadCloud, FiCheck } from 'react-icons/fi';
+import * as LuIcons from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../shared/utils/api';
+import { uploadImage } from '../../../shared/utils/upload';
+
+const PRESET_ICONS = [
+  { name: 'LuSofa', label: 'Furniture' },
+  { name: 'LuLampFloor', label: 'Lighting' },
+  { name: 'LuLayoutGrid', label: 'Wall Solutions' },
+  { name: 'LuFlower2', label: 'Decor' },
+  { name: 'LuHammer', label: 'Hardware' },
+  { name: 'LuChefHat', label: 'Modular Kitchen' },
+  { name: 'LuBath', label: 'Bathroom' },
+  { name: 'LuBriefcase', label: 'Office' },
+  { name: 'LuUmbrella', label: 'Outdoor' }
+];
 
 const EditCategoryPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const iconInputRef = useRef(null);
   
   const [category, setCategory] = useState({
     name: '',
     image: '',
     description: '',
   });
+
+  const [categoryIcon, setCategoryIcon] = useState('');
+  const [iconFile, setIconFile] = useState(null);
+  const [customIconPreview, setCustomIconPreview] = useState('');
+
   const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [saveError, setSaveError] = useState('');
+
+  const [imgFile, setImgFile] = useState(null);
+  const [subImgFiles, setSubImgFiles] = useState({});
 
   useEffect(() => {
     fetchCategoryDetails();
@@ -36,7 +59,28 @@ const EditCategoryPage = () => {
         image: data.image,
         description: data.description || '',
       });
-      setSubcategories(data.subcategories || []);
+
+      // Populate existing icon
+      if (data.icon) {
+        if (data.icon.startsWith('http') || data.icon.startsWith('/')) {
+          setCustomIconPreview(data.icon);
+          setCategoryIcon('');
+        } else {
+          setCategoryIcon(data.icon);
+          setCustomIconPreview('');
+        }
+      }
+
+      setSubcategories((data.subcategories || []).map(sub => ({
+        _id: sub._id,
+        name: sub.name,
+        image: sub.image,
+        subsubcategories: (sub.subsubcategories || []).map(ss => ({
+          _id: ss._id,
+          name: ss.name,
+          image: ss.image || ''
+        }))
+      })));
     } catch (err) {
       console.error('Failed to load category:', err);
       setSaveError('Could not load category details. Please try again.');
@@ -48,11 +92,12 @@ const EditCategoryPage = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        setSaveError('Image too large (max 2MB).');
+      if (file.size > 5 * 1024 * 1024) {
+        setSaveError('Banner image too large (max 5MB).');
         return;
       }
       setSaveError('');
+      setImgFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setCategory(prev => ({ ...prev, image: reader.result }));
@@ -61,8 +106,21 @@ const EditCategoryPage = () => {
     }
   };
 
+  const handleIconUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setIconFile(file);
+      setCategoryIcon(''); // Clear preset if uploading custom
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCustomIconPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleAddSubcategory = () => {
-    setSubcategories([...subcategories, { name: '', image: '', description: '' }]);
+    setSubcategories([...subcategories, { name: '', image: '', subsubcategories: [] }]);
   };
 
   const handleRemoveSubcategory = (index) => {
@@ -75,18 +133,64 @@ const EditCategoryPage = () => {
     setSubcategories(newSubs);
   };
 
+  const handleSubImageUpload = (e, index) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSubImgFiles(prev => ({ ...prev, [index]: file }));
+      const reader = new FileReader();
+      reader.onloadend = () => handleSubChange(index, 'image', reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSaving(true);
     setSaveError('');
 
     try {
+      // 1. Upload banner image if modified
+      let mainImageUrl = category.image;
+      if (imgFile) {
+        mainImageUrl = await uploadImage(imgFile);
+      }
+
+      // 1.5. Upload custom icon if selected
+      let finalIcon = categoryIcon;
+      if (iconFile) {
+        finalIcon = await uploadImage(iconFile);
+      } else if (customIconPreview) {
+        finalIcon = customIconPreview;
+      }
+
+      const updatedSubcategories = await Promise.all(
+        subcategories.map(async (sub, index) => {
+          if (sub.name.trim() === '') return null;
+          let subImgUrl = sub.image;
+          if (subImgFiles[index]) {
+            subImgUrl = await uploadImage(subImgFiles[index]);
+          }
+          const item = { 
+            name: sub.name, 
+            image: subImgUrl, 
+            subsubcategories: sub.subsubcategories || [] 
+          };
+          if (sub._id) {
+            item._id = sub._id;
+          }
+          return item;
+        })
+      );
+
       const categoryData = {
         name: category.name,
         description: category.description,
-        image: category.image,
-        subcategories: subcategories.filter(s => s.name.trim() !== '')
+        image: mainImageUrl,
+        icon: finalIcon,
+        subcategories: updatedSubcategories.filter(s => s !== null)
       };
+
+      console.log("=== Sending PUT categoryData ===", categoryData);
 
       const response = await api.put(`/categories/${id}`, categoryData);
 
@@ -102,6 +206,17 @@ const EditCategoryPage = () => {
       setSaveError(err.response?.data?.error || 'Failed to update category. Check your connection.');
       setIsSaving(false);
     }
+  };
+
+  const renderIconPreview = () => {
+    if (customIconPreview) {
+      return <img src={customIconPreview} alt="Icon Preview" className="w-8 h-8 object-contain" />;
+    }
+    if (categoryIcon) {
+      const IconComponent = LuIcons[categoryIcon] || LuIcons.LuShapes;
+      return <IconComponent size={32} className="text-deep-espresso" />;
+    }
+    return <LuIcons.LuShapes size={32} className="text-warm-sand opacity-40" />;
   };
 
   if (loading) return <PageWrapper><div className="flex items-center justify-center min-h-[60vh] text-warm-sand font-display font-black uppercase tracking-widest text-xs animate-pulse">Loading Details...</div></PageWrapper>;
@@ -152,6 +267,87 @@ const EditCategoryPage = () => {
               </div>
             </div>
 
+            {/* Icon Selection Card */}
+            <div className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-soft-oatmeal shadow-sm space-y-6 md:space-y-8">
+              <h3 className="text-base md:text-lg font-black text-deep-espresso border-b border-soft-oatmeal pb-4 uppercase tracking-[0.1em]">Category Icon Management</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="flex flex-col items-center justify-center p-6 bg-soft-oatmeal/10 border border-soft-oatmeal rounded-2xl">
+                  <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center border border-soft-oatmeal/40 mb-3">
+                    {renderIconPreview()}
+                  </div>
+                  <span className="text-[9px] font-black text-warm-sand uppercase tracking-widest">Selected Icon</span>
+                </div>
+
+                <div className="md:col-span-2 space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-warm-sand uppercase tracking-widest block pl-1">Option A: Custom SVG / PNG Upload</label>
+                    <input 
+                      type="file" 
+                      ref={iconInputRef}
+                      onChange={handleIconUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => iconInputRef.current.click()}
+                      className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white border border-soft-oatmeal hover:bg-soft-oatmeal/10 transition-colors rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-deep-espresso shadow-sm"
+                    >
+                      <FiUploadCloud size={16} />
+                      {customIconPreview || iconFile ? 'Change Graphic File' : 'Upload Graphic Icon'}
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-warm-sand uppercase tracking-widest block pl-1">Option B: Custom Lucide Code</label>
+                    <input 
+                      type="text" 
+                      placeholder="Search or enter Lucide code (e.g. Sofa, Hammer)..."
+                      value={categoryIcon}
+                      onChange={(e) => {
+                        setCategoryIcon(e.target.value);
+                        setIconFile(null);
+                        setCustomIconPreview('');
+                      }}
+                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all font-semibold"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[9px] font-black text-warm-sand uppercase tracking-widest block pl-1">Or Quick Select Pre-curated Lucide Icons</label>
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                  {PRESET_ICONS.map((ico) => {
+                    const IconComp = LuIcons[ico.name] || LuIcons.LuShapes;
+                    const isSelected = categoryIcon === ico.name;
+                    return (
+                      <button
+                        key={ico.name}
+                        type="button"
+                        onClick={() => {
+                          setCategoryIcon(ico.name);
+                          setIconFile(null);
+                          setCustomIconPreview('');
+                        }}
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all ${
+                          isSelected
+                            ? 'bg-deep-espresso text-white border-deep-espresso shadow-md'
+                            : 'bg-soft-oatmeal/10 border-soft-oatmeal hover:bg-soft-oatmeal/20 text-warm-sand'
+                        }`}
+                      >
+                        <IconComp size={20} />
+                        <span className="text-[7.5px] font-black uppercase tracking-widest mt-1.5 truncate max-w-full">
+                          {ico.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white p-8 md:p-10 rounded-[40px] border border-soft-oatmeal shadow-sm space-y-8">
               <div className="flex items-center justify-between border-b border-soft-oatmeal pb-4">
                 <h3 className="text-lg font-black text-deep-espresso uppercase tracking-[0.1em]">Subcategories</h3>
@@ -172,7 +368,7 @@ const EditCategoryPage = () => {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="flex gap-4 p-5 bg-soft-oatmeal/5 rounded-[24px] border border-soft-oatmeal/50 relative group transition-all duration-300"
+                      className="flex flex-col gap-4 p-5 bg-soft-oatmeal/5 rounded-[24px] border border-soft-oatmeal/50 relative group transition-all duration-300"
                     >
                       <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
@@ -182,21 +378,120 @@ const EditCategoryPage = () => {
                               placeholder="e.g. Chandeliers"
                               value={sub.name}
                               onChange={(e) => handleSubChange(index, 'name', e.target.value)}
-                              className="w-full bg-white border border-soft-oatmeal rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-warm-sand/20 outline-none transition-all font-medium"
+                              className="w-full bg-white border border-soft-oatmeal rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-warm-sand/20 outline-none transition-all font-semibold"
                            />
                         </div>
                         <div className="space-y-1.5">
-                           <label className="text-[8px] font-black text-warm-sand uppercase tracking-widest pl-1">Thumbnail Media URL/Base64</label>
+                           <div className="flex items-center justify-between">
+                             <label className="text-[8px] font-black text-warm-sand uppercase tracking-widest pl-1">Thumbnail Media</label>
+                             <button 
+                               type="button"
+                               onClick={() => document.getElementById(`sub-img-${index}`).click()}
+                               className="text-[8px] font-black uppercase tracking-widest text-deep-espresso hover:underline font-bold"
+                             >
+                               Upload
+                             </button>
+                           </div>
+                           <input 
+                              type="file" id={`sub-img-${index}`} className="hidden" 
+                              onChange={(e) => handleSubImageUpload(e, index)} accept="image/*"
+                           />
                            <input 
                               type="text" 
-                              placeholder="https://..."
+                              placeholder="URL or upload file..."
                               value={sub.image}
                               onChange={(e) => handleSubChange(index, 'image', e.target.value)}
-                              className="w-full bg-white border border-soft-oatmeal rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-warm-sand/20 outline-none transition-all font-medium"
+                              className="w-full bg-white border border-soft-oatmeal rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-warm-sand/20 outline-none transition-all"
                            />
                         </div>
+
+                        {/* Sub-subcategories nested section */}
+                        <div className="col-span-1 md:col-span-2 pt-4 border-t border-soft-oatmeal/40">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-[9px] font-black uppercase tracking-widest text-deep-espresso pl-1">Sub-subcategories</h4>
+                            <div className="flex items-center gap-2">
+                              <input 
+                                type="text"
+                                id={`new-subsub-${index}`}
+                                placeholder="Add nested sub-subcategory..."
+                                className="bg-white border border-soft-oatmeal rounded-xl px-3 py-2 text-[10px] focus:outline-none w-48 font-medium shadow-inner"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    const val = e.target.value.trim();
+                                    if (val) {
+                                      const updated = subcategories.map((s, sIdx) => {
+                                        if (sIdx === index) {
+                                          return {
+                                            ...s,
+                                            subsubcategories: [...(s.subsubcategories || []), { name: val, image: '' }]
+                                          };
+                                        }
+                                        return s;
+                                      });
+                                      setSubcategories(updated);
+                                      e.target.value = '';
+                                    }
+                                  }
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const input = document.getElementById(`new-subsub-${index}`);
+                                  const val = input.value.trim();
+                                  if (val) {
+                                    const updated = subcategories.map((s, sIdx) => {
+                                      if (sIdx === index) {
+                                        return {
+                                          ...s,
+                                          subsubcategories: [...(s.subsubcategories || []), { name: val, image: '' }]
+                                        };
+                                      }
+                                      return s;
+                                    });
+                                    setSubcategories(updated);
+                                    input.value = '';
+                                  }
+                                }}
+                                className="p-2 bg-soft-oatmeal/20 rounded-xl text-deep-espresso hover:bg-soft-oatmeal/40 transition-colors"
+                              >
+                                <FiPlus size={12} />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {sub.subsubcategories && sub.subsubcategories.map((subsub, ssIdx) => (
+                              <div key={ssIdx} className="flex items-center gap-1.5 px-3 py-1.5 bg-soft-oatmeal/30 border border-soft-oatmeal/60 rounded-full text-[10px] font-bold text-warm-sand">
+                                <span>{subsub.name}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = subcategories.map((s, sIdx) => {
+                                      if (sIdx === index) {
+                                        return {
+                                          ...s,
+                                          subsubcategories: (s.subsubcategories || []).filter((_, ss) => ss !== ssIdx)
+                                        };
+                                      }
+                                      return s;
+                                    });
+                                    setSubcategories(updated);
+                                  }}
+                                  className="text-red-400 hover:text-red-600 transition-colors ml-1 font-bold text-xs"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                            {(!sub.subsubcategories || sub.subsubcategories.length === 0) && (
+                              <p className="text-[9px] font-medium text-warm-sand italic pl-1">No sub-subcategories added yet. Press Enter or click + to add.</p>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-end pb-1">
+                      <div className="flex items-end justify-end pb-1 border-t border-soft-oatmeal/40 pt-3 md:border-none md:pt-0">
                         <button 
                            type="button"
                            onClick={() => handleRemoveSubcategory(index)}
@@ -236,7 +531,7 @@ const EditCategoryPage = () => {
 
                 <div className="space-y-3">
                   <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest pl-1">Media Format</p>
-                  <p className="px-4 py-3 bg-soft-oatmeal/10 rounded-xl text-[10px] font-medium text-warm-sand border border-soft-oatmeal/50">Supports JPG, PNG, WEBP. Max 2MB.</p>
+                  <p className="px-4 py-3 bg-soft-oatmeal/10 rounded-xl text-[10px] font-medium text-warm-sand border border-soft-oatmeal/50">Supports JPG, PNG, WEBP. Max 5MB.</p>
                 </div>
               </div>
 

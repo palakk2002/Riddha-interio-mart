@@ -15,8 +15,9 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import StatusBadge from './StatusBadge';
 
-const OrderCard = ({ order, onAccept, onReject, onUpdateStatus }) => {
+const OrderCard = ({ order, onAccept, onReject, onUpdateStatus, onVerifyOtp }) => {
   const [showTracking, setShowTracking] = useState(false);
+  const [otp, setOtp] = useState('');
   const isAvailable = ['None', 'Pending', 'Rejected'].includes(order.status);
   
   return (
@@ -163,23 +164,38 @@ const OrderCard = ({ order, onAccept, onReject, onUpdateStatus }) => {
             )}
 
             {order.status === 'Out for Delivery' && (
-              <button 
-                onClick={() => {
-                  if (order.paymentMode === 'COD') {
-                    const confirmCollect = window.confirm(`Please collect cash of ₹${order.totalBill.toLocaleString()} before completing the delivery. Proceed?`);
-                    if (!confirmCollect) return;
-                  }
-                  onUpdateStatus(order.id, 'Delivered');
-                }}
-                className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-xs font-bold transition-all shadow-sm ${
-                  order.paymentMode === 'COD' 
-                    ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-500/20' 
-                    : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20'
-                }`}
-              >
-                <LuCheck size={16} /> 
-                {order.paymentMode === 'COD' ? `Deliver & Collect Cash (₹${order.totalBill.toLocaleString()})` : 'Complete Delivery'}
-              </button>
+              <div className="space-y-3 border-t border-slate-200 pt-3">
+                <div className="bg-amber-50 p-3 rounded-xl border border-amber-100 flex flex-col gap-2">
+                  <label className="text-xs font-bold text-amber-800 uppercase tracking-widest text-center">Verify Delivery OTP</label>
+                  <input 
+                    type="text"
+                    placeholder="Enter 4-digit OTP"
+                    value={otp}
+                    onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+                    className="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm text-center tracking-[0.5em] font-black focus:ring-2 focus:ring-amber-500 outline-none"
+                    maxLength={4}
+                  />
+                  <p className="text-[9px] text-amber-600 text-center font-semibold">OTP has been sent to customer's email</p>
+                </div>
+                <button 
+                  onClick={() => {
+                    if (!otp || otp.length !== 4) return alert('Please enter 4-digit OTP');
+                    if (order.paymentMode === 'COD') {
+                      const confirmCollect = window.confirm(`Please collect cash of ₹${order.totalBill.toLocaleString()} before completing the delivery. Proceed?`);
+                      if (!confirmCollect) return;
+                    }
+                    if (onVerifyOtp) onVerifyOtp(order.id, otp);
+                  }}
+                  className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-xs font-bold transition-all shadow-sm ${
+                    order.paymentMode === 'COD' 
+                      ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-500/20' 
+                      : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20'
+                  }`}
+                >
+                  <LuCheck size={16} /> 
+                  {order.paymentMode === 'COD' ? `Deliver & Collect Cash (₹${order.totalBill.toLocaleString()})` : 'Verify OTP & Complete Delivery'}
+                </button>
+              </div>
             )}
 
             {order.status === 'Delivered' && (

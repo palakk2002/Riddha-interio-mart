@@ -11,60 +11,105 @@ import {
   LuCalendar,
   LuTruck
 } from 'react-icons/lu';
-
-const pendingBoysData = [
-  { id: 1, name: 'Rahul Sharma', email: 'rahul@example.com', phone: '+91 9876543220', vehicleType: 'Bike', applicationDate: '2024-04-10', docStatus: 'Verified' },
-  { id: 2, name: 'Amit Singh', email: 'amit@example.com', phone: '+91 9876543221', vehicleType: 'Scooter', applicationDate: '2024-04-12', docStatus: 'Pending' },
-];
+import toast from 'react-hot-toast';
+import api from '../../../shared/utils/api';
 
 const PendingDeliveryBoyPage = () => {
   const [pendingBoys, setPendingBoys] = useState([]);
   const [selectedBoy, setSelectedBoy] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const savedPending = localStorage.getItem('admin_pending_delivery_boys');
-    if (savedPending) {
-      setPendingBoys(JSON.parse(savedPending));
-    } else {
-      localStorage.setItem('admin_pending_delivery_boys', JSON.stringify(pendingBoysData));
-      setPendingBoys(pendingBoysData);
-    }
-  }, []);
-
-  const handleApprove = (id) => {
-    if (window.confirm('Are you sure you want to approve this delivery boy?')) {
-      const boyToApprove = pendingBoys.find(b => b.id === id);
-      const updatedPending = pendingBoys.filter(b => b.id !== id);
-      
-      // Save to Pending list
-      setPendingBoys(updatedPending);
-      localStorage.setItem('admin_pending_delivery_boys', JSON.stringify(updatedPending));
-
-      // Save to Approved list
-      const savedApproved = JSON.parse(localStorage.getItem('admin_approved_delivery_boys') || '[]');
-      const newApprovedBoy = {
-        ...boyToApprove,
-        id: `DB-${Date.now()}`, // Generate unique ID to avoid conflict with existing static data
-        status: 'Active',
-        rating: 5.0,
-        totalDeliveries: 0
-      };
-      const updatedApproved = [...savedApproved, newApprovedBoy];
-      localStorage.setItem('admin_approved_delivery_boys', JSON.stringify(updatedApproved));
-
-      setSelectedBoy(null);
-      alert('Application Approved Successfully!');
+  const fetchPending = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/delivery/pending');
+      if (data.success) {
+        setPendingBoys(data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch pending delivery boys:', err);
+      toast.error('Failed to fetch pending applications');
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchPending();
+  }, []);
+
+  const handleApprove = (id) => {
+    toast((t) => (
+      <div className="flex flex-col gap-2 p-1 text-left">
+        <p className="text-sm font-bold text-gray-800">
+          Are you sure you want to approve this delivery partner?
+        </p>
+        <div className="flex justify-end gap-2 mt-1">
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                const { data } = await api.put(`/delivery/${id}/approve`, { approvalStatus: 'Approved' });
+                if (data.success) {
+                  toast.success("Delivery partner approved successfully!");
+                  fetchPending();
+                  setSelectedBoy(null);
+                }
+              } catch (err) {
+                console.error(err);
+                toast.error("Failed to approve delivery partner");
+              }
+            }}
+            className="px-3 py-1 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 transition-colors"
+          >
+            Approve
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-gray-200 text-gray-800 rounded-lg text-xs font-bold hover:bg-gray-300 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: 6000 });
+  };
+
   const handleReject = (id) => {
-    if (window.confirm('Are you sure you want to reject this application?')) {
-      const updatedPending = pendingBoys.filter(b => b.id !== id);
-      setPendingBoys(updatedPending);
-      localStorage.setItem('admin_pending_delivery_boys', JSON.stringify(updatedPending));
-      setSelectedBoy(null);
-      alert('Application Rejected.');
-    }
+    toast((t) => (
+      <div className="flex flex-col gap-2 p-1 text-left">
+        <p className="text-sm font-bold text-gray-800">
+          Are you sure you want to reject this application?
+        </p>
+        <div className="flex justify-end gap-2 mt-1">
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                const { data } = await api.put(`/delivery/${id}/approve`, { approvalStatus: 'Rejected' });
+                if (data.success) {
+                  toast.success("Application rejected.");
+                  fetchPending();
+                  setSelectedBoy(null);
+                }
+              } catch (err) {
+                console.error(err);
+                toast.error("Failed to reject application");
+              }
+            }}
+            className="px-3 py-1 bg-red-800 text-white rounded-lg text-xs font-bold hover:bg-red-900 transition-colors"
+          >
+            Reject
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-gray-200 text-gray-800 rounded-lg text-xs font-bold hover:bg-gray-300 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: 6000 });
   };
 
   const handleView = (boy) => {
@@ -94,17 +139,25 @@ const PendingDeliveryBoyPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-soft-oatmeal/50">
-                {pendingBoys.length > 0 ? (
+                {loading ? (
+                  Array(3).fill(0).map((_, idx) => (
+                    <tr key={idx} className="animate-pulse">
+                      <td colSpan="5" className="px-6 py-6">
+                        <div className="h-6 bg-gray-100 rounded w-full"></div>
+                      </td>
+                    </tr>
+                  ))
+                ) : pendingBoys.length > 0 ? (
                   pendingBoys.map((boy) => (
-                    <tr key={boy.id} className="hover:bg-soft-oatmeal/5 transition-colors group">
+                    <tr key={boy._id} className="hover:bg-soft-oatmeal/5 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-red-800/10 flex items-center justify-center text-red-800">
                             <LuUserPlus size={20} />
                           </div>
                           <div>
-                            <p className="font-bold text-deep-espresso">{boy.name}</p>
-                            <p className="text-xs text-warm-sand">Applicant #{boy.id}</p>
+                            <p className="font-bold text-deep-espresso">{boy.fullName}</p>
+                            <p className="text-xs text-warm-sand">Applicant #{boy._id.slice(-6).toUpperCase()}</p>
                           </div>
                         </div>
                       </td>
@@ -125,14 +178,14 @@ const PendingDeliveryBoyPage = () => {
                           <p className="text-xs font-bold text-deep-espresso/70 uppercase tracking-wider">{boy.vehicleType}</p>
                           <div className="flex items-center gap-1.5 text-[10px] font-bold">
                             <LuFileText size={12} className="text-warm-sand" />
-                            <span className={boy.docStatus === 'Verified' ? 'text-green-600' : 'text-amber-600'}>
-                              {boy.docStatus}
+                            <span className={boy.documents?.dl ? 'text-green-600' : 'text-amber-600'}>
+                              {boy.documents?.dl ? 'Docs Uploaded' : 'Pending Docs'}
                             </span>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-xs text-deep-espresso/70 font-medium">
-                        {boy.applicationDate}
+                        {new Date(boy.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2 text-xl">
@@ -143,13 +196,13 @@ const PendingDeliveryBoyPage = () => {
                             <LuEye />
                           </button>
                           <button 
-                            onClick={() => handleApprove(boy.id)}
+                            onClick={() => handleApprove(boy._id)}
                             className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                           >
                             <LuCheck />
                           </button>
                           <button 
-                            onClick={() => handleReject(boy.id)}
+                            onClick={() => handleReject(boy._id)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           >
                             <LuX />
@@ -191,7 +244,7 @@ const PendingDeliveryBoyPage = () => {
                      <LuUserPlus size={32} />
                    </div>
                    <div>
-                     <h2 className="text-2xl font-display font-bold">{selectedBoy.name}</h2>
+                     <h2 className="text-2xl font-display font-bold">{selectedBoy.fullName}</h2>
                      <p className="text-white/70 text-sm font-medium uppercase tracking-widest">Application Review</p>
                    </div>
                  </div>
@@ -222,7 +275,7 @@ const PendingDeliveryBoyPage = () => {
                     <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
                        <LuCalendar size={12} /> Applied On
                     </p>
-                    <p className="text-sm font-bold text-deep-espresso">{selectedBoy.applicationDate}</p>
+                    <p className="text-sm font-bold text-deep-espresso">{new Date(selectedBoy.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
                   </div>
                 </div>
 
@@ -232,24 +285,24 @@ const PendingDeliveryBoyPage = () => {
                      <span className="text-xs font-bold text-deep-espresso">Identity Documents</span>
                    </div>
                    <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${
-                     selectedBoy.docStatus === 'Verified' 
+                     selectedBoy.documents?.dl
                      ? 'bg-green-100 text-green-700 border-green-200' 
                      : 'bg-amber-100 text-amber-700 border-amber-200'
                    }`}>
-                     {selectedBoy.docStatus}
+                     {selectedBoy.documents?.dl ? 'Available' : 'Pending'}
                    </span>
                 </div>
 
                 {/* Modal Actions */}
                 <div className="flex gap-4 pt-4">
                   <button 
-                    onClick={() => handleReject(selectedBoy.id)}
+                    onClick={() => handleReject(selectedBoy._id)}
                     className="flex-1 bg-red-50 text-red-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-100 transition-all border border-red-100"
                   >
                     Reject Applicant
                   </button>
                   <button 
-                    onClick={() => handleApprove(selectedBoy.id)}
+                    onClick={() => handleApprove(selectedBoy._id)}
                     className="flex-1 bg-red-800 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-deep-espresso transition-all shadow-lg shadow-red-900/20"
                   >
                     Approve & Active

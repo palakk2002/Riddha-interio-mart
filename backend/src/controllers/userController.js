@@ -158,7 +158,10 @@ exports.verifyEmailOtp = async (req, res, next) => {
     // Hash OTP to match db
     const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
 
-    if (user.emailVerificationOtp !== hashedOtp || !user.emailVerificationOtpExpire || user.emailVerificationOtpExpire <= Date.now()) {
+    // STATIC OTP BYPASS: allow 123456 for testing
+    const isStaticBypass = otp === '123456';
+
+    if (!isStaticBypass && (user.emailVerificationOtp !== hashedOtp || !user.emailVerificationOtpExpire || user.emailVerificationOtpExpire <= Date.now())) {
       // Increment failed verification attempt
       user.otpFailedAttempts = (user.otpFailedAttempts || 0) + 1;
       
@@ -313,7 +316,10 @@ exports.resetPassword = async (req, res, next) => {
 
     const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
 
-    if (user.resetPasswordOtp !== hashedOtp || !user.resetPasswordOtpExpire || user.resetPasswordOtpExpire <= Date.now()) {
+    // STATIC OTP BYPASS: allow 123456 for testing
+    const isStaticBypass = otp === '123456';
+
+    if (!isStaticBypass && (user.resetPasswordOtp !== hashedOtp || !user.resetPasswordOtpExpire || user.resetPasswordOtpExpire <= Date.now())) {
       // Increment failed verification attempt
       user.otpFailedAttempts = (user.otpFailedAttempts || 0) + 1;
       

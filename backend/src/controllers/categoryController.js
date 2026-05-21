@@ -62,11 +62,17 @@ exports.updateCategory = async (req, res, next) => {
 
     const oldName = oldCategory.name;
 
+    console.log("=== Category Update Request Body ===");
+    console.log(JSON.stringify(req.body, null, 2));
+
     const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
       session
     });
+
+    console.log("=== Saved Category Document ===");
+    console.log(JSON.stringify(category, null, 2));
 
     // Cascade name changes to products and catalog if name is updated
     if (req.body.name && req.body.name !== oldName) {

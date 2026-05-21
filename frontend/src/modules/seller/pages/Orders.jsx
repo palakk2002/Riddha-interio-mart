@@ -259,13 +259,20 @@ const Orders = () => {
                             >
                               <Eye size={14} />
                             </button>
-                            {order.status === 'Processing' && (
+                            {order.status === 'Processing' && !order.deliveryBoy && (
                               <button
                                 onClick={() => handleAssignInit(order)}
                                 className="p-2 bg-seller-primary text-white rounded-lg hover:bg-seller-dark transition-all shadow-lg shadow-seller-primary/20"
+                                title="Assign Partner"
                               >
                                 <Truck size={14} />
                               </button>
+                            )}
+                            {order.deliveryBoy && (
+                              <div className="flex items-center gap-1.5 p-1.5 px-3 bg-seller-light/50 rounded-lg border border-seller-primary/20" title={`Delivery Partner: ${order.deliveryBoy?.fullName || 'Assigned'}`}>
+                                 <Truck size={12} className="text-seller-primary" />
+                                 <span className="text-[9px] font-black text-seller-primary uppercase tracking-widest">{order.deliveryStatus || 'Assigned'}</span>
+                              </div>
                             )}
                           </div>
                         </td>

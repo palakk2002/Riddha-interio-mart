@@ -60,6 +60,7 @@ const menuGroups = [
         icon: FiTruck, 
         path: '/admin/delivery',
         children: [
+          { path: '/admin/delivery/pending', icon: FiClock, label: 'Pending Deliveries', showBadge: true, badgeType: 'delivery' },
           { path: '/admin/delivery', icon: FiGrid, label: 'Manage Delivery' },
           { path: '/admin/delivery/assign', icon: FiTruck, label: 'Assign Delivery' },
         ]

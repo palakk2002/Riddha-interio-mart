@@ -27,6 +27,8 @@ const AddInventoryPage = () => {
     sku: '',
     hsnCode: '',
     category: '',
+    subcategory: '',
+    subsubcategory: '',
     brand: '',
     price: '',
     images: [],
@@ -64,6 +66,7 @@ const AddInventoryPage = () => {
               hsnCode: itm.hsnCode || '',
               category: itm.category || '',
               subcategory: itm.subcategory || '',
+              subsubcategory: itm.subsubcategory || '',
               brand: itm.brand || '',
               price: itm.price || '',
               images: itm.images || [],
@@ -395,7 +398,8 @@ const AddInventoryPage = () => {
                                        setFormData({
                                          ...formData,
                                          category: cat.name,
-                                         subcategory: '' // Reset subcategory when parent changes
+                                         subcategory: '', // Reset subcategory when parent changes
+                                         subsubcategory: ''
                                        });
                                        setCatSearch('');
                                        setIsCatOpen(false);
@@ -432,7 +436,7 @@ const AddInventoryPage = () => {
                        </label>
                        <select 
                          value={formData.subcategory || ''}
-                         onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
+                         onChange={(e) => setFormData({...formData, subcategory: e.target.value, subsubcategory: ''})}
                          className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none cursor-pointer appearance-none font-medium"
                        >
                          <option value="">Select Subcategory</option>
@@ -442,6 +446,25 @@ const AddInventoryPage = () => {
                        </select>
                     </div>
                   )}
+
+                   {/* Active Sub-subcategories Dynamic Selector Dropdown */}
+                   {formData.category && formData.subcategory && categories.find(c => c.name === formData.category)?.subcategories?.find(s => s.name === formData.subcategory)?.subsubcategories?.length > 0 && (
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
+                           <LuGrid2X2 size={12} /> Sub-subcategory
+                        </label>
+                        <select 
+                          value={formData.subsubcategory || ''}
+                          onChange={(e) => setFormData({...formData, subsubcategory: e.target.value})}
+                          className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none cursor-pointer appearance-none font-medium"
+                        >
+                          <option value="">Select Sub-subcategory</option>
+                          {categories.find(c => c.name === formData.category).subcategories.find(s => s.name === formData.subcategory).subsubcategories.map(subsub => (
+                            <option key={subsub._id || subsub.name} value={subsub.name}>{subsub.name}</option>
+                          ))}
+                        </select>
+                     </div>
+                   )}
 
                   {/* Brand */}
                   <div className="space-y-2">

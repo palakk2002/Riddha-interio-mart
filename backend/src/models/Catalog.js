@@ -21,6 +21,12 @@ const CatalogSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add a category']
   },
+  subcategory: {
+    type: String
+  },
+  subsubcategory: {
+    type: String
+  },
   price: {
     type: Number,
     required: [true, 'Please add a price'],

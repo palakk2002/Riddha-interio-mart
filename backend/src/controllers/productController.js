@@ -7,6 +7,16 @@ exports.getProducts = async (req, res, next) => {
   try {
     const searchService = require('../services/searchService');
 
+    // Dump all database products to check their categories and subcategories
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const allProducts = await Product.find({}, 'name category subcategory subsubcategory');
+      fs.writeFileSync(path.join(__dirname, '../../db_dump.json'), JSON.stringify(allProducts, null, 2));
+    } catch (err) {
+      console.error("Failed to dump products:", err);
+    }
+
     // 1. Generate unique cache key based on query parameters
     const cacheKey = JSON.stringify(req.query);
     const cachedData = searchService.getCachedResult(cacheKey);
@@ -23,6 +33,14 @@ exports.getProducts = async (req, res, next) => {
     // 2. Apply Category, Brand, and Admin protections
     if (req.query.category && req.query.category !== 'all') {
       filter.category = req.query.category;
+    }
+
+    if (req.query.subcategory && req.query.subcategory !== 'all') {
+      filter.subcategory = { $regex: new RegExp(`^${req.query.subcategory.trim()}$`, 'i') };
+    }
+
+    if (req.query.subsubcategory && req.query.subsubcategory !== 'all') {
+      filter.subsubcategory = { $regex: new RegExp(`^${req.query.subsubcategory.trim()}$`, 'i') };
     }
     
     if (req.query.brand && req.query.brand !== 'all') {
@@ -107,6 +125,7 @@ exports.getProducts = async (req, res, next) => {
       { path: 'brand', select: 'name logo' }
     ];
 
+    console.log("FILTER BUILT FOR PRODUCTS QUERY:", JSON.stringify(filter, null, 2));
     const result = await paginate(Product, filter, req, populateOptions);
 
     // Apply ranking sort based on Levenshtein distances if fuzzy regex fallback is active
@@ -131,6 +150,28 @@ exports.getProducts = async (req, res, next) => {
 
     // Store in-memory cache
     searchService.setCacheResult(cacheKey, outputPayload);
+
+    // Write to local debug file
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const debugPath = path.join(__dirname, '../../debug_products.json');
+      fs.writeFileSync(debugPath, JSON.stringify({
+        timestamp: new Date().toISOString(),
+        query: req.query,
+        builtFilter: filter,
+        resultCount: result.data.length,
+        results: result.data.map(p => ({
+          _id: p._id,
+          name: p.name,
+          category: p.category,
+          subcategory: p.subcategory,
+          subsubcategory: p.subsubcategory
+        }))
+      }, null, 2));
+    } catch (err) {
+      console.error("Failed to write debug file:", err);
+    }
 
     res.status(200).json({
       success: true,
@@ -166,6 +207,23 @@ exports.getSearchSuggestions = async (req, res, next) => {
 exports.createProduct = async (req, res, next) => {
   try {
     const { source = 'new' } = req.body;
+    
+    // Clean up empty string brand to avoid BSON Error and assign a default brand fallback
+    if (req.body.brand === '') {
+      delete req.body.brand;
+    }
+    
+    if (!req.body.brand) {
+      const Brand = require('../models/Brand');
+      let defaultBrand = await Brand.findOne({ name: 'General' });
+      if (!defaultBrand) {
+        defaultBrand = await Brand.findOne();
+      }
+      if (!defaultBrand) {
+        defaultBrand = await Brand.create({ name: 'General' });
+      }
+      req.body.brand = defaultBrand._id;
+    }
     
     // Automatically set seller and sellerType based on role if not provided
     if (!req.body.seller) {
@@ -343,6 +401,11 @@ exports.updateProduct = async (req, res, next) => {
     // Make sure user is product owner or admin
     if (product.seller.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(401).json({ success: false, error: 'User not authorized to update this product' });
+    }
+
+    // Clean up empty string brand to avoid BSON Error
+    if (req.body.brand === '') {
+      delete req.body.brand;
     }
 
     // If admin is updating, handle commission logic

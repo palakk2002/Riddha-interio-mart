@@ -1,5 +1,5 @@
 const express = require('express');
-const { registerSeller, loginSeller, getSellerMe, updateSellerProfile, getSellerStockStatus } = require('../controllers/sellerController');
+const { registerSeller, loginSeller, getSellerMe, updateSellerProfile, getSellerStockStatus, verifySellerOtp, getSellerCustomers } = require('../controllers/sellerController');
 const { getSellerAnalytics } = require('../controllers/sellerAnalyticsController');
 const { protect } = require('../middleware/auth');
 const { check } = require('express-validator');
@@ -25,9 +25,12 @@ router.post('/login', [
   check('password', 'Password is required').exists(),
   validate
 ], loginSeller);
+
+router.post('/verify-otp', verifySellerOtp);
 router.get('/me', protect, getSellerMe);
 router.put('/profile', protect, updateSellerProfile);
 router.get('/stock-status', protect, getSellerStockStatus);
 router.get('/analytics', protect, getSellerAnalytics);
+router.get('/customers', protect, getSellerCustomers);
 
 module.exports = router;

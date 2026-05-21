@@ -16,9 +16,37 @@ exports.getSellerWallet = async (req, res, next) => {
       wallet = await SellerWallet.create({ seller: req.user.id });
     }
 
+    // Populate order details for sale/refund transactions
+    const populatedTransactions = await Promise.all(wallet.transactions.map(async (tx) => {
+      let txObj = tx.toObject();
+      if (['sale_credit', 'refund_debit'].includes(tx.type) && tx.referenceId) {
+        try {
+          const Order = require('../models/Order');
+          const order = await Order.findById(tx.referenceId)
+            .select('user orderItems')
+            .populate('user', 'fullName email')
+            .lean();
+          
+          if (order) {
+            txObj.orderData = {
+              customerName: order.user ? order.user.fullName : 'Unknown User',
+              productName: order.orderItems && order.orderItems.length > 0 ? order.orderItems[0].name : 'Unknown Product',
+              itemsCount: order.orderItems ? order.orderItems.length : 0
+            };
+          }
+        } catch (e) {
+          console.error('Failed to populate order data for transaction:', e.message);
+        }
+      }
+      return txObj;
+    }));
+
+    const responseData = wallet.toObject();
+    responseData.transactions = populatedTransactions;
+
     res.status(200).json({
       success: true,
-      data: wallet
+      data: responseData
     });
   } catch (err) {
     next(err);

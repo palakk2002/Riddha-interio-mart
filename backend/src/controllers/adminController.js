@@ -446,7 +446,7 @@ exports.getStockStatus = async (req, res, next) => {
     const products = await Product.find()
       .populate('seller', 'shopName fullName')
       .populate('brand', 'name')
-      .sort('countInStock');
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
