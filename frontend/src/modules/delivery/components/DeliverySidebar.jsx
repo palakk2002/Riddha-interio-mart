@@ -8,10 +8,8 @@ import {
   LuArrowUpRight, 
   LuNavigation, 
   LuUsers, 
-  LuTrendingUp, 
   LuWallet, 
   LuBell, 
-  LuFileText, 
   LuSettings, 
   LuCircleHelp,
   LuLogOut,
@@ -32,6 +30,7 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const [pendingCount, setPendingCount] = useState(0);
   const [pickupCount, setPickupCount] = useState(0);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
   const fetchAnalytics = async () => {
     try {
@@ -43,11 +42,25 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
     } catch (err) {
       console.error('Failed to fetch delivery analytics:', err);
     }
+
+    try {
+      const { data } = await api.get('/notifications?limit=1');
+      if (data.success) {
+        setUnreadNotificationsCount(data.unreadCount || 0);
+      }
+    } catch (err) {
+      console.error('Failed to fetch unread notification count in Sidebar:', err);
+    }
   };
 
   useEffect(() => {
     fetchAnalytics();
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    window.addEventListener('delivery_notifications_updated', fetchAnalytics);
+    return () => window.removeEventListener('delivery_notifications_updated', fetchAnalytics);
+  }, []);
 
   useEffect(() => {
     const socket = getSocket();
@@ -62,9 +75,16 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
       fetchAnalytics();
     };
 
+    const handleNotificationNew = () => {
+      fetchAnalytics();
+    };
+
     socket.on('delivery:assigned', handleDeliveryAssigned);
+    socket.on('notification:new', handleNotificationNew);
+
     return () => {
       socket.off('delivery:assigned', handleDeliveryAssigned);
+      socket.off('notification:new', handleNotificationNew);
     };
   }, []);
 
@@ -93,10 +113,9 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
       ]
     },
     {
-      title: 'Fleet & Analytics',
+      title: 'Fleet & Earnings',
       items: [
         { name: 'Profile', path: '/delivery/profile', icon: LuUsers },
-        { name: 'Analytics', path: '/delivery/dashboard', icon: LuTrendingUp },
         { name: 'Earnings', path: '/delivery/earnings', icon: LuWallet },
       ]
     },
@@ -104,7 +123,6 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
       title: 'System',
       items: [
         { name: 'Notifications', path: '/delivery/notifications', icon: LuBell },
-        { name: 'Reports', path: '/delivery/dashboard', icon: LuFileText },
         { name: 'Terms & Conditions', path: '/delivery/terms', icon: LuShieldCheck },
         { name: 'Settings', path: '/delivery/settings', icon: LuSettings },
         { name: 'Help & Support', path: '/delivery/help', icon: LuCircleHelp },
@@ -172,6 +190,11 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
                               active ? 'bg-white text-[#2A458A]' : 'bg-[#2A458A] text-white'
                             }`}>
                               {pickupCount}
+                            </span>
+                          )}
+                          {item.name === 'Notifications' && unreadNotificationsCount > 0 && (
+                            <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white animate-pulse shadow-sm shadow-rose-500/50">
+                              {unreadNotificationsCount}
                             </span>
                           )}
                         </NavLink>

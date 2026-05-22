@@ -24,7 +24,8 @@ exports.getDeliveryAnalytics = async (req, res, next) => {
                   $and: [
                     { $eq: ['$deliveryStatus', 'Delivered'] },
                     { $ifNull: ['$deliveredAt', false] },
-                    { $ifNull: ['$deliveryAssignmentTime', false] }
+                    { $ifNull: ['$deliveryAssignmentTime', false] },
+                    { $gt: ['$deliveredAt', '$deliveryAssignmentTime'] }
                   ]
                 },
                 1,
@@ -39,7 +40,8 @@ exports.getDeliveryAnalytics = async (req, res, next) => {
                   $and: [
                     { $eq: ['$deliveryStatus', 'Delivered'] },
                     { $ifNull: ['$deliveredAt', false] },
-                    { $ifNull: ['$deliveryAssignmentTime', false] }
+                    { $ifNull: ['$deliveryAssignmentTime', false] },
+                    { $gt: ['$deliveredAt', '$deliveryAssignmentTime'] }
                   ]
                 },
                 { $subtract: ['$deliveredAt', '$deliveryAssignmentTime'] },
@@ -51,22 +53,17 @@ exports.getDeliveryAnalytics = async (req, res, next) => {
       }
     ]);
 
-    let totalAssigned = 0;
     let completedDeliveries = 0;
     let pendingDeliveries = 0;
-    let rejectedDeliveries = 0;
     let pickupRequestsCount = 0;
     let totalTimeMs = 0;
     let timeCount = 0;
 
     statsAgg.forEach(stat => {
-      totalAssigned += stat.count;
       if (stat._id === 'Delivered') {
         completedDeliveries += stat.count;
         totalTimeMs += stat.totalDeliveryTimeMs;
         timeCount += stat.completedWithTimeCount;
-      } else if (stat._id === 'Rejected') {
-        rejectedDeliveries += stat.count;
       } else if (['Pending', 'Accepted', 'Picked', 'Out for Delivery'].includes(stat._id)) {
         pendingDeliveries += stat.count;
         if (stat._id === 'Accepted') {
@@ -75,6 +72,12 @@ exports.getDeliveryAnalytics = async (req, res, next) => {
       }
     });
 
+    // Fix Rejection Analytics: Count orders rejected by this driver
+    const rejectedDeliveries = await Order.countDocuments({
+      'rejectedBy.deliveryBoy': deliveryId
+    });
+
+    const totalAssigned = completedDeliveries + pendingDeliveries + rejectedDeliveries;
     const successRate = totalAssigned > 0 ? ((completedDeliveries / totalAssigned) * 100).toFixed(1) : 0;
     const avgDeliveryTimeMs = timeCount > 0 ? (totalTimeMs / timeCount) : 0;
     const avgDeliveryTimeHours = avgDeliveryTimeMs > 0 ? (avgDeliveryTimeMs / (1000 * 60 * 60)).toFixed(1) : 0;
@@ -110,7 +113,21 @@ exports.getDeliveryAnalytics = async (req, res, next) => {
 
       const dayOrders = ordersLast7Days.filter(o => new Date(o.createdAt).toDateString() === dateString);
       const completed = dayOrders.filter(o => o.deliveryStatus === 'Delivered').length;
-      const rejected = dayOrders.filter(o => o.deliveryStatus === 'Rejected').length;
+
+      // Count rejections on this specific day matching this delivery boy
+      const startOfDay = new Date(d);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(d);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const rejected = await Order.countDocuments({
+        rejectedBy: {
+          $elemMatch: {
+            deliveryBoy: deliveryId,
+            rejectedAt: { $gte: startOfDay, $lte: endOfDay }
+          }
+        }
+      });
 
       performanceData.push({
         name: dayName,
@@ -118,8 +135,13 @@ exports.getDeliveryAnalytics = async (req, res, next) => {
         rejected
       });
 
-      // Standard delivery fee credit of ₹50 per completed order
-      const dayEarnings = completed * 50;
+      // Bind daily earnings directly to the wallet ledger transactions of type 'delivery_fee_credit'
+      const dayEarningsTransactions = wallet.transactions.filter(t => 
+        t.type === 'delivery_fee_credit' && 
+        new Date(t.createdAt).toDateString() === dateString
+      );
+      const dayEarnings = dayEarningsTransactions.reduce((sum, t) => sum + t.amount, 0);
+
       const timeLabel = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
       revenueData.push({
         name: timeLabel,

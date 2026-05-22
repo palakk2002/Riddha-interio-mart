@@ -224,11 +224,11 @@ const Dashboard = () => {
         {/* Premium KPI Cards Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
            {[
-             { label: 'Total Orders', value: stats.totalAssigned, icon: LuPackage, trend: '+12.5%', color: 'text-blue-600', bg: 'bg-blue-50' },
-             { label: 'Active Routes', value: stats.pendingDeliveries, icon: LuNavigation, trend: 'Normal', color: 'text-amber-600', bg: 'bg-amber-50' },
-             { label: 'Success Rate', value: `${performance.successRate}%`, icon: LuCheck, trend: '+2.1%', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-             { label: 'Partner Tier', value: 'Active', icon: LuZap, trend: 'Top 5%', color: 'text-[#2A458A]', bg: 'bg-[#2A458A]/10' },
-             { label: 'Total Earnings', value: `₹${earnings.totalEarnings.toLocaleString()}`, icon: LuWallet, trend: '+₹2.4k', color: 'text-slate-900', bg: 'bg-slate-100' },
+             { label: 'Total Orders', value: stats.totalAssigned, icon: LuPackage, trend: 'Lifetime', color: 'text-blue-600', bg: 'bg-blue-50' },
+             { label: 'Active Routes', value: stats.pendingDeliveries, icon: LuNavigation, trend: 'Active', color: 'text-amber-600', bg: 'bg-amber-50' },
+             { label: 'Success Rate', value: `${performance.successRate}%`, icon: LuCheck, trend: 'Target > 95%', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+             { label: 'Avg Delivery Time', value: `${performance.avgDeliveryTimeHours || 0} hrs`, icon: LuClock, trend: 'Target < 1.5h', color: 'text-[#2A458A]', bg: 'bg-[#2A458A]/10' },
+             { label: 'Total Earnings', value: `₹${earnings.totalEarnings.toLocaleString()}`, icon: LuWallet, trend: 'Ledger Balance', color: 'text-slate-900', bg: 'bg-slate-100' },
              { label: 'Pending COD', value: `₹${earnings.codToDeposit.toLocaleString()}`, icon: LuTriangleAlert, trend: 'To Deposit', color: 'text-rose-600', bg: 'bg-rose-50' },
            ].map((card, i) => (
              <motion.div 

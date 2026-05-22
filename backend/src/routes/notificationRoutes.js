@@ -3,7 +3,8 @@ const {
   getNotifications,
   markAsRead,
   markAllAsRead,
-  deleteNotification
+  deleteNotification,
+  clearAllNotifications
 } = require('../controllers/notificationController');
 
 const { protect } = require('../middleware/auth');
@@ -16,6 +17,7 @@ router.route('/')
   .get(getNotifications);
 
 router.put('/read-all', markAllAsRead);
+router.delete('/clear-all', clearAllNotifications);
 
 router.route('/:id/read')
   .put(markAsRead);
