@@ -137,6 +137,12 @@ const SignupPage = () => {
       return;
     }
 
+    if (formData.phone && formData.phone.length !== 10) {
+      setError('Please enter a valid 10-digit mobile number');
+      setLoading(false);
+      return;
+    }
+
     if (!agreeTerms) {
       setError('Please agree to the terms and conditions');
       setLoading(false);
@@ -198,7 +204,7 @@ const SignupPage = () => {
     }
 
     try {
-      const response = await api.post(`/auth/verify-email`, {
+      const response = await api.post(`/auth/user/verify-email`, {
         email: registeredEmail,
         otp
       });
@@ -215,7 +221,7 @@ const SignupPage = () => {
 
   const handleResendOtp = async () => {
     try {
-      const res = await api.post('/auth/resend-otp', { email: registeredEmail });
+      const res = await api.post('/auth/user/resend-otp', { email: registeredEmail });
       if (res.data.success) {
         alert('A new OTP has been sent to your email.');
       }
@@ -225,7 +231,18 @@ const SignupPage = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    if (name === 'fullName') {
+      if (value !== '' && !/^[A-Za-z\s]*$/.test(value)) return;
+    }
+    
+    if (name === 'phone') {
+      if (value !== '' && !/^\d*$/.test(value)) return;
+      if (value.length > 10) return;
+    }
+
+    setFormData({ ...formData, [name]: value });
   };
 
   return (

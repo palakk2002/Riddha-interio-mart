@@ -27,13 +27,55 @@ exports.getAllBulkOrders = async (req, res) => {
   }
 };
 
+// Update bulk order status (Admin)
+exports.updateBulkOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const validStatuses = ['Pending', 'Contacted', 'Processing', 'Resolved', 'Cancelled'];
+    
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status provided.' });
+    }
+
+    const bulkOrder = await BulkOrder.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: true }
+    );
+
+    if (!bulkOrder) {
+      return res.status(404).json({ success: false, message: 'Bulk order not found' });
+    }
+
+    res.status(200).json({ success: true, data: bulkOrder });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// Delete single bulk order (Admin)
+exports.deleteBulkOrder = async (req, res) => {
+  try {
+    const bulkOrder = await BulkOrder.findByIdAndDelete(req.params.id);
+    
+    if (!bulkOrder) {
+      return res.status(404).json({ success: false, message: 'Bulk order not found' });
+    }
+
+    res.status(200).json({ success: true, message: 'Bulk order deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
 // Seed dummy data
 exports.seedBulkOrders = async (req, res) => {
   try {
     const dummy = [
       {
         name: "Corporate Interiors Pvt Ltd",
-        contact: "9876543210 / info@corpinteriors.com",
+        phone: "9876543210",
+        email: "info@corpinteriors.com",
         items: [
           { name: "Executive Leather Chair", quantity: 50, category: "Office Furniture" },
           { name: "Conference Table", quantity: 5, category: "Office Furniture" }
@@ -42,7 +84,8 @@ exports.seedBulkOrders = async (req, res) => {
       },
       {
         name: "Grand Residency Hotel",
-        contact: "8887776665 / procure@grandresidency.com",
+        phone: "8887776665",
+        email: "procure@grandresidency.com",
         items: [
           { name: "Premium Velvet Sofa", quantity: 20, category: "Living Room" },
           { name: "King Size Bed Frame", quantity: 15, category: "Bedroom" }

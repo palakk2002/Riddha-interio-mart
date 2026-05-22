@@ -157,6 +157,32 @@ exports.approveSeller = async (req, res, next) => {
       status: 'approved'
     }, { new: true });
     if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
+
+    // Queue status change email
+    try {
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(seller.email, 'Riddha Mart - Seller Application Approved', 'seller_approval', {
+        shopName: seller.shopName,
+        status: 'approved'
+      });
+    } catch (emailErr) {
+      console.error('Failed to queue seller approval email:', emailErr.message);
+    }
+
+    // Log Administrative Action
+    try {
+      const { logSystemActivity } = require('../utils/activityLogger');
+      await logSystemActivity({
+        action: 'Approved Seller Account',
+        target: seller.shopName || seller.fullName,
+        user: req.user ? req.user.fullName : 'Admin',
+        role: 'Super Admin',
+        ipAddress: req.ip
+      });
+    } catch (logErr) {
+      console.error('Failed to log admin action:', logErr.message);
+    }
+
     res.status(200).json({ success: true, data: seller });
   } catch (err) {
     next(err);
@@ -171,6 +197,18 @@ exports.deleteSeller = async (req, res, next) => {
       isVerified: false 
     }, { new: true });
     if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
+
+    // Queue status change email
+    try {
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(seller.email, 'Riddha Mart - Seller Application Update', 'seller_approval', {
+        shopName: seller.shopName,
+        status: 'rejected'
+      });
+    } catch (emailErr) {
+      console.error('Failed to queue seller rejection email:', emailErr.message);
+    }
+
     res.status(200).json({ success: true, data: {} });
   } catch (err) {
     next(err);
@@ -187,6 +225,18 @@ exports.suspendSeller = async (req, res, next) => {
       isVerified: false 
     }, { new: true });
     if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
+
+    // Queue status change email
+    try {
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(seller.email, 'Riddha Mart - Seller Account Suspended', 'seller_approval', {
+        shopName: seller.shopName,
+        status: 'suspended'
+      });
+    } catch (emailErr) {
+      console.error('Failed to queue seller suspension email:', emailErr.message);
+    }
+
     res.status(200).json({ success: true, data: seller });
   } catch (err) {
     next(err);
@@ -203,6 +253,18 @@ exports.unsuspendSeller = async (req, res, next) => {
       isVerified: true 
     }, { new: true });
     if (!seller) return res.status(404).json({ success: false, error: 'Seller not found' });
+
+    // Queue status change email
+    try {
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(seller.email, 'Riddha Mart - Seller Account Unsuspended', 'seller_approval', {
+        shopName: seller.shopName,
+        status: 'approved'
+      });
+    } catch (emailErr) {
+      console.error('Failed to queue seller unsuspension email:', emailErr.message);
+    }
+
     res.status(200).json({ success: true, data: seller });
   } catch (err) {
     next(err);
@@ -234,17 +296,35 @@ exports.updateAdminProfile = async (req, res, next) => {
 // @desc    Get dashboard statistics
 // @route   GET /api/auth/admin/dashboard-stats
 // @access  Private/Admin
+let dashboardStatsCache = null;
+let dashboardStatsCacheExpiry = 0;
+
+// @desc    Get dashboard statistics
+// @route   GET /api/auth/admin/dashboard-stats
+// @access  Private/Admin
 exports.getDashboardStats = async (req, res, next) => {
   try {
+    const now = Date.now();
+    // Serve from cache if fresh and not explicitly bypassed
+    if (dashboardStatsCache && now < dashboardStatsCacheExpiry && req.query.refresh !== 'true') {
+      return res.status(200).json({
+        success: true,
+        cached: true,
+        data: dashboardStatsCache
+      });
+    }
+
     const Catalog = require('../models/Catalog');
     const Category = require('../models/Category');
     const Seller = require('../models/Seller');
     const Order = require('../models/Order');
     const User = require('../models/User');
     const Delivery = require('../models/Delivery');
+    const Product = require('../models/Product');
 
     const [
       productsCount,
+      liveProductsCount,
       categoriesCount,
       sellersCount,
       usersCount,
@@ -253,9 +333,12 @@ exports.getDashboardStats = async (req, res, next) => {
       recentOrders,
       orderStatusCounts,
       paymentMethodCounts,
-      userTypeCounts
+      userTypeCounts,
+      pendingApprovalsCount,
+      totalStockSum
     ] = await Promise.all([
       Catalog.countDocuments({ isActive: true }),
+      Product.countDocuments({ isActive: true, isApproved: true }),
       Category.countDocuments(),
       Seller.countDocuments({ isVerified: true }),
       User.countDocuments({ role: 'user' }),
@@ -277,6 +360,10 @@ exports.getDashboardStats = async (req, res, next) => {
       User.aggregate([
         { $match: { role: 'user' } },
         { $group: { _id: "$userType", count: { $sum: 1 } } }
+      ]),
+      Product.countDocuments({ approvalStatus: 'pending' }),
+      Product.aggregate([
+        { $group: { _id: null, total: { $sum: '$countInStock' } } }
       ])
     ]);
 
@@ -310,30 +397,40 @@ exports.getDashboardStats = async (req, res, next) => {
       });
     }
 
+    const payload = {
+      stats: {
+        products: productsCount,
+        liveProducts: liveProductsCount,
+        categories: categoriesCount,
+        sellers: sellersCount,
+        users: usersCount,
+        delivery: deliveryCount,
+        totalRevenue: revenueData[0]?.total || 0,
+        statusBreakdown: orderStatusCounts,
+        paymentBreakdown: paymentMethodCounts,
+        userTypeBreakdown: userTypeCounts,
+        pendingApprovals: pendingApprovalsCount,
+        warehouseStock: totalStockSum[0]?.total || 0
+      },
+      revenueChart: chartData,
+      recentActivity: recentOrders.map(o => ({
+        id: o._id,
+        action: `Order ${o.status}`,
+        target: `#${o._id.toString().slice(-6).toUpperCase()}`,
+        user: o.user?.fullName || 'Customer',
+        time: o.createdAt,
+        amount: o.totalPrice
+      }))
+    };
+
+    // Store in-memory cache for 60 seconds
+    dashboardStatsCache = payload;
+    dashboardStatsCacheExpiry = now + 60 * 1000;
+
     res.status(200).json({
       success: true,
-      data: {
-        stats: {
-          products: productsCount,
-          categories: categoriesCount,
-          sellers: sellersCount,
-          users: usersCount,
-          delivery: deliveryCount,
-          totalRevenue: revenueData[0]?.total || 0,
-          statusBreakdown: orderStatusCounts,
-          paymentBreakdown: paymentMethodCounts,
-          userTypeBreakdown: userTypeCounts
-        },
-        revenueChart: chartData,
-        recentActivity: recentOrders.map(o => ({
-          id: o._id,
-          action: `Order ${o.status}`,
-          target: `#${o._id.toString().slice(-6).toUpperCase()}`,
-          user: o.user?.fullName || 'Customer',
-          time: o.createdAt,
-          amount: o.totalPrice
-        }))
-      }
+      cached: false,
+      data: payload
     });
   } catch (err) {
     next(err);
@@ -349,12 +446,262 @@ exports.getStockStatus = async (req, res, next) => {
     const products = await Product.find()
       .populate('seller', 'shopName fullName')
       .populate('brand', 'name')
-      .sort('countInStock');
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
       count: products.length,
       data: products
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Adjust single product stock atomically
+// @route   PUT /api/auth/admin/inventory/adjust/:id
+// @access  Private/Admin
+exports.adjustStock = async (req, res, next) => {
+  const mongoose = require('mongoose');
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const Product = require('../models/Product');
+    const InventoryHistoryLog = require('../models/InventoryHistoryLog');
+    const { logSystemActivity } = require('../utils/activityLogger');
+
+    const { quantityDelta } = req.body;
+    if (quantityDelta === undefined || isNaN(quantityDelta)) {
+      return res.status(400).json({ success: false, error: 'Please provide a valid quantity delta' });
+    }
+
+    const delta = parseInt(quantityDelta);
+
+    // Fetch the product inside transaction
+    const product = await Product.findById(req.params.id).session(session);
+    if (!product) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ success: false, error: 'Product not found' });
+    }
+
+    const originalStock = product.countInStock;
+    const newStock = originalStock + delta;
+
+    if (newStock < 0) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ success: false, error: `Stock cannot be adjusted below zero. Current stock: ${originalStock}` });
+    }
+
+    // Atomically update product stock
+    product.countInStock = newStock;
+    await product.save({ session });
+
+    // Log to inventory history log
+    await InventoryHistoryLog.create([{
+      product: product._id,
+      action: 'manual_adjustment',
+      quantity: Math.abs(delta),
+      stockBefore: originalStock,
+      stockAfter: newStock,
+      details: `Manual adjustment of ${delta > 0 ? '+' : ''}${delta} units by ${req.user ? req.user.fullName : 'Admin'}`
+    }], { session });
+
+    // Log System Activity
+    await logSystemActivity({
+      action: 'Adjusted Stock Level',
+      target: `${product.name} (SKU: ${product.sku || 'N/A'})`,
+      user: req.user ? req.user.fullName : 'Admin',
+      role: 'Super Admin',
+      ipAddress: req.ip
+    });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // Trigger Real-time Sockets and Low Stock Alerts after commit
+    try {
+      const socketModule = require('../socket');
+      const io = socketModule.getIO();
+      if (io) {
+        // Broadcast to all active users/admins
+        io.emit('product:stock_update', {
+          productId: product._id,
+          countInStock: product.countInStock
+        });
+
+        // Trigger low stock alert if it falls below the critical limit
+        if (product.countInStock <= 10) {
+          socketModule.notifyLowStock(product.seller, {
+            productId: product._id,
+            name: product.name,
+            remainingStock: product.countInStock,
+            message: `Product "${product.name}" (SKU: ${product.sku || 'N/A'}) has fallen to a critical level of ${product.countInStock} units.`
+          });
+        }
+      }
+    } catch (socketErr) {
+      console.error('[Socket Notification Error] Failed to broadcast inventory adjustment:', socketErr.message);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: product
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    next(err);
+  }
+};
+
+// @desc    Batch adjust multiple product stocks atomically
+// @route   POST /api/auth/admin/inventory/batch-adjust
+// @access  Private/Admin
+exports.batchAdjustStock = async (req, res, next) => {
+  const mongoose = require('mongoose');
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const Product = require('../models/Product');
+    const InventoryHistoryLog = require('../models/InventoryHistoryLog');
+    const { logSystemActivity } = require('../utils/activityLogger');
+
+    const { adjustments } = req.body;
+    if (!adjustments || !Array.isArray(adjustments)) {
+      return res.status(400).json({ success: false, error: 'Adjustments array is required' });
+    }
+
+    const results = [];
+
+    for (const adj of adjustments) {
+      const { sku, quantityDelta } = adj;
+      if (!sku || quantityDelta === undefined || isNaN(quantityDelta)) {
+        results.push({ sku, success: false, error: 'Invalid payload parameters' });
+        continue;
+      }
+
+      const delta = parseInt(quantityDelta);
+      const product = await Product.findOne({ sku }).session(session);
+
+      if (!product) {
+        results.push({ sku, success: false, error: 'SKU not found' });
+        continue;
+      }
+
+      const originalStock = product.countInStock;
+      const newStock = originalStock + delta;
+
+      if (newStock < 0) {
+        results.push({ sku, success: false, error: `Adjustment would result in negative stock: ${newStock}` });
+        continue;
+      }
+
+      product.countInStock = newStock;
+      await product.save({ session });
+
+      await InventoryHistoryLog.create([{
+        product: product._id,
+        action: 'manual_adjustment',
+        quantity: Math.abs(delta),
+        stockBefore: originalStock,
+        stockAfter: newStock,
+        details: `Batch adjustment of ${delta > 0 ? '+' : ''}${delta} units by ${req.user ? req.user.fullName : 'Admin'}`
+      }], { session });
+
+      results.push({ sku, success: true, originalStock, newStock });
+    }
+
+    // Log System Activity
+    await logSystemActivity({
+      action: 'Batch Stock Adjustment',
+      target: `${results.filter(r => r.success).length} items restocked successfully`,
+      user: req.user ? req.user.fullName : 'Admin',
+      role: 'Super Admin',
+      ipAddress: req.ip
+    });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // Trigger Real-time Sockets and Low Stock Alerts after commit
+    try {
+      const socketModule = require('../socket');
+      const io = socketModule.getIO();
+      if (io) {
+        for (const res of results) {
+          if (res.success) {
+            // Find the product in the DB to get its seller info and current name
+            const updatedProd = await Product.findOne({ sku: res.sku });
+            if (updatedProd) {
+              io.emit('product:stock_update', {
+                productId: updatedProd._id,
+                countInStock: updatedProd.countInStock
+              });
+
+              if (updatedProd.countInStock <= 10) {
+                socketModule.notifyLowStock(updatedProd.seller, {
+                  productId: updatedProd._id,
+                  name: updatedProd.name,
+                  remainingStock: updatedProd.countInStock,
+                  message: `Product "${updatedProd.name}" (SKU: ${updatedProd.sku || 'N/A'}) has fallen to a critical level of ${updatedProd.countInStock} units.`
+                });
+              }
+            }
+          }
+        }
+      }
+    } catch (socketErr) {
+      console.error('[Socket Notification Error] Failed to broadcast batch inventory adjustments:', socketErr.message);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: results
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    next(err);
+  }
+};
+
+// @desc    Get inventory history logs for a specific product
+// @route   GET /api/auth/admin/inventory/history/:id
+// @access  Private/Admin
+exports.getProductInventoryHistory = async (req, res, next) => {
+  try {
+    const InventoryHistoryLog = require('../models/InventoryHistoryLog');
+    const logs = await InventoryHistoryLog.find({ product: req.params.id })
+      .sort('-createdAt')
+      .limit(100);
+
+    res.status(200).json({
+      success: true,
+      count: logs.length,
+      data: logs
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get active temporary stock reservations
+// @route   GET /api/auth/admin/inventory/reservations
+// @access  Private/Admin
+exports.getActiveReservations = async (req, res, next) => {
+  try {
+    const InventoryReservation = require('../models/InventoryReservation');
+    const reservations = await InventoryReservation.find({ status: 'reserved' })
+      .populate('product', 'name sku price')
+      .populate('user', 'fullName email')
+      .sort('-createdAt');
+
+    res.status(200).json({
+      success: true,
+      count: reservations.length,
+      data: reservations
     });
   } catch (err) {
     next(err);
@@ -444,6 +791,21 @@ exports.deleteAssistant = async (req, res, next) => {
   try {
     const assistant = await Admin.findByIdAndDelete(req.params.id);
     if (!assistant) return res.status(404).json({ success: false, error: 'Assistant not found' });
+
+    // Log Administrative Action
+    try {
+      const { logSystemActivity } = require('../utils/activityLogger');
+      await logSystemActivity({
+        action: 'Deleted Staff Account',
+        target: assistant.fullName || assistant.email,
+        user: req.user ? req.user.fullName : 'Admin',
+        role: 'Super Admin',
+        ipAddress: req.ip
+      });
+    } catch (logErr) {
+      console.error('Failed to log admin action:', logErr.message);
+    }
+
     res.status(200).json({ success: true, data: {} });
   } catch (err) {
     next(err);
@@ -681,12 +1043,15 @@ exports.searchOrders = async (req, res, next) => {
     const Order = require('../models/Order');
     
     // Search by ID (if valid hex string of length 24) or customer name
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(query);
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(query.trim());
     
+    // Safely escape user input for regular expression to protect against ReDoS attacks
+    const escapedQuery = query.trim().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+
     const searchQuery = {
       $or: [
-        ...(isObjectId ? [{ _id: query }] : []),
-        { 'shippingAddress.fullName': { $regex: query, $options: 'i' } }
+        ...(isObjectId ? [{ _id: query.trim() }] : []),
+        { 'shippingAddress.fullName': { $regex: escapedQuery, $options: 'i' } }
       ]
     };
 
@@ -696,6 +1061,58 @@ exports.searchOrders = async (req, res, next) => {
       .populate('user', 'fullName');
 
     res.status(200).json({ success: true, data: orders });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get system activity logs
+// @route   GET /api/auth/admin/activity-logs
+// @access  Private/Admin
+exports.getActivityLogs = async (req, res, next) => {
+  try {
+    const ActivityLog = require('../models/ActivityLog');
+    const { type, page = 1, limit = 10 } = req.query;
+
+    const filter = {};
+    if (type === 'system') {
+      filter.role = 'System';
+    } else if (type === 'admin') {
+      filter.role = { $in: ['Super Admin', 'Admin', 'Manager'] };
+    }
+
+    const skipIndex = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Seed initial mock activity log records if database is empty so dashboard is alive instantly
+    const count = await ActivityLog.countDocuments(filter);
+    if (count === 0 && parseInt(page) === 1) {
+      const mockLogs = [
+        { action: 'Approved Seller Account', target: 'Royal Interiors Ltd', user: 'Admin', role: 'Super Admin', ipAddress: '192.168.1.101', createdAt: new Date(Date.now() - 5 * 60 * 1000) },
+        { action: 'Added New Category', target: 'Lamps & Illuminations', user: 'Admin', role: 'Super Admin', ipAddress: '192.168.1.101', createdAt: new Date(Date.now() - 45 * 60 * 1000) },
+        { action: 'Updated Global Commission', target: 'Markup Settings', user: 'Manager', role: 'Manager', ipAddress: '192.168.1.112', createdAt: new Date(Date.now() - 2 * 3600 * 1000) },
+        { action: 'Confirmed Cash Deposit', target: 'Order #ORD-8472', user: 'Admin', role: 'Super Admin', ipAddress: '192.168.1.101', createdAt: new Date(Date.now() - 5 * 3600 * 1000) },
+        { action: 'Blocked Malicious IP', target: 'IP 203.0.113.50', user: 'System', role: 'System', ipAddress: '127.0.0.1', createdAt: new Date(Date.now() - 12 * 3600 * 1000) },
+        { action: 'Automatic DB Backup', target: 'MongoDB Cluster', user: 'System', role: 'System', ipAddress: '127.0.0.1', createdAt: new Date(Date.now() - 24 * 3600 * 1000) }
+      ];
+      await ActivityLog.insertMany(mockLogs);
+    }
+
+    const logs = await ActivityLog.find(filter)
+      .sort('-createdAt')
+      .skip(skipIndex)
+      .limit(parseInt(limit));
+
+    const total = await ActivityLog.countDocuments(filter);
+
+    res.status(200).json({
+      success: true,
+      data: logs,
+      pagination: {
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
   } catch (err) {
     next(err);
   }

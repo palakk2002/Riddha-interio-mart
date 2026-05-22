@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronRight, FiGrid, FiArrowRight, FiFilter, FiHome } from 'react-icons/fi';
 import api from '../../../shared/utils/api';
@@ -8,6 +8,9 @@ import BrandScroll from '../components/BrandScroll';
 
 const CategoryDetailPage = () => {
   const { slug } = useParams();
+  const [searchParams] = useSearchParams();
+  const subFilter = searchParams.get('sub');
+  
   const [category, setCategory] = useState(null);
   const [allCategories, setAllCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -22,8 +25,14 @@ const CategoryDetailPage = () => {
         const currentCategory = catRes.data.data;
         setCategory(currentCategory);
 
-        // Fetch products for this category
-        const productRes = await api.get(`/products?category=${currentCategory.name}`);
+        // Fetch products for this category (with optional subcategory filter)
+        let productUrl = `/products?category=${encodeURIComponent(currentCategory.name)}`;
+        if (subFilter) {
+          productUrl += `&subcategory=${encodeURIComponent(subFilter)}`;
+        }
+        console.log("[CategoryDetailPage] Fetching products from URL:", productUrl);
+        const productRes = await api.get(productUrl);
+        console.log("[CategoryDetailPage] Received products response:", productRes.data);
         setProducts(productRes.data.data);
 
         // Fetch all categories for sidebar
@@ -37,7 +46,7 @@ const CategoryDetailPage = () => {
     };
     fetchData();
     window.scrollTo(0, 0);
-  }, [slug]);
+  }, [slug, subFilter]);
 
   if (loading) {
     return (

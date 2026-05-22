@@ -55,6 +55,9 @@ const DeliverySchema = new mongoose.Schema({
     enum: ['Available', 'Busy', 'Offline'],
     default: 'Offline'
   },
+  servicePincodes: [{
+    type: String
+  }],
   approvalStatus: {
     type: String,
     enum: ['Pending', 'Approved', 'Rejected', 'Suspended'],

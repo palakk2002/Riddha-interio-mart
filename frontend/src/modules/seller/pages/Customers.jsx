@@ -89,9 +89,28 @@ const Customers = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
            {[
              { label: 'Total Buyers', value: customers.length, icon: <User size={18} />, color: 'bg-blue-50 text-blue-600' },
-             { label: 'Retention Rate', value: '84%', icon: <ArrowUpRight size={18} />, color: 'bg-emerald-50 text-emerald-600' },
-             { label: 'Avg LTV', value: '₹4.2k', icon: <DollarSign size={18} />, color: 'bg-amber-50 text-amber-600' },
-             { label: 'New This Month', value: '12', icon: <Calendar size={18} />, color: 'bg-rose-50 text-rose-600' },
+             { 
+               label: 'Retention Rate', 
+               value: customers.length > 0 ? `${Math.round((customers.filter(c => c.totalOrders > 1).length / customers.length) * 100)}%` : '0%', 
+               icon: <ArrowUpRight size={18} />, 
+               color: 'bg-emerald-50 text-emerald-600' 
+             },
+             { 
+               label: 'Avg LTV', 
+               value: customers.length > 0 ? `₹${(customers.reduce((sum, c) => sum + c.totalSpent, 0) / customers.length).toFixed(0).toLocaleString()}` : '₹0', 
+               icon: <DollarSign size={18} />, 
+               color: 'bg-amber-50 text-amber-600' 
+             },
+             { 
+               label: 'New This Month', 
+               value: customers.filter(c => {
+                 const d = new Date(c.memberSince);
+                 const now = new Date();
+                 return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+               }).length, 
+               icon: <Calendar size={18} />, 
+               color: 'bg-rose-50 text-rose-600' 
+             },
            ].map((stat, i) => (
              <div key={i} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                 <div className={`w-10 h-10 rounded-xl ${stat.color} flex items-center justify-center`}>

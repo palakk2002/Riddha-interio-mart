@@ -15,7 +15,8 @@ import {
   LuClock,
   LuCircleDot,
   LuNavigation,
-  LuLogOut
+  LuLogOut,
+  LuPackage
 } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../user/data/UserContext';

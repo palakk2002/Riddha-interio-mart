@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Referral = require('../models/Referral');
 const Wallet = require('../models/Wallet');
+const ReferralSettings = require('../models/ReferralSettings');
 const { notifyUserOrderStatus } = require('../socket');
 
 /**
@@ -13,6 +14,21 @@ class ReferralService {
    */
   async trackReferral(referredUser, referralCode, signupIp, signupFingerprint) {
     if (!referralCode) return null;
+
+    // Load dynamic settings
+    let settings = await ReferralSettings.findOne();
+    if (!settings) {
+      settings = await ReferralSettings.create({
+        isEnabled: true,
+        referrerReward: 100,
+        newUserReward: 50
+      });
+    }
+
+    // If disabled, skip referral tracking gracefully
+    if (!settings.isEnabled) {
+      return null;
+    }
 
     const referrer = await User.findOne({ referralCode });
     if (!referrer) {
@@ -44,8 +60,8 @@ class ReferralService {
       referrer: referrer._id,
       referredUser: referredUser._id,
       rewardStatus: 'pending',
-      referredUserReward: 50, // Rs. 50 signup credit
-      referrerReward: 100,    // Rs. 100 referral reward on purchase
+      referredUserReward: settings.newUserReward,
+      referrerReward: settings.referrerReward,
       signupIp,
       signupFingerprint
     });

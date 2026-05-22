@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PageWrapper from '../components/PageWrapper';
+import api from '../../../shared/utils/api';
 import { 
   Wallet as WalletIcon, 
   TrendingUp, 
@@ -26,22 +27,68 @@ const initialTransactions = [
 ];
 
 const Wallet = () => {
-  const [balance, setBalance] = useState(() => {
-    const saved = localStorage.getItem('seller_wallet_balance');
-    return saved ? parseFloat(saved) : 12450;
+  const [walletData, setWalletData] = useState({
+    withdrawableBalance: 0,
+    pendingBalance: 0,
+    totalEarnings: 0,
+    transactions: []
   });
-  
-  const [transactions, setTransactions] = useState(() => {
-    const saved = localStorage.getItem('seller_transactions');
-    return saved ? JSON.parse(saved) : initialTransactions;
-  });
+  const [loading, setLoading] = useState(true);
 
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
-  const handleWithdraw = (e) => {
+  const fetchWallet = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/wallets/seller/me');
+      if (data.success) {
+        setWalletData(data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch wallet:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchWallet();
+  }, []);
+
+  // Listen for socket events to update wallet in real-time
+  React.useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    let token = null;
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        token = u.token;
+      } catch (e) {}
+    }
+
+    if (token) {
+      const { connectSocket } = require('../../../shared/utils/socket');
+      const socket = connectSocket({ token });
+      
+      const refresh = () => fetchWallet();
+      
+      socket.on('order:new', refresh);
+      socket.on('delivery:response', refresh);
+
+      return () => {
+        socket.off('order:new', refresh);
+        socket.off('delivery:response', refresh);
+      };
+    }
+  }, []);
+
+  const handleWithdraw = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccessMsg('');
     const amount = parseFloat(withdrawAmount);
     
     if (isNaN(amount) || amount <= 0) {
@@ -49,7 +96,7 @@ const Wallet = () => {
       return;
     }
     
-    if (amount > balance) {
+    if (amount > walletData.withdrawableBalance) {
       setError('Insufficient balance in your wallet.');
       return;
     }
@@ -59,27 +106,20 @@ const Wallet = () => {
       return;
     }
 
-    const newBalance = balance - amount;
-    const newTransaction = {
-      id: Date.now(),
-      type: 'Withdrawal',
-      amount: amount,
-      status: 'Pending',
-      date: new Date().toISOString().split('T')[0],
-      isPositive: false
-    };
-
-    const updatedTransactions = [newTransaction, ...transactions];
-    
-    setBalance(newBalance);
-    setTransactions(updatedTransactions);
-    
-    localStorage.setItem('seller_wallet_balance', newBalance.toString());
-    localStorage.setItem('seller_transactions', JSON.stringify(updatedTransactions));
-    
-    setShowWithdrawModal(false);
-    setWithdrawAmount('');
-    setError('');
+    try {
+      const response = await api.post('/wallets/seller/payout', { amount });
+      if (response.data.success) {
+        setSuccessMsg(response.data.message || 'Payout requested successfully.');
+        setTimeout(() => {
+          setShowWithdrawModal(false);
+          setWithdrawAmount('');
+          setSuccessMsg('');
+          fetchWallet(); // refresh balance
+        }, 2000);
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to request payout.');
+    }
   };
 
   return (
@@ -125,14 +165,14 @@ const Wallet = () => {
                       </span>
                    </div>
                 </div>
-                <div>
+                 <div>
                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 leading-none">Available Balance</p>
-                   <h2 className="text-3xl font-semibold tracking-tight text-slate-900">₹{balance.toLocaleString()}</h2>
+                   <h2 className="text-3xl font-semibold tracking-tight text-slate-900">₹{walletData.withdrawableBalance.toLocaleString()}</h2>
                 </div>
                 <div className="mt-6 pt-6 border-t border-slate-50 flex items-center justify-between">
                    <div className="flex flex-col">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Next Payout</span>
-                      <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Apr 20, 2024</span>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total Earnings</span>
+                      <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">₹{walletData.totalEarnings.toLocaleString()}</span>
                    </div>
                    <button className="text-[10px] font-semibold text-seller-primary bg-seller-primary/5 px-3 py-1.5 rounded-lg border border-seller-primary/10 hover:bg-seller-primary hover:text-white transition-all flex items-center gap-1 uppercase tracking-widest">
                       Details <ChevronRight size={14} />
@@ -148,12 +188,11 @@ const Wallet = () => {
                 </div>
                 <div>
                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1 leading-none">Total Gross Revenue</p>
-                   <h3 className="text-2xl font-semibold text-slate-900 tracking-tight">₹85,000</h3>
+                   <h3 className="text-2xl font-semibold text-slate-900 tracking-tight">₹{walletData.totalEarnings.toLocaleString()}</h3>
                    <div className="flex items-center gap-2 mt-3">
                       <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-semibold uppercase tracking-widest">
-                         <ArrowUpRight size={10} /> +14.2%
+                         <ArrowUpRight size={10} /> Lifetime
                       </div>
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">vs. last month</span>
                    </div>
                 </div>
              </div>
@@ -163,10 +202,10 @@ const Wallet = () => {
                    <History size={24} />
                 </div>
                 <div>
-                   <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1 leading-none">Processing Payouts</p>
-                   <h3 className="text-2xl font-semibold text-slate-900 tracking-tight">₹5,000</h3>
+                   <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1 leading-none">Processing Payouts (Pending)</p>
+                   <h3 className="text-2xl font-semibold text-slate-900 tracking-tight">₹{walletData.pendingBalance.toLocaleString()}</h3>
                    <div className="flex items-center gap-2 mt-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest">
-                      <Clock size={12} className="text-amber-500" /> Expected in 48 hours
+                      <Clock size={12} className="text-amber-500" /> Awaiting Delivery
                    </div>
                 </div>
              </div>
@@ -202,39 +241,56 @@ const Wallet = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {transactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-8 py-5">
-                      <div className="flex items-center gap-4">
-                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${transaction.isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
-                            {transaction.isPositive ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
-                         </div>
-                         <div>
-                            <p className="text-sm font-semibold text-slate-900 group-hover:text-seller-primary transition-colors">{transaction.type}</p>
-                            <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5">{transaction.isPositive ? 'Credit' : 'Debit'}</p>
-                         </div>
-                      </div>
-                    </td>
-                    <td className="px-8 py-5">
-                       <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">TXN-{transaction.id}</span>
-                    </td>
-                    <td className="px-8 py-5 font-semibold text-slate-900">
-                      <span className={transaction.isPositive ? 'text-emerald-600' : 'text-slate-900'}>
-                         {transaction.isPositive ? '+' : '-'} ₹{transaction.amount.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="px-8 py-5">
-                      <span className={`text-[10px] font-semibold uppercase tracking-widest px-3 py-1.5 rounded-xl border ${
-                        transaction.status === 'Completed' 
-                          ? 'text-emerald-600 bg-emerald-50 border-emerald-100' 
-                          : 'text-amber-600 bg-amber-50 border-amber-100'
-                      }`}>
-                        {transaction.status}
-                      </span>
-                    </td>
-                    <td className="px-8 py-5 text-right text-[11px] text-slate-500 font-semibold uppercase tracking-widest">{transaction.date}</td>
+                {walletData.transactions.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="px-8 py-10 text-center text-slate-500 text-sm">No transactions found.</td>
                   </tr>
-                ))}
+                ) : walletData.transactions.slice().reverse().map((transaction) => {
+                  const isPositive = ['sale_credit', 'refund_credit', 'manual_adjustment'].includes(transaction.type) && transaction.amount > 0;
+                  return (
+                    <tr key={transaction._id || transaction.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-4">
+                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                              {isPositive ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
+                           </div>
+                           <div>
+                              <p className="text-sm font-semibold text-slate-900 group-hover:text-seller-primary transition-colors">
+                                {transaction.orderData 
+                                  ? `${transaction.orderData.productName} ${transaction.orderData.itemsCount > 1 ? `(+${transaction.orderData.itemsCount - 1})` : ''}`
+                                  : transaction.type.replace(/_/g, ' ')}
+                              </p>
+                              <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5">
+                                {transaction.orderData ? `Paid by ${transaction.orderData.customerName}` : (isPositive ? 'Credit' : 'Debit')}
+                              </p>
+                           </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5">
+                         <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">
+                           TXN-{transaction._id ? transaction._id.slice(-6).toUpperCase() : transaction.id}
+                         </span>
+                      </td>
+                      <td className="px-8 py-5 font-semibold text-slate-900">
+                        <span className={isPositive ? 'text-emerald-600' : 'text-slate-900'}>
+                           {isPositive ? '+' : '-'} ₹{Math.abs(transaction.amount).toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="px-8 py-5">
+                        <span className={`text-[10px] font-semibold uppercase tracking-widest px-3 py-1.5 rounded-xl border ${
+                          transaction.status === 'cleared' || transaction.status === 'Completed'
+                            ? 'text-emerald-600 bg-emerald-50 border-emerald-100' 
+                            : 'text-amber-600 bg-amber-50 border-amber-100'
+                        }`}>
+                          {transaction.status}
+                        </span>
+                      </td>
+                      <td className="px-8 py-5 text-right text-[11px] text-slate-500 font-semibold uppercase tracking-widest">
+                        {new Date(transaction.createdAt || transaction.date).toLocaleDateString('en-IN')}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -272,7 +328,7 @@ const Wallet = () => {
                    <div className="relative z-10 flex items-center justify-between">
                       <div>
                          <p className="text-[10px] font-semibold text-white/40 uppercase tracking-widest mb-1">Current Balance</p>
-                         <p className="text-2xl font-semibold">₹{balance.toLocaleString()}</p>
+                         <p className="text-2xl font-semibold">₹{walletData.withdrawableBalance.toLocaleString()}</p>
                       </div>
                       <CreditCard className="text-white/20" size={32} />
                    </div>

@@ -23,6 +23,7 @@ import {
   Truck
 } from 'lucide-react';
 import { useUser } from '../../user/data/UserContext';
+import api from '../../../shared/utils/api';
 import logo from '../../../assets/transparent_logo.png';
 
 const menuItems = [
@@ -55,6 +56,7 @@ const SellerSidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [openMenus, setOpenMenus] = React.useState({});
+  const [pendingOrdersCount, setPendingOrdersCount] = React.useState(0);
 
   React.useEffect(() => {
     const activeMenu = menuItems.find(item => 
@@ -63,6 +65,19 @@ const SellerSidebar = ({ isOpen, onClose }) => {
     if (activeMenu) {
       setOpenMenus(prev => ({ ...prev, [activeMenu.label]: true }));
     }
+
+    // Fetch dynamic orders count
+    const fetchOrdersCount = async () => {
+      try {
+        const { data } = await api.get('/seller/analytics?timeRange=monthly');
+        if (data.success && data.data.stats) {
+          setPendingOrdersCount(data.data.stats.pendingOrders || 0);
+        }
+      } catch (err) {
+        console.error('Failed to fetch pending orders count:', err);
+      }
+    };
+    fetchOrdersCount();
   }, [location.pathname]);
 
   const toggleMenu = (label) => {
@@ -182,9 +197,9 @@ const SellerSidebar = ({ isOpen, onClose }) => {
               >
                 <item.icon size={20} className={`${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 <span className="font-semibold text-sm">{item.label}</span>
-                {item.label === 'Orders' && (
+                {item.label === 'Orders' && pendingOrdersCount > 0 && (
                    <span className={`ml-auto w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${isActive ? 'bg-white text-seller-primary' : 'bg-seller-primary text-white'}`}>
-                     3
+                     {pendingOrdersCount}
                    </span>
                 )}
               </NavLink>

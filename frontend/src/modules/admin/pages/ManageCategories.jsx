@@ -154,6 +154,80 @@ const CategoryImage = ({ src, name, className = "" }) => {
   );
 };
 
+const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, categoryName }) => {
+  if (!isOpen) return null;
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-deep-espresso/60 backdrop-blur-xl z-[150] flex items-center justify-center p-4"
+    >
+      <motion.div 
+        initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
+        className="bg-white w-full max-w-md rounded-[32px] shadow-2xl p-8 border border-soft-oatmeal/30 text-center space-y-6 relative overflow-hidden"
+      >
+        <div className="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-full -mr-8 -mt-8 opacity-50" />
+        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto shadow-md">
+          <FiTrash2 size={28} />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-xl font-display font-bold text-deep-espresso">Delete Category?</h3>
+          <p className="text-xs text-warm-sand leading-relaxed font-medium">
+            Are you sure you want to delete <span className="text-deep-espresso font-bold">"{categoryName}"</span>? This action cannot be undone and will fail if active inventory items are assigned to this category.
+          </p>
+        </div>
+        <div className="flex gap-3 pt-2">
+          <button 
+            onClick={onClose} 
+            className="flex-1 py-3 text-[10px] font-black uppercase tracking-[0.2em] border border-soft-oatmeal rounded-xl text-warm-sand hover:bg-soft-oatmeal/20 transition-all font-bold"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={onConfirm} 
+            className="flex-1 py-3 text-[10px] font-black uppercase tracking-[0.2em] bg-red-500 text-white rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all font-bold"
+          >
+            Delete
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+const AlertModal = ({ isOpen, onClose, title, message }) => {
+  if (!isOpen) return null;
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-deep-espresso/60 backdrop-blur-xl z-[160] flex items-center justify-center p-4"
+    >
+      <motion.div 
+        initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
+        className="bg-white w-full max-w-md rounded-[32px] shadow-2xl p-8 border border-soft-oatmeal/30 text-center space-y-6 relative overflow-hidden"
+      >
+        <div className="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-full -mr-8 -mt-8 opacity-50" />
+        <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mx-auto shadow-md">
+          <FiInfo size={28} />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-xl font-display font-bold text-deep-espresso">{title}</h3>
+          <p className="text-xs text-warm-sand leading-relaxed font-medium">
+            {message}
+          </p>
+        </div>
+        <div className="pt-2">
+          <button 
+            onClick={onClose} 
+            className="w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] bg-deep-espresso text-white rounded-xl shadow-lg hover:bg-dusty-cocoa transition-all font-bold"
+          >
+            Acknowledge
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 const ManageCategories = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
@@ -162,6 +236,8 @@ const ManageCategories = () => {
   const [expandedIds, setExpandedIds] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); 
+  const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, categoryId: null, categoryName: null });
+  const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '' });
 
   useEffect(() => {
     fetchCategories();
@@ -178,14 +254,23 @@ const ManageCategories = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
-      try {
-        await api.delete(`/categories/${id}`);
-        setCategories(categories.filter((c) => c._id !== id));
-      } catch (err) {
-        alert('Failed to delete category');
-      }
+  const handleDelete = (id, name) => {
+    setDeleteConfirm({ isOpen: true, categoryId: id, categoryName: name });
+  };
+
+  const confirmDelete = async () => {
+    const { categoryId } = deleteConfirm;
+    setDeleteConfirm({ isOpen: false, categoryId: null, categoryName: null });
+    try {
+      await api.delete(`/categories/${categoryId}`);
+      setCategories(categories.filter((c) => c._id !== categoryId));
+    } catch (err) {
+      const errMsg = err.response?.data?.error || 'Failed to delete category. Please check if active products are associated with it.';
+      setErrorModal({
+        isOpen: true,
+        title: 'Delete Failed',
+        message: errMsg
+      });
     }
   };
 
@@ -291,7 +376,7 @@ const ManageCategories = () => {
                        <div className="flex items-center gap-2">
                           <button onClick={(e) => { e.stopPropagation(); setEditingSubcategory({ category: cat, sub: null, index: -1 }); }} className="p-2 hover:bg-soft-oatmeal rounded-lg text-warm-sand"><FiPlus size={14} /></button>
                           <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/manage-categories/edit/${cat._id}`); }} className="p-2 hover:bg-soft-oatmeal rounded-lg text-warm-sand"><FiEdit3 size={14} /></button>
-                          <button onClick={(e) => { e.stopPropagation(); handleDelete(cat._id); }} className="p-2 hover:bg-red-50 text-red-400 rounded-lg"><FiTrash2 size={14} /></button>
+                          <button onClick={(e) => { e.stopPropagation(); handleDelete(cat._id, cat.name); }} className="p-2 hover:bg-red-50 text-red-400 rounded-lg"><FiTrash2 size={14} /></button>
                        </div>
                     </div>
 
@@ -345,6 +430,28 @@ const ManageCategories = () => {
               else updatedSubs = cat.subcategories.map((s, i) => i === idx ? updatedSub : s);
               handleUpdateSubcategories(cat._id, updatedSubs);
             }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {deleteConfirm.isOpen && (
+          <DeleteConfirmationModal
+            isOpen={deleteConfirm.isOpen}
+            categoryName={deleteConfirm.categoryName}
+            onClose={() => setDeleteConfirm({ isOpen: false, categoryId: null, categoryName: null })}
+            onConfirm={confirmDelete}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {errorModal.isOpen && (
+          <AlertModal
+            isOpen={errorModal.isOpen}
+            title={errorModal.title}
+            message={errorModal.message}
+            onClose={() => setErrorModal({ isOpen: false, title: '', message: '' })}
           />
         )}
       </AnimatePresence>

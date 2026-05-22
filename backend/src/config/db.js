@@ -42,6 +42,8 @@ const resolveSrvWithTimeout = async (record, timeoutMs = 4000) => {
   ]);
 };
 
+const PUBLIC_DNS = ['8.8.8.8', '8.8.4.4', '1.1.1.1', '1.0.0.1'];
+
 const ensureMongoSrvResolver = async (mongoUri) => {
   if (!mongoUri.startsWith('mongodb+srv://')) return;
 
@@ -53,9 +55,11 @@ const ensureMongoSrvResolver = async (mongoUri) => {
 
   const candidates = envServers.length
     ? envServers
-    : systemServers.length
-      ? systemServers
-      : getLanDnsCandidates();
+    : [
+        ...systemServers,
+        ...PUBLIC_DNS,
+        ...getLanDnsCandidates()
+      ];
 
   if (!candidates.length) return;
 

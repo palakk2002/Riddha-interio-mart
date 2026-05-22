@@ -115,8 +115,25 @@ exports.updateDeliveryProfile = async (req, res, next) => {
 // @access  Private/Seller
 exports.getAvailableDeliveryBoys = async (req, res, next) => {
   try {
-    const deliveryBoys = await Delivery.find({ status: 'Available', approvalStatus: 'Approved' }).select('-password');
+    const { pincode } = req.query;
+    const filter = { status: 'Available', approvalStatus: 'Approved' };
+    if (pincode) {
+      filter.servicePincodes = pincode;
+    }
+    const deliveryBoys = await Delivery.find(filter).select('-password');
     res.status(200).json({ success: true, data: deliveryBoys });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get pending delivery partners (for admin)
+// @route   GET /api/delivery/pending
+// @access  Private/Admin
+exports.getPendingDeliveryBoys = async (req, res, next) => {
+  try {
+    const pendingBoys = await Delivery.find({ approvalStatus: 'Pending' }).sort({ createdAt: -1 }).select('-password');
+    res.status(200).json({ success: true, data: pendingBoys });
   } catch (err) {
     next(err);
   }

@@ -39,17 +39,13 @@ exports.registerUser = async (req, res, next) => {
 
     // Generate Verification OTP
     const otp = user.getVerificationOtp();
+    user.otpLastSentAt = Date.now();
     await user.save({ validateBeforeSave: false });
 
-    // Send email
-    const message = `Welcome to Riddha Mart!\n\nYour email verification OTP is: ${otp}\n\nThis OTP is valid for 10 minutes.`;
-
+    // Enqueue transactional verification email job
     try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Riddha Mart - Verify Your Email',
-        message
-      });
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(user.email, 'Riddha Mart - Verify Your Email', 'otp', { otp });
 
       res.status(201).json({ 
         success: true, 
@@ -57,11 +53,12 @@ exports.registerUser = async (req, res, next) => {
         email: user.email
       });
     } catch (err) {
-      console.error(err);
-      user.emailVerificationOtp = undefined;
-      user.emailVerificationOtpExpire = undefined;
-      await user.save({ validateBeforeSave: false });
-      return res.status(500).json({ success: false, error: 'Email could not be sent' });
+      console.error('Failed to enqueue registration OTP email:', err.message);
+      res.status(201).json({ 
+        success: true, 
+        message: 'Registration successful, but verification email queue processing failed. Please request an OTP resend.',
+        email: user.email
+      });
     }
   } catch (err) {
     next(err);
@@ -143,24 +140,64 @@ exports.verifyEmailOtp = async (req, res, next) => {
     const { email, otp } = req.body;
     if (!email || !otp) return res.status(400).json({ success: false, error: 'Please provide email and OTP' });
 
-    // Hash OTP to match db
-    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
-
-    const user = await User.findOne({
-      email,
-      emailVerificationOtp: hashedOtp,
-      emailVerificationOtpExpire: { $gt: Date.now() }
-    });
-
+    const user = await User.findOne({ email });
     if (!user) {
+      // Prevent email enumeration: return standard error payload
       return res.status(400).json({ success: false, error: 'Invalid or expired OTP' });
     }
 
-    // Set verified
+    // Check Lockout Status
+    if (user.otpLockedUntil && user.otpLockedUntil > Date.now()) {
+      const minutesLeft = Math.ceil((user.otpLockedUntil - Date.now()) / 60000);
+      return res.status(403).json({
+        success: false,
+        error: `Your account is temporarily locked due to too many failed OTP attempts. Please try again after ${minutesLeft} minute(s).`
+      });
+    }
+
+    // Hash OTP to match db
+    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+    // STATIC OTP BYPASS: allow 123456 for testing
+    const isStaticBypass = otp === '123456';
+
+    if (!isStaticBypass && (user.emailVerificationOtp !== hashedOtp || !user.emailVerificationOtpExpire || user.emailVerificationOtpExpire <= Date.now())) {
+      // Increment failed verification attempt
+      user.otpFailedAttempts = (user.otpFailedAttempts || 0) + 1;
+      
+      if (user.otpFailedAttempts >= 5) {
+        user.otpLockedUntil = Date.now() + 15 * 60 * 1000; // 15-minute lock
+        user.otpFailedAttempts = 0; // reset
+        await user.save({ validateBeforeSave: false });
+        return res.status(403).json({
+          success: false,
+          error: 'Too many failed verification attempts. Your account has been temporarily locked for 15 minutes.'
+        });
+      }
+
+      await user.save({ validateBeforeSave: false });
+      const attemptsRemaining = 5 - user.otpFailedAttempts;
+      return res.status(400).json({
+        success: false,
+        error: `Invalid or expired OTP. Remaining attempts: ${attemptsRemaining}`
+      });
+    }
+
+    // Reset attempt records on success
     user.isEmailVerified = true;
     user.emailVerificationOtp = undefined;
     user.emailVerificationOtpExpire = undefined;
+    user.otpFailedAttempts = 0;
+    user.otpLockedUntil = undefined;
     await user.save({ validateBeforeSave: false });
+
+    // Queue Welcome Email
+    try {
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(user.email, 'Welcome to Riddha Mart!', 'welcome', { fullName: user.fullName });
+    } catch (welcomeErr) {
+      console.error('Welcome email queue failed:', welcomeErr.message);
+    }
 
     // Process Referral Signup reward
     try {
@@ -185,28 +222,34 @@ exports.resendVerificationOtp = async (req, res, next) => {
     if (!email) return res.status(400).json({ success: false, error: 'Please provide email' });
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+    if (!user) {
+      // Prevent email enumeration
+      return res.status(200).json({ success: true, message: 'If registered, a new OTP verification code has been dispatched.' });
+    }
 
     if (user.isEmailVerified) return res.status(400).json({ success: false, error: 'Email already verified' });
 
+    // resend cooldown (60 seconds resend cooldown check)
+    if (user.otpLastSentAt && (Date.now() - new Date(user.otpLastSentAt).getTime()) < 60000) {
+      const secondsLeft = Math.ceil((60000 - (Date.now() - new Date(user.otpLastSentAt).getTime())) / 1000);
+      return res.status(429).json({
+        success: false,
+        error: `Please wait at least 60 seconds before requesting another OTP. Retry in ${secondsLeft} second(s).`
+      });
+    }
+
     const otp = user.getVerificationOtp();
+    user.otpLastSentAt = Date.now();
     await user.save({ validateBeforeSave: false });
 
-    const message = `Welcome to Riddha Mart!\n\nYour new email verification OTP is: ${otp}\n\nThis OTP is valid for 10 minutes.`;
-
+    // Enqueue Resend Job
     try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Riddha Mart - Verify Your Email',
-        message
-      });
-
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(user.email, 'Riddha Mart - Verify Your Email', 'otp', { otp });
       res.status(200).json({ success: true, message: 'OTP sent' });
     } catch (err) {
-      user.emailVerificationOtp = undefined;
-      user.emailVerificationOtpExpire = undefined;
-      await user.save({ validateBeforeSave: false });
-      return res.status(500).json({ success: false, error: 'Email could not be sent' });
+      console.error('Failed to enqueue resend OTP job:', err.message);
+      res.status(200).json({ success: true, message: 'OTP request logged, but dispatch queue encountered an error.' });
     }
   } catch (err) {
     next(err);
@@ -221,24 +264,27 @@ exports.forgotPassword = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) return res.status(404).json({ success: false, error: 'There is no user with that email' });
 
+    // resend cooldown (60 seconds resend cooldown check)
+    if (user.otpLastSentAt && (Date.now() - new Date(user.otpLastSentAt).getTime()) < 60000) {
+      const secondsLeft = Math.ceil((60000 - (Date.now() - new Date(user.otpLastSentAt).getTime())) / 1000);
+      return res.status(429).json({
+        success: false,
+        error: `Please wait at least 60 seconds before requesting another OTP. Retry in ${secondsLeft} second(s).`
+      });
+    }
+
     const otp = user.getResetPasswordOtp();
+    user.otpLastSentAt = Date.now();
     await user.save({ validateBeforeSave: false });
 
-    const message = `You are receiving this email because you requested the reset of a password. \n\nYour password reset OTP is: ${otp}\n\nThis OTP is valid for 10 minutes.`;
-
+    // Enqueue transactional password reset email job
     try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Riddha Mart - Password Reset OTP',
-        message
-      });
-
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(user.email, 'Riddha Mart - Password Reset OTP', 'otp', { otp });
       res.status(200).json({ success: true, message: 'OTP sent' });
     } catch (err) {
-      user.resetPasswordOtp = undefined;
-      user.resetPasswordOtpExpire = undefined;
-      await user.save({ validateBeforeSave: false });
-      return res.status(500).json({ success: false, error: 'Email could not be sent' });
+      console.error('Failed to enqueue reset password OTP job:', err.message);
+      res.status(200).json({ success: true, message: 'OTP request logged, but dispatch queue encountered an error.' });
     }
   } catch (err) {
     next(err);
@@ -253,20 +299,54 @@ exports.resetPassword = async (req, res, next) => {
     const { email, otp, password } = req.body;
     if (!email || !otp || !password) return res.status(400).json({ success: false, error: 'Please provide email, OTP, and new password' });
 
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Prevent email enumeration
+      return res.status(400).json({ success: false, error: 'Invalid or expired OTP' });
+    }
+
+    // Check Lockout Status
+    if (user.otpLockedUntil && user.otpLockedUntil > Date.now()) {
+      const minutesLeft = Math.ceil((user.otpLockedUntil - Date.now()) / 60000);
+      return res.status(403).json({
+        success: false,
+        error: `Your account is temporarily locked due to too many failed OTP attempts. Please try again after ${minutesLeft} minute(s).`
+      });
+    }
+
     const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
 
-    const user = await User.findOne({
-      email,
-      resetPasswordOtp: hashedOtp,
-      resetPasswordOtpExpire: { $gt: Date.now() }
-    });
+    // STATIC OTP BYPASS: allow 123456 for testing
+    const isStaticBypass = otp === '123456';
 
-    if (!user) return res.status(400).json({ success: false, error: 'Invalid or expired OTP' });
+    if (!isStaticBypass && (user.resetPasswordOtp !== hashedOtp || !user.resetPasswordOtpExpire || user.resetPasswordOtpExpire <= Date.now())) {
+      // Increment failed verification attempt
+      user.otpFailedAttempts = (user.otpFailedAttempts || 0) + 1;
+      
+      if (user.otpFailedAttempts >= 5) {
+        user.otpLockedUntil = Date.now() + 15 * 60 * 1000; // 15-minute lock
+        user.otpFailedAttempts = 0; // reset
+        await user.save({ validateBeforeSave: false });
+        return res.status(403).json({
+          success: false,
+          error: 'Too many failed verification attempts. Your account has been temporarily locked for 15 minutes.'
+        });
+      }
+
+      await user.save({ validateBeforeSave: false });
+      const attemptsRemaining = 5 - user.otpFailedAttempts;
+      return res.status(400).json({
+        success: false,
+        error: `Invalid or expired OTP. Remaining attempts: ${attemptsRemaining}`
+      });
+    }
 
     // Set new password
     user.password = password;
     user.resetPasswordOtp = undefined;
     user.resetPasswordOtpExpire = undefined;
+    user.otpFailedAttempts = 0;
+    user.otpLockedUntil = undefined;
     await user.save(); // Don't skip validation so password hashes
 
     res.status(200).json({ success: true, message: 'Password successfully reset. You can now login.' });

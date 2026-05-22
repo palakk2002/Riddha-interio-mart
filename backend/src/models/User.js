@@ -73,6 +73,16 @@ const UserSchema = new mongoose.Schema({
   emailVerificationOtpExpire: Date,
   resetPasswordOtp: String,
   resetPasswordOtpExpire: Date,
+  otpLastSentAt: {
+    type: Date
+  },
+  otpFailedAttempts: {
+    type: Number,
+    default: 0
+  },
+  otpLockedUntil: {
+    type: Date
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -122,8 +132,6 @@ UserSchema.methods.getResetPasswordOtp = function() {
   return otp;
 };
 
-UserSchema.index({ email: 1 });
 UserSchema.index({ role: 1 });
-UserSchema.index({ referralCode: 1 });
 
 module.exports = mongoose.model('User', UserSchema);

@@ -22,9 +22,14 @@ const {
   getCashCollections,
   confirmCashDeposit,
   getSellerTransactions,
-  searchOrders
+  searchOrders,
+  getActivityLogs,
+  adjustStock,
+  batchAdjustStock,
+  getProductInventoryHistory,
+  getActiveReservations
 } = require('../controllers/adminController');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize, checkPermission } = require('../middleware/auth');
 const { check } = require('express-validator');
 const { validate } = require('../middleware/validationMiddleware');
 
@@ -40,30 +45,39 @@ router.get('/me', protect, getAdminMe);
 router.put('/profile', protect, updateAdminProfile);
 
 // Search suggestions
-router.get('/orders/search', protect, authorize('admin'), searchOrders);
+router.get('/orders/search', protect, authorize('admin'), checkPermission('orders'), searchOrders);
 
 // Seller Management routes (Admin only)
-router.get('/sellers/pending', protect, authorize('admin'), getPendingSellers);
-router.get('/sellers/active', protect, authorize('admin'), getActiveSellers);
-router.put('/sellers/:id/approve', protect, authorize('admin'), approveSeller);
-router.delete('/sellers/:id', protect, authorize('admin'), deleteSeller);
-router.put('/sellers/:id/suspend', protect, authorize('admin'), suspendSeller);
-router.put('/sellers/:id/unsuspend', protect, authorize('admin'), unsuspendSeller);
-router.get('/dashboard-stats', protect, authorize('admin'), getDashboardStats);
-router.get('/stock-status', protect, authorize('admin'), getStockStatus);
+router.get('/sellers/pending', protect, authorize('admin'), checkPermission('sellers'), getPendingSellers);
+router.get('/sellers/active', protect, authorize('admin'), checkPermission('sellers'), getActiveSellers);
+router.put('/sellers/:id/approve', protect, authorize('admin'), checkPermission('sellers'), approveSeller);
+router.delete('/sellers/:id', protect, authorize('admin'), checkPermission('sellers'), deleteSeller);
+router.put('/sellers/:id/suspend', protect, authorize('admin'), checkPermission('sellers'), suspendSeller);
+router.put('/sellers/:id/unsuspend', protect, authorize('admin'), checkPermission('sellers'), unsuspendSeller);
+router.get('/dashboard-stats', protect, authorize('admin'), checkPermission('dashboard'), getDashboardStats);
+router.get('/stock-status', protect, authorize('admin'), checkPermission('products'), getStockStatus);
+
+// Advanced Inventory Management routes
+router.put('/inventory/adjust/:id', protect, authorize('admin'), checkPermission('products'), adjustStock);
+router.post('/inventory/batch-adjust', protect, authorize('admin'), checkPermission('products'), batchAdjustStock);
+router.get('/inventory/history/:id', protect, authorize('admin'), checkPermission('products'), getProductInventoryHistory);
+router.get('/inventory/reservations', protect, authorize('admin'), checkPermission('products'), getActiveReservations);
 
 // Assistant Management routes (Superadmin only or restricted)
-router.get('/assistants', protect, authorize('admin'), getAssistants);
-router.post('/assistants', protect, authorize('admin'), createAssistant);
-router.put('/assistants/:id', protect, authorize('admin'), updateAssistant);
-router.delete('/assistants/:id', protect, authorize('admin'), deleteAssistant);
-router.get('/users', protect, authorize('admin'), getUsers);
-router.put('/users/:id', protect, authorize('admin'), updateUser);
-router.delete('/users/:id', protect, authorize('admin'), deleteUser);
+router.get('/assistants', protect, authorize('admin'), checkPermission('team'), getAssistants);
+router.post('/assistants', protect, authorize('admin'), checkPermission('team'), createAssistant);
+router.put('/assistants/:id', protect, authorize('admin'), checkPermission('team'), updateAssistant);
+router.delete('/assistants/:id', protect, authorize('admin'), checkPermission('team'), deleteAssistant);
+router.get('/users', protect, authorize('admin'), checkPermission('customers'), getUsers);
+router.put('/users/:id', protect, authorize('admin'), checkPermission('customers'), updateUser);
+router.delete('/users/:id', protect, authorize('admin'), checkPermission('customers'), deleteUser);
 
 // Payment Management
-router.get('/payments/delivery', protect, authorize('admin'), getCashCollections);
-router.put('/payments/delivery/confirm/:deliveryBoyId', protect, authorize('admin'), confirmCashDeposit);
-router.get('/payments/sellers', protect, authorize('admin'), getSellerTransactions);
+router.get('/payments/delivery', protect, authorize('admin'), checkPermission('payments'), getCashCollections);
+router.put('/payments/delivery/confirm/:deliveryBoyId', protect, authorize('admin'), checkPermission('payments'), confirmCashDeposit);
+router.get('/payments/sellers', protect, authorize('admin'), checkPermission('payments'), getSellerTransactions);
+
+// Activity Logs route
+router.get('/activity-logs', protect, authorize('admin'), checkPermission('team'), getActivityLogs);
 
 module.exports = router;

@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiPhone, FiMapPin, FiShoppingBag, FiGift, FiArrowLeft, FiCheckCircle, FiFileText } from 'react-icons/fi';
 import api from '../../../shared/utils/api';
+import { toast } from 'react-hot-toast';
 import logo from '../../../assets/transparent_logo.png';
 import warehouseImg from '../../../assets/seller_onboarding_warehouse_1778923798789.png';
 
 const SellerSignup = () => {
   const [step, setStep] = useState('signup'); // 'signup' or 'otp'
   const [otp, setOtp] = useState('');
-  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [registeredPhone, setRegisteredPhone] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -34,7 +35,16 @@ const SellerSignup = () => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let { name, value } = e.target;
+    
+    // Validate and restrict input
+    if (name === 'phone') {
+      value = value.replace(/\D/g, '').slice(0, 10);
+    } else if (name === 'fullName') {
+      value = value.replace(/[^A-Za-z\s]/g, '');
+    }
+    
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleFileChange = (e) => {
@@ -75,7 +85,8 @@ const SellerSignup = () => {
       });
 
       if (response.data.success) {
-        setRegisteredEmail(formData.email);
+        toast.success(response.data.message || 'Registration successful! Please verify phone.');
+        setRegisteredPhone(formData.phone);
         setStep('otp');
       }
     } catch (err) {
@@ -91,12 +102,13 @@ const SellerSignup = () => {
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/verify-email', {
-        email: registeredEmail,
+      const response = await api.post('/auth/seller/verify-otp', {
+        phone: registeredPhone,
         otp
       });
 
       if (response.data.success) {
+        toast.success(response.data.message || 'Phone verified successfully!');
         navigate('/seller/login-form');
       }
     } catch (err) {
@@ -105,7 +117,6 @@ const SellerSignup = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-white flex flex-col md:flex-row font-['Outfit'] overflow-hidden">
       {/* Left Section: Branding & Visual */}
@@ -161,7 +172,7 @@ const SellerSignup = () => {
 
           <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0">
             <h2 className="text-2xl md:text-2xl font-semibold text-slate-900 tracking-tight text-center md:text-left">
-              {step === 'signup' ? 'Seller Registration' : 'Verify Email'}
+              {step === 'signup' ? 'Seller Registration' : 'Verify Phone'}
             </h2>
             <Link to="/seller/login-form" className="text-xs font-semibold uppercase tracking-widest text-[#E36666] hover:underline underline-offset-4">
               Sign In
@@ -296,7 +307,7 @@ const SellerSignup = () => {
                       <span className="text-[10px] font-semibold text-slate-400 text-center truncate w-full px-2">
                         {docs.gstDoc ? docs.gstDoc.name : 'Upload PDF/JPG'}
                       </span>
-                      <input type="file" name="gstDoc" onChange={handleFileChange} className="hidden" accept=".pdf,.jpg,.jpeg,.png" required />
+                      <input type="file" name="gstDoc" onChange={handleFileChange} className="sr-only" accept=".pdf,.jpg,.jpeg,.png" />
                     </label>
                   </div>
                   <div className="space-y-2">
@@ -306,7 +317,7 @@ const SellerSignup = () => {
                       <span className="text-[10px] font-semibold text-slate-400 text-center truncate w-full px-2">
                         {docs.panDoc ? docs.panDoc.name : 'Upload PDF/JPG'}
                       </span>
-                      <input type="file" name="panDoc" onChange={handleFileChange} className="hidden" accept=".pdf,.jpg,.jpeg,.png" required />
+                      <input type="file" name="panDoc" onChange={handleFileChange} className="sr-only" accept=".pdf,.jpg,.jpeg,.png" />
                     </label>
                   </div>
                   <div className="space-y-2">
@@ -316,7 +327,7 @@ const SellerSignup = () => {
                       <span className="text-[10px] font-semibold text-slate-400 text-center truncate w-full px-2">
                         {docs.shopDoc ? docs.shopDoc.name : 'Upload PDF/JPG'}
                       </span>
-                      <input type="file" name="shopDoc" onChange={handleFileChange} className="hidden" accept=".pdf,.jpg,.jpeg,.png" required />
+                      <input type="file" name="shopDoc" onChange={handleFileChange} className="sr-only" accept=".pdf,.jpg,.jpeg,.png" />
                     </label>
                   </div>
                 </div>
@@ -423,7 +434,7 @@ const SellerSignup = () => {
             <form onSubmit={handleVerifyOtp} className="space-y-8">
                <div className="text-center space-y-2">
                   <p className="text-slate-400 font-medium">We've sent a verification code to</p>
-                  <p className="text-slate-900 font-bold">{registeredEmail}</p>
+                  <p className="text-slate-900 font-bold">+91 {registeredPhone}</p>
                </div>
                
                <div className="space-y-1.5">
@@ -432,7 +443,7 @@ const SellerSignup = () => {
                     type="text"
                     maxLength={6}
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                     className="w-full text-center text-4xl font-bold tracking-[0.5em] py-6 rounded-2xl bg-[#FDF8F8] border-2 border-transparent focus:border-[#E36666]/20 focus:bg-white focus:outline-none text-slate-700 transition-all"
                     required
                   />
@@ -445,7 +456,7 @@ const SellerSignup = () => {
                  disabled={loading}
                  className="w-full py-5 bg-[#E36666] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-[#E36666]/20 transition-all disabled:opacity-50"
                >
-                 {loading ? 'Verifying...' : 'Verify Email'}
+                 {loading ? 'Verifying...' : 'Verify Phone'}
                </motion.button>
 
                <p className="text-center text-xs font-bold text-slate-400 uppercase tracking-widest">

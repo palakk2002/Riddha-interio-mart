@@ -35,9 +35,59 @@ exports.registerSeller = async (req, res, next) => {
       status: 'pending'
     });
 
+    const otp = seller.getVerificationOtp();
+    await seller.save({ validateBeforeSave: false });
+
+    try {
+      const emailService = require('../services/emailService');
+      await emailService.queueEmail(seller.email, 'Riddha Mart - Verify Your Registration', 'otp', { otp });
+    } catch (e) {
+      console.error('Failed to queue seller verification email:', e);
+    }
+
     res.status(201).json({
       success: true,
-      message: 'Registration successful! Your seller account is pending admin approval. You will receive an email once approved.'
+      message: 'Registration successful! Please verify using the OTP sent to your email.'
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Verify Seller OTP
+// @route   POST /api/auth/seller/verify-otp
+// @access  Public
+exports.verifySellerOtp = async (req, res, next) => {
+  try {
+    const { phone, otp } = req.body;
+    
+    if (!phone || !otp) {
+      return res.status(400).json({ success: false, error: 'Please provide phone number and OTP' });
+    }
+
+    const seller = await Seller.findOne({ phone });
+    if (!seller) {
+      return res.status(404).json({ success: false, error: 'Seller account not found' });
+    }
+
+    const crypto = require('crypto');
+    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+    // STATIC OTP BYPASS: allow 123456 for testing
+    const isStaticBypass = otp === '123456';
+
+    if (!isStaticBypass && (seller.phoneVerificationOtp !== hashedOtp || !seller.phoneVerificationOtpExpire || seller.phoneVerificationOtpExpire < Date.now())) {
+      return res.status(400).json({ success: false, error: 'Invalid or expired OTP' });
+    }
+
+    seller.isVerified = true;
+    seller.phoneVerificationOtp = undefined;
+    seller.phoneVerificationOtpExpire = undefined;
+    await seller.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Phone number verified successfully! Your account is pending admin approval.'
     });
   } catch (err) {
     next(err);
@@ -61,7 +111,7 @@ exports.loginSeller = async (req, res, next) => {
     if (seller.status === 'pending') {
       return res.status(403).json({ 
         success: false, 
-        error: 'Your seller registration is pending admin approval. You will receive an email once approved.' 
+        error: 'Your seller account is pending admin approval. Please check back later.' 
       });
     }
     if (seller.status === 'rejected') {
@@ -140,7 +190,7 @@ exports.getSellerStockStatus = async (req, res, next) => {
     const Product = require('../models/Product');
     const products = await Product.find({ seller: req.user.id })
       .populate('brand', 'name')
-      .sort('countInStock');
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,

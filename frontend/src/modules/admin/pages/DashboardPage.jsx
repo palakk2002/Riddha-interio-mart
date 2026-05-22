@@ -195,7 +195,7 @@ const DashboardPage = () => {
     },
     {
       title: 'Warehouse Stock',
-      value: loading ? '...' : '14,850 U',
+      value: loading ? '...' : `${stats.warehouseStock?.toLocaleString() || 0} U`,
       trend: '+2.1%',
       compareText: 'live capacity',
       icon: LuLayoutDashboard,
@@ -205,7 +205,7 @@ const DashboardPage = () => {
     },
     {
       title: 'Pending Approvals',
-      value: loading ? '...' : '12 Items',
+      value: loading ? '...' : `${stats.pendingApprovals || 0} Items`,
       trend: '-14.3%',
       compareText: 'needs verification',
       icon: LuClock,

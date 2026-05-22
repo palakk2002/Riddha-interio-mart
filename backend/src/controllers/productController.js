@@ -5,71 +5,198 @@ const paginate = require('../utils/paginate');
 // @desc    Get all products (Filter by Verified Sellers only for Public)
 exports.getProducts = async (req, res, next) => {
   try {
-    const queryObj = { ...req.query };
-    const excludeFields = ['page', 'sort', 'limit', 'fields'];
-    excludeFields.forEach(param => delete queryObj[param]);
+    const searchService = require('../services/searchService');
 
-    // Handle name/category searches if needed (simple match for now)
-    // If isActive is not specified in query, default to true for public, but allow admin to see all
-    // Sanitize Boolean Filters to avoid CastError
+    // Dump all database products to check their categories and subcategories
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const allProducts = await Product.find({}, 'name category subcategory subsubcategory');
+      fs.writeFileSync(path.join(__dirname, '../../db_dump.json'), JSON.stringify(allProducts, null, 2));
+    } catch (err) {
+      console.error("Failed to dump products:", err);
+    }
+
+    // 1. Generate unique cache key based on query parameters
+    const cacheKey = JSON.stringify(req.query);
+    const cachedData = searchService.getCachedResult(cacheKey);
+    if (cachedData) {
+      return res.status(200).json({
+        success: true,
+        cached: true,
+        ...cachedData
+      });
+    }
+
     const filter = {};
-    
+
+    // 2. Apply Category, Brand, and Admin protections
     if (req.query.category && req.query.category !== 'all') {
       filter.category = req.query.category;
     }
+
+    if (req.query.subcategory && req.query.subcategory !== 'all') {
+      filter.subcategory = { $regex: new RegExp(`^${req.query.subcategory.trim()}$`, 'i') };
+    }
+
+    if (req.query.subsubcategory && req.query.subsubcategory !== 'all') {
+      filter.subsubcategory = { $regex: new RegExp(`^${req.query.subsubcategory.trim()}$`, 'i') };
+    }
     
     if (req.query.brand && req.query.brand !== 'all') {
-      filter.brand = req.query.brand;
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(req.query.brand)) {
+        filter.brand = req.query.brand;
+      } else {
+        const Brand = require('../models/Brand');
+        const foundBrand = await Brand.findOne({ name: { $regex: new RegExp(`^${req.query.brand.trim()}$`, 'i') } });
+        if (foundBrand) {
+          filter.brand = foundBrand._id;
+        } else {
+          filter.brand = new mongoose.Types.ObjectId();
+        }
+      }
     }
 
-    if (req.query.search) {
-      filter.$text = { $search: req.query.search };
-    }
-
-    // Default: only show approved products unless filter specifies otherwise
-    // Admins can see everything
+    // Default protections: only show approved/active unless Admin overrides
     const isAdmin = req.user && req.user.role === 'admin';
-    
     if (!isAdmin) {
       filter.isApproved = true;
       filter.isActive = true;
     } else {
-      // Admin filters
       if (req.query.isActive !== undefined && req.query.isActive !== 'all') {
         filter.isActive = req.query.isActive === 'true' || req.query.isActive === true;
       }
-      
       if (req.query.isApproved !== undefined && req.query.isApproved !== 'all') {
         filter.isApproved = req.query.isApproved === 'true' || req.query.isApproved === true;
       }
-
-      // Special case for approvalStatus string
       if (req.query.approvalStatus && req.query.approvalStatus !== 'all') {
         filter.approvalStatus = req.query.approvalStatus;
       }
     }
 
-    // If text search is used, sort by score unless another sort is specified
-    if (req.query.search && !req.query.sort) {
-      req.query.sort = '-score';
-      // In paginate util we don't have access to projection, but we can set lean()
+    // 3. Dynamic Price Filters
+    if (req.query.minPrice || req.query.maxPrice) {
+      filter.price = {};
+      if (req.query.minPrice) filter.price.$gte = Number(req.query.minPrice);
+      if (req.query.maxPrice) filter.price.$lte = Number(req.query.maxPrice);
     }
 
+    // 4. Availability Filters (Only show items in stock)
+    if (req.query.inStock === 'true') {
+      filter.$expr = {
+        $gt: [{ $subtract: ['$countInStock', '$reservedStock'] }, 0]
+      };
+    }
+
+    // 5. Ratings Threshold Filters
+    if (req.query.rating) {
+      filter.averageRating = { $gte: Number(req.query.rating) };
+    }
+
+    // 6. Typo-Tolerant & Fuzzy Search Integration
+    let isFuzzyFallbackUsed = false;
+    if (req.query.search) {
+      const searchPhrase = req.query.search.trim();
+      
+      // Async log for trending analytics
+      searchService.logSearch(req.user ? req.user.id : null, searchPhrase);
+
+      // Attempt primary full-text match
+      filter.$text = { $search: searchPhrase };
+      
+      const primaryCount = await Product.countDocuments(filter);
+      if (primaryCount === 0) {
+        // Fallback to typo-tolerant regex bounds on search miss
+        delete filter.$text;
+        isFuzzyFallbackUsed = true;
+        
+        const fuzzyPatterns = searchService.getFuzzyRegex(searchPhrase);
+        filter.$or = [
+          { name: { $all: fuzzyPatterns } },
+          { description: { $all: fuzzyPatterns } }
+        ];
+      }
+    }
+
+    // 7. Paginate results
     const populateOptions = [
       { path: 'seller', select: 'fullName shopName' },
       { path: 'brand', select: 'name logo' }
     ];
 
+    console.log("FILTER BUILT FOR PRODUCTS QUERY:", JSON.stringify(filter, null, 2));
     const result = await paginate(Product, filter, req, populateOptions);
 
-    res.status(200).json({ 
-      success: true, 
+    // Apply ranking sort based on Levenshtein distances if fuzzy regex fallback is active
+    if (isFuzzyFallbackUsed && req.query.search) {
+      const searchPhrase = req.query.search.trim();
+      result.data.sort((a, b) => {
+        const distA = searchService.getLevenshteinDistance(a.name, searchPhrase);
+        const distB = searchService.getLevenshteinDistance(b.name, searchPhrase);
+        return distA - distB;
+      });
+    }
+
+    const outputPayload = {
       count: result.data.length,
       totalResults: result.totalResults,
       totalPages: result.totalPages,
       page: result.page,
       limit: result.limit,
-      data: result.data 
+      fuzzyFallback: isFuzzyFallbackUsed,
+      data: result.data
+    };
+
+    // Store in-memory cache
+    searchService.setCacheResult(cacheKey, outputPayload);
+
+    // Write to local debug file
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const debugPath = path.join(__dirname, '../../debug_products.json');
+      fs.writeFileSync(debugPath, JSON.stringify({
+        timestamp: new Date().toISOString(),
+        query: req.query,
+        builtFilter: filter,
+        resultCount: result.data.length,
+        results: result.data.map(p => ({
+          _id: p._id,
+          name: p.name,
+          category: p.category,
+          subcategory: p.subcategory,
+          subsubcategory: p.subsubcategory
+        }))
+      }, null, 2));
+    } catch (err) {
+      console.error("Failed to write debug file:", err);
+    }
+
+    res.status(200).json({
+      success: true,
+      cached: false,
+      ...outputPayload
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get autocomplete recommendations, recent queries and trending terms
+// @route   GET /api/products/search/suggestions
+// @access  Public (Optional auth)
+exports.getSearchSuggestions = async (req, res, next) => {
+  try {
+    const searchService = require('../services/searchService');
+    const q = req.query.q || '';
+    const userId = req.user ? req.user.id : null;
+
+    const data = await searchService.getSuggestions(userId, q);
+    
+    res.status(200).json({
+      success: true,
+      data
     });
   } catch (error) {
     next(error);
@@ -80,6 +207,23 @@ exports.getProducts = async (req, res, next) => {
 exports.createProduct = async (req, res, next) => {
   try {
     const { source = 'new' } = req.body;
+    
+    // Clean up empty string brand to avoid BSON Error and assign a default brand fallback
+    if (req.body.brand === '') {
+      delete req.body.brand;
+    }
+    
+    if (!req.body.brand) {
+      const Brand = require('../models/Brand');
+      let defaultBrand = await Brand.findOne({ name: 'General' });
+      if (!defaultBrand) {
+        defaultBrand = await Brand.findOne();
+      }
+      if (!defaultBrand) {
+        defaultBrand = await Brand.create({ name: 'General' });
+      }
+      req.body.brand = defaultBrand._id;
+    }
     
     // Automatically set seller and sellerType based on role if not provided
     if (!req.body.seller) {
@@ -259,6 +403,11 @@ exports.updateProduct = async (req, res, next) => {
       return res.status(401).json({ success: false, error: 'User not authorized to update this product' });
     }
 
+    // Clean up empty string brand to avoid BSON Error
+    if (req.body.brand === '') {
+      delete req.body.brand;
+    }
+
     // If admin is updating, handle commission logic
     if (req.user.role === 'admin') {
       const { adminCommission, price: newPrice, sellerPrice: newSPrice } = req.body;
@@ -387,6 +536,19 @@ exports.updateBulkStock = async (req, res, next) => {
     }
 
     res.status(200).json({ success: true, data: results });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Check SKU uniqueness in live products
+// @route   GET /api/products/check-sku/:sku
+// @access  Private/Admin
+exports.checkProductSku = async (req, res, next) => {
+  try {
+    const { sku } = req.params;
+    const exists = await Product.findOne({ sku: sku.trim() });
+    res.status(200).json({ success: true, exists: !!exists });
   } catch (error) {
     next(error);
   }

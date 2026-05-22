@@ -4,11 +4,15 @@ const {
   getCatalogItem,
   createCatalogItem,
   updateCatalogItem,
-  deleteCatalogItem
+  deleteCatalogItem,
+  checkCatalogSku
 } = require('../controllers/catalogController');
 const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
+
+router.route('/check-sku/:sku')
+  .get(protect, authorize('admin'), checkCatalogSku);
 
 router.route('/')
   .get(getCatalogItems)

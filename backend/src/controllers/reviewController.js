@@ -41,14 +41,26 @@ exports.createReview = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
-    // Check if user already submitted a review
+    // Check if user already submitted a review for this product
     const alreadyReviewed = await Review.findOne({ user: userId, product: productId });
     if (alreadyReviewed) {
-      return res.status(400).json({ success: false, message: 'Product already reviewed' });
+      return res.status(400).json({ success: false, message: 'You have already reviewed this product' });
     }
 
-    // Check for verified purchase
-    // User must have an order with this product that is Delivered
+    // Enforce 60-second review cooldown to prevent automated reviews / spam
+    const lastReview = await Review.findOne({ user: userId }).sort({ createdAt: -1 });
+    if (lastReview) {
+      const timeDiff = Date.now() - new Date(lastReview.createdAt).getTime();
+      if (timeDiff < 60000) {
+        const secondsLeft = Math.ceil((60000 - timeDiff) / 1000);
+        return res.status(429).json({
+          success: false,
+          message: `Please wait at least 60 seconds between reviews. Retry in ${secondsLeft} second(s).`
+        });
+      }
+    }
+
+    // Check for verified purchase (Strict Delivered-order-only requirement)
     const orders = await Order.find({ user: userId, status: 'Delivered' });
     let isVerified = false;
     for (const order of orders) {
@@ -59,11 +71,18 @@ exports.createReview = async (req, res) => {
       }
     }
 
+    if (!isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only customers with verified, delivered purchases of this product can submit a review.'
+      });
+    }
+
     const reviewData = {
       ...req.body,
       product: productId,
       user: userId,
-      verifiedPurchase: isVerified
+      verifiedPurchase: true
     };
 
     const review = await Review.create(reviewData);
@@ -96,15 +115,6 @@ exports.updateReview = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Not authorized to update review' });
     }
 
-    review = await Review.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    });
-
-    // Manually trigger static method to recalculate averages since findByIdAndUpdate doesn't trigger post('save') automatically unless configured.
-    // However, our model has post('save'). We can just save it instead of findByIdAndUpdate.
-    
-    // Actually, let's use document.save() to trigger hooks properly.
     review.rating = req.body.rating || review.rating;
     review.title = req.body.title || review.title;
     review.review = req.body.review || review.review;
@@ -137,7 +147,7 @@ exports.deleteReview = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Not authorized to delete review' });
     }
 
-    await review.deleteOne(); // Triggers post('remove') hook in Mongoose 6+ (Actually, deleteOne middleware is different. Let's use findOneAndDelete hook or call manually).
+    await review.deleteOne();
 
     // Call static method manually to be safe
     await Review.getAverageRating(review.product);
@@ -163,7 +173,7 @@ exports.moderateReview = async (req, res) => {
     }
 
     review.isApproved = req.body.isApproved;
-    await review.save(); // Triggers getAverageRating because of save hook!
+    await review.save();
 
     res.status(200).json({
       success: true,
@@ -173,3 +183,128 @@ exports.moderateReview = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Upvote review as helpful
+// @route   POST /api/reviews/:id/helpful
+// @access  Private
+exports.voteHelpful = async (req, res, next) => {
+  try {
+    const review = await Review.findById(req.params.id);
+    if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
+
+    const userId = req.user.id;
+    const voteIndex = review.helpfulVotes.indexOf(userId);
+
+    if (voteIndex === -1) {
+      // Add upvote
+      review.helpfulVotes.push(userId);
+    } else {
+      // Remove upvote (toggle)
+      review.helpfulVotes.splice(voteIndex, 1);
+    }
+
+    review.helpfulCount = review.helpfulVotes.length;
+    await review.save();
+
+    res.status(200).json({
+      success: true,
+      data: review
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Report review as abusive
+// @route   POST /api/reviews/:id/report
+// @access  Private
+exports.reportReview = async (req, res, next) => {
+  try {
+    const { reason } = req.body;
+    if (!reason) return res.status(400).json({ success: false, message: 'Please provide a reason for reporting.' });
+
+    const review = await Review.findById(req.params.id);
+    if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
+
+    const userId = req.user.id;
+    const alreadyReported = review.reports.find(r => r.user.toString() === userId.toString());
+    
+    if (alreadyReported) {
+      return res.status(400).json({ success: false, message: 'You have already reported this review.' });
+    }
+
+    review.reports.push({ user: userId, reason });
+    review.reportCount = review.reports.length;
+    review.isFlagged = true; // Flag for manual Admin review
+
+    await review.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Review has been reported for admin investigation.',
+      data: review
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Respond to review (Sellers only)
+// @route   POST /api/reviews/:id/response
+// @access  Private (Seller/Admin)
+exports.respondToReview = async (req, res, next) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ success: false, message: 'Response text is required.' });
+
+    const review = await Review.findById(req.params.id).populate('product');
+    if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
+
+    // Authorization: seller of the product or admin
+    if (req.user.role === 'seller' && review.product.seller.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Not authorized to respond to reviews on this product.' });
+    }
+
+    review.sellerResponse = {
+      text,
+      respondedAt: Date.now()
+    };
+
+    await review.save();
+
+    res.status(200).json({
+      success: true,
+      data: review
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Get all reviews (Admin only)
+// @route   GET /api/reviews/admin
+// @access  Private/Admin
+exports.getAdminReviews = async (req, res) => {
+  try {
+    const query = {};
+    const populateOptions = [
+      { path: 'user', select: 'fullName avatar' },
+      { path: 'product', select: 'name' }
+    ];
+
+    const result = await paginate(Review, query, req, populateOptions);
+
+    res.status(200).json({
+      success: true,
+      count: result.data.length,
+      totalResults: result.totalResults,
+      totalPages: result.totalPages,
+      page: result.page,
+      limit: result.limit,
+      data: result.data
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

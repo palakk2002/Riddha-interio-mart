@@ -41,6 +41,9 @@ const ProductSchema = new mongoose.Schema({
   subcategory: {
     type: String
   },
+  subsubcategory: {
+    type: String
+  },
   brand: {
     type: mongoose.Schema.ObjectId,
     ref: 'Brand',
@@ -74,6 +77,12 @@ const ProductSchema = new mongoose.Schema({
     type: Number,
     required: true,
     default: 0,
+    index: true
+  },
+  reservedStock: {
+    type: Number,
+    default: 0,
+    min: 0,
     index: true
   },
   seller: {
@@ -128,5 +137,19 @@ const ProductSchema = new mongoose.Schema({
 ProductSchema.index({ seller: 1, countInStock: 1 });
 ProductSchema.index({ seller: 1, createdAt: -1 });
 ProductSchema.index({ name: 'text', description: 'text', category: 'text' });
+
+ProductSchema.post('save', function() {
+  try {
+    const searchService = require('../services/searchService');
+    searchService.clearCache();
+  } catch (err) {}
+});
+
+ProductSchema.post('remove', function() {
+  try {
+    const searchService = require('../services/searchService');
+    searchService.clearCache();
+  } catch (err) {}
+});
 
 module.exports = mongoose.model('Product', ProductSchema);

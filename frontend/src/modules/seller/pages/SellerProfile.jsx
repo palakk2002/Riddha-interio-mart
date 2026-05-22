@@ -43,6 +43,13 @@ const SellerProfile = () => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  
+  const [stats, setStats] = useState({
+    revenue: 0,
+    rating: 4.9,
+    service: 98
+  });
+
   const [profileData, setProfileData] = useState({
     shopName: currentUser?.shopName || "",
     fullName: currentUser?.fullName || "",
@@ -60,9 +67,13 @@ const SellerProfile = () => {
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/auth/seller/me');
-      if (data.success && data.data) {
-        const s = data.data;
+      const [profileRes, analyticsRes] = await Promise.all([
+        api.get('/auth/seller/me'),
+        api.get('/seller/analytics?timeRange=yearly').catch(() => null)
+      ]);
+      
+      if (profileRes.data.success && profileRes.data.data) {
+        const s = profileRes.data.data;
         setProfileData({
           shopName: s.shopName || "",
           fullName: s.fullName || "",
@@ -77,6 +88,12 @@ const SellerProfile = () => {
           joinDate: s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "N/A"
         });
       }
+
+      if (analyticsRes?.data?.success) {
+        const totalRevenue = analyticsRes.data.data.stats.totalRevenue || 0;
+        setStats(prev => ({ ...prev, revenue: totalRevenue }));
+      }
+
     } catch (err) {
       console.error('Failed to fetch seller profile:', err);
     } finally {
@@ -324,9 +341,14 @@ const SellerProfile = () => {
                   {/* Enhanced Stats Row - Dashboard Compact */}
                   <div className="grid grid-cols-3 gap-3 md:gap-6">
                      {[
-                       { label: 'Revenue', value: '₹12.4L', icon: <ShoppingBag size={18} />, color: 'text-seller-primary', bg: 'bg-seller-primary/5' },
-                       { label: 'Rating', value: '4.9/5', icon: <Star size={18} />, color: 'text-amber-500', bg: 'bg-amber-50' },
-                       { label: 'Service', value: '98%', icon: <Zap size={18} />, color: 'text-emerald-600', bg: 'bg-emerald-50' }
+                       { 
+                         label: 'Revenue', 
+                         value: stats.revenue >= 100000 ? `₹${(stats.revenue / 100000).toFixed(1)}L` : `₹${stats.revenue.toLocaleString()}`, 
+                         icon: <ShoppingBag size={18} />, 
+                         color: 'text-seller-primary', bg: 'bg-seller-primary/5' 
+                       },
+                       { label: 'Rating', value: `${stats.rating}/5`, icon: <Star size={18} />, color: 'text-amber-500', bg: 'bg-amber-50' },
+                       { label: 'Service', value: `${stats.service}%`, icon: <Zap size={18} />, color: 'text-emerald-600', bg: 'bg-emerald-50' }
                      ].map((stat, i) => (
                        <div key={i} className="bg-white p-3.5 md:p-6 rounded-[1.5rem] md:rounded-[1.8rem] border border-slate-100 shadow-sm flex flex-col md:flex-row items-center gap-2 md:gap-4 group">
                           <div className={`w-8 h-8 md:w-11 md:h-11 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center shrink-0`}>

@@ -16,10 +16,7 @@ const AssignDeliveryBoy = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [ordersRes, dbRes] = await Promise.all([
-        api.get('/orders'),
-        api.get('/delivery/available')
-      ]);
+      const ordersRes = await api.get('/orders');
 
       if (ordersRes.data.success) {
         // Show orders that need assignment (Processing and no deliveryBoy yet or rejected)
@@ -27,10 +24,6 @@ const AssignDeliveryBoy = () => {
           o.status === 'Processing' && (!o.deliveryBoy || o.deliveryStatus === 'Rejected' || o.deliveryStatus === 'None')
         );
         setOrders(filtered);
-      }
-
-      if (dbRes.data.success) {
-        setDeliveryBoys(dbRes.data.data || []);
       }
     } catch (err) {
       console.error('Failed to fetch assignment data:', err);
@@ -48,8 +41,16 @@ const AssignDeliveryBoy = () => {
     return () => window.removeEventListener('delivery:response_received', onResponse);
   }, []);
 
-  const handleAssignClick = (order) => {
+  const handleAssignClick = async (order) => {
     setSelectedOrder(order);
+    try {
+      const res = await api.get(`/delivery/available?pincode=${order.shippingAddress?.pincode}`);
+      if (res.data.success) {
+        setDeliveryBoys(res.data.data || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch delivery boys for pincode:', err);
+    }
     setShowModal(true);
   };
 

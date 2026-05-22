@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import ErrorBoundary from './shared/components/ErrorBoundary';
 import GlobalLoader from './shared/components/GlobalLoader';
+import OfflineDetector from './shared/components/OfflineDetector';
 import Navbar from './modules/user/components/Navbar';
 import Footer from './modules/user/components/Footer';
 import BottomNavbar from './modules/user/components/BottomNavbar';
@@ -50,6 +51,7 @@ function App() {
   return (
     <div className={`min-h-screen flex flex-col user-theme bg-white border-deep-espresso/5 ${(!isDashboardLayout && !isCheckoutPath && !isProductPage) ? 'pb-24 md:pb-0' : ''}`}>
       <Toaster position="top-center" reverseOrder={false} />
+      <OfflineDetector />
       {showPincodeModal && <PincodeModal onComplete={handlePincodeComplete} />}
 
       {/* Global Notifications */}

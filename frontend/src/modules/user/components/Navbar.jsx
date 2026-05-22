@@ -302,27 +302,62 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* Dynamic Categories next to All Categories */}
+            {/* Dynamic Subcategories next to All Categories */}
             <div className="flex items-center gap-6 lg:gap-8 overflow-x-auto no-scrollbar scroll-smooth ml-6">
-              {categories.map((cat, i) => {
-                const slug = getCategorySlug(cat.name);
-                return (
-                  <div
-                    key={i}
-                    className="relative h-full flex items-center shrink-0"
-                  >
-                    <Link
-                      to={`/category/${slug}`}
-                      className={`text-[13px] font-semibold tracking-tight transition-all h-full flex items-center whitespace-nowrap px-1 py-3 ${activeCategory === slug
-                        ? "text-[#004D40]"
-                        : "text-gray-800 hover:text-[#004D40]"
-                        }`}
+              {(() => {
+                const subcategoriesList = [];
+                categories.forEach(cat => {
+                  if (cat.subcategories && cat.subcategories.length > 0) {
+                    cat.subcategories.forEach(sub => {
+                      subcategoriesList.push({
+                        name: sub.name,
+                        parentSlug: getCategorySlug(cat.name),
+                        slug: getCategorySlug(sub.name)
+                      });
+                    });
+                  }
+                });
+
+                // Fallback to parent categories if no nested subcategories are defined yet
+                const listToRender = subcategoriesList.length > 0 
+                  ? subcategoriesList 
+                  : categories.map(cat => ({
+                      name: cat.name,
+                      parentSlug: getCategorySlug(cat.name),
+                      slug: '',
+                      isParent: true
+                    }));
+
+                return listToRender.map((item, i) => {
+                  const linkTo = item.isParent 
+                    ? `/category/${item.parentSlug}`
+                    : `/category/${item.parentSlug}?sub=${encodeURIComponent(item.name)}`;
+                  
+                  // Active status check using location query params
+                  const queryParams = new URLSearchParams(location.search);
+                  const activeSub = queryParams.get('sub');
+                  const isActive = item.isParent
+                    ? location.pathname === `/category/${item.parentSlug}`
+                    : location.pathname === `/category/${item.parentSlug}` && activeSub?.toLowerCase() === item.name.toLowerCase();
+
+                  return (
+                    <div
+                      key={i}
+                      className="relative h-full flex items-center shrink-0"
                     >
-                      {cat.name}
-                    </Link>
-                  </div>
-                );
-              })}
+                      <Link
+                        to={linkTo}
+                        className={`text-[13px] font-semibold tracking-tight transition-all h-full flex items-center whitespace-nowrap px-1 py-3 ${isActive
+                          ? "text-[#004D40] border-b-2 border-[#004D40]"
+                          : "text-gray-800 hover:text-[#004D40]"
+                          }`}
+                      >
+                        {item.name}
+                      </Link>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </div>
         </div>

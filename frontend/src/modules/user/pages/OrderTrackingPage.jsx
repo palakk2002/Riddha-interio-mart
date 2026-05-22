@@ -163,6 +163,36 @@ const OrderTrackingPage = () => {
           )}
         </AnimatePresence>
 
+        {/* OTP Notification / Display */}
+        <AnimatePresence>
+          {isOutForDelivery && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-amber-50 rounded-2xl p-6 border border-amber-200 shadow-sm relative overflow-hidden"
+            >
+              <div className="absolute -right-4 -top-4 w-24 h-24 bg-amber-100 rounded-full blur-2xl opacity-50"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                    <FiCheckCircle size={16} />
+                  </div>
+                  <h3 className="text-sm font-bold text-amber-900">Secure Delivery PIN</h3>
+                </div>
+                <p className="text-xs text-amber-700 font-medium leading-relaxed mb-4">
+                  Please provide the 4-digit PIN to the delivery partner to receive your order. The PIN has been sent to your registered email address.
+                </p>
+                {order.deliveryOtp && (
+                   <div className="bg-white px-4 py-3 rounded-xl border border-amber-100 inline-block">
+                     <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-1">Your PIN</p>
+                     <p className="text-2xl font-black text-amber-900 tracking-[0.2em]">{order.deliveryOtp}</p>
+                   </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Order Details Header */}
         <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-200 shadow-sm">
            <div className="flex items-start justify-between gap-4 pb-6 border-b border-gray-100 mb-6">

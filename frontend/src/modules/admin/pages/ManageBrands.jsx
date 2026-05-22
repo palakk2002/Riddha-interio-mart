@@ -9,6 +9,7 @@ import {
 } from 'react-icons/fi';
 import api from '../../../shared/utils/api';
 import { uploadImage } from '../../../shared/utils/upload';
+import { toast } from 'react-hot-toast';
 
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Delete', type = 'danger' }) => {
   if (!isOpen) return null;
@@ -101,6 +102,11 @@ const BrandModal = ({ brand, isOpen, onClose, onSave, saving }) => {
     isActive: true
   });
   const fileInputRef = useRef(null);
+  const bannerFileInputRef = useRef(null);
+  const categoryFileInputRef = useRef(null);
+
+  const [activeBannerUploadIndex, setActiveBannerUploadIndex] = useState(null);
+  const [activeCategoryUploadIndex, setActiveCategoryUploadIndex] = useState(null);
 
   useEffect(() => {
     if (brand) {
@@ -120,6 +126,8 @@ const BrandModal = ({ brand, isOpen, onClose, onSave, saving }) => {
       });
     }
     setActiveTab('general');
+    setActiveBannerUploadIndex(null);
+    setActiveCategoryUploadIndex(null);
   }, [brand, isOpen]);
 
   if (!isOpen) return null;
@@ -165,6 +173,30 @@ const BrandModal = ({ brand, isOpen, onClose, onSave, saving }) => {
     }
   };
 
+  const handleBannerUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && activeBannerUploadIndex !== null) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        handleArrayChange('banners', activeBannerUploadIndex, reader.result);
+        setActiveBannerUploadIndex(null);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCategoryUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && activeCategoryUploadIndex !== null) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        handleCategoryChange(activeCategoryUploadIndex, 'image', reader.result);
+        setActiveCategoryUploadIndex(null);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const tabs = [
     { id: 'general', label: 'General Info', icon: FiInfo },
     { id: 'assets', label: 'Visual Assets', icon: FiImage },
@@ -182,7 +214,7 @@ const BrandModal = ({ brand, isOpen, onClose, onSave, saving }) => {
       >
         <div className="p-8 border-b border-soft-oatmeal flex items-center justify-between bg-soft-oatmeal/5">
           <div className="flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-white border border-soft-oatmeal shadow-inner flex items-center justify-center overflow-hidden">
+            <div className="w-14 h-14 rounded-2xl bg-white border border-soft-oatmeal shadow-inner flex items-center justify-center overflow-hidden flex-shrink-0">
               {formData.logo ? <img src={formData.logo} className="w-full h-full object-contain p-2" /> : <FiImage className="text-warm-sand/20" size={24} />}
             </div>
             <div>
@@ -282,6 +314,7 @@ const BrandModal = ({ brand, isOpen, onClose, onSave, saving }) => {
 
           {activeTab === 'assets' && (
             <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+              <input type="file" className="hidden" ref={bannerFileInputRef} onChange={handleBannerUpload} accept="image/*" />
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-sm font-bold text-deep-espresso">Banner Assets</h3>
@@ -297,12 +330,16 @@ const BrandModal = ({ brand, isOpen, onClose, onSave, saving }) => {
               <div className="grid grid-cols-1 gap-4">
                 {formData.banners.map((url, idx) => (
                   <div key={idx} className="bg-white p-4 rounded-3xl border border-soft-oatmeal/40 flex items-center gap-4 group">
-                    <div className="w-24 h-14 rounded-xl bg-soft-oatmeal/10 border border-soft-oatmeal/20 flex-shrink-0 overflow-hidden relative">
+                    <div 
+                      onClick={() => { setActiveBannerUploadIndex(idx); bannerFileInputRef.current.click(); }}
+                      className="w-24 h-14 rounded-xl bg-soft-oatmeal/10 border border-soft-oatmeal/20 flex-shrink-0 overflow-hidden relative cursor-pointer hover:opacity-80 transition-opacity"
+                      title="Click to Upload Banner Image"
+                    >
                       {url ? <img src={url} className="w-full h-full object-cover" /> : <FiImage className="absolute inset-0 m-auto text-warm-sand/20" />}
                     </div>
                     <input
                       type="text" value={url} onChange={(e) => handleArrayChange('banners', idx, e.target.value)}
-                      placeholder="Enter banner image URL..."
+                      placeholder="Enter banner image URL or click thumbnail to upload..."
                       className="flex-1 bg-transparent border-none text-xs focus:ring-0 font-medium placeholder:text-warm-sand/30"
                     />
                     <button onClick={() => removeArrayItem('banners', idx)} className="p-2 text-warm-sand/40 hover:text-red-500 transition-colors">
@@ -316,6 +353,7 @@ const BrandModal = ({ brand, isOpen, onClose, onSave, saving }) => {
 
           {activeTab === 'categories' && (
             <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+              <input type="file" className="hidden" ref={categoryFileInputRef} onChange={handleCategoryUpload} accept="image/*" />
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-sm font-bold text-deep-espresso">Collection Segments</h3>
@@ -332,8 +370,12 @@ const BrandModal = ({ brand, isOpen, onClose, onSave, saving }) => {
                 {formData.categories.map((cat, idx) => (
                   <div key={idx} className="bg-white p-5 rounded-[32px] border border-soft-oatmeal/40 shadow-sm relative group hover:border-warm-sand/30 transition-all">
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-2xl bg-soft-oatmeal/10 border border-soft-oatmeal/20 overflow-hidden">
-                        {cat.image ? <img src={cat.image} className="w-full h-full object-cover" /> : <FiImage className="w-full h-full p-3 text-warm-sand/20" />}
+                      <div 
+                        onClick={() => { setActiveCategoryUploadIndex(idx); categoryFileInputRef.current.click(); }}
+                        className="w-12 h-12 rounded-2xl bg-soft-oatmeal/10 border border-soft-oatmeal/20 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
+                        title="Click to Upload Category Image"
+                      >
+                        {cat.image ? <img src={cat.image} className="w-full h-full object-cover" /> : <FiImage className="w-full h-full p-3 text-warm-sand/20 flex-shrink-0" />}
                       </div>
                       <div className="flex-1">
                         <input
@@ -368,11 +410,11 @@ const BrandModal = ({ brand, isOpen, onClose, onSave, saving }) => {
           )}
         </div>
 
-        <div className="p-8 bg-white border-t border-soft-oatmeal flex items-center justify-between">
+        <div className="p-8 bg-white border-t border-soft-oatmeal flex items-center justify-between flex-shrink-0">
           <div className="hidden md:flex gap-4">
             <div className="flex -space-x-3">
               {formData.banners.filter(b => b).slice(0, 3).map((b, i) => (
-                <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-soft-oatmeal overflow-hidden shadow-sm">
+                <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-soft-oatmeal overflow-hidden shadow-sm flex-shrink-0">
                   <img src={b} className="w-full h-full object-cover" />
                 </div>
               ))}
@@ -413,7 +455,6 @@ const ManageBrands = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // all, active, hidden
   const [sortBy, setSortBy] = useState('name'); // name, categories, banners
@@ -428,7 +469,7 @@ const ManageBrands = () => {
       setBrands(data.data || []);
     } catch (err) {
       console.error('Failed to fetch brands:', err);
-      setError('Failed to load partners from the directory.');
+      toast.error('Failed to load partners from the directory.');
     } finally {
       setLoading(false);
     }
@@ -439,36 +480,63 @@ const ManageBrands = () => {
   }, []);
 
   const handleSave = async (brandData) => {
+    const saveToast = toast.loading(editingBrand ? 'Updating brand partner...' : 'Initializing brand partner...');
     try {
       setSaving(true);
       let finalLogo = brandData.logo;
 
-      // Upload logo to Cloudinary if it's base64
+      // 1. Upload logo to Cloudinary if it's base64
       if (finalLogo && finalLogo.startsWith('data:image')) {
         finalLogo = await uploadImage(finalLogo);
       }
+
+      // 2. Upload banners if base64 in parallel
+      const uploadedBanners = await Promise.all(
+        (brandData.banners || []).map(async (bannerUrl) => {
+          if (bannerUrl && bannerUrl.startsWith('data:image')) {
+            return await uploadImage(bannerUrl);
+          }
+          return bannerUrl;
+        })
+      );
+
+      // 3. Upload category images if base64 in parallel
+      const uploadedCategories = await Promise.all(
+        (brandData.categories || []).map(async (cat) => {
+          let catImg = cat.image;
+          if (catImg && catImg.startsWith('data:image')) {
+            catImg = await uploadImage(catImg);
+          }
+          return {
+            ...cat,
+            image: catImg
+          };
+        })
+      );
 
       // Sanitize payload
       const sanitizedPayload = {
         ...brandData,
         logo: finalLogo,
-        banners: brandData.banners?.filter(b => b && b.trim() !== '') || [],
-        categories: brandData.categories
+        banners: uploadedBanners.filter(b => b && b.trim() !== ''),
+        categories: uploadedCategories
           ?.filter(c => c.name && c.name.trim() !== '')
           .map(({ id, _id, ...rest }) => rest) || [] 
       };
 
       if (editingBrand) {
         await api.put(`/brands/${editingBrand._id}`, sanitizedPayload);
+        toast.success('Brand partner updated successfully.', { id: saveToast });
       } else {
         await api.post('/brands', sanitizedPayload);
+        toast.success('Brand partner created successfully.', { id: saveToast });
       }
       fetchBrands();
       setIsModalOpen(false);
       setEditingBrand(null);
     } catch (err) {
       console.error('Failed to save brand:', err);
-      alert(err.response?.data?.error || 'Failed to save brand data.');
+      toast.error(err.response?.data?.error || 'Failed to save brand data.', { id: saveToast });
     } finally {
       setSaving(false);
     }
@@ -481,18 +549,22 @@ const ManageBrands = () => {
     try {
       await api.put(`/brands/${id}`, { isActive: !brand.isActive });
       setBrands(brands.map(b => b._id === id ? { ...b, isActive: !b.isActive } : b));
+      toast.success(`Brand visibility: ${!brand.isActive ? 'Active' : 'Hidden'}`);
     } catch (err) {
       console.error('Failed to toggle visibility:', err);
+      toast.error('Failed to toggle brand visibility.');
     }
   };
 
   const handleDelete = async (id) => {
+    const deleteToast = toast.loading('Removing brand partner...');
     try {
       await api.delete(`/brands/${id}`);
       setBrands(brands.filter(b => b._id !== id));
+      toast.success('Brand partner removed from directory.', { id: deleteToast });
     } catch (err) {
       console.error('Failed to delete brand:', err);
-      alert('Failed to remove partner from the directory.');
+      toast.error('Failed to remove partner from the directory.', { id: deleteToast });
     }
   };
 
@@ -596,8 +668,26 @@ const ManageBrands = () => {
         <div className="flex flex-col gap-3">
            <AnimatePresence mode="popLayout">
              {loading ? (
-                <div className="py-20 text-center text-warm-sand font-bold uppercase tracking-widest text-xs animate-pulse">
-                   Fetching directory partners...
+                <div className="flex flex-col gap-3">
+                  {[1, 2, 3].map((n) => (
+                    <div key={n} className="bg-white p-3 rounded-2xl border border-soft-oatmeal/40 shadow-sm flex items-center gap-6 animate-pulse">
+                      <div className="w-14 h-14 rounded-xl bg-slate-200 flex-shrink-0"></div>
+                      <div className="flex-1 flex items-center gap-8">
+                        <div className="w-48 space-y-2">
+                          <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+                          <div className="h-3 bg-slate-200 rounded w-1/4"></div>
+                        </div>
+                        <div className="flex-1 hidden md:block">
+                          <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+                        </div>
+                        <div className="hidden lg:flex items-center gap-4">
+                          <div className="w-8 h-8 rounded-full bg-slate-200"></div>
+                          <div className="w-8 h-8 rounded-full bg-slate-200"></div>
+                        </div>
+                      </div>
+                      <div className="w-16 h-8 bg-slate-200 rounded-xl flex-shrink-0"></div>
+                    </div>
+                  ))}
                 </div>
              ) : filteredBrands.length > 0 ? (
                filteredBrands.map((brand) => (

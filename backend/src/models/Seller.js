@@ -70,6 +70,8 @@ const SellerSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  phoneVerificationOtp: String,
+  phoneVerificationOtpExpire: Date,
   createdAt: {
     type: Date,
     default: Date.now
@@ -82,6 +84,14 @@ SellerSchema.pre('save', async function() {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
+SellerSchema.methods.getVerificationOtp = function() {
+  const crypto = require('crypto');
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  this.phoneVerificationOtp = crypto.createHash('sha256').update(otp).digest('hex');
+  this.phoneVerificationOtpExpire = Date.now() + 10 * 60 * 1000;
+  return otp;
+};
+
 SellerSchema.methods.getSignedJwtToken = function() {
   return jwt.sign({ id: this._id, role: 'seller' }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
@@ -90,7 +100,6 @@ SellerSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-SellerSchema.index({ email: 1 });
 SellerSchema.index({ isVerified: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Seller', SellerSchema);

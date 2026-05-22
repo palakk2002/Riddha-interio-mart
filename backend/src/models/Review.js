@@ -34,6 +34,40 @@ const ReviewSchema = new mongoose.Schema({
   isApproved: {
     type: Boolean,
     default: true
+  },
+  helpfulVotes: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'User'
+  }],
+  helpfulCount: {
+    type: Number,
+    default: 0
+  },
+  reports: [{
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User'
+    },
+    reason: {
+      type: String,
+      required: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  reportCount: {
+    type: Number,
+    default: 0
+  },
+  isFlagged: {
+    type: Boolean,
+    default: false
+  },
+  sellerResponse: {
+    text: String,
+    respondedAt: Date
   }
 }, {
   timestamps: true

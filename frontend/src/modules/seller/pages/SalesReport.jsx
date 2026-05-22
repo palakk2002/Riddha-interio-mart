@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   BarChart3, 
@@ -40,30 +40,69 @@ import {
   Legend
 } from 'recharts';
 import { useNavigate } from 'react-router-dom';
+import api from '../../../shared/utils/api';
 
-const chartData = [
-  { name: 'Mon', sales: 400, revenue: 240, units: 100 },
-  { name: 'Tue', sales: 500, revenue: 300, units: 120 },
-  { name: 'Wed', sales: 1200, revenue: 800, units: 250 },
-  { name: 'Thu', sales: 900, revenue: 600, units: 180 },
-  { name: 'Fri', sales: 1500, revenue: 1100, units: 320 },
-];
-
-const pieData = [
-  { name: 'Sofa', value: 400, color: '#E36666' },
-  { name: 'Tables', value: 300, color: '#9333EA' },
-  { name: 'Lamps', value: 200, color: '#4F46E5' },
-  { name: 'Decor', value: 100, color: '#F59E0B' },
-];
-
-const bestSellers = [
-  { id: 1, name: 'Anticor Dist Table', price: '₹12,500', rating: 4.7, image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=200&auto=format&fit=crop' },
-  { id: 2, name: 'Velvet Soft Chair', price: '₹8,500', rating: 4.9, image: 'https://images.unsplash.com/photo-1592078615290-033ee584e267?q=80&w=200&auto=format&fit=crop' },
-];
+const COLORS = ['#E36666', '#9333EA', '#4F46E5', '#F59E0B', '#10B981', '#F43F5E', '#3B82F6', '#14B8A6'];
 
 const SalesReport = () => {
   const navigate = useNavigate();
   const [activeMetric, setActiveMetric] = useState('sales');
+  
+  const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState([]);
+  const [pieData, setPieData] = useState([]);
+  const [bestSellers, setBestSellers] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const { data } = await api.get('/seller/analytics?timeRange=monthly');
+        
+        if (data.success && data.data) {
+          const { revenueTrends, topProducts } = data.data;
+
+          // Map revenue trends
+          if (revenueTrends) {
+            const mappedTrends = revenueTrends.map((t) => ({
+              name: new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              sales: t.orders,
+              revenue: t.revenue,
+              units: t.orders
+            }));
+            setChartData(mappedTrends.length > 0 ? mappedTrends : [
+              { name: 'No Data', sales: 0, revenue: 0, units: 0 }
+            ]);
+          }
+
+          // Map top products for pie chart (Revenue distribution)
+          if (topProducts) {
+            const mappedPie = topProducts.map((p, idx) => ({
+              name: p.name.length > 15 ? p.name.substring(0, 15) + '...' : p.name,
+              value: p.totalRevenue,
+              color: COLORS[idx % COLORS.length]
+            }));
+            setPieData(mappedPie);
+
+            // Map best sellers list
+            const mappedBest = topProducts.map((p, idx) => ({
+              id: p._id || idx,
+              name: p.name,
+              price: `₹${p.totalRevenue.toLocaleString()}`,
+              rating: p.totalQuantity, // Display quantity instead of rating
+              image: p.image || 'https://via.placeholder.com/150'
+            }));
+            setBestSellers(mappedBest);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch sales report data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <PageWrapper>
@@ -166,7 +205,7 @@ const SalesReport = () => {
 
            {/* Category Contribution (Donut Chart) */}
            <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-2xl shadow-slate-200/50 border border-slate-100">
-              <h3 className="text-sm font-semibold uppercase tracking-widest text-slate-900 mb-6">Category contribution</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-widest text-slate-900 mb-6">Top Products Revenue</h3>
               <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                  <div className="w-full h-48 md:h-56 max-w-[240px]">
                     <ResponsiveContainer width="100%" height="100%" minWidth={0}>
@@ -196,7 +235,7 @@ const SalesReport = () => {
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
                           <div className="space-y-0.5">
                              <p className="text-[10px] font-black text-slate-900 leading-none">{item.name}</p>
-                             <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest">₹{item.value}k Sales</p>
+                             <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest">₹{item.value.toLocaleString()} Sales</p>
                           </div>
                        </div>
                     ))}
@@ -220,11 +259,11 @@ const SalesReport = () => {
                              <img src={product.image} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                           </div>
                           <div className="space-y-1">
-                             <h4 className="text-sm font-semibold text-slate-900 leading-tight">{product.name}</h4>
+                             <h4 className="text-sm font-semibold text-slate-900 leading-tight line-clamp-1">{product.name}</h4>
                              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Total {product.price}</p>
-                             <div className="flex items-center gap-1.5">
-                                <Star size={10} className="text-amber-500 fill-amber-500" />
-                                <span className="text-[10px] font-black text-slate-900">{product.rating}</span>
+                             <div className="flex items-center gap-1.5 mt-1">
+                                <Package size={10} className="text-amber-500" />
+                                <span className="text-[10px] font-black text-slate-900">{product.rating} Sold</span>
                              </div>
                           </div>
                        </div>

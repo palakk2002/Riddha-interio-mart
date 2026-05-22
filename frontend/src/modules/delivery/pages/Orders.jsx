@@ -21,8 +21,8 @@ const Orders = () => {
   const [loading, setLoading] = React.useState(true);
   const { user } = useUser();
 
-  const fetchOrders = async () => {
-    setLoading(true);
+  const fetchOrders = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const { data } = await api.get('/orders');
       if (data.success) {
@@ -30,16 +30,16 @@ const Orders = () => {
       }
     } catch (err) {
       console.error('Failed to fetch orders:', err);
-      toast.error('Logistics Sync Failure');
+      if (!isBackground) toast.error('Logistics Sync Failure');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
   React.useEffect(() => {
     fetchOrders();
     const handleNewAssignment = () => {
-      fetchOrders();
+      fetchOrders(true);
       toast.success('New Deployment Detected', { icon: '🚀' });
     };
     window.addEventListener('delivery:assigned', handleNewAssignment);
@@ -52,10 +52,23 @@ const Orders = () => {
       const { data } = await api.put(`/orders/${orderId}/status`, { status: newStatus });
       if (data.success) {
         toast.success(`Mission State: ${newStatus} Validated`, { id: loadingToast });
-        fetchOrders();
+        fetchOrders(true);
       }
     } catch (err) {
       toast.error(err.response?.data?.error || 'Validation Failure', { id: loadingToast });
+    }
+  };
+
+  const handleVerifyOtp = async (orderId, otp) => {
+    const loadingToast = toast.loading('Verifying OTP...');
+    try {
+      const { data } = await api.post(`/orders/${orderId}/verify-otp`, { otp });
+      if (data.success) {
+        toast.success(data.message || 'OTP Verified & Delivered', { id: loadingToast });
+        fetchOrders(true);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Invalid OTP', { id: loadingToast });
     }
   };
 
@@ -65,7 +78,7 @@ const Orders = () => {
       const { data } = await api.put(`/orders/${orderId}/delivery-response`, { status });
       if (data.success) {
         toast.success(`Deployment ${status} Successfully`, { id: loadingToast });
-        fetchOrders();
+        fetchOrders(true);
       }
     } catch (err) {
       toast.error(err.response?.data?.error || 'Authorization Failure', { id: loadingToast });
@@ -163,11 +176,13 @@ const Orders = () => {
                          price: item.price
                       })),
                       totalBill: order.totalPrice,
-                      paymentMode: order.paymentMethod
+                      paymentMode: order.paymentMethod,
+                      otp: order.deliveryOtp
                     }} 
                     onAccept={(id) => handleDeliveryResponse(id, 'Accepted')}
                     onReject={(id) => handleDeliveryResponse(id, 'Rejected')}
                     onUpdateStatus={(id, status) => handleUpdateStatus(id, status)} 
+                    onVerifyOtp={(id, otp) => handleVerifyOtp(id, otp)}
                   />
                 </div>
               ))

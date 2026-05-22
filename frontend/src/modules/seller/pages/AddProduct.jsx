@@ -36,6 +36,7 @@ const AddProduct = () => {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
+  const [subsubcategories, setSubsubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -45,8 +46,10 @@ const AddProduct = () => {
   // Custom Dropdown State
   const [isCatOpen, setIsCatOpen] = useState(false);
   const [isSubOpen, setIsSubOpen] = useState(false);
+  const [isSubSubOpen, setIsSubSubOpen] = useState(false);
   const [catSearch, setCatSearch] = useState('');
   const [subSearch, setSubSearch] = useState('');
+  const [subSubSearch, setSubSubSearch] = useState('');
 
   const fileInputRef = useRef(null);
 
@@ -59,6 +62,7 @@ const AddProduct = () => {
     discountPrice: '',
     category: '',
     subcategory: '',
+    subsubcategory: '',
     brand: '',
     material: '',
     dimensions: '',
@@ -97,6 +101,7 @@ const AddProduct = () => {
         description: item.description || '',
         category: item.category || '',
         subcategory: item.subcategory || '',
+        subsubcategory: item.subsubcategory || '',
         brand: brandId,
         material: item.material || '',
         dimensions: item.dimensions || '',
@@ -119,6 +124,10 @@ const AddProduct = () => {
 
   const filteredSubcategories = subcategories.filter(sub => 
     sub.name.toLowerCase().includes(subSearch.toLowerCase())
+  );
+
+  const filteredSubSubcategories = subsubcategories.filter(subsub => 
+    subsub.name.toLowerCase().includes(subSubSearch.toLowerCase())
   );
 
   const fetchInitialData = async () => {
@@ -157,6 +166,41 @@ const AddProduct = () => {
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
     }));
+  };
+
+  const autoAddProducts = async () => {
+    setIsSubmitting(true);
+    try {
+      const brandId = brands.length > 0 ? brands[0]._id : '';
+      const catName = categories.length > 0 ? categories[0].name : 'Furniture';
+      
+      for (let i = 1; i <= 5; i++) {
+        await api.post('/products', {
+          name: `Sheetal Premium Item ${i}`,
+          sku: `SH-ITM-00${i}`,
+          hsnCode: '9403',
+          description: `details sheetal - Premium luxury edition ${i}`,
+          price: 1500 + (i * 100),
+          category: catName,
+          brand: brandId,
+          countInStock: 20 + i,
+          images: ['https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&q=80'],
+          unit: 'piece',
+          unitValue: '1',
+          source: 'new'
+        });
+      }
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        navigate('/seller/stock-management');
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.error || err.message || 'Failed to auto-add products');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -204,7 +248,7 @@ const AddProduct = () => {
         setSuccess(true);
         setTimeout(() => {
           setSuccess(false);
-          navigate('/seller/inventory');
+          navigate('/seller/stock-management');
         }, 2000);
       }
     } catch (err) {
@@ -286,12 +330,21 @@ const AddProduct = () => {
               {/* Form Header */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-4 md:px-0">
                 <div className="space-y-1">
+                  <div className="flex items-center">
                     <button 
-                    onClick={() => setSelection(null)}
-                    className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-seller-primary transition-colors uppercase tracking-widest mb-2"
-                  >
-                    <ChevronLeft size={16} /> Back to selection
-                  </button>
+                      onClick={() => setSelection(null)}
+                      className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-seller-primary transition-colors uppercase tracking-widest mb-2"
+                    >
+                      <ChevronLeft size={16} /> Back to selection
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={autoAddProducts}
+                      className="ml-4 flex items-center gap-2 text-xs font-bold text-white bg-seller-primary px-3 py-1.5 rounded-lg hover:bg-seller-dark transition-colors uppercase tracking-widest mb-2 shadow-sm"
+                    >
+                      <Plus size={14} /> Auto Add 5 Products (Sheetal)
+                    </button>
+                  </div>
                   <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
                     {selection === 'new' ? 'New Listing' : 'Sync Catalog Item'}
                   </h1>
@@ -356,8 +409,8 @@ const AddProduct = () => {
                   <select 
                     required
                     value={formData.brand} onChange={(e) => setFormData({...formData, brand: e.target.value})}
-                    disabled={selection === 'catalog'}
-                    className={`w-full px-6 py-4 rounded-2xl border-none font-semibold text-sm focus:ring-2 focus:ring-seller-primary/10 transition-all ${selection === 'catalog' ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : 'bg-slate-50 text-slate-900'}`}
+                    disabled={selection === 'catalog' && !!formData.brand}
+                    className={`w-full px-6 py-4 rounded-2xl border-none font-semibold text-sm focus:ring-2 focus:ring-seller-primary/10 transition-all ${(selection === 'catalog' && !!formData.brand) ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : 'bg-slate-50 text-slate-900'}`}
                   >
                     <option value="">Select Brand</option>
                     {brands.map(brand => (
@@ -412,8 +465,9 @@ const AddProduct = () => {
                                  type="button"
                                  onClick={() => {
                                    const selectedCat = categories.find(c => c.name === cat.name);
-                                   setFormData({ ...formData, category: cat.name, subcategory: '' });
-                                   setSubcategories(selectedCat ? selectedCat.subcategories : []);
+                                   setFormData({ ...formData, category: cat.name, subcategory: '', subsubcategory: '' });
+                                   setSubcategories(selectedCat ? selectedCat.subcategories || [] : []);
+                                   setSubsubcategories([]);
                                    setCatSearch('');
                                    setIsCatOpen(false);
                                  }}
@@ -450,7 +504,9 @@ const AddProduct = () => {
                                  key={sub._id || sub.name}
                                  type="button"
                                  onClick={() => {
-                                   setFormData({...formData, subcategory: sub.name});
+                                   const selectedSub = subcategories.find(s => s.name === sub.name);
+                                    setFormData({ ...formData, subcategory: sub.name, subsubcategory: '' });
+                                    setSubsubcategories(selectedSub ? selectedSub.subsubcategories || [] : []);
                                    setSubSearch('');
                                    setIsSubOpen(false);
                                  }}
@@ -463,6 +519,43 @@ const AddProduct = () => {
                        )}
                     </div>
                  </div>
+
+                  <div className="space-y-2 relative">
+                     <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Sub-subcategory</label>
+                     <div className="relative">
+                        <input 
+                          type="text"
+                          disabled={!formData.subcategory || selection === 'catalog'}
+                          placeholder={formData.subsubcategory || "Select sub-subcategory..."}
+                          value={subSubSearch}
+                          onChange={(e) => {
+                             if (selection === 'catalog') return;
+                             setSubSubSearch(e.target.value);
+                             setIsSubSubOpen(true);
+                          }}
+                          onFocus={() => { if (selection !== 'catalog') setIsSubSubOpen(true); }}
+                          className={`w-full px-6 py-4 rounded-2xl border-none font-semibold text-sm focus:ring-2 focus:ring-seller-primary/10 transition-all ${(!formData.subcategory || selection === 'catalog') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : 'bg-slate-50 text-slate-900'}`}
+                        />
+                        {isSubSubOpen && (
+                          <div className="absolute left-0 right-0 top-full mt-3 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto overflow-x-hidden p-2">
+                             {filteredSubSubcategories.map(subsub => (
+                                <button
+                                  key={subsub._id || subsub.name}
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData({ ...formData, subsubcategory: subsub.name });
+                                    setSubSubSearch('');
+                                    setIsSubSubOpen(false);
+                                  }}
+                                  className="w-full text-left px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-colors uppercase tracking-widest"
+                                >
+                                  {subsub.name}
+                                </button>
+                             ))}
+                          </div>
+                        )}
+                     </div>
+                  </div>
 
                  <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Material Composition</label>
@@ -609,7 +702,8 @@ const AddProduct = () => {
                                {videoFile ? 'Replace' : 'Upload File'}
                             </label>
                          )}
-                      </div>
+                     </div>
+
                       <input 
                         type="url" placeholder={selection === 'catalog' ? "Catalog linked" : "Paste YouTube/Vimeo URL"}
                         value={formData.videoUrl} 
@@ -646,14 +740,14 @@ const AddProduct = () => {
                       {success ? 'Listing Success' : (isSubmitting ? 'Syncing...' : 'Finalize Listing')}
                     </button>
                    
-                   <p className="text-[9px] text-center text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
-                      Syncing this product will make it visible to customers globally upon validation.
-                   </p>
+                    <p className="text-[9px] font-bold text-center text-slate-400 uppercase tracking-widest leading-relaxed">
+                       Syncing this product will make it visible to customers globally upon validation.
+                    </p>
                 </div>
              </div>
           </div>
-              </form>
-            </motion.div>
+                </form>
+             </motion.div>
           )}
         </AnimatePresence>
       </div>

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import * as FiIcons from 'react-icons/fi';
 import { 
   FiTrendingUp, 
   FiShoppingBag, 
@@ -13,34 +14,65 @@ import {
   FiZap
 } from 'react-icons/fi';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import api from '../../../shared/utils/api';
 
 const AnalyticsPage = () => {
   const [timeRange, setTimeRange] = useState('This Month');
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const chartData = [
-    { day: 'Mon', current: 2400, previous: 1400 },
-    { day: 'Tue', current: 4398, previous: 3000 },
-    { day: 'Wed', current: 9800, previous: 6000 },
-    { day: 'Thu', current: 3908, previous: 2780 },
-    { day: 'Fri', current: 8800, previous: 4890 },
-    { day: 'Sat', current: 3800, previous: 2390 },
-    { day: 'Sun', current: 4300, previous: 3490 },
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true);
+        const { data: res } = await api.get(`/wallets/admin/analytics?range=${timeRange}`);
+        if (res.success) {
+          setData(res.data.insights);
+        }
+      } catch (err) {
+        console.error('Failed to retrieve analytics telemetry:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalytics();
+  }, [timeRange]);
+
+  const chartData = data?.chartData || [
+    { day: 'Mon', current: 0, previous: 0 },
+    { day: 'Tue', current: 0, previous: 0 },
+    { day: 'Wed', current: 0, previous: 0 },
+    { day: 'Thu', current: 0, previous: 0 },
+    { day: 'Fri', current: 0, previous: 0 },
+    { day: 'Sat', current: 0, previous: 0 },
+    { day: 'Sun', current: 0, previous: 0 },
   ];
 
-  // Mock Data for Frontend Display
-  const stats = [
-    { label: 'Total Revenue', value: '₹12,45,800', change: '+14.5%', isUp: true, icon: FiDollarSign, color: 'bg-green-50 text-green-600' },
-    { label: 'Total Orders', value: '1,284', change: '+8.2%', isUp: true, icon: FiShoppingBag, color: 'bg-blue-50 text-blue-600' },
-    { label: 'Profit Margin', value: '28.4%', change: '-2.1%', isUp: false, icon: FiTrendingUp, color: 'bg-warm-sand/10 text-warm-sand' },
-    { label: 'Avg Order Value', value: '₹970', change: '+5.4%', isUp: true, icon: FiZap, color: 'bg-purple-50 text-purple-600' }
+  // Live and Fallback Data for Frontend Display
+  const stats = data?.stats || [
+    { label: 'Total Revenue', value: '₹0', change: '+0.0%', isUp: true, icon: 'FiDollarSign' },
+    { label: 'Total Orders', value: '0', change: '+0.0%', isUp: true, icon: 'FiShoppingBag' },
+    { label: 'Profit Margin', value: '₹0', change: '+0.0%', isUp: true, icon: 'FiTrendingUp' },
+    { label: 'Avg Order Value', value: '₹0', change: '+0.0%', isUp: true, icon: 'FiZap' }
   ];
 
-  const topSellers = [
+  const topSellers = data?.topSellers || [
     { name: 'Royal Interiors', sales: '₹4,20,000', orders: 142, growth: '+12%' },
     { name: 'Modern Decor Pvt', sales: '₹2,80,000', orders: 98, growth: '+8%' },
     { name: 'Luxury Lighting', sales: '₹1,50,000', orders: 56, growth: '-2%' },
     { name: 'Artisan Woodwork', sales: '₹95,000', orders: 34, growth: '+15%' }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-6 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 border-4 border-[#189D91] border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Syncing platform telemetry...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-6">
@@ -81,7 +113,7 @@ const AnalyticsPage = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {stats.map((stat, idx) => {
-            const Icon = stat.icon;
+            const Icon = FiIcons[stat.icon] || FiIcons.FiDollarSign;
             const isUp = stat.isUp;
             const brandBg = idx === 0 || idx === 2 ? 'bg-teal-50 text-[#189D91] border-teal-100/50' : 'bg-pink-50 text-[#EC008C] border-pink-100/50';
             

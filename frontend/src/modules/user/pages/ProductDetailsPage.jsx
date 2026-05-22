@@ -323,25 +323,7 @@ const ProductDetailsPage = () => {
               ))}
             </div>
 
-            {/* Select Size Options */}
-            <div className="mt-5 md:mt-4">
-              <h4 className="text-[15px] md:text-[11px] font-bold md:uppercase tracking-normal md:tracking-wider text-gray-900 md:text-gray-800 mb-2 md:mb-0">Option</h4>
-              <div className="flex items-center gap-2.5 md:mt-2 flex-wrap">
-                {(product.sizes && product.sizes.length > 0 && product.sizes[0] !== 'Standard' ? product.sizes : ['32', 'M', 'L', 'XL']).map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`px-4 md:px-3 py-2 border rounded-[14px] md:rounded-xl text-[13px] md:text-xs font-bold transition-all duration-300 ${
-                      selectedSize === size
-                        ? 'border-[#94C2CB] bg-[#94C2CB]/10 text-gray-800 md:border-[#004D40] md:bg-[#004D40]/5 md:text-[#004D40] ring-1 ring-[#94C2CB] md:ring-[#004D40]'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Select Size Options Removed as per request */}
 
             {/* Quantity Counter (Desktop Only) */}
             <div className="hidden md:block mt-4">

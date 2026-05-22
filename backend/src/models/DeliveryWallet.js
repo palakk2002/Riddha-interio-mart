@@ -46,6 +46,4 @@ const DeliveryWalletSchema = new mongoose.Schema({
   transactions: [DeliveryWalletTransactionSchema]
 }, { timestamps: true });
 
-DeliveryWalletSchema.index({ deliveryPartner: 1 });
-
 module.exports = mongoose.model('DeliveryWallet', DeliveryWalletSchema);

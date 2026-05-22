@@ -12,6 +12,7 @@ import {
 } from 'react-icons/lu';
 import PageWrapper from '../components/PageWrapper';
 import api from '../../../shared/utils/api';
+import { toast } from 'react-hot-toast';
 
 const createBlockId = () => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -66,7 +67,6 @@ const ManageFavouriteCategories = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
-  const [statusMessage, setStatusMessage] = useState('');
 
   const categoryMap = useMemo(
     () => new Map(categories.map((category) => [String(category._id), category])),
@@ -117,7 +117,7 @@ const ManageFavouriteCategories = () => {
       setProducts(Array.isArray(productRes?.data) ? productRes.data : []);
     } catch (error) {
       console.error('Failed to load favourite section data:', error);
-      setStatusMessage(error.response?.data?.error || 'Failed to load favourite sections.');
+      toast.error(error.response?.data?.error || 'Failed to load favourite sections.');
     } finally {
       setLoading(false);
     }
@@ -144,7 +144,6 @@ const ManageFavouriteCategories = () => {
   const resetForm = () => {
     setSectionForm(createEmptyForm());
     setEditingId(null);
-    setStatusMessage('');
     if (location.pathname.includes('/create') && editingId) {
       navigate('/admin/manage-favourites');
     }
@@ -155,27 +154,47 @@ const ManageFavouriteCategories = () => {
     setEditingId(getId(section));
     setActiveTab('create');
     navigate('/admin/manage-favourites/create');
-    setStatusMessage(`Editing: ${section.heading}`);
+    toast.success(`Loaded section: "${section.heading}" for editing.`);
   };
 
-  const handleDelete = async (section) => {
-    const shouldDelete = window.confirm(`Delete favourite section "${section.heading}"?`);
-    if (!shouldDelete) return;
-
-    try {
-      setDeletingId(getId(section));
-      await api.delete(`/favourite-section/${getId(section)}`);
-      await updateSections();
-      if (editingId === getId(section)) {
-        resetForm();
-      }
-      setStatusMessage('Favourite section deleted.');
-    } catch (error) {
-      console.error('Failed to delete favourite section:', error);
-      setStatusMessage(error.response?.data?.error || 'Failed to delete favourite section.');
-    } finally {
-      setDeletingId(null);
-    }
+  const handleDelete = (section) => {
+    toast((t) => (
+      <div className="flex flex-col gap-2 p-1 text-left">
+        <p className="text-sm font-bold text-deep-espresso">
+          Delete favourite section "{section.heading}"?
+        </p>
+        <div className="flex justify-end gap-2 mt-1">
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                setDeletingId(getId(section));
+                await api.delete(`/favourite-section/${getId(section)}`);
+                await updateSections();
+                if (editingId === getId(section)) {
+                  resetForm();
+                }
+                toast.success('Favourite section deleted successfully.');
+              } catch (error) {
+                console.error('Failed to delete favourite section:', error);
+                toast.error(error.response?.data?.error || 'Failed to delete section.');
+              } finally {
+                setDeletingId(null);
+              }
+            }}
+            className="px-3 py-1 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-colors"
+          >
+            Confirm
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-slate-250 text-deep-espresso border border-soft-oatmeal rounded-lg text-xs font-bold hover:bg-slate-350 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: 6000 });
   };
 
   const addBlock = () => {
@@ -231,7 +250,7 @@ const ManageFavouriteCategories = () => {
     event.preventDefault();
 
     if (!sectionForm.heading.trim()) {
-      setStatusMessage('Please add a heading.');
+      toast.error('Please add a heading.');
       return;
     }
 
@@ -241,7 +260,7 @@ const ManageFavouriteCategories = () => {
       displayOrder: Number(sectionForm.displayOrder) || 0,
       isActive: sectionForm.isActive,
       items: sectionForm.items
-        .filter((block) => block.categoryId) // Filter out blocks without category
+        .filter((block) => block.categoryId)
         .map((block) => ({
           categoryId: block.categoryId,
           productIds: block.productIds
@@ -249,13 +268,13 @@ const ManageFavouriteCategories = () => {
     };
 
     if (payload.items.length === 0) {
-      setStatusMessage('Please add at least one category block with products.');
+      toast.error('Please add at least one category block with products.');
       return;
     }
 
     const hasEmptyBlocks = payload.items.some(block => !block.productIds || block.productIds.length === 0);
     if (hasEmptyBlocks) {
-      setStatusMessage('Please select at least one product for every category block.');
+      toast.error('Please select at least one product for every category block.');
       return;
     }
 
@@ -267,11 +286,11 @@ const ManageFavouriteCategories = () => {
       if (editingId) {
         console.log('Sending PUT request for editingId:', editingId);
         await api.put(`/favourite-section/${editingId}`, payload);
-        setStatusMessage('Favourite section updated successfully.');
+        toast.success('Favourite section updated successfully.');
       } else {
         console.log('Sending POST request');
         await api.post('/favourite-section', payload);
-        setStatusMessage('Favourite section created successfully.');
+        toast.success('Favourite section created successfully.');
       }
 
       await updateSections();
@@ -280,7 +299,7 @@ const ManageFavouriteCategories = () => {
       navigate('/admin/manage-favourites');
     } catch (error) {
       console.error('Failed to save favourite section:', error);
-      setStatusMessage(error.response?.data?.error || 'Failed to save favourite section.');
+      toast.error(error.response?.data?.error || 'Failed to save favourite section.');
     } finally {
       setSubmitting(false);
     }
@@ -351,18 +370,20 @@ const ManageFavouriteCategories = () => {
           </button>
         </div>
 
-        {statusMessage && (
-          <div className="px-4 py-3 rounded-2xl border border-soft-oatmeal bg-white text-sm text-deep-espresso shadow-sm">
-            {statusMessage}
-          </div>
-        )}
-
         {loading ? (
-          <div className="rounded-[2rem] border border-soft-oatmeal bg-white p-8 shadow-sm">
-            <div className="flex items-center gap-3 text-warm-sand">
-              <LuLoader className="animate-spin" />
-              <span className="text-sm font-medium">Loading favourite sections...</span>
-            </div>
+          <div className="grid grid-cols-1 gap-4">
+            {[1, 2].map((n) => (
+              <div key={n} className="rounded-[2rem] border border-soft-oatmeal bg-white p-5 md:p-6 shadow-sm animate-pulse space-y-4">
+                <div className="h-5 bg-slate-200 rounded w-1/4"></div>
+                <div className="h-8 bg-slate-200 rounded w-1/2"></div>
+                <div className="h-10 bg-slate-200 rounded w-full"></div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="h-12 bg-slate-200 rounded-xl animate-pulse"></div>
+                  <div className="h-12 bg-slate-200 rounded-xl animate-pulse"></div>
+                  <div className="h-12 bg-slate-200 rounded-xl animate-pulse"></div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <>
@@ -525,7 +546,7 @@ const ManageFavouriteCategories = () => {
                                 <select
                                   value={categoryId}
                                   onChange={(event) => updateBlock(block.id, 'categoryId', event.target.value)}
-                                  className="w-full rounded-2xl border border-soft-oatmeal bg-white px-4 py-3.5 text-sm text-deep-espresso focus:outline-none focus:ring-2 focus:ring-warm-sand"
+                                  className="w-full rounded-2xl border border-soft-oatmeal bg-white px-4 py-3.5 text-sm text-deep-espresso focus:outline-none focus:ring-2 focus:ring-warm-sand cursor-pointer"
                                 >
                                   <option value="">Select a category</option>
                                   {categoryOptions.map((category) => (
@@ -744,7 +765,7 @@ const ManageFavouriteCategories = () => {
                             <button
                               type="button"
                               onClick={() => handleEdit(section)}
-                              className="inline-flex items-center gap-2 rounded-xl border border-soft-oatmeal bg-white px-4 py-2.5 text-sm font-semibold text-deep-espresso hover:border-dusty-cocoa hover:text-dusty-cocoa transition-all"
+                              className="inline-flex items-center gap-2 rounded-xl border border-soft-oatmeal bg-white px-4 py-2.5 text-sm font-semibold text-deep-espresso hover:border-dusty-cocoa hover:text-dusty-cocoa transition-all cursor-pointer"
                             >
                               <LuPen size={16} />
                               Edit
@@ -753,7 +774,7 @@ const ManageFavouriteCategories = () => {
                               type="button"
                               onClick={() => handleDelete(section)}
                               disabled={deletingId === getId(section)}
-                              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-100 transition-all disabled:opacity-60"
+                              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-100 transition-all disabled:opacity-60 cursor-pointer"
                             >
                               {deletingId === getId(section) ? (
                                 <LuLoader className="animate-spin" size={16} />
