@@ -73,57 +73,57 @@ const CategoryDetailPage = () => {
   return (
     <div className="min-h-svh bg-[#FDFBF9]">
       {/* Category Hero */}
-      <div className="relative h-[220px] md:h-[320px] overflow-hidden">
+      <div className="relative h-[160px] md:h-[240px] overflow-hidden">
         <img
           src={category.image && !category.image.startsWith('C:') ? category.image : 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1600&q=80'}
           alt={category.name}
           className="absolute inset-0 w-full h-full object-cover scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-        <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-24 max-w-4xl">
+        <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-16 max-w-4xl">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="space-y-2 md:space-y-6"
+            className="space-y-1.5 md:space-y-3"
           >
-            <nav className="flex items-center gap-2 text-white/50 text-[9px] md:text-sm font-medium mb-1 md:mb-4">
+            <nav className="flex items-center gap-1.5 text-white/60 text-[10px] md:text-xs font-medium mb-1 md:mb-2">
               <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <FiChevronRight size={14} />
+              <FiChevronRight size={12} />
               <span className="text-white">Collections</span>
             </nav>
-            <h1 className="text-3xl md:text-6xl font-display font-semibold text-white tracking-tight leading-none">
+            <h1 className="text-2xl md:text-4xl font-display font-semibold text-white tracking-tight leading-none">
               {category.name}
             </h1>
-            <p className="text-white/70 text-[10px] md:text-xl font-light leading-relaxed max-w-2xl border-l-2 border-warm-sand pl-4 md:pl-6 italic line-clamp-2 md:line-clamp-none">
+            <p className="text-white/80 text-[11px] md:text-sm font-light leading-relaxed max-w-2xl border-l-2 border-warm-sand pl-3 md:pl-4 italic line-clamp-2 md:line-clamp-none">
               {category.description || `Exquisite pieces curated from the world's finest artisans, designed to bring character and timeless elegance to your modern living spaces.`}
             </p>
           </motion.div>
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 md:px-12 py-4 md:py-12">
-        <div className="flex flex-col lg:flex-row gap-12 md:gap-24 relative">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-4 md:py-8">
+        <div className="flex flex-col lg:flex-row gap-8 md:gap-10 relative">
 
           {/* Professional Sidebar - Categories Navigation */}
-          <aside className="w-full lg:w-72 shrink-0">
-            <div className="lg:sticky lg:top-32 space-y-8 lg:space-y-12">
-              <div className="space-y-8">
-                <div className="flex items-center justify-between border-b border-soft-oatmeal pb-4">
-                  <h3 className="text-[11px] font-semibold uppercase tracking-wider text-deep-espresso/30">Collections</h3>
-                  <FiFilter className="text-warm-sand h-4 w-4" />
+          <aside className="w-full lg:w-64 shrink-0">
+            <div className="lg:sticky lg:top-24 space-y-6 lg:space-y-8">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-soft-oatmeal pb-3">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-deep-espresso/50">Collections</h3>
+                  <FiFilter className="text-warm-sand h-3.5 w-3.5" />
                 </div>
-                <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
+                <div className="flex flex-row lg:flex-col gap-1.5 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
                   {allCategories.map(cat => (
                     <Link
                       key={cat._id}
                       to={`/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`}
-                      className={`group flex items-center justify-between py-2.5 lg:py-3.5 px-4 lg:px-5 rounded-xl lg:rounded-2xl transition-all duration-300 shrink-0 lg:shrink ${cat._id === category._id ? 'bg-deep-espresso text-white shadow-xl lg:shadow-2xl shadow-black/20' : 'text-deep-espresso/60 bg-soft-oatmeal/5 lg:bg-transparent border border-soft-oatmeal/20 lg:border-none hover:bg-soft-oatmeal/10 hover:text-deep-espresso'}`}
+                      className={`group flex items-center justify-between py-2 lg:py-2.5 px-3 lg:px-4 rounded-lg lg:rounded-xl transition-all duration-300 shrink-0 lg:shrink ${cat._id === category._id ? 'bg-deep-espresso text-white shadow-md lg:shadow-lg shadow-black/10' : 'text-deep-espresso/70 bg-soft-oatmeal/5 lg:bg-transparent border border-soft-oatmeal/10 lg:border-none hover:bg-soft-oatmeal/10 hover:text-deep-espresso'}`}
                     >
-                      <span className={`text-[12px] lg:text-sm font-semibold whitespace-nowrap ${cat._id === category._id ? 'translate-x-0 lg:translate-x-1' : 'group-hover:translate-x-1'} transition-transform`}>
+                      <span className={`text-[11px] lg:text-[13px] font-semibold whitespace-nowrap ${cat._id === category._id ? 'translate-x-0 lg:translate-x-1' : 'group-hover:translate-x-1'} transition-transform`}>
                         {cat.name}
                       </span>
-                      {cat._id === category._id && <div className="hidden lg:block w-1.5 h-1.5 rounded-full bg-warm-sand shadow-[0_0_10px_rgba(182,143,101,0.5)]" />}
+                      {cat._id === category._id && <div className="hidden lg:block w-1.5 h-1.5 rounded-full bg-warm-sand shadow-[0_0_8px_rgba(182,143,101,0.5)]" />}
                     </Link>
                   ))}
                 </div>
@@ -158,17 +158,17 @@ const CategoryDetailPage = () => {
 
           {/* Main Visual Grid Area */}
           <main className="flex-1">
-            <div className="flex flex-col md:flex-row items-baseline justify-between mb-4 md:mb-16 gap-6">
+            <div className="flex flex-col md:flex-row items-baseline justify-between mb-4 md:mb-8 gap-4">
               <div>
-                <h2 className="text-3xl md:text-5xl font-display font-semibold text-deep-espresso mb-3 leading-tight">Superior {category.name}</h2>
-                <div className="flex items-center gap-3">
-                  <span className="h-px w-8 bg-warm-sand" />
-                  <p className="text-sm text-warm-sand font-semibold uppercase tracking-wider">Showing {products.length} Masterpieces</p>
+                <h2 className="text-2xl md:text-3xl font-display font-semibold text-deep-espresso mb-1.5 leading-tight">Superior {category.name}</h2>
+                <div className="flex items-center gap-2.5">
+                  <span className="h-px w-6 bg-warm-sand" />
+                  <p className="text-[11px] md:text-xs text-warm-sand font-semibold uppercase tracking-wider">Showing {products.length} Masterpieces</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4 text-[11px] font-semibold uppercase tracking-wider text-deep-espresso/30">
+              <div className="flex items-center gap-3 text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-deep-espresso/50">
                 <span>Sort By:</span>
-                <select className="bg-transparent border-b border-soft-oatmeal pb-1 focus:outline-none text-deep-espresso font-semibold cursor-pointer">
+                <select className="bg-transparent border-b border-soft-oatmeal pb-0.5 focus:outline-none text-deep-espresso font-semibold cursor-pointer">
                   <option>Handpicked</option>
                   <option>Price: Low to High</option>
                   <option>Newest First</option>
@@ -177,7 +177,7 @@ const CategoryDetailPage = () => {
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
               <AnimatePresence>
                 {products.length > 0 ? (
                   products.map((product, index) => (
@@ -206,13 +206,13 @@ const CategoryDetailPage = () => {
 
             {/* Footer call to action in center */}
             {products.length > 0 && (
-              <div className="mt-24 py-20 border-t border-soft-oatmeal/20 text-center space-y-8">
-                <h3 className="text-2xl md:text-4xl font-display font-semibold text-deep-espresso underline decoration-warm-sand/20 decoration-8 underline-offset-[12px]">Request a Custom Selection?</h3>
-                <p className="text-deep-espresso/40 max-w-lg mx-auto text-sm md:text-lg font-light italic">
+              <div className="mt-16 py-12 border-t border-soft-oatmeal/20 text-center space-y-4">
+                <h3 className="text-xl md:text-2xl font-display font-semibold text-deep-espresso underline decoration-warm-sand/20 decoration-4 underline-offset-[8px]">Request a Custom Selection?</h3>
+                <p className="text-deep-espresso/50 max-w-lg mx-auto text-xs md:text-sm font-light italic">
                   Can't find the exact piece for your vision? Our designers can source exclusive materials tailored to your specific architectural requirements.
                 </p>
                 <Link to="/contact">
-                  <button className="px-12 py-5 bg-deep-espresso text-white rounded-full font-black uppercase tracking-[0.2em] text-xs shadow-2xl hover:bg-black hover:scale-105 active:scale-95 transition-all mt-4">
+                  <button className="px-8 py-3.5 bg-deep-espresso text-white rounded-lg font-bold uppercase tracking-widest text-[10px] shadow-lg hover:bg-black transition-all mt-4">
                     Contact Curator
                   </button>
                 </Link>
