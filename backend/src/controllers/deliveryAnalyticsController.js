@@ -1,4 +1,5 @@
 const Order = require('../models/Order');
+const DeliveryWallet = require('../models/DeliveryWallet');
 const mongoose = require('mongoose');
 
 // @desc    Get delivery dashboard analytics
@@ -8,72 +9,40 @@ exports.getDeliveryAnalytics = async (req, res, next) => {
   try {
     const deliveryId = new mongoose.Types.ObjectId(req.user.id);
 
-    // 1. Dashboard Stats & Performance
+    // 1. Optimized Dashboard Stats & Performance
+    // Aggregating directly inside MongoDB to protect RAM and avoid BSON size breaches
     const statsAgg = await Order.aggregate([
       { $match: { deliveryBoy: deliveryId } },
       {
         $group: {
           _id: '$deliveryStatus',
           count: { $sum: 1 },
-          orders: { $push: '$$ROOT' } // We keep track of orders for time calculation
-        }
-      }
-    ]);
-
-    let totalAssigned = 0;
-    let completedDeliveries = 0;
-    let pendingDeliveries = 0;
-    let rejectedDeliveries = 0;
-    
-    let totalDeliveryTimeMs = 0;
-    let completedWithTimeCount = 0;
-
-    statsAgg.forEach(stat => {
-      totalAssigned += stat.count;
-      if (stat._id === 'Delivered') {
-        completedDeliveries += stat.count;
-        
-        // Calculate average time
-        stat.orders.forEach(order => {
-          if (order.deliveredAt && order.deliveryAssignmentTime) {
-            totalDeliveryTimeMs += (new Date(order.deliveredAt) - new Date(order.deliveryAssignmentTime));
-            completedWithTimeCount++;
-          }
-        });
-      } else if (stat._id === 'Rejected') {
-        rejectedDeliveries += stat.count;
-      } else if (['Pending', 'Accepted', 'Picked', 'Out for Delivery'].includes(stat._id)) {
-        pendingDeliveries += stat.count;
-      }
-    });
-
-    const successRate = totalAssigned > 0 ? ((completedDeliveries / totalAssigned) * 100).toFixed(1) : 0;
-    
-    // Convert ms to hours
-    const avgDeliveryTimeMs = completedWithTimeCount > 0 ? (totalDeliveryTimeMs / completedWithTimeCount) : 0;
-    const avgDeliveryTimeHours = avgDeliveryTimeMs > 0 ? (avgDeliveryTimeMs / (1000 * 60 * 60)).toFixed(1) : 0;
-
-    // 2. Earnings & COD
-    // Calculate Commission (max of shippingPrice or 50) and COD collections
-    const earningsAgg = await Order.aggregate([
-      { $match: { deliveryBoy: deliveryId, deliveryStatus: 'Delivered' } },
-      {
-        $group: {
-          _id: null,
-          totalCommission: {
+          completedWithTimeCount: {
             $sum: {
               $cond: [
-                { $gte: ['$shippingPrice', 50] },
-                '$shippingPrice',
-                50
+                {
+                  $and: [
+                    { $eq: ['$deliveryStatus', 'Delivered'] },
+                    { $ifNull: ['$deliveredAt', false] },
+                    { $ifNull: ['$deliveryAssignmentTime', false] }
+                  ]
+                },
+                1,
+                0
               ]
             }
           },
-          codToDeposit: {
+          totalDeliveryTimeMs: {
             $sum: {
               $cond: [
-                { $and: [{ $eq: ['$paymentMethod', 'COD'] }, { $eq: ['$isCashDeposited', false] }] },
-                '$totalPrice',
+                {
+                  $and: [
+                    { $eq: ['$deliveryStatus', 'Delivered'] },
+                    { $ifNull: ['$deliveredAt', false] },
+                    { $ifNull: ['$deliveryAssignmentTime', false] }
+                  ]
+                },
+                { $subtract: ['$deliveredAt', '$deliveryAssignmentTime'] },
                 0
               ]
             }
@@ -82,10 +51,83 @@ exports.getDeliveryAnalytics = async (req, res, next) => {
       }
     ]);
 
-    const totalEarnings = earningsAgg.length > 0 ? earningsAgg[0].totalCommission : 0;
-    const codToDeposit = earningsAgg.length > 0 ? earningsAgg[0].codToDeposit : 0;
+    let totalAssigned = 0;
+    let completedDeliveries = 0;
+    let pendingDeliveries = 0;
+    let rejectedDeliveries = 0;
+    let pickupRequestsCount = 0;
+    let totalTimeMs = 0;
+    let timeCount = 0;
 
-    // 3. Delivery History (Recent 5)
+    statsAgg.forEach(stat => {
+      totalAssigned += stat.count;
+      if (stat._id === 'Delivered') {
+        completedDeliveries += stat.count;
+        totalTimeMs += stat.totalDeliveryTimeMs;
+        timeCount += stat.completedWithTimeCount;
+      } else if (stat._id === 'Rejected') {
+        rejectedDeliveries += stat.count;
+      } else if (['Pending', 'Accepted', 'Picked', 'Out for Delivery'].includes(stat._id)) {
+        pendingDeliveries += stat.count;
+        if (stat._id === 'Accepted') {
+          pickupRequestsCount += stat.count;
+        }
+      }
+    });
+
+    const successRate = totalAssigned > 0 ? ((completedDeliveries / totalAssigned) * 100).toFixed(1) : 0;
+    const avgDeliveryTimeMs = timeCount > 0 ? (totalTimeMs / timeCount) : 0;
+    const avgDeliveryTimeHours = avgDeliveryTimeMs > 0 ? (avgDeliveryTimeMs / (1000 * 60 * 60)).toFixed(1) : 0;
+
+    // 2. Earnings & COD - Bound directly to DeliveryWallet database records
+    let wallet = await DeliveryWallet.findOne({ deliveryPartner: deliveryId });
+    if (!wallet) {
+      wallet = await DeliveryWallet.create({ deliveryPartner: deliveryId });
+    }
+    const totalEarnings = wallet.earningsBalance;
+    const codToDeposit = wallet.codCollectionLiability;
+
+    // 3. Dynamic Historical 7-Day Performance & Earnings Telemetry
+    const performanceData = [];
+    const revenueData = [];
+    
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const ordersLast7Days = await Order.find({
+      deliveryBoy: deliveryId,
+      createdAt: { $gte: sevenDaysAgo }
+    }).select('deliveryStatus createdAt totalPrice');
+
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayName = daysOfWeek[d.getDay()];
+      const dateString = d.toDateString();
+
+      const dayOrders = ordersLast7Days.filter(o => new Date(o.createdAt).toDateString() === dateString);
+      const completed = dayOrders.filter(o => o.deliveryStatus === 'Delivered').length;
+      const rejected = dayOrders.filter(o => o.deliveryStatus === 'Rejected').length;
+
+      performanceData.push({
+        name: dayName,
+        completed,
+        rejected
+      });
+
+      // Standard delivery fee credit of ₹50 per completed order
+      const dayEarnings = completed * 50;
+      const timeLabel = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+      revenueData.push({
+        name: timeLabel,
+        value: dayEarnings
+      });
+    }
+
+    // 4. Delivery History (Recent 5)
     const recentDeliveries = await Order.find({ deliveryBoy: deliveryId })
       .sort({ createdAt: -1 })
       .limit(5)
@@ -93,7 +135,7 @@ exports.getDeliveryAnalytics = async (req, res, next) => {
 
     const formattedHistory = recentDeliveries.map(order => ({
       id: order._id.toString().slice(-8).toUpperCase(),
-      customerName: order.shippingAddress.fullName,
+      customerName: order.shippingAddress?.fullName || 'Guest Customer',
       status: order.deliveryStatus,
       dateTime: order.createdAt
     }));
@@ -105,7 +147,8 @@ exports.getDeliveryAnalytics = async (req, res, next) => {
           totalAssigned,
           completedDeliveries,
           pendingDeliveries,
-          rejectedDeliveries
+          rejectedDeliveries,
+          pickupRequestsCount
         },
         earnings: {
           totalEarnings,
@@ -114,6 +157,10 @@ exports.getDeliveryAnalytics = async (req, res, next) => {
         performance: {
           successRate: parseFloat(successRate),
           avgDeliveryTimeHours: parseFloat(avgDeliveryTimeHours)
+        },
+        charts: {
+          performanceData,
+          revenueData
         },
         recentDeliveries: formattedHistory
       }

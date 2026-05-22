@@ -107,7 +107,12 @@ ReviewSchema.post('save', async function() {
   await this.constructor.getAverageRating(this.product);
 });
 
-// Call getAverageRating before remove
+// Call getAverageRating after deleteOne
+ReviewSchema.post('deleteOne', { document: true, query: false }, async function() {
+  await this.constructor.getAverageRating(this.product);
+});
+
+// Call getAverageRating before remove (legacy support)
 ReviewSchema.post('remove', async function() {
   await this.constructor.getAverageRating(this.product);
 });

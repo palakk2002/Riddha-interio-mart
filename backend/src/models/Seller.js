@@ -72,6 +72,12 @@ const SellerSchema = new mongoose.Schema({
   },
   phoneVerificationOtp: String,
   phoneVerificationOtpExpire: Date,
+  bankDetails: {
+    accountHolderName: { type: String, default: "" },
+    accountNumber: { type: String, default: "" },
+    ifscCode: { type: String, default: "" },
+    bankName: { type: String, default: "" }
+  },
   createdAt: {
     type: Date,
     default: Date.now

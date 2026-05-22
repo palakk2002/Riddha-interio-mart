@@ -126,6 +126,11 @@ const ProductSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  weight: {
+    type: Number,
+    required: true,
+    default: 1.5
+  },
   createdAt: {
     type: Date,
     default: Date.now

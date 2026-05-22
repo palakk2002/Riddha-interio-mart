@@ -173,7 +173,25 @@ const OrderSchema = new mongoose.Schema({
   },
   invoiceUrl: {
     type: String
-  }
+  },
+  shippingCoordinates: {
+    latitude: { type: Number },
+    longitude: { type: Number }
+  },
+  sellerCoordinates: {
+    latitude: { type: Number },
+    longitude: { type: Number }
+  },
+  rejectedBy: [{
+    deliveryBoy: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Delivery'
+    },
+    rejectedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });

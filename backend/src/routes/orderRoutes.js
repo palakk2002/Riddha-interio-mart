@@ -11,7 +11,8 @@ const {
   checkCodEligibility,
   calculateOrderPricing,
   verifyPayment,
-  verifyDeliveryOtp
+  verifyDeliveryOtp,
+  resendDeliveryOtp
 } = require('../controllers/orderController');
 const { protect, authorize } = require('../middleware/auth');
 const { check } = require('express-validator');
@@ -49,6 +50,9 @@ router.route('/:id/delivery-response')
 
 router.route('/:id/verify-otp')
   .post(authorize('delivery'), verifyDeliveryOtp);
+
+router.route('/:id/resend-otp')
+  .post(authorize('delivery'), resendDeliveryOtp);
 
 router.route('/:id').get(getOrderById);
 

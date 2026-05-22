@@ -5,11 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../../modules/user/data/NotificationContext';
 import { formatDistanceToNow } from 'date-fns';
 
-const NotificationDropdown = ({ isMobile = false }) => {
+const NotificationDropdown = ({ isMobile = false, buttonClassName = '', viewAllPath = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotification();
+
+  const isSeller = window.location.pathname.startsWith('/seller');
+  const isAdmin = window.location.pathname.startsWith('/admin');
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -25,18 +28,37 @@ const NotificationDropdown = ({ isMobile = false }) => {
   const handleNotificationClick = (notif) => {
     if (!notif.read) markAsRead(notif._id);
     
-    // Optional routing based on type
-    if (notif.type === 'order_update') navigate('/orders');
-    else if (notif.type === 'delivery_update') navigate('/orders');
+    // Optional routing based on type and role
+    if (notif.type === 'order_update' || notif.type === 'delivery_update') {
+      if (isSeller) {
+        navigate('/seller/orders');
+      } else if (isAdmin) {
+        navigate('/admin/orders/all');
+      } else {
+        navigate('/orders');
+      }
+    }
     
     setIsOpen(false);
   };
+
+  const defaultButtonClass = isMobile 
+    ? 'p-2 rounded-full text-deep-espresso hover:bg-gray-100' 
+    : (isSeller || isAdmin)
+      ? 'p-2.5 text-slate-500 hover:bg-slate-100 rounded-xl'
+      : 'p-2 rounded-full text-gray-500 hover:text-[#004D40] hover:bg-gray-50';
+
+  const defaultViewAllPath = isSeller 
+    ? '/seller/notifications' 
+    : isAdmin 
+      ? '/admin/settings' 
+      : '/notifications';
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`relative p-2 rounded-full transition-colors ${isMobile ? 'text-deep-espresso hover:bg-gray-100' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
+        className={`relative transition-colors ${buttonClassName || defaultButtonClass}`}
       >
         <FiBell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -104,7 +126,7 @@ const NotificationDropdown = ({ isMobile = false }) => {
 
             <div className="p-3 border-t border-gray-100 bg-gray-50/50 text-center">
               <button 
-                onClick={() => { setIsOpen(false); navigate('/notifications'); }}
+                onClick={() => { setIsOpen(false); navigate(viewAllPath || defaultViewAllPath); }}
                 className="text-[10px] font-black uppercase tracking-widest text-deep-espresso hover:text-[#189D91] transition-colors"
               >
                 View All Notifications

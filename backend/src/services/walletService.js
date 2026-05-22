@@ -46,16 +46,25 @@ class WalletService {
     for (const wallet of wallets) {
       const tx = wallet.transactions.find(t => t.referenceId.toString() === orderId.toString() && t.status === 'pending');
       if (tx) {
-        tx.status = 'cleared';
+        const newWithdrawable = wallet.withdrawableBalance + tx.amount;
         
-        wallet.pendingBalance = Math.max(0, wallet.pendingBalance - tx.amount);
-        wallet.withdrawableBalance += tx.amount;
-        wallet.totalEarnings += tx.amount;
-        
-        tx.balanceAfter = wallet.withdrawableBalance;
-        
-        // Save using clean indexing update
-        await wallet.save();
+        await SellerWallet.updateOne(
+          { 
+            _id: wallet._id, 
+            "transactions._id": tx._id 
+          },
+          {
+            $set: { 
+              "transactions.$.status": "cleared",
+              "transactions.$.balanceAfter": newWithdrawable
+            },
+            $inc: {
+              pendingBalance: -tx.amount,
+              withdrawableBalance: tx.amount,
+              totalEarnings: tx.amount
+            }
+          }
+        );
       }
     }
   }
@@ -64,71 +73,109 @@ class WalletService {
    * Records a refund deduction on returned orders
    */
   async recordRefundDeduction(order, refundAmount) {
-    let wallet = await SellerWallet.findOne({ seller: order.seller });
-    if (!wallet) return;
-
     // Deduct proportionally (including 10% commission recovery)
-    const commissionRecovery = refundAmount * 0.10;
-    const netDeduction = refundAmount - commissionRecovery;
+    const commissionRecovery = Number((refundAmount * 0.10).toFixed(2));
+    const netDeduction = Number((refundAmount - commissionRecovery).toFixed(2));
 
-    wallet.withdrawableBalance = Number((wallet.withdrawableBalance - netDeduction).toFixed(2));
-    
-    wallet.transactions.push({
-      amount: -netDeduction,
-      type: 'refund_debit',
-      status: 'cleared',
-      description: `Deduction for returned items in Order ${order._id}`,
-      referenceId: order._id,
-      balanceAfter: wallet.withdrawableBalance
-    });
+    // Update atomically and get the new balance (upsert if no wallet exists yet)
+    const wallet = await SellerWallet.findOneAndUpdate(
+      { seller: order.seller },
+      { $inc: { withdrawableBalance: -netDeduction } },
+      { returnDocument: 'after', upsert: true }
+    );
 
-    await wallet.save();
+    const newBalance = Number(wallet.withdrawableBalance.toFixed(2));
+
+    // Atomically push the transaction log
+    await SellerWallet.updateOne(
+      { seller: order.seller },
+      {
+        $push: {
+          transactions: {
+            amount: -netDeduction,
+            type: 'refund_debit',
+            status: 'cleared',
+            description: `Deduction for returned items in Order ${order._id}`,
+            referenceId: order._id,
+            balanceAfter: newBalance
+          }
+        }
+      }
+    );
   }
 
   /**
    * Initiates a withdrawal payout request for sellers
    */
   async requestSellerPayout(sellerId, amount, customBankDetails = null) {
-    const wallet = await SellerWallet.findOne({ seller: sellerId });
-    if (!wallet || wallet.withdrawableBalance < amount) {
-      throw new Error('Insufficient withdrawable balance.');
+    if (amount < 500) {
+      throw new Error('Minimum withdrawal amount is ₹500.');
     }
 
     const seller = await Seller.findById(sellerId);
     if (!seller) throw new Error('Seller profile not found.');
 
-    const bankDetails = customBankDetails || seller.bankDetails || {
-      accountHolderName: seller.fullName || 'Fintech Seller',
-      accountNumber: '999988887777',
-      ifscCode: 'UTIB0000001',
-      bankName: 'Axis Bank'
-    };
+    const hasProfileBankDetails = seller.bankDetails && seller.bankDetails.accountNumber && seller.bankDetails.accountNumber.trim() !== '';
+    const hasCustomBankDetails = customBankDetails && customBankDetails.accountNumber && customBankDetails.accountNumber.trim() !== '';
 
-    // Debit wallet withdrawable balance instantly to prevent double-spending race conditions
-    wallet.withdrawableBalance = Number((wallet.withdrawableBalance - amount).toFixed(2));
+    if (!hasCustomBankDetails && !hasProfileBankDetails) {
+      throw new Error('Please configure your bank details in your profile or provide valid bank details with the withdrawal request.');
+    }
 
-    const payoutRequest = await SellerPayout.create({
-      seller: sellerId,
-      amount,
-      status: 'requested',
-      bankDetails: {
-        accountHolderName: bankDetails.accountHolderName,
-        accountNumber: bankDetails.accountNumber,
-        ifscCode: bankDetails.ifscCode,
-        bankName: bankDetails.bankName
+    const bankDetails = hasCustomBankDetails ? customBankDetails : seller.bankDetails;
+
+    // 1. Debit wallet withdrawable balance atomically to prevent double-spending race conditions
+    const wallet = await SellerWallet.findOneAndUpdate(
+      { seller: sellerId, withdrawableBalance: { $gte: amount } },
+      { $inc: { withdrawableBalance: -amount } },
+      { returnDocument: 'after' }
+    );
+
+    if (!wallet) {
+      throw new Error('Insufficient withdrawable balance.');
+    }
+
+    // 2. Create the SellerPayout document
+    let payoutRequest;
+    try {
+      payoutRequest = await SellerPayout.create({
+        seller: sellerId,
+        amount,
+        status: 'requested',
+        bankDetails: {
+          accountHolderName: bankDetails.accountHolderName,
+          accountNumber: bankDetails.accountNumber,
+          ifscCode: bankDetails.ifscCode,
+          bankName: bankDetails.bankName
+        }
+      });
+    } catch (createErr) {
+      // Rollback the atomic balance decrement if the database fails to create the payout
+      await SellerWallet.updateOne(
+        { seller: sellerId },
+        { $inc: { withdrawableBalance: amount } }
+      );
+      throw createErr;
+    }
+
+    // 3. Atomically record the transaction in the wallet ledger
+    const newBalance = Number(wallet.withdrawableBalance.toFixed(2));
+    await SellerWallet.updateOne(
+      { seller: sellerId },
+      {
+        $push: {
+          transactions: {
+            amount: -amount,
+            type: 'payout_debit',
+            status: 'pending',
+            description: `Payout request created. Request ID: ${payoutRequest._id}`,
+            referenceId: payoutRequest._id,
+            balanceAfter: newBalance
+          }
+        }
       }
-    });
+    );
 
-    wallet.transactions.push({
-      amount: -amount,
-      type: 'payout_debit',
-      status: 'pending',
-      description: `Payout request created. Request ID: ${payoutRequest._id}`,
-      referenceId: payoutRequest._id,
-      balanceAfter: wallet.withdrawableBalance
-    });
-
-    await wallet.save();
     return payoutRequest;
   }
 
@@ -154,6 +201,50 @@ class WalletService {
         await wallet.save();
       }
     }
+    return payout;
+  }
+
+  /**
+   * Reject a seller payout request and refund the funds atomically
+   */
+  async rejectSellerPayout(payoutId, adminNotes = '') {
+    // 1. Transition payout status atomically to 'rejected' to prevent race conditions during admin approvals/rejections
+    const payout = await SellerPayout.findOneAndUpdate(
+      { _id: payoutId, status: { $in: ['requested', 'processing'] } },
+      { $set: { status: 'rejected', adminNotes } },
+      { returnDocument: 'after' }
+    );
+
+    if (!payout) {
+      throw new Error('Payout request not found, or it has already been processed.');
+    }
+
+    // 2. Refund the funds to the seller's withdrawable balance atomically
+    const wallet = await SellerWallet.findOneAndUpdate(
+      { seller: payout.seller },
+      { $inc: { withdrawableBalance: payout.amount } },
+      { returnDocument: 'after' }
+    );
+
+    if (wallet) {
+      // 3. Atomically update the transaction status inside the ledger to 'cancelled'
+      const newBalance = Number(wallet.withdrawableBalance.toFixed(2));
+      
+      await SellerWallet.updateOne(
+        { 
+          seller: payout.seller, 
+          "transactions.referenceId": payoutId 
+        },
+        {
+          $set: { 
+            "transactions.$.status": "cancelled",
+            "transactions.$.balanceAfter": newBalance,
+            "transactions.$.description": `Payout request rejected & refunded. Notes: ${adminNotes}`
+          }
+        }
+      );
+    }
+
     return payout;
   }
 

@@ -8,7 +8,8 @@ const {
   updateDeliveryStatus,
   getAllDeliveryPartners,
   updateDeliveryApprovalStatus,
-  getPendingDeliveryBoys
+  getPendingDeliveryBoys,
+  updateDeliveryLocation
 } = require('../controllers/deliveryController');
 const { getDeliveryAnalytics } = require('../controllers/deliveryAnalyticsController');
 const { protect, authorize } = require('../middleware/auth');
@@ -34,6 +35,7 @@ router.get('/me', protect, getDeliveryMe);
 router.put('/profile', protect, updateDeliveryProfile);
 router.get('/available', protect, getAvailableDeliveryBoys);
 router.put('/status', protect, updateDeliveryStatus);
+router.put('/location', protect, updateDeliveryLocation);
 router.get('/analytics', protect, getDeliveryAnalytics);
 
 // Admin routes

@@ -30,8 +30,7 @@ import {
   Tooltip, 
   ResponsiveContainer,
   BarChart,
-  Bar,
-  Cell
+  Bar
 } from 'recharts';
 import { motion } from 'framer-motion';
 import api from '../../../shared/utils/api';
@@ -41,6 +40,15 @@ const Dashboard = () => {
   const { user, setUser } = useUser();
   const [updating, setUpdating] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [activeShiftTime, setActiveShiftTime] = useState('Offline');
+
+  // Modal State for Cash Deposit Request
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [depositReference, setDepositReference] = useState('');
+  const [depositNotes, setDepositNotes] = useState('');
+  const [submittingDeposit, setSubmittingDeposit] = useState(false);
+  const [depositSuccess, setDepositSuccess] = useState(false);
   
   const [analytics, setAnalytics] = useState({
     stats: {
@@ -57,29 +65,12 @@ const Dashboard = () => {
       successRate: 0,
       avgDeliveryTimeHours: 0
     },
+    charts: {
+      performanceData: [],
+      revenueData: []
+    },
     recentDeliveries: []
   });
-
-  // Mock data for charts - keeping it realistic for logistics
-  const performanceData = [
-    { name: 'Mon', completed: 12, rejected: 1 },
-    { name: 'Tue', completed: 18, rejected: 2 },
-    { name: 'Wed', completed: 15, rejected: 0 },
-    { name: 'Thu', completed: 22, rejected: 3 },
-    { name: 'Fri', completed: 30, rejected: 1 },
-    { name: 'Sat', completed: 25, rejected: 2 },
-    { name: 'Sun', completed: 10, rejected: 0 },
-  ];
-
-  const revenueData = [
-    { name: '08:00', value: 400 },
-    { name: '10:00', value: 1200 },
-    { name: '12:00', value: 2400 },
-    { name: '14:00', value: 1800 },
-    { name: '16:00', value: 3600 },
-    { name: '18:00', value: 2800 },
-    { name: '20:00', value: 1500 },
-  ];
 
   const fetchDashboardData = async () => {
     try {
@@ -103,6 +94,36 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
+  // Tick-by-tick shift timer tracking
+  useEffect(() => {
+    let intervalId;
+    if (user?.status === 'Available' && user?.lastOnlineTime) {
+      const updateTimer = () => {
+        const diffMs = Date.now() - new Date(user.lastOnlineTime).getTime();
+        if (diffMs <= 0) {
+          setActiveShiftTime('00h 00m 00s');
+          return;
+        }
+        const totalSecs = Math.floor(diffMs / 1000);
+        const hours = Math.floor(totalSecs / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        const secs = totalSecs % 60;
+        
+        const pad = (num) => String(num).padStart(2, '0');
+        setActiveShiftTime(`${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`);
+      };
+
+      updateTimer();
+      intervalId = setInterval(updateTimer, 1000);
+    } else {
+      setActiveShiftTime('Offline');
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [user?.status, user?.lastOnlineTime]);
+
   const toggleStatus = async () => {
     if (user?.approvalStatus !== 'Approved') return;
     setUpdating(true);
@@ -110,7 +131,11 @@ const Dashboard = () => {
       const nextStatus = user?.status === 'Available' ? 'Offline' : 'Available';
       const { data } = await api.put('/delivery/status', { status: nextStatus });
       if (data.success) {
-        setUser({ ...user, status: data.data.status });
+        setUser(prev => ({ 
+          ...prev, 
+          status: data.data.status, 
+          lastOnlineTime: data.data.lastOnlineTime 
+        }));
       }
     } catch (err) {
       console.error('Status update failed:', err);
@@ -119,7 +144,39 @@ const Dashboard = () => {
     }
   };
 
-  const { stats, earnings, performance, recentDeliveries } = analytics;
+  const handleDepositSubmit = async (e) => {
+    e.preventDefault();
+    if (!depositAmount || Number(depositAmount) <= 0) return;
+    
+    setSubmittingDeposit(true);
+    try {
+      const response = await api.post('/wallets/delivery/deposit-request', {
+        amount: Number(depositAmount),
+        transactionReference: depositReference,
+        notes: depositNotes
+      });
+      if (response.data.success) {
+        setDepositSuccess(true);
+        fetchDashboardData();
+        setTimeout(() => {
+          setShowDepositModal(false);
+          setDepositSuccess(false);
+          setDepositAmount('');
+          setDepositReference('');
+          setDepositNotes('');
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Failed to submit deposit request:', err);
+      alert(err.response?.data?.error || 'Failed to submit deposit request. Please try again.');
+    } finally {
+      setSubmittingDeposit(false);
+    }
+  };
+
+  const { stats, earnings, performance, recentDeliveries, charts } = analytics;
+  const performanceData = charts?.performanceData || [];
+  const revenueData = charts?.revenueData || [];
 
   return (
     <PageWrapper>
@@ -144,7 +201,7 @@ const Dashboard = () => {
               <div className="bg-white border border-slate-100 p-1.5 rounded-xl flex items-center gap-2 shadow-sm">
                  <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-100">
                     <LuClock size={14} className="text-[#189D91]" />
-                    <span className="text-xs font-semibold text-slate-600">Active Shift: 08h 12m</span>
+                    <span className="text-xs font-semibold text-slate-600">Active Shift: {activeShiftTime}</span>
                  </div>
                  <button 
                    onClick={toggleStatus}
@@ -181,16 +238,16 @@ const Dashboard = () => {
                transition={{ delay: i * 0.05 }}
                className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group"
              >
-                <div className="flex justify-between items-start mb-3">
-                   <div className={`w-8 h-8 rounded-xl ${card.bg} ${card.color} flex items-center justify-center transition-transform group-hover:scale-105`}>
-                      <card.icon size={16} />
-                   </div>
-                   <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${card.bg} ${card.color}`}>{card.trend}</span>
-                </div>
-                <div>
-                   <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-0.5">{card.label}</p>
-                   <p className="text-xl font-bold text-slate-900 tracking-tight">{loading ? '---' : card.value}</p>
-                </div>
+                 <div className="flex justify-between items-start mb-3">
+                    <div className={`w-8 h-8 rounded-xl ${card.bg} ${card.color} flex items-center justify-center transition-transform group-hover:scale-105`}>
+                       <card.icon size={16} />
+                    </div>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${card.bg} ${card.color}`}>{card.trend}</span>
+                 </div>
+                 <div>
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-0.5">{card.label}</p>
+                    <p className="text-xl font-bold text-slate-900 tracking-tight">{loading ? '---' : card.value}</p>
+                 </div>
              </motion.div>
            ))}
         </div>
@@ -234,8 +291,8 @@ const Dashboard = () => {
                  </div>
                  <div className="flex items-center gap-4">
                     <div className="text-right hidden sm:block">
-                       <p className="text-[10px] font-semibold text-slate-500">Average Order Value</p>
-                       <p className="text-sm font-bold text-slate-900">₹842.00</p>
+                       <p className="text-[10px] font-semibold text-slate-500">Standard Delivery Pay</p>
+                       <p className="text-sm font-bold text-slate-900">₹50.00 / Order</p>
                     </div>
                     <LuTrendingUp className="text-[#189D91]" size={20} />
                  </div>
@@ -258,12 +315,12 @@ const Dashboard = () => {
                          itemStyle={{ color: '#189D91', fontWeight: 'bold' }}
                        />
                        <Area 
-                         type="monotone" 
-                         dataKey="value" 
-                         stroke="#189D91" 
-                         strokeWidth={3} 
-                         fillOpacity={1} 
-                         fill="url(#colorRevenue)" 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#189D91" 
+                          strokeWidth={3} 
+                          fillOpacity={1} 
+                          fill="url(#colorRevenue)" 
                        />
                     </AreaChart>
                  </ResponsiveContainer>
@@ -316,7 +373,7 @@ const Dashboard = () => {
                           recentDeliveries.slice(0, 4).map((order) => (
                              <tr key={order.id} className="hover:bg-slate-50 transition-colors group">
                                 <td className="px-5 py-3">
-                                   <span className="text-xs font-bold text-slate-900">#{order.id.slice(-8)}</span>
+                                   <span className="text-xs font-bold text-slate-900">#{order.id}</span>
                                 </td>
                                 <td className="px-5 py-3">
                                    <div className="flex items-center gap-2.5">
@@ -362,12 +419,98 @@ const Dashboard = () => {
                     </div>
                  </div>
 
-                 <button className="w-full relative z-10 bg-white text-[#189D91] py-2.5 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all shadow-sm">
+                 <button 
+                   onClick={() => setShowDepositModal(true)}
+                   disabled={earnings.codToDeposit <= 0}
+                   className="w-full relative z-10 bg-white text-[#189D91] py-2.5 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                 >
                     Pay Now
                  </button>
               </div>
            </div>
         </div>
+
+        {/* Deposit Verification Modal */}
+        {showDepositModal && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-3xl p-6 border border-slate-100 max-w-md w-full shadow-2xl space-y-4 relative overflow-hidden"
+            >
+              <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                <h3 className="text-slate-900 font-bold text-lg">Log Cash Deposit</h3>
+                <button 
+                  onClick={() => setShowDepositModal(false)}
+                  className="text-slate-400 hover:text-slate-600 text-sm font-semibold transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+
+              {depositSuccess ? (
+                <div className="py-8 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="w-12 h-12 bg-emerald-50 rounded-full flex flex-center items-center justify-center text-emerald-500 animate-bounce mx-auto">
+                     <LuCheck size={24} />
+                  </div>
+                  <h4 className="text-slate-900 font-bold text-base">Request Submitted!</h4>
+                  <p className="text-slate-500 text-xs px-4">Your deposit verification request has been successfully queued for Admin approval.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleDepositSubmit} className="space-y-4 pt-2">
+                  <div className="bg-teal-50/50 rounded-xl p-3 border border-teal-100">
+                    <p className="text-[10px] font-semibold text-teal-600 uppercase tracking-wider mb-0.5">Maximum Cash Due</p>
+                    <p className="text-lg font-bold text-[#189D91]">₹{earnings.codToDeposit.toLocaleString()}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Deposit Amount (₹)</label>
+                    <input 
+                      type="number" 
+                      required
+                      max={earnings.codToDeposit}
+                      value={depositAmount}
+                      onChange={(e) => setDepositAmount(e.target.value)}
+                      placeholder="e.g. 500"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-slate-700 text-xs focus:ring-2 focus:ring-[#189D91] focus:border-[#189D91] outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Transaction ID / UPI Reference (UTR)</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={depositReference}
+                      onChange={(e) => setDepositReference(e.target.value)}
+                      placeholder="e.g. UTR1293849"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-slate-700 text-xs focus:ring-2 focus:ring-[#189D91] focus:border-[#189D91] outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Deposit Notes</label>
+                    <textarea 
+                      value={depositNotes}
+                      onChange={(e) => setDepositNotes(e.target.value)}
+                      placeholder="Mention payment channel (e.g., deposited to hub cashier, GPay)"
+                      rows={2}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-slate-700 text-xs focus:ring-2 focus:ring-[#189D91] focus:border-[#189D91] outline-none resize-none"
+                    />
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={submittingDeposit || !depositAmount}
+                    className="w-full bg-[#189D91] text-white py-2.5 rounded-xl font-bold text-xs hover:bg-[#15877c] transition-all shadow-md flex items-center justify-center gap-2"
+                  >
+                    {submittingDeposit ? 'Submitting...' : 'Submit Deposit'}
+                  </button>
+                </form>
+              )}
+            </motion.div>
+          </div>
+        )}
       </div>
     </PageWrapper>
   );

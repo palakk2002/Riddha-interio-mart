@@ -88,7 +88,11 @@ const AdminLayoutContent = () => {
 
           {/* Right Side: Notifications & Profile */}
           <div className="flex items-center gap-4">
-            <NotificationDropdown isMobile={false} />
+            <NotificationDropdown 
+              isMobile={false} 
+              buttonClassName="p-2 text-slate-500 hover:text-slate-850 hover:bg-slate-100 rounded-xl transition-colors relative"
+              viewAllPath="/admin/settings"
+            />
             
             <div className="h-6 w-[1px] bg-slate-200 hidden sm:block"></div>
             

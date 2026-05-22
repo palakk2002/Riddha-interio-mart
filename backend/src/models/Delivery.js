@@ -26,11 +26,22 @@ const DeliverySchema = new mongoose.Schema({
   },
   vehicleType: {
     type: String,
-    enum: ['Bike', 'Van', 'Truck'],
+    enum: ['Bike', 'Van', 'Truck', 'Bicycle', 'Motorcycle', 'Scooter', 'Car'],
     default: 'Bike'
   },
   vehicleNumber: {
     type: String
+  },
+  vehicleDetails: {
+    plateNumber: { type: String, default: '' },
+    maxWeightCapacity: { type: Number, default: 20 }, // in kg
+    maxVolumeCapacity: { type: Number, default: 4 }   // maximum concurrent active shipments
+  },
+  activeShift: {
+    isClockedIn: { type: Boolean, default: false },
+    clockedInAt: { type: Date, default: null },
+    currentPayloadWeight: { type: Number, default: 0 },
+    currentPayloadCount: { type: Number, default: 0 }
   },
   documents: {
     rc: { type: String, default: "" },
@@ -55,6 +66,10 @@ const DeliverySchema = new mongoose.Schema({
     enum: ['Available', 'Busy', 'Offline'],
     default: 'Offline'
   },
+  lastOnlineTime: {
+    type: Date,
+    default: null
+  },
   servicePincodes: [{
     type: String
   }],
@@ -62,6 +77,11 @@ const DeliverySchema = new mongoose.Schema({
     type: String,
     enum: ['Pending', 'Approved', 'Rejected', 'Suspended'],
     default: 'Pending'
+  },
+  currentLocation: {
+    latitude: { type: Number, default: 26.9124 }, // Default to Jaipur city center for dev convenience
+    longitude: { type: Number, default: 75.7873 },
+    updatedAt: { type: Date }
   },
   createdAt: {
     type: Date,
