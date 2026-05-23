@@ -9,7 +9,8 @@ const {
   reportReview,
   respondToReview,
   getAdminReviews,
-  getSellerReviews
+  getSellerReviews,
+  getMyReviews
 } = require('../controllers/reviewController');
 
 const { protect, authorize } = require('../middleware/auth');
@@ -23,7 +24,7 @@ router.route('/')
     param('productId', 'Invalid product ID format').optional().isMongoId(),
     validate
   ], getReviews)
-  .post(protect, authorize('user', 'admin'), [
+  .post(protect, [
     param('productId', 'Invalid product ID format').isMongoId(),
     check('rating', 'Rating is required between 1 and 5').isInt({ min: 1, max: 5 }),
     check('review', 'Review text is required').not().isEmpty(),
@@ -32,6 +33,7 @@ router.route('/')
 
 router.get('/admin', protect, authorize('admin'), getAdminReviews);
 router.get('/seller', protect, authorize('seller', 'admin'), getSellerReviews);
+router.get('/me', protect, getMyReviews);
 
 router.route('/:id')
   .put(protect, authorize('user', 'admin'), [

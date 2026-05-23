@@ -186,7 +186,7 @@ const Dashboard = () => {
           />
           <StatCard 
             label="Wallet Balance" 
-            value={`₹${(stats.totalRevenue * 0.4).toLocaleString()}`} 
+            value={`₹${(stats.walletBalance || 0).toLocaleString()}`} 
             icon={Layers} 
             trend={5.1}
           />

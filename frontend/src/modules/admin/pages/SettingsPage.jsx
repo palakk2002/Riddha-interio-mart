@@ -1,29 +1,129 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
-import { FiUser, FiMail, FiShield, FiBell, FiLayers, FiSave, FiCheck } from 'react-icons/fi';
+import { FiUser, FiMail, FiShield, FiBell, FiSave, FiCheck, FiXCircle } from 'react-icons/fi';
+import api from '../../../shared/utils/api';
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('Profile');
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   
   const [profile, setProfile] = useState({
-    name: 'Alex Johnson',
-    email: 'admin@riddha.com',
+    fullName: '',
+    email: '',
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
 
   const [notifications, setNotifications] = useState(true);
-  const [compactLayout, setCompactLayout] = useState(false);
 
-  const handleSave = () => {
+  // Fetch Admin Profile on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const { data } = await api.get('/auth/admin/me');
+        if (data.success) {
+          setProfile({
+            fullName: data.data.fullName || '',
+            email: data.data.email || ''
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load admin profile', err);
+        setError('Failed to load profile data.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleSaveProfile = async () => {
     setIsSaving(true);
-    // Simulate API call
+    setError('');
+    setIsSaved(false);
+    
+    try {
+      const { data } = await api.put('/auth/admin/profile', {
+        fullName: profile.fullName,
+        email: profile.email
+      });
+      if (data.success) {
+        setIsSaved(true);
+        setTimeout(() => setIsSaved(false), 3000);
+      }
+    } catch (err) {
+      console.error('Failed to update profile', err);
+      setError(err.response?.data?.error || 'Failed to update profile.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSavePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setError('New passwords do not match.');
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
+    setIsSaving(true);
+    setError('');
+    setIsSaved(false);
+
+    try {
+      const { data } = await api.put('/auth/admin/password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+      if (data.success) {
+        setIsSaved(true);
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setTimeout(() => setIsSaved(false), 3000);
+      }
+    } catch (err) {
+      console.error('Failed to update password', err);
+      setError(err.response?.data?.error || 'Failed to update password.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveNotifications = () => {
+    // Mock save for notifications if backend route doesn't exist yet
+    setIsSaving(true);
     setTimeout(() => {
       setIsSaving(false);
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 3000);
-    }, 1500);
+    }, 800);
   };
+
+  const handleSave = () => {
+    if (activeTab === 'Profile') handleSaveProfile();
+    else if (activeTab === 'Security') handleSavePassword();
+    else if (activeTab === 'Notifications') handleSaveNotifications();
+  };
+
+  if (isLoading) {
+    return (
+      <PageWrapper>
+        <div className="flex justify-center items-center h-64">
+          <div className="w-8 h-8 border-4 border-deep-espresso border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   return (
     <PageWrapper>
@@ -33,13 +133,24 @@ const SettingsPage = () => {
           <p className="text-warm-sand text-sm md:text-base font-medium">Manage your administrator account and preferences.</p>
         </div>
 
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center gap-3 border border-red-100">
+            <FiXCircle className="shrink-0" />
+            <p className="text-sm font-medium">{error}</p>
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl md:rounded-[32px] shadow-xl border border-soft-oatmeal overflow-hidden">
           {/* Tabs header */}
           <div className="flex border-b border-soft-oatmeal px-4 md:px-8 bg-soft-oatmeal/5 overflow-x-auto no-scrollbar">
             {['Profile', 'Notifications', 'Security'].map((tab) => (
               <button 
                 key={tab} 
-                onClick={() => setActiveTab(tab)}
+                onClick={() => {
+                  setActiveTab(tab);
+                  setError('');
+                  setIsSaved(false);
+                }}
                 className={`py-5 px-6 text-[10px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap border-b-2 ${activeTab === tab ? 'text-dusty-cocoa border-dusty-cocoa' : 'text-warm-sand border-transparent hover:text-deep-espresso'}`}
               >
                 {tab}
@@ -49,7 +160,7 @@ const SettingsPage = () => {
 
           <div className="p-6 md:p-12">
             {activeTab === 'Profile' && (
-              <div className="space-y-6 max-w-xl">
+              <div className="space-y-6 max-w-xl animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <h3 className="text-xl font-display font-bold text-deep-espresso flex items-center gap-3">
                   <FiUser className="text-warm-sand" /> Personal Details
                 </h3>
@@ -58,8 +169,8 @@ const SettingsPage = () => {
                     <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest pl-1">Full Name</label>
                     <input 
                       type="text" 
-                      value={profile.name}
-                      onChange={(e) => setProfile({...profile, name: e.target.value})}
+                      value={profile.fullName}
+                      onChange={(e) => setProfile({...profile, fullName: e.target.value})}
                       className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all font-medium" 
                     />
                   </div>
@@ -80,25 +191,47 @@ const SettingsPage = () => {
             )}
 
             {activeTab === 'Security' && (
-              <div className="space-y-6 max-w-xl">
+              <div className="space-y-6 max-w-xl animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <h3 className="text-xl font-display font-bold text-deep-espresso flex items-center gap-3">
                   <FiShield className="text-warm-sand" /> Authentication
                 </h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest pl-1">Current Password</label>
-                    <input type="password" placeholder="••••••••" className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all" />
+                    <input 
+                      type="password" 
+                      placeholder="••••••••" 
+                      value={passwordData.currentPassword}
+                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all" 
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest pl-1">New Password</label>
-                    <input type="password" placeholder="Min. 8 characters" className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all" />
+                    <input 
+                      type="password" 
+                      placeholder="Min. 6 characters" 
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest pl-1">Confirm New Password</label>
+                    <input 
+                      type="password" 
+                      placeholder="Min. 6 characters" 
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all" 
+                    />
                   </div>
                 </div>
               </div>
             )}
 
             {activeTab === 'Notifications' && (
-              <div className="space-y-6">
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <h3 className="text-xl font-display font-bold text-deep-espresso flex items-center gap-3">
                   <FiBell className="text-warm-sand" /> Notification Settings
                 </h3>
@@ -134,7 +267,7 @@ const SettingsPage = () => {
                 {isSaving ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 ) : (
-                  isSaved ? <FiCheck /> : <FiSave />
+                  isSaved ? <FiCheck size={16} /> : <FiSave size={16} />
                 )}
                 {isSaving ? 'Processing...' : (isSaved ? 'Preferences Saved' : 'Update Settings')}
               </button>

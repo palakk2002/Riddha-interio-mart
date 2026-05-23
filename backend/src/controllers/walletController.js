@@ -486,26 +486,14 @@ exports.getAdminFinancialAnalytics = async (req, res, next) => {
 
     // 5. Populate seller leaderboard
     const populatedSellers = [];
-    for (let j = 0; j < 4; j++) {
-      const record = topSellersAgg[j];
+    for (const record of topSellersAgg) {
       if (record && record._id) {
         const sellerObj = await Seller.findById(record._id);
         populatedSellers.push({
           name: sellerObj?.shopName || sellerObj?.fullName || 'Marketplace Seller',
           sales: `₹${record.sales.toLocaleString()}`,
           orders: record.ordersCount,
-          growth: '+12%'
-        });
-      } else {
-        const defaultNames = ['Royal Interiors', 'Modern Decor Pvt', 'Luxury Lighting', 'Artisan Woodwork'];
-        const defaultSales = ['₹4,20,000', '₹2,80,000', '₹1,50,000', '₹95,000'];
-        const defaultOrders = [142, 98, 56, 34];
-        const defaultGrowths = ['+12%', '+8%', '-2%', '+15%'];
-        populatedSellers.push({
-          name: defaultNames[j],
-          sales: defaultSales[j],
-          orders: defaultOrders[j],
-          growth: defaultGrowths[j]
+          growth: '+12%' // Assuming static growth for now until historical data is computed
         });
       }
     }

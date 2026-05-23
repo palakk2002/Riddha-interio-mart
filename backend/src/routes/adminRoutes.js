@@ -4,6 +4,7 @@ const {
   loginAdmin, 
   getAdminMe,
   updateAdminProfile,
+  updateAdminPassword,
   getPendingSellers,
   getActiveSellers,
   approveSeller,
@@ -43,6 +44,7 @@ router.post('/login', [
 ], loginAdmin);
 router.get('/me', protect, getAdminMe);
 router.put('/profile', protect, updateAdminProfile);
+router.put('/password', protect, updateAdminPassword);
 
 // Search suggestions
 router.get('/orders/search', protect, authorize('admin'), checkPermission('orders'), searchOrders);

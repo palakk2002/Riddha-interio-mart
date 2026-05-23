@@ -1,15 +1,19 @@
 import React from 'react';
 import { FiStar, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import api from '../../../shared/utils/api';
 
 const ExistingReviewCard = ({ review, onEdit, onDelete }) => {
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this review?')) {
-      const existingReviews = JSON.parse(localStorage.getItem('riddha_reviews') || '[]');
-      const updatedReviews = existingReviews.filter(r => r.id !== review.id);
-      localStorage.setItem('riddha_reviews', JSON.stringify(updatedReviews));
-      toast.success('Review deleted');
-      onDelete();
+      try {
+        const idToDelete = review._id || review.id;
+        await api.delete(`/reviews/${idToDelete}`);
+        toast.success('Review deleted');
+        onDelete();
+      } catch (err) {
+        toast.error('Failed to delete review');
+      }
     }
   };
 
@@ -42,7 +46,7 @@ const ExistingReviewCard = ({ review, onEdit, onDelete }) => {
         </div>
       </div>
       
-      <p className="text-xs text-gray-700 font-medium leading-relaxed italic">"{review.comment}"</p>
+      <p className="text-xs text-gray-700 font-medium leading-relaxed italic">"{review.review || review.comment}"</p>
       
       {review.images && review.images.length > 0 && (
         <div className="flex gap-2 mt-4">

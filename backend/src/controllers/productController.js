@@ -318,6 +318,23 @@ exports.updateApprovalStatus = async (req, res, next) => {
       status: approvalStatus
     });
 
+    // Log the admin action
+    try {
+      const { logSystemActivity } = require('../utils/activityLogger');
+      const action = approvalStatus === 'approved' ? 'Approved Product Listing' 
+        : approvalStatus === 'rejected' ? 'Rejected Product Listing'
+        : 'Updated Product Approval Status';
+      await logSystemActivity({
+        action,
+        target: product.name,
+        user: req.user ? req.user.fullName : 'Admin',
+        role: req.user && req.user.role === 'admin' ? 'Super Admin' : 'System',
+        ipAddress: req.ip
+      });
+    } catch (logErr) {
+      console.error('Failed to log admin action:', logErr.message);
+    }
+
     res.status(200).json({ success: true, data: product });
   } catch (error) {
     next(error);
@@ -381,6 +398,22 @@ exports.deleteProduct = async (req, res, next) => {
     }
 
     await Product.findByIdAndDelete(req.params.id);
+
+    // Log the deletion action if it's done by admin
+    if (req.user && req.user.role === 'admin') {
+      try {
+        const { logSystemActivity } = require('../utils/activityLogger');
+        await logSystemActivity({
+          action: 'Deleted Product',
+          target: product.name,
+          user: req.user.fullName,
+          role: 'Super Admin',
+          ipAddress: req.ip
+        });
+      } catch (logErr) {
+        console.error('Failed to log admin action:', logErr.message);
+      }
+    }
 
     res.status(200).json({ success: true, data: {} });
   } catch (error) {

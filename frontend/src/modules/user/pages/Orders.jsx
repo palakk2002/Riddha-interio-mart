@@ -25,9 +25,15 @@ const Orders = () => {
   const [returnOrder, setReturnOrder] = useState(null);
   const [returnItem, setReturnItem] = useState(null);
 
-  const fetchReviews = () => {
-    const savedReviews = JSON.parse(localStorage.getItem('riddha_reviews') || '[]');
-    setReviews(savedReviews);
+  const fetchReviews = async () => {
+    try {
+      const { data } = await api.get('/reviews/me');
+      if (data.success) {
+        setReviews(data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user reviews:', error);
+    }
   };
 
   const fetchMyOrders = async () => {
@@ -160,7 +166,7 @@ const Orders = () => {
                     {/* Order Items */}
                     <div className="space-y-4 mb-6">
                        {order.orderItems.map((item, i) => {
-                          const existingReview = reviews.find(r => r.orderId === order._id && r.productId === item.product);
+                          const existingReview = reviews.find(r => r.product && (r.product._id === item.product || r.product === item.product));
                           
                           return (
                             <div key={i} className="flex flex-col">

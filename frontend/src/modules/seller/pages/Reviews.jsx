@@ -2,38 +2,91 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiStar, FiMessageSquare, FiTrendingUp, FiUsers, FiFilter, FiCalendar } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import api from '../../../shared/utils/api';
 
 const SellerReviews = () => {
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState({
     avgRating: 0,
     totalReviews: 0,
-    ratingDistribution: [0, 0, 0, 0, 0]
+    ratingDistribution: [0, 0, 0, 0, 0],
+    reviewGrowth: '+0%',
+    happyCustomers: '0%'
   });
 
   useEffect(() => {
-    const savedReviews = JSON.parse(localStorage.getItem('riddha_reviews') || '[]');
-    setReviews(savedReviews);
+    const fetchReviews = async () => {
+      try {
+        const { data } = await api.get('/reviews/seller');
+        if (data.success) {
+          const fetchedReviews = data.data;
+          setReviews(fetchedReviews);
+          if (fetchedReviews.length > 0) {
+            const total = fetchedReviews.length;
+            const sum = fetchedReviews.reduce((acc, r) => acc + r.rating, 0);
+            const dist = [0, 0, 0, 0, 0];
+            let happyCount = 0;
+            
+            const now = new Date();
+            const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+            
+            let recentReviews = 0;
+            let olderReviews = 0;
 
-    if (savedReviews.length > 0) {
-      const total = savedReviews.length;
-      const sum = savedReviews.reduce((acc, r) => acc + r.rating, 0);
-      const dist = [0, 0, 0, 0, 0];
-      savedReviews.forEach(r => dist[r.rating - 1]++);
+            fetchedReviews.forEach(r => {
+              dist[r.rating - 1]++;
+              if (r.rating >= 4) happyCount++;
+              
+              const reviewDate = new Date(r.createdAt);
+              if (reviewDate >= thirtyDaysAgo) {
+                recentReviews++;
+              } else if (reviewDate >= sixtyDaysAgo && reviewDate < thirtyDaysAgo) {
+                olderReviews++;
+              }
+            });
 
-      setStats({
-        avgRating: (sum / total).toFixed(1),
-        totalReviews: total,
-        ratingDistribution: dist.reverse() // 5 stars first
-      });
-    }
+            // Calculate Growth
+            let growthString = '+0%';
+            if (olderReviews === 0 && recentReviews > 0) {
+              growthString = '+100%';
+            } else if (olderReviews > 0) {
+              const growth = ((recentReviews - olderReviews) / olderReviews) * 100;
+              growthString = `${growth >= 0 ? '+' : ''}${Math.round(growth)}%`;
+            }
+
+            // Calculate Happy Customers
+            const happyPercentage = Math.round((happyCount / total) * 100);
+
+            setStats({
+              avgRating: (sum / total).toFixed(1),
+              totalReviews: total,
+              ratingDistribution: dist.reverse(), // 5 stars first
+              reviewGrowth: growthString,
+              happyCustomers: `${happyPercentage}%`
+            });
+          } else {
+            setStats({
+              avgRating: 0,
+              totalReviews: 0,
+              ratingDistribution: [0, 0, 0, 0, 0],
+              reviewGrowth: '+0%',
+              happyCustomers: '0%'
+            });
+          }
+        }
+      } catch (err) {
+        toast.error(err.response?.data?.error || err.response?.data?.message || 'Failed to load reviews');
+      }
+    };
+    fetchReviews();
   }, []);
 
   const statCards = [
     { label: 'Average Rating', value: stats.avgRating, icon: <FiStar className="text-amber-400" />, sub: 'Out of 5.0' },
     { label: 'Total Reviews', value: stats.totalReviews, icon: <FiMessageSquare className="text-teal-500" />, sub: 'Customer Feedback' },
-    { label: 'Review Growth', value: '+12%', icon: <FiTrendingUp className="text-green-500" />, sub: 'Last 30 days' },
-    { label: 'Happy Customers', value: '94%', icon: <FiUsers className="text-blue-500" />, sub: 'Rating 4+' },
+    { label: 'Review Growth', value: stats.reviewGrowth, icon: <FiTrendingUp className="text-green-500" />, sub: 'Last 30 days' },
+    { label: 'Happy Customers', value: stats.happyCustomers, icon: <FiUsers className="text-blue-500" />, sub: 'Rating 4+' },
   ];
 
   return (
@@ -138,7 +191,7 @@ const SellerReviews = () => {
           ) : (
             reviews.map((review, i) => (
               <motion.div
-                key={review.id}
+                key={review._id || review.id}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
@@ -147,10 +200,10 @@ const SellerReviews = () => {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 font-bold text-xs">
-                      {review.productName?.charAt(0) || 'P'}
+                      {review.product?.name?.charAt(0) || 'P'}
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-gray-900 uppercase tracking-tight">{review.productName}</p>
+                      <p className="text-xs font-bold text-gray-900 uppercase tracking-tight">{review.product?.name || 'Unknown Product'}</p>
                       <div className="flex items-center gap-1 mt-0.5">
                         {[1, 2, 3, 4, 5].map(s => (
                           <FiStar key={s} size={10} className={`${s <= review.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}`} />
@@ -162,7 +215,7 @@ const SellerReviews = () => {
                     {new Date(review.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-                <p className="text-xs text-gray-600 font-medium leading-relaxed italic">"{review.comment}"</p>
+                <p className="text-xs text-gray-600 font-medium leading-relaxed italic">"{review.review || review.comment}"</p>
                 {review.images && review.images.length > 0 && (
                   <div className="flex gap-2 mt-4">
                     {review.images.map((img, idx) => (

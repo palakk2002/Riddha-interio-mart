@@ -11,9 +11,7 @@ const PaymentPage = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, cartCount, clearCart } = useCart();
   const { address, user } = useUser();
-  const [selectedSection, setSelectedSection] = useState('upi');
-  const [selectedMethod, setSelectedMethod] = useState('gpay');
-  const [showRazorpay, setShowRazorpay] = useState(false);
+  const [selectedSection, setSelectedSection] = useState('online');
   const [isProcessing, setIsProcessing] = useState(false);
   const [codEligibility, setCodEligibility] = useState({ eligible: false, loading: true, reason: '' });
 
@@ -286,138 +284,44 @@ const PaymentPage = () => {
           <p className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">PAYMENT OPTIONS</p>
 
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            {/* UPI Section */}
+            {/* Online Payment (Razorpay) Section */}
             <div className="border-b border-gray-50">
               <button
-                onClick={() => setSelectedSection(selectedSection === 'upi' ? null : 'upi')}
+                onClick={() => setSelectedSection(selectedSection === 'online' ? null : 'online')}
                 className="w-full flex items-center justify-between p-4 md:p-5"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-10 rounded-lg bg-[#189D91]/10 flex items-center justify-center border border-[#189D91]/20">
-                    <FiSmartphone className="text-[#189D91]" />
+                    <FiCreditCard className="text-[#189D91]" />
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-black text-gray-800 uppercase tracking-tighter">UPI</p>
-                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">GOOGLE PAY, PHONEPE, PAYTM</p>
+                    <p className="text-sm font-black text-gray-800 uppercase tracking-tighter">PAY ONLINE (RAZORPAY)</p>
+                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">UPI, CARDS, NETBANKING, WALLETS</p>
                   </div>
                 </div>
-                {selectedSection === 'upi' ? <FiChevronUp className="text-gray-400" /> : <FiChevronDown className="text-gray-400" />}
+                {selectedSection === 'online' ? <FiChevronUp className="text-gray-400" /> : <FiChevronDown className="text-gray-400" />}
               </button>
 
               <AnimatePresence>
-                {selectedSection === 'upi' && (
+                {selectedSection === 'online' && (
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: 'auto' }}
                     exit={{ height: 0 }}
                     className="overflow-hidden bg-gray-50/30 px-4 md:px-5 pb-4 md:pb-5 space-y-2 md:space-y-3"
                   >
-                    {/* Google Pay */}
-                    <div
-                      onClick={() => setSelectedMethod('gpay')}
-                      className={`flex items-center justify-between p-3 md:p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'gpay' ? 'border-[#189D91] bg-white' : 'border-transparent bg-transparent'}`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Google_Pay_%28GPay%29_Logo.svg" alt="GPay" className="w-6 h-6" />
-                        <span className="text-xs font-black text-gray-800">Google Pay</span>
+                    <div className="p-4 bg-white border-2 border-[#189D91] rounded-xl flex items-center gap-3">
+                      <div className="w-8 h-8 rounded bg-[#189D91]/10 flex items-center justify-center">
+                        <FiGlobe className="text-[#189D91]" />
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'gpay' ? 'border-[#189D91] bg-[#189D91]' : 'border-gray-200'}`}>
-                        {selectedMethod === 'gpay' && <div className="w-2 h-2 rounded-full bg-white" />}
-                      </div>
-                    </div>
-                    {/* PhonePe */}
-                    <div
-                      onClick={() => setSelectedMethod('phonepe')}
-                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'phonepe' ? 'border-[#189D91] bg-white' : 'border-transparent bg-transparent'}`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/PhonePe_Logo.svg" alt="PhonePe" className="w-6 h-6" />
-                        <span className="text-xs font-black text-gray-800">PhonePe</span>
-                      </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'phonepe' ? 'border-[#189D91] bg-[#189D91]' : 'border-gray-200'}`}>
-                        {selectedMethod === 'phonepe' && <div className="w-2 h-2 rounded-full bg-white" />}
-                      </div>
-                    </div>
-                    {/* Paytm */}
-                    <div
-                      onClick={() => setSelectedMethod('paytm')}
-                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === 'paytm' ? 'border-[#189D91] bg-white' : 'border-transparent bg-transparent'}`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm" className="w-6 h-6" />
-                        <span className="text-xs font-black text-gray-800">Paytm</span>
-                      </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'paytm' ? 'border-[#189D91] bg-[#189D91]' : 'border-gray-200'}`}>
-                        {selectedMethod === 'paytm' && <div className="w-2 h-2 rounded-full bg-white" />}
+                      <div>
+                        <p className="text-xs font-black text-gray-800">Secure Online Payment</p>
+                        <p className="text-[10px] text-gray-500 font-medium mt-0.5">You will be redirected to Razorpay to complete your purchase securely.</p>
                       </div>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
-
-            {/* Net Banking Section */}
-            <div className="border-b border-gray-50">
-              <button
-                onClick={() => setSelectedSection(selectedSection === 'netbanking' ? null : 'netbanking')}
-                className="w-full flex items-center justify-between p-4 md:p-5"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-10 rounded-lg bg-blue-50 flex items-center justify-center border border-blue-100">
-                    <FiGlobe className="text-blue-600" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-black text-gray-800 uppercase tracking-tighter">NET BANKING</p>
-                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">SBI, HDFC, ICICI, AXIS</p>
-                  </div>
-                </div>
-                {selectedSection === 'netbanking' ? <FiChevronUp className="text-gray-400" /> : <FiChevronDown className="text-gray-400" />}
-              </button>
-
-              <AnimatePresence>
-                {selectedSection === 'netbanking' && (
-                  <motion.div
-                    initial={{ height: 0 }}
-                    animate={{ height: 'auto' }}
-                    exit={{ height: 0 }}
-                    className="overflow-hidden bg-gray-50/30 px-4 md:px-5 pb-4 md:pb-5 space-y-2 md:space-y-3"
-                  >
-                    <div className="grid grid-cols-2 gap-3">
-                      {['SBI', 'HDFC', 'ICICI', 'AXIS', 'PNB', 'KOTAK'].map((bank) => (
-                        <div
-                          key={bank}
-                          onClick={() => setSelectedMethod(bank.toLowerCase())}
-                          className={`flex items-center justify-between p-2.5 md:p-3 rounded-xl border-2 transition-all cursor-pointer ${selectedMethod === bank.toLowerCase() ? 'border-[#189D91] bg-white' : 'border-transparent bg-transparent'}`}
-                        >
-                          <span className="text-[11px] font-black text-gray-800">{bank}</span>
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedMethod === bank.toLowerCase() ? 'border-[#189D91] bg-[#189D91]' : 'border-gray-200'}`}>
-                            {selectedMethod === bank.toLowerCase() && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Card Section */}
-            <div className="border-b border-gray-50">
-              <button
-                onClick={() => setSelectedSection(selectedSection === 'card' ? null : 'card')}
-                className="w-full flex items-center justify-between p-4 md:p-5"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-10 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
-                    <FiCreditCard className="text-gray-400" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-black text-gray-800 uppercase tracking-tighter">CREDIT / DEBIT CARD</p>
-                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">VISA, MASTERCARD, RUPAY</p>
-                  </div>
-                </div>
-                {selectedSection === 'card' ? <FiChevronUp className="text-gray-400" /> : <FiChevronDown className="text-gray-400" />}
-              </button>
             </div>
 
             {/* Cash On Delivery Section */}
@@ -511,73 +415,6 @@ const PaymentPage = () => {
           </div>
         </div>
       )}
-
-      {/* Razorpay Mock UI */}
-      <AnimatePresence>
-        {showRazorpay && (
-          <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              className="w-full max-w-md bg-white rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl"
-            >
-              {/* Razorpay Header */}
-              <div className="bg-[#1C2541] p-6 text-white flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-600 rounded flex items-center justify-center font-black italic">R</div>
-                  <div>
-                    <p className="text-[10px] font-bold text-blue-300 tracking-widest uppercase">RIDDHA INTERIO</p>
-                    <p className="text-sm font-black">₹{cartTotal.toLocaleString()}</p>
-                  </div>
-                </div>
-                <button onClick={() => setShowRazorpay(false)} className="text-2xl font-light opacity-50">&times;</button>
-              </div>
-
-              {/* Razorpay Body */}
-              <div className="p-8 space-y-6">
-                {!isProcessing ? (
-                  <>
-                    <div className="flex items-center justify-between p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white shadow-sm rounded-lg flex items-center justify-center">
-                          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Google_Pay_%28GPay%29_Logo.svg" alt="GPay" className="w-6 h-6" />
-                        </div>
-                        <p className="text-xs font-black text-gray-700">Google Pay (Simulated)</p>
-                      </div>
-                      <FiCheck className="text-blue-500" />
-                    </div>
-
-                    <div className="space-y-4 pt-4">
-                      <button
-                        onClick={handleMockPayment}
-                        className="w-full py-5 bg-[#3395FF] text-white font-black text-sm rounded-xl shadow-lg shadow-blue-200 uppercase tracking-widest active:scale-[0.98] transition-all"
-                      >
-                        PROCEED TO PAY
-                      </button>
-                      <p className="text-[9px] text-center text-gray-400 font-bold uppercase tracking-widest">RELIABLE & SECURE PAYMENTS BY RAZORPAY</p>
-                    </div>
-                  </>
-                ) : (
-                  <div className="py-20 flex flex-col items-center justify-center space-y-8">
-                    <div className="relative w-20 h-20">
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                        className="absolute inset-0 border-4 border-blue-100 border-t-blue-500 rounded-full"
-                      />
-                    </div>
-                    <div className="text-center">
-                      <h3 className="text-lg font-black text-gray-800 uppercase tracking-widest">Processing Payment</h3>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-2">Please do not refresh or close this tab</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 };

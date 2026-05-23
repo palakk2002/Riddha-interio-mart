@@ -49,6 +49,11 @@ exports.getReferralAnalytics = async (req, res, next) => {
         .reduce((sum, t) => sum + t.amount, 0);
     }
 
+    let settings = await ReferralSettings.findOne();
+    if (!settings) {
+      settings = { referrerReward: 100, newUserReward: 50 };
+    }
+
     res.status(200).json({
       success: true,
       data: {
@@ -56,7 +61,11 @@ exports.getReferralAnalytics = async (req, res, next) => {
         totalReferred,
         successfulReferred,
         pendingReferred,
-        totalEarned
+        totalEarned,
+        config: {
+          referrerReward: settings.referrerReward,
+          newUserReward: settings.newUserReward
+        }
       }
     });
   } catch (err) {

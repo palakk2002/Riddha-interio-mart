@@ -5,7 +5,8 @@ const Button = ({
   children, 
   variant = 'primary', 
   size = 'md', 
-  className = '', 
+  className = '',
+  isLoading,
   ...props 
 }) => {
   const baseStyles = 'inline-flex items-center justify-center font-bold tracking-widest uppercase transition-all duration-500 rounded-full focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden relative group';
@@ -31,6 +32,9 @@ const Button = ({
       {...props}
     >
       <span className="relative z-10 flex items-center justify-center gap-2 w-full">
+        {isLoading ? (
+          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+        ) : null}
         {children}
       </span>
     </motion.button>

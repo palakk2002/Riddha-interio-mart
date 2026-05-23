@@ -56,12 +56,7 @@ const AnalyticsPage = () => {
     { label: 'Avg Order Value', value: '₹0', change: '+0.0%', isUp: true, icon: 'FiZap' }
   ];
 
-  const topSellers = data?.topSellers || [
-    { name: 'Royal Interiors', sales: '₹4,20,000', orders: 142, growth: '+12%' },
-    { name: 'Modern Decor Pvt', sales: '₹2,80,000', orders: 98, growth: '+8%' },
-    { name: 'Luxury Lighting', sales: '₹1,50,000', orders: 56, growth: '-2%' },
-    { name: 'Artisan Woodwork', sales: '₹95,000', orders: 34, growth: '+15%' }
-  ];
+  const topSellers = data?.topSellers || [];
 
   if (loading) {
     return (
@@ -229,30 +224,36 @@ const AnalyticsPage = () => {
             </div>
 
             <div className="space-y-3.5 flex-1 justify-center flex flex-col">
-              {topSellers.map((seller, i) => {
-                const accentColor = i % 2 === 0 ? 'text-[#189D91] bg-teal-50 border-teal-100/50' : 'text-[#EC008C] bg-pink-50 border-pink-100/50';
-                return (
-                  <div key={i} className="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100/60 rounded-xl border border-slate-100 transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg ${accentColor} border flex items-center justify-center font-bold text-xs shrink-0`}>
-                        {i + 1}
+              {topSellers.length === 0 ? (
+                <div className="text-center py-6">
+                  <p className="text-xs font-semibold text-slate-400">No sales data yet.</p>
+                </div>
+              ) : (
+                topSellers.map((seller, i) => {
+                  const accentColor = i % 2 === 0 ? 'text-[#189D91] bg-teal-50 border-teal-100/50' : 'text-[#EC008C] bg-pink-50 border-pink-100/50';
+                  return (
+                    <div key={i} className="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100/60 rounded-xl border border-slate-100 transition-colors group">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg ${accentColor} border flex items-center justify-center font-bold text-xs shrink-0`}>
+                          {i + 1}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-slate-800 leading-none">{seller.name}</p>
+                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1">{seller.orders} Orders</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800 leading-none">{seller.name}</p>
-                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1">{seller.orders} Orders</p>
+                      <div className="text-right">
+                        <p className="text-xs font-bold text-slate-800 leading-none">{seller.sales}</p>
+                        <p className={`text-[9px] font-bold uppercase tracking-wider mt-1 ${
+                          seller.growth.startsWith('+') ? 'text-emerald-600' : 'text-rose-600'
+                        }`}>
+                          {seller.growth}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs font-bold text-slate-800 leading-none">{seller.sales}</p>
-                      <p className={`text-[9px] font-bold uppercase tracking-wider mt-1 ${
-                        seller.growth.startsWith('+') ? 'text-emerald-600' : 'text-rose-600'
-                      }`}>
-                        {seller.growth}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
 
             <button className="w-full mt-5 py-3 rounded-xl border border-slate-200 hover:border-[#189D91] hover:bg-teal-50/20 text-[10px] font-bold uppercase tracking-widest text-slate-600 hover:text-[#189D91] transition-all">

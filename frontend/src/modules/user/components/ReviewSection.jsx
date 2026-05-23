@@ -26,7 +26,7 @@ const ReviewSection = ({ productId, averageRating = 0, totalReviews = 0 }) => {
         } else {
           setReviews(prev => [...prev, ...res.data.data]);
         }
-        setTotalPages(res.data.pagination.pages);
+        setTotalPages(res.data.totalPages || 1);
       }
     } catch (err) {
       console.error('Failed to fetch reviews:', err);

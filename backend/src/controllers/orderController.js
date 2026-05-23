@@ -462,6 +462,25 @@ exports.getOrders = async (req, res) => {
     const isAdmin = userRole === 'admin';
     const isSeller = userRole === 'seller';
     const isDelivery = userRole === 'delivery';
+
+    // Apply optional date range filters
+    if (req.query.startDate || req.query.endDate) {
+      query.createdAt = {};
+      if (req.query.startDate) query.createdAt.$gte = new Date(req.query.startDate);
+      if (req.query.endDate) {
+        const end = new Date(req.query.endDate);
+        end.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = end;
+      }
+    }
+
+    // Apply status filters if passed
+    if (req.query.deliveryStatus) {
+      query.deliveryStatus = req.query.deliveryStatus;
+    }
+    if (req.query.status) {
+      query.status = req.query.status;
+    }
     
     // If user is seller, only show orders belonging to them or containing their products
     if (isSeller) {

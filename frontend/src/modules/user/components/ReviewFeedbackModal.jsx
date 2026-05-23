@@ -7,7 +7,7 @@ import api from '../../../shared/utils/api';
 const ReviewFeedbackModal = ({ isOpen, onClose, orderId, product, initialData = null, onStatusChange }) => {
   const [rating, setRating] = useState(initialData?.rating || 0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [comment, setComment] = useState(initialData?.comment || '');
+  const [comment, setComment] = useState(initialData?.review || initialData?.comment || '');
   const [images, setImages] = useState(initialData?.images || []);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -47,39 +47,27 @@ const ReviewFeedbackModal = ({ isOpen, onClose, orderId, product, initialData = 
 
     setSubmitting(true);
     
-    // Mock Backend Logic using localStorage since real API doesn't exist
-    const reviewData = {
-      id: initialData?.id || Date.now().toString(),
-      orderId,
-      productId: product?.product, // Use product ID from order item
-      productName: product?.name,
-      rating,
-      comment,
-      images,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const existingReviews = JSON.parse(localStorage.getItem('riddha_reviews') || '[]');
-      let updatedReviews;
-      
+      const payload = {
+        rating,
+        review: comment,
+        title: 'Product Review',
+        images
+      };
+
       if (initialData) {
-        updatedReviews = existingReviews.map(r => r.id === initialData.id ? reviewData : r);
+        const idToUpdate = initialData._id || initialData.id;
+        await api.put(`/reviews/${idToUpdate}`, payload);
+        toast.success('Review updated!');
       } else {
-        updatedReviews = [...existingReviews, reviewData];
+        await api.post(`/products/${product?.product}/reviews`, payload);
+        toast.success('Thank you for your feedback!');
       }
       
-      localStorage.setItem('riddha_reviews', JSON.stringify(updatedReviews));
-      
-      toast.success(initialData ? 'Review updated!' : 'Thank you for your feedback!');
       onStatusChange();
       onClose();
     } catch (err) {
-      toast.error('Failed to submit review');
+      toast.error(err.response?.data?.message || 'Failed to submit review');
     } finally {
       setSubmitting(false);
     }

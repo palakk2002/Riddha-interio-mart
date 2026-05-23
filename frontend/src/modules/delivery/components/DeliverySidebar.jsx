@@ -107,6 +107,7 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
       items: [
         { name: 'Dashboard', path: '/delivery/dashboard', icon: LuLayoutDashboard },
         { name: 'Orders', path: '/delivery/orders', icon: LuPackage },
+        { name: 'Delivery History', path: '/delivery/delivery-history', icon: LuPackage },
         { name: 'Route Management', path: '/delivery/route-management', icon: LuMap },
         { name: 'Dispatch Center', path: '/delivery/dispatch-center', icon: LuZap },
         { name: 'Pickup Requests', path: '/delivery/orders?filter=pickups', icon: LuArrowUpRight },

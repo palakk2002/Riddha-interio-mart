@@ -1,31 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiGift, FiCopy, FiCheck, FiArrowLeft, FiClock, FiDollarSign, FiUserPlus, FiSend, FiUserCheck, FiCreditCard } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import api from '../../../shared/utils/api';
 
 const ReferralRewardsPage = () => {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  const [data, setData] = useState({
+    analytics: null,
+    history: [],
+    wallet: null,
+    loading: true,
+  });
 
-  const referralStats = [
-    { label: 'Total Earned', value: '₹200', icon: FiDollarSign, color: 'text-[#189D91]', bg: 'bg-[#189D91]/10' },
-    { label: 'Friends Referred', value: '2', icon: FiUserPlus, color: 'text-[#702D8B]', bg: 'bg-[#702D8B]/10' },
-    { label: 'Pending Rewards', value: '₹100', icon: FiClock, color: 'text-[#FF6B35]', bg: 'bg-[#FF6B35]/10' },
-  ];
+  useEffect(() => {
+    const fetchReferralData = async () => {
+      try {
+        const [analyticsRes, historyRes, walletRes] = await Promise.all([
+          api.get('/referrals/analytics'),
+          api.get('/referrals/history'),
+          api.get('/referrals/wallet')
+        ]);
 
-  const referralHistory = [
-    { id: 1, name: 'Rahul Sharma', date: '24 Apr 2026', status: 'Completed', reward: '₹100' },
-    { id: 2, name: 'Priya Patel', date: '12 Apr 2026', status: 'Completed', reward: '₹100' },
-    { id: 3, name: 'Amit Kumar', date: '28 Apr 2026', status: 'Pending', reward: '₹100' },
-  ];
+        setData({
+          analytics: analyticsRes.data.data,
+          history: historyRes.data.data,
+          wallet: walletRes.data.data,
+          loading: false
+        });
+      } catch (err) {
+        console.error('Failed to load referral data', err);
+        toast.error('Failed to load referral data.');
+        setData(prev => ({ ...prev, loading: false }));
+      }
+    };
+    
+    fetchReferralData();
+  }, []);
 
   const copyCode = () => {
-    navigator.clipboard.writeText('RIDDHA-2026');
+    if (!data.analytics?.referralCode) return;
+    navigator.clipboard.writeText(data.analytics.referralCode);
     setCopied(true);
     toast.success('Referral code copied!');
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (data.loading) {
+    return (
+      <div className="min-h-screen bg-gray-50/30 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 border-4 border-[#189D91] border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest animate-pulse">Loading Rewards...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const {
+    totalEarned = 0,
+    successfulReferred = 0,
+    pendingReferred = 0,
+    referralCode = 'PENDING',
+    config = { referrerReward: 100, newUserReward: 50 }
+  } = data.analytics || {};
+
+  const availableBalance = data.wallet?.balance || 0;
+
+  const referralStats = [
+    { label: 'Total Earned', value: `₹${totalEarned.toLocaleString()}`, icon: FiDollarSign, color: 'text-[#189D91]', bg: 'bg-[#189D91]/10' },
+    { label: 'Friends Referred', value: successfulReferred, icon: FiUserPlus, color: 'text-[#702D8B]', bg: 'bg-[#702D8B]/10' },
+    { label: 'Pending Invitations', value: pendingReferred, icon: FiClock, color: 'text-[#FF6B35]', bg: 'bg-[#FF6B35]/10' },
+  ];
 
   return (
     <motion.div 
@@ -53,7 +101,7 @@ const ReferralRewardsPage = () => {
              </div>
              <div>
                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Available Balance</p>
-               <h2 className="text-2xl font-black text-black">₹200</h2>
+               <h2 className="text-2xl font-black text-black">₹{availableBalance.toLocaleString()}</h2>
              </div>
           </div>
         </div>
@@ -85,15 +133,15 @@ const ReferralRewardsPage = () => {
                  </div>
                  <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-none">
                    Invite Friends & <br />
-                   <span className="text-white italic font-serif">Earn ₹100 Credits</span>
+                   <span className="text-white italic font-serif">Earn ₹{config.referrerReward} Credits</span>
                  </h2>
                  <p className="text-white/70 text-sm md:text-lg font-medium leading-relaxed max-w-lg">
-                   When your friend signs up with your referral code and places their first order, you get ₹100 and they get ₹50 off instantly!
+                   When your friend signs up with your referral code and places their first order, you get ₹{config.referrerReward} and they get ₹{config.newUserReward} off instantly!
                  </p>
                  
                  <div className="pt-8 flex flex-col md:flex-row items-center gap-6">
                     <div className="bg-white/10 backdrop-blur-xl border border-white/20 px-8 py-5 rounded-2xl font-black text-2xl tracking-[0.2em] text-white shadow-inner">
-                      RIDDHA-2026
+                      {referralCode}
                     </div>
                     <button 
                       onClick={copyCode}
@@ -123,18 +171,28 @@ const ReferralRewardsPage = () => {
                          </tr>
                        </thead>
                        <tbody className="divide-y divide-gray-100">
-                         {referralHistory.map((item) => (
-                           <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                             <td className="px-8 py-6 font-bold text-black text-sm">{item.name}</td>
-                             <td className="px-8 py-6 text-gray-400 text-xs font-medium">{item.date}</td>
-                             <td className="px-8 py-6">
-                                <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${item.status === 'Completed' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-amber-50 text-amber-600 border border-amber-100'}`}>
-                                  {item.status}
-                                </span>
+                         {data.history.length === 0 ? (
+                           <tr>
+                             <td colSpan="4" className="px-8 py-12 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">
+                               No referrals yet
                              </td>
-                             <td className="px-8 py-6 font-black text-black">{item.reward}</td>
                            </tr>
-                         ))}
+                         ) : (
+                           data.history.map((item) => (
+                             <tr key={item._id} className="hover:bg-gray-50 transition-colors">
+                               <td className="px-8 py-6 font-bold text-black text-sm">{item.referredUser?.fullName || 'Anonymous'}</td>
+                               <td className="px-8 py-6 text-gray-400 text-xs font-medium">
+                                 {new Date(item.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                               </td>
+                               <td className="px-8 py-6">
+                                  <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${item.rewardStatus === 'rewarded' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-amber-50 text-amber-600 border border-amber-100'}`}>
+                                    {item.rewardStatus === 'rewarded' ? 'Completed' : 'Pending'}
+                                  </span>
+                               </td>
+                               <td className="px-8 py-6 font-black text-black">₹{item.referrerReward}</td>
+                             </tr>
+                           ))
+                         )}
                        </tbody>
                      </table>
                   </div>
@@ -150,7 +208,7 @@ const ReferralRewardsPage = () => {
                    {[
                      { icon: FiSend, title: 'Share Your Code', desc: 'Send your unique referral code to your friends and family.' },
                      { icon: FiUserCheck, title: 'They Sign Up', desc: 'Ensure they enter your code during their registration process.' },
-                     { icon: FiCreditCard, title: 'Earn Rewards', desc: 'Get ₹100 added to your rewards wallet after their first order.' }
+                     { icon: FiCreditCard, title: 'Earn Rewards', desc: `Get ₹${config.referrerReward} added to your rewards wallet after their first order.` }
                    ].map((item, i) => (
                      <div key={i} className="flex gap-6 relative">
                         {i < 2 && <div className="absolute left-6 top-12 bottom-[-48px] w-0.5 bg-gray-100"></div>}

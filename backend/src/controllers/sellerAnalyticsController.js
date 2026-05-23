@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const SellerWallet = require('../models/SellerWallet');
 const mongoose = require('mongoose');
 
 // Helper to get date boundaries based on timeRange
@@ -130,6 +131,10 @@ exports.getSellerAnalytics = async (req, res, next) => {
     .sort({ countInStock: 1 })
     .limit(5);
 
+    // 6. Wallet Balance
+    const wallet = await SellerWallet.findOne({ seller: sellerId });
+    const walletBalance = wallet ? (wallet.withdrawableBalance + wallet.pendingBalance) : 0;
+
     res.status(200).json({
       success: true,
       data: {
@@ -138,7 +143,8 @@ exports.getSellerAnalytics = async (req, res, next) => {
           periodRevenue,
           totalOrders,
           pendingOrders,
-          completedOrders
+          completedOrders,
+          walletBalance
         },
         revenueTrends: revenueTrends.map(t => ({
           date: t._id,

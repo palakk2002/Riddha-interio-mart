@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
 import EarningsCard from '../components/EarningsCard';
 import { 
@@ -14,26 +14,68 @@ import {
   BarChart, 
   Bar, 
   XAxis, 
-  YAxis, 
-  CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
   Cell
 } from 'recharts';
-import { motion } from 'framer-motion';
-import { earningsData } from '../data/deliveryData';
+import { toast } from 'react-hot-toast';
+import api from '../../../shared/utils/api';
 
 const Earnings = () => {
-  // Mock data for weekly distribution
-  const chartData = [
-    { day: 'Mon', income: 1200 },
-    { day: 'Tue', income: 1800 },
-    { day: 'Wed', income: 1400 },
-    { day: 'Thu', income: 2400 },
-    { day: 'Fri', income: 3200 },
-    { day: 'Sat', income: 2800 },
-    { day: 'Sun', income: 900 },
-  ];
+  const [loading, setLoading] = useState(true);
+  const [analytics, setAnalytics] = useState(null);
+  const [wallet, setWallet] = useState(null);
+
+  useEffect(() => {
+    const fetchFinancials = async () => {
+      try {
+        const [analyticsRes, walletRes] = await Promise.all([
+          api.get('/delivery/analytics'),
+          api.get('/wallets/delivery/me')
+        ]);
+        
+        if (analyticsRes.data.success && walletRes.data.success) {
+          setAnalytics(analyticsRes.data.data);
+          setWallet(walletRes.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to load earnings data:', err);
+        toast.error('Failed to load your earnings data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFinancials();
+  }, []);
+
+  if (loading) {
+    return (
+      <PageWrapper>
+        <div className="flex justify-center items-center py-40">
+          <div className="w-12 h-12 border-4 border-[#2A458A] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </PageWrapper>
+    );
+  }
+
+  // Calculate dynamic metrics
+  const totalLifetime = wallet?.earningsBalance || 0;
+  
+  // Weekly chart data from backend telemetry
+  const chartData = analytics?.charts?.revenueData?.map(d => ({
+    day: d.name,
+    income: d.value
+  })) || [];
+
+  // Derived stats
+  const todayIncome = chartData.length > 0 ? chartData[chartData.length - 1].income : 0;
+  const weeklyIncome = chartData.reduce((sum, curr) => sum + curr.income, 0);
+
+  // Extract Ledger (Earnings History) from wallet transactions
+  const ledger = (wallet?.transactions || [])
+    .filter(t => t.type === 'delivery_fee_credit')
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 50); // Get last 50 deliveries
 
   return (
     <PageWrapper>
@@ -50,7 +92,7 @@ const Earnings = () => {
             </div>
             <p className="text-slate-500 font-medium text-xs flex items-center gap-1.5">
                <LuActivity className="text-[#2A458A]" />
-               Track your deliveries and income
+               Track your live delivery income
             </p>
           </div>
           
@@ -64,22 +106,22 @@ const Earnings = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           <EarningsCard 
             label="Today's Earnings" 
-            value={earningsData.today} 
-            subtext="3/5 Deliveries completed"
+            value={todayIncome} 
+            subtext={`${analytics?.charts?.performanceData?.[6]?.completed || 0} deliveries completed`}
             icon={LuWallet}
-            trend={12}
+            trend={todayIncome > 0 ? 10 : 0}
           />
           <EarningsCard 
             label="This Week" 
-            value={earningsData.thisWeek} 
-            subtext="21 deliveries completed"
+            value={weeklyIncome} 
+            subtext="Last 7 Days Rolling"
             icon={LuCalendar}
-            trend={-5}
+            trend={weeklyIncome > 0 ? 5 : 0}
           />
           <EarningsCard 
             label="Total Lifetime" 
-            value={earningsData.total} 
-            subtext="Partner since Jan 2026"
+            value={totalLifetime} 
+            subtext="Available for withdrawal"
             icon={LuAward}
           />
         </div>
@@ -100,13 +142,13 @@ const Earnings = () => {
                 <ResponsiveContainer width="100%" height={220}>
                    <BarChart data={chartData}>
                       <Tooltip 
-                        cursor={{ fill: 'rgba(24, 157, 145, 0.05)' }}
+                        cursor={{ fill: 'rgba(42, 69, 138, 0.05)' }}
                         contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '12px', color: '#0f172a' }}
-                        itemStyle={{ color: '#189D91', fontSize: '14px', fontWeight: 'bold' }}
+                        itemStyle={{ color: '#2A458A', fontSize: '14px', fontWeight: 'bold' }}
                       />
                       <Bar dataKey="income" radius={[8, 8, 0, 0]}>
                          {chartData.map((entry, index) => (
-                           <Cell key={`cell-${index}`} fill={index === 4 ? '#189D91' : '#e2e8f0'} />
+                           <Cell key={`cell-${index}`} fill={index === chartData.length - 1 ? '#2A458A' : '#e2e8f0'} />
                          ))}
                       </Bar>
                       <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600, fill: '#64748b' }} dy={10} />
@@ -123,37 +165,33 @@ const Earnings = () => {
                       <LuTrendingUp className="text-[#2A458A]" size={20} />
                    </div>
                    <div>
-                      <h3 className="text-slate-900 font-bold text-base">Earnings Breakdown</h3>
-                      <p className="text-slate-500 text-xs mt-0.5">Current incentive structure</p>
+                      <h3 className="text-slate-900 font-bold text-base">Current Balance</h3>
+                      <p className="text-slate-500 text-xs mt-0.5">Ready for payout</p>
                    </div>
                 </div>
 
                 <div className="flex-1 space-y-4">
                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex justify-between items-center">
                       <div>
-                         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-0.5">Per Delivery</p>
-                         <p className="text-2xl font-bold text-slate-900">₹{earningsData.perOrderCommission}</p>
+                         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-0.5">Withdrawable</p>
+                         <p className="text-2xl font-bold text-slate-900">₹{totalLifetime.toLocaleString()}</p>
                       </div>
                       <LuAward className="text-[#2A458A]" size={24} />
                    </div>
 
                    <div className="space-y-3 px-1">
                       <div className="flex items-center justify-between text-xs font-semibold">
-                         <span className="text-slate-600">Night Shift Surcharge</span>
-                         <span className="text-emerald-600">+₹25.00 Active</span>
+                         <span className="text-slate-600">Pending Approvals</span>
+                         <span className="text-slate-900">₹0.00</span>
                       </div>
                       <div className="flex items-center justify-between text-xs font-semibold">
-                         <span className="text-slate-600">Distance Premium</span>
-                         <span className="text-slate-500">2.4x</span>
-                      </div>
-                      <div className="flex items-center justify-between text-xs font-semibold">
-                         <span className="text-slate-600">Weekly Bonus</span>
-                         <span className="text-emerald-600">Unlocked</span>
+                         <span className="text-slate-600">COD Liability</span>
+                         <span className="text-rose-600">-₹{(wallet?.codCollectionLiability || 0).toLocaleString()}</span>
                       </div>
                    </div>
                 </div>
 
-                <button className="w-full mt-6 bg-[#189D91] text-white py-2.5 rounded-xl font-bold text-xs hover:bg-[#137A71] transition-all shadow-sm">
+                <button className="w-full mt-6 bg-[#2A458A] text-white py-2.5 rounded-xl font-bold text-xs hover:bg-[#1f3366] transition-all shadow-sm">
                    Withdraw Earnings
                 </button>
              </div>
@@ -177,31 +215,49 @@ const Earnings = () => {
                  <thead>
                     <tr className="bg-slate-50 text-slate-500">
                        <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200">Date</th>
-                       <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200">Deliveries</th>
-                       <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200">Base Pay</th>
-                       <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200 text-right">Total Payout</th>
+                       <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200">Order ID</th>
+                       <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200">Description</th>
+                       <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-semibold border-b border-slate-200 text-right">Amount</th>
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-slate-100">
-                    {earningsData.recentEarnings.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50 transition-colors group">
-                        <td className="px-5 py-3">
-                           <span className="text-xs font-semibold text-slate-900">{item.date}</span>
-                        </td>
-                        <td className="px-5 py-3">
-                           <div className="flex items-center gap-2">
-                              <LuPackage size={14} className="text-slate-400 group-hover:text-[#2A458A] transition-colors" />
-                              <span className="text-xs font-medium text-slate-700">{item.orders}</span>
-                           </div>
-                        </td>
-                        <td className="px-5 py-3">
-                           <span className="text-xs font-medium text-slate-500">₹{earningsData.perOrderCommission}</span>
-                        </td>
-                        <td className="px-5 py-3 text-right">
-                           <span className="text-xs font-bold text-slate-900">₹{item.amount.toLocaleString()}</span>
+                    {ledger.length > 0 ? (
+                      ledger.map((item, idx) => {
+                        const shortId = item.referenceId ? item.referenceId.toString().slice(-8).toUpperCase() : 'N/A';
+                        let cleanDesc = item.description || '';
+                        if (cleanDesc.includes('Delivery fee earning for Order')) {
+                          cleanDesc = 'Delivery fee earning';
+                        }
+                        
+                        return (
+                        <tr key={idx} className="hover:bg-slate-50 transition-colors group">
+                          <td className="px-5 py-3">
+                             <span className="text-xs font-semibold text-slate-900">
+                               {new Date(item.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                             </span>
+                          </td>
+                          <td className="px-5 py-3">
+                             <div className="flex items-center gap-2">
+                                <LuPackage size={14} className="text-slate-400 group-hover:text-[#2A458A] transition-colors" />
+                                <span className="text-xs font-medium text-slate-700">#{shortId}</span>
+                             </div>
+                          </td>
+                          <td className="px-5 py-3">
+                             <span className="text-xs font-medium text-slate-500">{cleanDesc}</span>
+                          </td>
+                          <td className="px-5 py-3 text-right">
+                             <span className="text-xs font-bold text-emerald-600">+₹{item.amount.toLocaleString()}</span>
+                          </td>
+                        </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className="px-5 py-8 text-center text-slate-400 text-xs font-semibold">
+                          No recent earnings found. Start delivering to see your ledger!
                         </td>
                       </tr>
-                    ))}
+                    )}
                  </tbody>
               </table>
            </div>
