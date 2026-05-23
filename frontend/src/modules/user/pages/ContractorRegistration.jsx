@@ -44,13 +44,11 @@ const ContractorRegistration = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      // In a real app, this would call an endpoint like /api/professionals/register
-      // For now, we'll simulate success and maybe send it to a general contact/inquiry log
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await api.post('/b2b-leads', formData);
       toast.success('Registration request sent successfully!');
       setIsSuccess(true);
     } catch (err) {
-      toast.error('Failed to submit registration. Please try again.');
+      toast.error(err.response?.data?.error || 'Failed to submit registration. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

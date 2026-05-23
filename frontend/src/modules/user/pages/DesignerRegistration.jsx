@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FiUser, FiBriefcase, FiPhone, FiMail, FiMapPin, FiCheckCircle, FiStar, FiLayers, FiArrowRight } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import api from '../../../shared/utils/api';
 
 const DesignerRegistration = () => {
   const [formData, setFormData] = useState({
@@ -42,11 +43,15 @@ const DesignerRegistration = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const payload = {
+        ...formData,
+        companyName: formData.firmName // Map firmName to companyName for backend
+      };
+      await api.post('/b2b-leads', payload);
       toast.success('Registration request sent successfully!');
       setIsSuccess(true);
     } catch (err) {
-      toast.error('Failed to submit registration. Please try again.');
+      toast.error(err.response?.data?.error || 'Failed to submit registration. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

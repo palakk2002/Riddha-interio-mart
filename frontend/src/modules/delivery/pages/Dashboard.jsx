@@ -41,6 +41,7 @@ const Dashboard = () => {
   const [updating, setUpdating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeShiftTime, setActiveShiftTime] = useState('Offline');
+  const [deliveryCommissionRate, setDeliveryCommissionRate] = useState(50.00);
 
   // Modal State for Cash Deposit Request
   const [showDepositModal, setShowDepositModal] = useState(false);
@@ -82,6 +83,10 @@ const Dashboard = () => {
       const { data: analyticsData } = await api.get('/delivery/analytics');
       if (analyticsData.success) {
         setAnalytics(analyticsData.data);
+      }
+      const { data: settingsRes } = await api.get('/settings');
+      if (settingsRes.success && settingsRes.data) {
+        setDeliveryCommissionRate(settingsRes.data.deliveryCommissionRate || 50.00);
       }
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err);
@@ -292,7 +297,7 @@ const Dashboard = () => {
                  <div className="flex items-center gap-4">
                     <div className="text-right hidden sm:block">
                        <p className="text-[10px] font-semibold text-slate-500">Standard Delivery Pay</p>
-                       <p className="text-sm font-bold text-slate-900">₹50.00 / Order</p>
+                       <p className="text-sm font-bold text-slate-900">₹{deliveryCommissionRate.toFixed(2)} / Order</p>
                     </div>
                     <LuTrendingUp className="text-[#189D91]" size={20} />
                  </div>

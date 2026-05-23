@@ -23,6 +23,10 @@ const SettingsPage = () => {
 
   const [notifications, setNotifications] = useState(true);
 
+  const [systemSettings, setSystemSettings] = useState({
+    deliveryCommissionRate: 50.00
+  });
+
   // Fetch Admin Profile on mount
   useEffect(() => {
     const fetchProfile = async () => {
@@ -33,6 +37,14 @@ const SettingsPage = () => {
           setProfile({
             fullName: data.data.fullName || '',
             email: data.data.email || ''
+          });
+        }
+        
+        // Fetch System Settings
+        const settingsRes = await api.get('/settings');
+        if (settingsRes.data?.success && settingsRes.data?.data) {
+          setSystemSettings({
+            deliveryCommissionRate: settingsRes.data.data.deliveryCommissionRate || 50.00
           });
         }
       } catch (err) {
@@ -109,10 +121,30 @@ const SettingsPage = () => {
     }, 800);
   };
 
+  const handleSaveSystemSettings = async () => {
+    setIsSaving(true);
+    setError('');
+    setIsSaved(false);
+
+    try {
+      const { data } = await api.put('/settings', systemSettings);
+      if (data.success) {
+        setIsSaved(true);
+        setTimeout(() => setIsSaved(false), 3000);
+      }
+    } catch (err) {
+      console.error('Failed to update system settings', err);
+      setError(err.response?.data?.error || 'Failed to update system settings.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleSave = () => {
     if (activeTab === 'Profile') handleSaveProfile();
     else if (activeTab === 'Security') handleSavePassword();
     else if (activeTab === 'Notifications') handleSaveNotifications();
+    else if (activeTab === 'System') handleSaveSystemSettings();
   };
 
   if (isLoading) {
@@ -143,7 +175,7 @@ const SettingsPage = () => {
         <div className="bg-white rounded-2xl md:rounded-[32px] shadow-xl border border-soft-oatmeal overflow-hidden">
           {/* Tabs header */}
           <div className="flex border-b border-soft-oatmeal px-4 md:px-8 bg-soft-oatmeal/5 overflow-x-auto no-scrollbar">
-            {['Profile', 'Notifications', 'Security'].map((tab) => (
+            {['Profile', 'Notifications', 'Security', 'System'].map((tab) => (
               <button 
                 key={tab} 
                 onClick={() => {
@@ -249,6 +281,31 @@ const SettingsPage = () => {
                     <div className={`w-14 h-8 rounded-full relative transition-all duration-300 ${notifications ? 'bg-emerald-500' : 'bg-soft-oatmeal'}`}>
                       <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg transition-all duration-300 ${notifications ? 'right-1' : 'left-1'}`}></div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'System' && (
+              <div className="space-y-6 max-w-xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <h3 className="text-xl font-display font-bold text-deep-espresso flex items-center gap-3">
+                  <FiSave className="text-warm-sand" /> System Configuration
+                </h3>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest pl-1">Delivery Commission Rate (₹ / Order)</label>
+                    <div className="relative">
+                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-warm-sand font-bold">₹</span>
+                      <input 
+                        type="number" 
+                        min="0"
+                        step="0.01"
+                        value={systemSettings.deliveryCommissionRate}
+                        onChange={(e) => setSystemSettings({...systemSettings, deliveryCommissionRate: parseFloat(e.target.value) || 0})}
+                        className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-2xl pl-10 px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all font-medium" 
+                      />
+                    </div>
+                    <p className="text-xs text-warm-sand/70 pl-1">This rate is automatically applied to all completed deliveries.</p>
                   </div>
                 </div>
               </div>

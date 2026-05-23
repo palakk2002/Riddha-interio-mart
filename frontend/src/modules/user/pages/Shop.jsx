@@ -1,22 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FiGrid, FiArrowRight } from 'react-icons/fi';
-import furnitureImg from '../../../assets/furniture.jpg';
-import furniture2Img from '../../../assets/furniture2.jpg';
-import lightingImg from '../../../assets/lighting.jpg';
-import tapImg from '../../../assets/tap.jpg';
-
-const categories = [
-  { name: 'Tiles', slug: 'tiles', description: 'Premium floor & wall tiles for every space', image: tapImg },
-  { name: 'Designer Paints', slug: 'paints', description: 'Transform walls with luxurious finishes', image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&q=80' },
-  { name: 'Furniture', slug: 'furniture', description: 'Handcrafted pieces for modern living', image: furnitureImg },
-  { name: 'Lighting', slug: 'lighting', description: 'Elegant fixtures to set the mood', image: lightingImg },
-  { name: 'Sanitaryware', slug: 'sanitaryware', description: 'Premium bath & kitchen essentials', image: tapImg },
-  { name: 'Home Décor', slug: 'home-decor', description: 'Finishing touches for every room', image: furniture2Img },
-];
+import { FiGrid, FiArrowRight, FiImage } from 'react-icons/fi';
+import api from '../../../shared/utils/api';
 
 const Shop = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data } = await api.get('/categories');
+        setCategories(data.data || []);
+      } catch (error) {
+        console.error('Failed to fetch categories', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -45,8 +50,17 @@ const Shop = () => {
         </motion.div>
 
         {/* Category Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((cat, index) => (
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white border border-gray-100 rounded-2xl p-6 h-32" />
+            ))}
+          </div>
+        ) : categories.length === 0 ? (
+          <div className="text-center py-12 text-gray-400 font-medium">No categories found.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.map((cat, index) => (
             <motion.div
               key={cat.slug}
               initial={{ opacity: 0, y: 30 }}
@@ -59,12 +73,16 @@ const Shop = () => {
               >
                 <div className="flex items-center gap-6">
                   {/* Small Category Image */}
-                  <div className="h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-soft-oatmeal/5 shadow-inner border border-soft-oatmeal/10">
-                    <img 
-                      src={cat.image} 
-                      alt={cat.name} 
-                      className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                    />
+                  <div className="h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-soft-oatmeal/5 shadow-inner border border-soft-oatmeal/10 flex items-center justify-center">
+                    {cat.image && cat.image !== 'no-photo.jpg' ? (
+                      <img 
+                        src={cat.image} 
+                        alt={cat.name} 
+                        className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      />
+                    ) : (
+                      <FiImage className="h-8 w-8 text-warm-sand/50" />
+                    )}
                   </div>
                   
                   {/* Category Info */}
@@ -82,8 +100,9 @@ const Shop = () => {
                 </div>
               </Link>
             </motion.div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </motion.div>
   );
