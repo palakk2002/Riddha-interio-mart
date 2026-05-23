@@ -23,5 +23,11 @@
     "category": "Bath",
     "subcategory": "",
     "subsubcategory": ""
+  },
+  {
+    "_id": "6a1005c8a399239b828b5441",
+    "name": "Test Terracotta Vase",
+    "category": "Flooring",
+    "subcategory": "Terracotta Tiles"
   }
 ]
