@@ -79,7 +79,11 @@ const SellerLayout = () => {
                 <MessageSquare size={20} />
                 <span className="absolute top-2 right-2 w-2 h-2 bg-seller-primary rounded-full border-2 border-white"></span>
               </button>
-              <NotificationDropdown isMobile={false} />
+              <NotificationDropdown 
+                isMobile={false} 
+                buttonClassName="p-2.5 text-slate-500 hover:bg-slate-100 rounded-xl transition-colors relative"
+                viewAllPath="/seller/notifications"
+              />
             </div>
 
             <div className="h-8 w-[1px] bg-slate-200 hidden md:block"></div>

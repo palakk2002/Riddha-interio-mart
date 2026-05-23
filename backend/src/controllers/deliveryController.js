@@ -77,7 +77,7 @@ exports.getDeliveryMe = async (req, res, next) => {
 // @desc    Update Delivery Profile
 exports.updateDeliveryProfile = async (req, res, next) => {
   try {
-    const { fullName, email, phone, vehicleType, vehicleNumber, avatar } = req.body;
+    const { fullName, email, phone, vehicleType, vehicleNumber, avatar, documents } = req.body;
     
     const delivery = await Delivery.findById(req.user.id);
     if (!delivery) return res.status(404).json({ success: false, error: 'Partner not found' });
@@ -98,6 +98,13 @@ exports.updateDeliveryProfile = async (req, res, next) => {
       vehicleNumber: vehicleNumber || delivery.vehicleNumber,
       avatar: avatar || delivery.avatar
     };
+
+    if (documents) {
+      fieldsToUpdate.documents = {
+        ...delivery.documents,
+        ...documents
+      };
+    }
 
     const updatedDelivery = await Delivery.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
       new: true,
@@ -145,9 +152,27 @@ exports.getPendingDeliveryBoys = async (req, res, next) => {
 exports.updateDeliveryStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
+    const updateData = { status };
+    if (status === 'Available') {
+      updateData.lastOnlineTime = Date.now();
+      updateData.activeShift = {
+        isClockedIn: true,
+        clockedInAt: new Date(),
+        currentPayloadWeight: 0,
+        currentPayloadCount: 0
+      };
+    } else if (status === 'Offline') {
+      updateData.lastOnlineTime = null;
+      updateData.activeShift = {
+        isClockedIn: false,
+        clockedInAt: null,
+        currentPayloadWeight: 0,
+        currentPayloadCount: 0
+      };
+    }
     const delivery = await Delivery.findByIdAndUpdate(
       req.user.id,
-      { status },
+      updateData,
       { new: true, runValidators: true }
     );
     res.status(200).json({ success: true, data: delivery });
@@ -274,3 +299,38 @@ exports.updateDeliveryApprovalStatus = async (req, res, next) => {
     next(err);
   }
 };
+
+// @desc    Update live coordinates of delivery partner
+// @route   PUT /api/delivery/location
+// @access  Private/Delivery
+exports.updateDeliveryLocation = async (req, res, next) => {
+  try {
+    const { latitude, longitude } = req.body;
+    
+    if (latitude === undefined || longitude === undefined) {
+      return res.status(400).json({ success: false, error: 'Latitude and longitude coordinates are required.' });
+    }
+
+    const partner = await Delivery.findById(req.user.id);
+    if (!partner) {
+      return res.status(404).json({ success: false, error: 'Partner not found' });
+    }
+
+    partner.currentLocation = {
+      latitude: Number(latitude),
+      longitude: Number(longitude),
+      updatedAt: new Date()
+    };
+    
+    await partner.save();
+    
+    res.status(200).json({ 
+      success: true, 
+      message: 'Location updated successfully',
+      data: partner.currentLocation 
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+

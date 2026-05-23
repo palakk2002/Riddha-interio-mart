@@ -8,10 +8,8 @@ import {
   LuArrowUpRight, 
   LuNavigation, 
   LuUsers, 
-  LuTrendingUp, 
   LuWallet, 
   LuBell, 
-  LuFileText, 
   LuSettings, 
   LuCircleHelp,
   LuLogOut,
@@ -31,21 +29,38 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [pendingCount, setPendingCount] = useState(0);
+  const [pickupCount, setPickupCount] = useState(0);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
   const fetchAnalytics = async () => {
     try {
       const { data } = await api.get('/delivery/analytics');
       if (data.success && data.data?.stats) {
         setPendingCount(data.data.stats.pendingDeliveries || 0);
+        setPickupCount(data.data.stats.pickupRequestsCount || 0);
       }
     } catch (err) {
       console.error('Failed to fetch delivery analytics:', err);
+    }
+
+    try {
+      const { data } = await api.get('/notifications?limit=1');
+      if (data.success) {
+        setUnreadNotificationsCount(data.unreadCount || 0);
+      }
+    } catch (err) {
+      console.error('Failed to fetch unread notification count in Sidebar:', err);
     }
   };
 
   useEffect(() => {
     fetchAnalytics();
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    window.addEventListener('delivery_notifications_updated', fetchAnalytics);
+    return () => window.removeEventListener('delivery_notifications_updated', fetchAnalytics);
+  }, []);
 
   useEffect(() => {
     const socket = getSocket();
@@ -60,9 +75,16 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
       fetchAnalytics();
     };
 
+    const handleNotificationNew = () => {
+      fetchAnalytics();
+    };
+
     socket.on('delivery:assigned', handleDeliveryAssigned);
+    socket.on('notification:new', handleNotificationNew);
+
     return () => {
       socket.off('delivery:assigned', handleDeliveryAssigned);
+      socket.off('notification:new', handleNotificationNew);
     };
   }, []);
 
@@ -71,23 +93,29 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
     navigate('/delivery/login');
   };
 
+  const isLinkActive = (itemPath) => {
+    if (itemPath.includes('?')) {
+      const [pathPart, queryPart] = itemPath.split('?');
+      return location.pathname === pathPart && location.search.includes(queryPart);
+    }
+    return location.pathname === itemPath && !location.search.includes('filter=');
+  };
+
   const menuGroups = [
     {
       title: 'Operations',
       items: [
         { name: 'Dashboard', path: '/delivery/dashboard', icon: LuLayoutDashboard },
         { name: 'Orders', path: '/delivery/orders', icon: LuPackage },
-        { name: 'Route Management', path: '/delivery/delivery-history', icon: LuMap },
-        { name: 'Dispatch Center', path: '/delivery/orders', icon: LuZap },
-        { name: 'Pickup Requests', path: '/delivery/orders', icon: LuArrowUpRight },
-        { name: 'Delivery Tracking', path: '/delivery/delivery-history', icon: LuNavigation },
+        { name: 'Route Management', path: '/delivery/route-management', icon: LuMap },
+        { name: 'Dispatch Center', path: '/delivery/dispatch-center', icon: LuZap },
+        { name: 'Pickup Requests', path: '/delivery/orders?filter=pickups', icon: LuArrowUpRight },
       ]
     },
     {
-      title: 'Fleet & Analytics',
+      title: 'Fleet & Earnings',
       items: [
         { name: 'Profile', path: '/delivery/profile', icon: LuUsers },
-        { name: 'Analytics', path: '/delivery/dashboard', icon: LuTrendingUp },
         { name: 'Earnings', path: '/delivery/earnings', icon: LuWallet },
       ]
     },
@@ -95,7 +123,6 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
       title: 'System',
       items: [
         { name: 'Notifications', path: '/delivery/notifications', icon: LuBell },
-        { name: 'Reports', path: '/delivery/dashboard', icon: LuFileText },
         { name: 'Terms & Conditions', path: '/delivery/terms', icon: LuShieldCheck },
         { name: 'Settings', path: '/delivery/settings', icon: LuSettings },
         { name: 'Help & Support', path: '/delivery/help', icon: LuCircleHelp },
@@ -135,29 +162,44 @@ const DeliverySidebar = ({ isOpen, onClose }) => {
               <div key={group.title} className="space-y-2">
                  <h3 className="px-6 text-xs font-semibold text-slate-400">{group.title}</h3>
                  <div className="space-y-1">
-                    {group.items.map((item) => (
-                      <NavLink
-                        key={item.name}
-                        to={item.path}
-                        onClick={onClose}
-                        className={({ isActive }) => `
-                          flex items-center gap-4 px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 group
-                          ${isActive 
-                            ? 'bg-[#2A458A]/10 text-[#2A458A] border-l-4 border-[#2A458A]' 
-                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}
-                        `}
-                      >
-                        <item.icon size={18} className="shrink-0 transition-transform group-hover:scale-110" />
-                        <span>{item.name}</span>
-                        {item.name === 'Orders' && pendingCount > 0 && (
-                          <span className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            location.pathname === item.path ? 'bg-white text-[#2A458A]' : 'bg-[#2A458A] text-white'
-                          }`}>
-                            {pendingCount}
-                          </span>
-                        )}
-                      </NavLink>
-                    ))}
+                    {group.items.map((item) => {
+                      const active = isLinkActive(item.path);
+                      return (
+                        <NavLink
+                          key={item.name}
+                          to={item.path}
+                          onClick={onClose}
+                          className={`
+                            flex items-center gap-4 px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 group
+                            ${active 
+                              ? 'bg-[#2A458A]/10 text-[#2A458A] border-l-4 border-[#2A458A]' 
+                              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}
+                          `}
+                        >
+                          <item.icon size={18} className="shrink-0 transition-transform group-hover:scale-110" />
+                          <span>{item.name}</span>
+                          {item.name === 'Orders' && pendingCount > 0 && (
+                            <span className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              active ? 'bg-white text-[#2A458A]' : 'bg-[#2A458A] text-white'
+                            }`}>
+                              {pendingCount}
+                            </span>
+                          )}
+                          {item.name === 'Pickup Requests' && pickupCount > 0 && (
+                            <span className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              active ? 'bg-white text-[#2A458A]' : 'bg-[#2A458A] text-white'
+                            }`}>
+                              {pickupCount}
+                            </span>
+                          )}
+                          {item.name === 'Notifications' && unreadNotificationsCount > 0 && (
+                            <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white animate-pulse shadow-sm shadow-rose-500/50">
+                              {unreadNotificationsCount}
+                            </span>
+                          )}
+                        </NavLink>
+                      );
+                    })}
                  </div>
               </div>
             ))}

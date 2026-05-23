@@ -5,8 +5,11 @@ const {
   getDeliveryWallet,
   requestSellerWithdrawal,
   approvePayout,
+  rejectPayout,
   depositCodLiability,
-  getAdminFinancialAnalytics
+  getAdminFinancialAnalytics,
+  requestDeliveryCodDeposit,
+  rejectDeliverySettlement
 } = require('../controllers/walletController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -19,10 +22,13 @@ router.post('/seller/payout', authorize('seller'), requestSellerWithdrawal);
 
 // Delivery Partner endpoints
 router.get('/delivery/me', authorize('delivery'), getDeliveryWallet);
+router.post('/delivery/deposit-request', authorize('delivery'), requestDeliveryCodDeposit);
 
 // Admin oversight and settlements
 router.post('/admin/payouts/:id/approve', authorize('admin'), approvePayout);
+router.post('/admin/payouts/:id/reject', authorize('admin'), rejectPayout);
 router.post('/admin/delivery/cod-deposit', authorize('admin'), depositCodLiability);
+router.post('/admin/delivery/cod-reject', authorize('admin'), rejectDeliverySettlement);
 router.get('/admin/analytics', authorize('admin'), getAdminFinancialAnalytics);
 
 module.exports = router;

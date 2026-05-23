@@ -24,7 +24,20 @@ import NotificationDropdown from '../../../shared/components/NotificationDropdow
 import api from '../../../shared/utils/api';
 import { connectSocket } from '../../../shared/utils/socket';
 import { primeNotificationAudio, isSoundEnabled, playNotificationSound } from '../../../shared/utils/notificationSound';
-import { prependDeliveryNotification, getDeliveryNotifications, setDeliveryNotifications } from '../utils/deliveryNotifications';
+
+const formatTime = (dateStr) => {
+  const date = new Date(dateStr);
+  const diffMs = Date.now() - date.getTime();
+  if (diffMs < 0 || isNaN(diffMs)) return 'Just now';
+  const secs = Math.floor(diffMs / 1000);
+  if (secs < 60) return 'Just now';
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+};
 
 const DeliveryLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
@@ -43,24 +56,59 @@ const DeliveryLayout = () => {
     navigate('/delivery/login');
   };
 
-  React.useEffect(() => {
-    setNotifications(getDeliveryNotifications());
-    const handleUpdate = () => setNotifications(getDeliveryNotifications());
-    window.addEventListener('delivery_notifications_updated', handleUpdate);
-    return () => window.removeEventListener('delivery_notifications_updated', handleUpdate);
-  }, []);
-
-  const unreadCount = notifications.filter(n => n.status === 'unread').length;
-
-  const handleMarkAllRead = () => {
-    const next = notifications.map(n => ({ ...n, status: 'read' }));
-    setDeliveryNotifications(next);
+  const fetchNotifications = async () => {
+    try {
+      const { data } = await api.get('/notifications?limit=50');
+      if (data.success && data.data) {
+        const mapped = data.data.map(notif => ({
+          id: notif._id,
+          _id: notif._id,
+          title: notif.title,
+          message: notif.message,
+          status: notif.read ? 'read' : 'unread',
+          read: notif.read,
+          time: formatTime(notif.createdAt),
+          link: notif.metadata?.link || (notif.type === 'delivery_update' ? '/delivery/orders' : null),
+          ...notif
+        }));
+        setNotifications(mapped);
+      }
+    } catch (err) {
+      console.error('Failed to fetch notifications in Layout:', err);
+    }
   };
 
-  const handleNotificationClick = (notif) => {
-    if (notif.status === 'unread') {
-      const next = notifications.map(n => n.id === notif.id ? { ...n, status: 'read' } : n);
-      setDeliveryNotifications(next);
+  React.useEffect(() => {
+    fetchNotifications();
+    window.addEventListener('delivery_notifications_updated', fetchNotifications);
+    return () => window.removeEventListener('delivery_notifications_updated', fetchNotifications);
+  }, []);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const handleMarkAllRead = async () => {
+    try {
+      const { data } = await api.put('/notifications/read-all');
+      if (data.success) {
+        setNotifications(prev => prev.map(n => ({ ...n, status: 'read', read: true })));
+        window.dispatchEvent(new Event('delivery_notifications_updated'));
+      }
+    } catch (err) {
+      console.error('Failed to mark all as read in Layout dropdown:', err);
+    }
+  };
+
+  const handleNotificationClick = async (notif) => {
+    if (!notif.read) {
+      try {
+        const { data } = await api.put(`/notifications/${notif._id}/read`);
+        if (data.success) {
+          setNotifications(prev => prev.map(n => n._id === notif._id ? { ...n, status: 'read', read: true } : n));
+          window.dispatchEvent(new Event('delivery_notifications_updated'));
+        }
+      } catch (err) {
+        console.error('Failed to mark notification as read in Layout dropdown:', err);
+      }
     }
     setShowNotifications(false);
     if (notif.link) navigate(notif.link);
@@ -88,10 +136,6 @@ const DeliveryLayout = () => {
 
     const onAssigned = (payload) => {
       setAssignmentRequest(payload);
-      setToast({ title: 'New Task', message: 'A new order is available for pickup!', type: 'info' });
-      prependDeliveryNotification({ title: 'Order Assigned', message: 'New order task received.', time: 'Just now', status: 'unread', link: '/delivery/orders' });
-      if (isSoundEnabled()) playNotificationSound();
-      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
     };
 
     const onApprovalUpdate = (payload) => {
@@ -99,17 +143,49 @@ const DeliveryLayout = () => {
       if (payload.status === 'Approved') {
         setUser(prev => ({ ...prev, approvalStatus: 'Approved' }));
       }
-      setToast({ title: 'Account Status', message: payload.message, type: payload.status === 'Approved' ? 'success' : 'danger' });
-      prependDeliveryNotification({ title: 'Approval Update', message: payload.message, time: 'Just now', status: 'unread', link: '/delivery/profile' });
+    };
+
+    const onNotificationNew = (newNotif) => {
+      const mapped = {
+        id: newNotif._id,
+        _id: newNotif._id,
+        title: newNotif.title,
+        message: newNotif.message,
+        status: newNotif.read ? 'read' : 'unread',
+        read: newNotif.read,
+        time: formatTime(newNotif.createdAt),
+        link: newNotif.metadata?.link || (newNotif.type === 'delivery_update' ? '/delivery/orders' : null),
+        ...newNotif
+      };
+
+      setNotifications(prev => {
+        if (prev.some(n => n._id === mapped._id)) return prev;
+        return [mapped, ...prev];
+      });
+
+      // Dispatch window event so any listening pages/sidebars refresh
+      window.dispatchEvent(new Event('delivery_notifications_updated'));
+
+      // Show unified screen toast
+      setToast({
+        title: newNotif.title,
+        message: newNotif.message,
+        type: newNotif.title?.toLowerCase().includes('approved') ? 'success' : 'info'
+      });
+
+      // Vibrate / Play Sound
       if (isSoundEnabled()) playNotificationSound();
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
     };
 
     socket.on('delivery:assigned', onAssigned);
     socket.on('delivery:approval_update', onApprovalUpdate);
+    socket.on('notification:new', onNotificationNew);
 
     return () => {
       socket.off('delivery:assigned', onAssigned);
       socket.off('delivery:approval_update', onApprovalUpdate);
+      socket.off('notification:new', onNotificationNew);
     };
   }, [user?.token, user?.role]);
 
@@ -340,13 +416,13 @@ const DeliveryLayout = () => {
                              ) : (
                                notifications.map((notif) => (
                                  <div 
-                                   key={notif.id}
+                                   key={notif._id}
                                    onClick={() => handleNotificationClick(notif)}
-                                   className={`p-3 rounded-2xl cursor-pointer transition-all flex gap-3 ${notif.status === 'unread' ? 'bg-[#2A458A]/5 hover:bg-[#2A458A]/10' : 'hover:bg-slate-50'}`}
+                                   className={`p-3 rounded-2xl cursor-pointer transition-all flex gap-3 ${!notif.read ? 'bg-[#2A458A]/5 hover:bg-[#2A458A]/10' : 'hover:bg-slate-50'}`}
                                  >
-                                   <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${notif.status === 'unread' ? 'bg-[#2A458A]' : 'bg-transparent'}`} />
+                                   <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${!notif.read ? 'bg-[#2A458A]' : 'bg-transparent'}`} />
                                    <div>
-                                     <h4 className={`text-sm ${notif.status === 'unread' ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                                     <h4 className={`text-sm ${!notif.read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
                                        {notif.title}
                                      </h4>
                                      <p className="text-xs text-slate-500 mt-0.5">{notif.message}</p>

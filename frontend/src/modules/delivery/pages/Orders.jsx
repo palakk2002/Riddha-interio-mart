@@ -14,12 +14,26 @@ import {
 import { useUser } from '../../user/data/UserContext';
 import api from '../../../shared/utils/api';
 import { toast } from 'react-hot-toast';
+import { useSearchParams } from 'react-router-dom';
 
 const Orders = () => {
-  const [activeTab, setActiveTab] = React.useState('my');
+  const [searchParams] = useSearchParams();
+  const filterParam = searchParams.get('filter');
+  const [activeTab, setActiveTab] = React.useState(filterParam === 'pickups' ? 'pickups' : 'my');
   const [orders, setOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const { user } = useUser();
+
+  // Keep tab state synchronized with sidebar navigation changes
+  React.useEffect(() => {
+    if (filterParam === 'pickups') {
+      setActiveTab('pickups');
+    } else if (filterParam === 'available') {
+      setActiveTab('available');
+    } else {
+      setActiveTab('my');
+    }
+  }, [filterParam]);
 
   const fetchOrders = async (isBackground = false) => {
     if (!isBackground) setLoading(true);
@@ -85,13 +99,35 @@ const Orders = () => {
     }
   };
 
+  const handleResendOtp = async (orderId) => {
+    const loadingToast = toast.loading('Resending Delivery OTP...');
+    try {
+      const { data } = await api.post(`/orders/${orderId}/resend-otp`);
+      if (data.success) {
+        toast.success(data.message || 'New OTP sent successfully!', { id: loadingToast });
+        return true;
+      }
+      return false;
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to resend OTP', { id: loadingToast });
+      return false;
+    }
+  };
+
   const availableOrders = orders.filter(o => 
     (o.deliveryStatus === 'None' || o.deliveryStatus === 'Rejected') && 
     o.status === 'Processing'
   );
 
   const myOrders = orders.filter(o => o.deliveryBoy?._id === user?._id || o.deliveryBoy === user?._id);
-  const displayedOrders = activeTab === 'available' ? availableOrders : myOrders;
+  
+  // Filter for pending pickups (assigned to courier but not yet picked up from merchant)
+  const pendingPickups = myOrders.filter(o => o.deliveryStatus === 'Accepted');
+  
+  const displayedOrders = 
+    activeTab === 'available' ? availableOrders : 
+    activeTab === 'pickups' ? pendingPickups : 
+    myOrders;
 
   return (
     <PageWrapper>
@@ -120,10 +156,10 @@ const Orders = () => {
               <LuRefreshCw size={20} className={loading ? 'animate-spin' : ''} />
             </button>
             
-            <div className="flex p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+            <div className="flex p-1.5 bg-slate-100 rounded-2xl border border-slate-200 flex-wrap sm:flex-nowrap gap-1">
               <button
                 onClick={() => setActiveTab('available')}
-                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+                className={`px-4 sm:px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                   activeTab === 'available' 
                     ? 'bg-white text-slate-900 shadow-sm' 
                     : 'text-slate-500 hover:text-slate-700'
@@ -134,16 +170,31 @@ const Orders = () => {
                    {availableOrders.length}
                 </span>
               </button>
+              
+              <button
+                onClick={() => setActiveTab('pickups')}
+                className={`px-4 sm:px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+                  activeTab === 'pickups' 
+                    ? 'bg-[#2A458A] text-white shadow-md' 
+                    : 'text-slate-500 hover:text-[#2A458A]'
+                }`}
+              >
+                Pending Pickups
+                <span className={`px-2 py-0.5 rounded-md text-xs ${activeTab === 'pickups' ? 'bg-white/20' : 'bg-slate-200'}`}>
+                   {pendingPickups.length}
+                </span>
+              </button>
+
               <button
                 onClick={() => setActiveTab('my')}
-                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+                className={`px-4 sm:px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                   activeTab === 'my' 
                     ? 'bg-[#189D91] text-white shadow-md' 
                     : 'text-slate-500 hover:text-[#189D91]'
                 }`}
               >
                 My Deliveries
-                <span className={`px-2 py-0.5 rounded-md text-xs ${activeTab === 'my' ? 'bg-white/20' : 'bg-slate-200'}`}>
+                <span className={`px-2 py-0.5 rounded-md text-xs ${activeTab === 'my' ? 'bg-white/20' : 'bg-slate-205'}`}>
                    {myOrders.length}
                 </span>
               </button>
@@ -183,6 +234,7 @@ const Orders = () => {
                     onReject={(id) => handleDeliveryResponse(id, 'Rejected')}
                     onUpdateStatus={(id, status) => handleUpdateStatus(id, status)} 
                     onVerifyOtp={(id, otp) => handleVerifyOtp(id, otp)}
+                    onResendOtp={handleResendOtp}
                   />
                 </div>
               ))

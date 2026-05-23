@@ -3,7 +3,10 @@ const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Admin = require('../models/Admin');
 const Seller = require('../models/Seller');
+const Coupon = require('../models/Coupon');
 const paginate = require('../utils/paginate');
+const { geocodeAddress } = require('../utils/geocoder');
+
 const { 
   notifySellerNewOrder, 
   notifyAdminNewOrder, 
@@ -24,11 +27,28 @@ exports.addOrderItems = async (req, res) => {
     orderItems,
     shippingAddress,
     paymentMethod,
-    businessDetails
+    businessDetails,
+    couponCode
   } = req.body;
 
   if (!orderItems || orderItems.length === 0) {
     return res.status(400).json({ success: false, message: 'No order items' });
+  }
+
+  // Pre-validate Coupon early if supplied to save database locking resources
+  let coupon = null;
+  if (couponCode) {
+    coupon = await Coupon.findOne({
+      code: couponCode.toUpperCase().trim(),
+      isActive: true,
+      expiryDate: { $gte: new Date() }
+    });
+    if (!coupon) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired coupon code.' });
+    }
+    if (coupon.usedCount >= coupon.usageLimit) {
+      return res.status(400).json({ success: false, message: 'This coupon has reached its redemption limit.' });
+    }
   }
 
   // 1. COD Eligibility Validation (Fast, read-only pre-checks before transaction)
@@ -88,6 +108,14 @@ exports.addOrderItems = async (req, res) => {
       groupedItems[sId].items.push(item);
     }
 
+    // If a coupon code was supplied, verify if the seller of the coupon actually has products in this order.
+    if (coupon) {
+      const couponSellerId = coupon.seller.toString();
+      if (!groupedItems[couponSellerId]) {
+        throw new Error('This coupon is not applicable to any products in your cart.');
+      }
+    }
+
     // 5. Create Orders and Commit Stock Reservations
     const createdOrders = [];
     const lowStockAlerts = [];
@@ -103,8 +131,76 @@ exports.addOrderItems = async (req, res) => {
       // Perform secure inter-state vs intra-state tax breakdown
       const taxService = require('../services/taxService');
       const taxCalculation = await taxService.calculateTaxes(groupPricing.enrichedItems, shippingAddress);
+
+      let couponDiscount = 0;
+      if (coupon && coupon.seller.toString() === sellerId) {
+        // Load coupon inside session for transaction safety
+        const couponInSession = await Coupon.findById(coupon._id).session(session);
+        if (!couponInSession) {
+          throw new Error('Coupon code is invalid or expired.');
+        }
+        if (couponInSession.usedCount >= couponInSession.usageLimit) {
+          throw new Error('This coupon has reached its redemption limit.');
+        }
+
+        const groupSellingTotal = groupPricing.subtotal - groupPricing.discountAmount;
+        if (groupSellingTotal < couponInSession.minPurchaseAmount) {
+          throw new Error(`Minimum purchase amount of ₹${couponInSession.minPurchaseAmount} is required to use this coupon.`);
+        }
+
+        if (couponInSession.discountType === 'percentage') {
+          couponDiscount = (groupSellingTotal * couponInSession.discountValue) / 100;
+          if (couponInSession.maxDiscountAmount && couponDiscount > couponInSession.maxDiscountAmount) {
+            couponDiscount = couponInSession.maxDiscountAmount;
+          }
+        } else if (couponInSession.discountType === 'flat') {
+          couponDiscount = couponInSession.discountValue;
+        }
+
+        if (couponDiscount > groupSellingTotal) {
+          couponDiscount = groupSellingTotal;
+        }
+
+        couponDiscount = Number(couponDiscount.toFixed(2));
+
+        // Adjust prices proportionally across items in this group
+        const ratio = groupSellingTotal > 0 ? (groupSellingTotal - couponDiscount) / groupSellingTotal : 0;
+        
+        // Adjust the tax calculation values as well
+        taxCalculation.totalTax = Number((taxCalculation.totalTax * ratio).toFixed(2));
+        taxCalculation.cgst = Number((taxCalculation.cgst * ratio).toFixed(2));
+        taxCalculation.sgst = Number((taxCalculation.sgst * ratio).toFixed(2));
+        taxCalculation.igst = Number((taxCalculation.igst * ratio).toFixed(2));
+        taxCalculation.taxableAmount = Number((taxCalculation.taxableAmount * ratio).toFixed(2));
+
+        // Adjust items in this group so saved orderItems have corrected post-discount prices
+        group.items.forEach(item => {
+          item.price = Number((item.price * ratio).toFixed(2));
+        });
+
+        // Atomic update of usedCount inside the transaction
+        couponInSession.usedCount += 1;
+        await couponInSession.save({ session });
+      }
       
       const isCod = paymentMethod === 'COD';
+      
+      // Geocode Shipping Address
+      const shippingAddressText = `${shippingAddress.fullAddress}, ${shippingAddress.city}, ${shippingAddress.pincode}`;
+      const shippingCoords = await geocodeAddress(shippingAddressText);
+      
+      // Geocode Seller Address
+      let sellerCoords = null;
+      if (group.sellerType === 'Seller') {
+        const sellerObj = await Seller.findById(group.seller).session(session);
+        if (sellerObj && sellerObj.shopAddress) {
+          sellerCoords = await geocodeAddress(sellerObj.shopAddress);
+        }
+      }
+      
+      // Fallback coordinate checks to ensure coordinates are always defined
+      const resolvedShippingCoords = shippingCoords || { latitude: 26.9124, longitude: 75.7873 };
+      const resolvedSellerCoords = sellerCoords || { latitude: 26.9230, longitude: 75.7950 };
       
       const order = new Order({
         orderItems: group.items,
@@ -113,14 +209,14 @@ exports.addOrderItems = async (req, res) => {
         sellerType: group.sellerType,
         shippingAddress,
         paymentMethod,
-        itemsPrice: Number((groupPricing.subtotal - groupPricing.discountAmount).toFixed(2)),
+        itemsPrice: Number((groupPricing.subtotal - groupPricing.discountAmount - couponDiscount).toFixed(2)),
         shippingPrice: groupPricing.shippingPrice,
         taxAmount: taxCalculation.totalTax,
         cgst: taxCalculation.cgst,
         sgst: taxCalculation.sgst,
         igst: taxCalculation.igst,
         taxType: taxCalculation.items[0] ? taxCalculation.items[0].taxType : 'intra-state',
-        discountAmount: groupPricing.discountAmount,
+        discountAmount: groupPricing.discountAmount + couponDiscount,
         pricingBreakdown: {
           subtotal: groupPricing.subtotal,
           taxAmount: taxCalculation.totalTax,
@@ -128,15 +224,17 @@ exports.addOrderItems = async (req, res) => {
           sgst: taxCalculation.sgst,
           igst: taxCalculation.igst,
           shippingPrice: groupPricing.shippingPrice,
-          discountAmount: groupPricing.discountAmount,
-          totalPrice: groupPricing.totalPrice
+          discountAmount: groupPricing.discountAmount + couponDiscount,
+          totalPrice: Number((groupPricing.totalPrice - couponDiscount).toFixed(2))
         },
-        totalPrice: groupPricing.totalPrice,
+        totalPrice: Number((groupPricing.totalPrice - couponDiscount).toFixed(2)),
         isPaid: false,
         paidAt: undefined,
         paymentStatus: 'pending',
         status: isCod ? 'Processing' : 'Pending',
-        businessDetails
+        businessDetails,
+        shippingCoordinates: resolvedShippingCoords,
+        sellerCoordinates: resolvedSellerCoords
       });
 
       // Save order inside database transaction session
@@ -150,19 +248,21 @@ exports.addOrderItems = async (req, res) => {
           throw new Error(`Active stock hold reservation not found for ${item.name}`);
         }
 
-        await inventoryService.commitReservation(matchedRes._id, session);
+        if (isCod) {
+          await inventoryService.commitReservation(matchedRes._id, session);
 
-        // Fetch updated product for low stock alerts check
-        const updatedProduct = await Product.findById(item.product).session(session);
-        if (updatedProduct && updatedProduct.countInStock <= 5) {
-          lowStockAlerts.push({
-            seller: updatedProduct.seller,
-            data: {
-              productId: updatedProduct._id,
-              name: updatedProduct.name,
-              remainingStock: updatedProduct.countInStock
-            }
-          });
+          // Fetch updated product for low stock alerts check
+          const updatedProduct = await Product.findById(item.product).session(session);
+          if (updatedProduct && updatedProduct.countInStock <= 5) {
+            lowStockAlerts.push({
+              seller: updatedProduct.seller,
+              data: {
+                productId: updatedProduct._id,
+                name: updatedProduct.name,
+                remainingStock: updatedProduct.countInStock
+              }
+            });
+          }
         }
       }
     }
@@ -385,9 +485,23 @@ exports.getOrders = async (req, res) => {
 
     // If user is delivery partner, show orders assigned to them or available in pool
     if (isDelivery) {
+      const servicePincodes = req.user.servicePincodes || [];
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
       query.$or = [
         { deliveryBoy: req.user.id },
-        { deliveryStatus: { $in: ['None', 'Rejected'] } }
+        { 
+          deliveryStatus: { $in: ['None', 'Rejected'] },
+          'shippingAddress.pincode': { $in: servicePincodes },
+          rejectedBy: {
+            $not: {
+              $elemMatch: {
+                deliveryBoy: req.user.id,
+                rejectedAt: { $gte: twentyFourHoursAgo }
+              }
+            }
+          }
+        }
       ];
       query.status = { $in: ['Processing', 'Shipped', 'Delivered'] };
       // Delivery partners also shouldn't see unpaid online orders
@@ -438,7 +552,27 @@ exports.updateOrderStatus = async (req, res) => {
     const order = await Order.findById(req.params.id);
 
     if (order) {
+      // BOLA/IDOR Authorization Checks
+      if (req.user.role === 'seller' && order.seller.toString() !== req.user.id) {
+        return res.status(403).json({ success: false, error: 'Not authorized: You do not own this order.' });
+      }
+
+      if (req.user.role === 'delivery' && (!order.deliveryBoy || order.deliveryBoy.toString() !== req.user.id)) {
+        return res.status(403).json({ success: false, error: 'Not authorized: You are not assigned to this order.' });
+      }
+
       const newStatus = req.body.status;
+
+      // Restrict delivery partner status transitions to Picked and Out for Delivery only
+      if (req.user.role === 'delivery') {
+        const permittedStates = ['Picked', 'Out for Delivery'];
+        if (!permittedStates.includes(newStatus)) {
+          return res.status(403).json({ 
+            success: false, 
+            error: `Security Guard: Delivery partners cannot transition order status to "${newStatus}" directly. Use verify-otp to complete deliveries.` 
+          });
+        }
+      }
       
       // Early exit if status is identical to avoid double-processing
       if (order.status === newStatus) {
@@ -573,6 +707,11 @@ exports.assignOrderToDeliveryBoy = async (req, res) => {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
+    // BOLA/IDOR Authorization Check
+    if (req.user.role === 'seller' && order.seller.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, error: 'Not authorized: You do not own this order.' });
+    }
+
     const { deliveryBoyId } = req.body;
     order.deliveryBoy = deliveryBoyId;
     order.deliveryStatus = 'Pending';
@@ -603,6 +742,11 @@ exports.respondToDeliveryAssignment = async (req, res) => {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
+    // Verify assignment: if order.deliveryBoy is set, only that delivery partner can respond to it
+    if (order.deliveryBoy && order.deliveryBoy.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, error: 'Not authorized: This order is assigned to another delivery partner.' });
+    }
+
     order.deliveryStatus = status;
     if (status === 'Accepted') {
       order.status = 'Shipped';
@@ -610,6 +754,14 @@ exports.respondToDeliveryAssignment = async (req, res) => {
     } else {
       // If rejected, clear deliveryBoy so someone else can be assigned or it goes back to pool
       order.deliveryBoy = undefined;
+      
+      if (!order.rejectedBy) {
+        order.rejectedBy = [];
+      }
+      // Push to rejection blacklist to avoid showing it for 24 hours
+      if (!order.rejectedBy.some(r => r.deliveryBoy.toString() === req.user.id.toString())) {
+        order.rejectedBy.push({ deliveryBoy: req.user.id, rejectedAt: Date.now() });
+      }
     }
 
     await order.save();
@@ -730,6 +882,40 @@ exports.verifyPayment = async (req, res) => {
     const orders = await Order.find({ 'paymentResult.id': razorpay_order_id });
     
     for (const order of orders) {
+      // Commit the active stock hold reservations for this order
+      const InventoryReservation = require('../models/InventoryReservation');
+      const inventoryService = require('../services/inventoryService');
+      const lowStockAlerts = [];
+
+      for (const item of order.orderItems) {
+        const reservation = await InventoryReservation.findOne({
+          user: order.user,
+          product: item.product,
+          status: 'reserved'
+        });
+        if (reservation) {
+          await inventoryService.commitReservation(reservation._id);
+
+          // Fetch updated product for low stock alerts check
+          const updatedProduct = await Product.findById(item.product);
+          if (updatedProduct && updatedProduct.countInStock <= 5) {
+            lowStockAlerts.push({
+              seller: updatedProduct.seller,
+              data: {
+                productId: updatedProduct._id,
+                name: updatedProduct.name,
+                remainingStock: updatedProduct.countInStock
+              }
+            });
+          }
+        }
+      }
+
+      // Fire low stock alerts if any
+      for (const alert of lowStockAlerts) {
+        notifyLowStock(alert.seller, alert.data);
+      }
+
       order.isPaid = true;
       order.paidAt = Date.now();
       order.paymentStatus = 'paid';
@@ -800,9 +986,14 @@ exports.verifyDeliveryOtp = async (req, res) => {
     const { otp } = req.body;
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    // Verify assignment: only the assigned delivery partner can verify OTP
+    if (!order.deliveryBoy || order.deliveryBoy.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, error: 'Not authorized: You are not the assigned delivery partner for this order.' });
+    }
     
-    // STATIC OTP BYPASS: allow 1234 for testing
-    const isStaticBypass = otp === '1234';
+    // STATIC OTP BYPASS: allow 1234 if useMockOtpForDelivery environment variable is true
+    const isStaticBypass = (process.env.useMockOtpForDelivery === 'true' || process.env.USE_MOCK_OTP_FOR_DELIVERY === 'true') && otp === '1234';
 
     if (!isStaticBypass && order.deliveryOtp !== otp) {
       return res.status(400).json({ success: false, error: 'Invalid delivery OTP provided.' });
@@ -859,6 +1050,57 @@ exports.verifyDeliveryOtp = async (req, res) => {
     }
     
     res.status(200).json({ success: true, data: updatedOrder, message: 'OTP verified successfully. Order Delivered.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Resend Delivery OTP
+// @route   POST /api/orders/:id/resend-otp
+// @access  Private/Delivery
+exports.resendDeliveryOtp = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Verify assignment: only the assigned delivery partner can resend OTP
+    if (!order.deliveryBoy || order.deliveryBoy.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, error: 'Not authorized: You are not the assigned delivery partner for this order.' });
+    }
+
+    // Ensure state is appropriate (Out for Delivery)
+    if (order.deliveryStatus !== 'Out for Delivery') {
+      return res.status(400).json({ success: false, error: 'Cannot resend OTP: Order is not out for delivery yet.' });
+    }
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString(); // Generate fresh 4 digit OTP
+    order.deliveryOtp = otp;
+    await order.save();
+
+    // Log OTP to console to help with local testing!
+    console.log(`\n========================================`);
+    console.log(`[RESEND OTP] New Delivery OTP for Order #${order._id.toString().slice(-8).toUpperCase()} is: ${otp}`);
+    console.log(`========================================\n`);
+
+    try {
+      const User = require('../models/User');
+      const customer = await User.findById(order.user);
+      if (customer && customer.email) {
+        const emailService = require('../services/emailService');
+        await emailService.queueEmail(
+          customer.email, 
+          `New Delivery OTP for Order #${order._id.toString().slice(-8).toUpperCase()}`, 
+          'delivery_otp', 
+          { order, otp }
+        );
+      }
+    } catch (e) {
+      console.error('Failed to queue OTP email', e);
+    }
+
+    res.status(200).json({ success: true, message: 'New OTP generated and sent to customer.' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

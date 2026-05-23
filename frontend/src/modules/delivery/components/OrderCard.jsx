@@ -13,11 +13,35 @@ import {
   LuActivity
 } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import StatusBadge from './StatusBadge';
 
-const OrderCard = ({ order, onAccept, onReject, onUpdateStatus, onVerifyOtp }) => {
+const OrderCard = ({ order, onAccept, onReject, onUpdateStatus, onVerifyOtp, onResendOtp }) => {
+  const navigate = useNavigate();
   const [showTracking, setShowTracking] = useState(false);
   const [otp, setOtp] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+  
+  React.useEffect(() => {
+    let timer;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleResendClick = async () => {
+    if (resendCooldown > 0) return;
+    if (onResendOtp) {
+      const success = await onResendOtp(order.id);
+      if (success) {
+        setResendCooldown(30);
+      }
+    }
+  };
+
   const isAvailable = ['None', 'Pending', 'Rejected'].includes(order.status);
   
   return (
@@ -137,7 +161,7 @@ const OrderCard = ({ order, onAccept, onReject, onUpdateStatus, onVerifyOtp }) =
                </a>
                {order.status !== 'Delivered' && (
                  <button 
-                   onClick={() => setShowTracking(true)}
+                   onClick={() => navigate('/delivery/route-management')}
                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#189D91] bg-teal-50 hover:bg-[#189D91] hover:text-white rounded-lg transition-all"
                  >
                    <LuMapPin size={14} /> Track
@@ -175,7 +199,21 @@ const OrderCard = ({ order, onAccept, onReject, onUpdateStatus, onVerifyOtp }) =
                     className="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm text-center tracking-[0.5em] font-black focus:ring-2 focus:ring-amber-500 outline-none"
                     maxLength={4}
                   />
-                  <p className="text-[9px] text-amber-600 text-center font-semibold">OTP has been sent to customer's email</p>
+                  <div className="flex flex-col items-center gap-1.5">
+                    <p className="text-[9px] text-amber-600 text-center font-semibold">OTP has been sent to customer's email</p>
+                    <button
+                      type="button"
+                      onClick={handleResendClick}
+                      disabled={resendCooldown > 0}
+                      className={`text-[10px] font-bold tracking-wide transition-all px-2 py-0.5 rounded ${
+                        resendCooldown > 0 
+                          ? 'text-slate-400 cursor-not-allowed' 
+                          : 'text-[#189D91] hover:text-[#137A71] hover:underline'
+                      }`}
+                    >
+                      {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : 'Resend OTP'}
+                    </button>
+                  </div>
                 </div>
                 <button 
                   onClick={() => {

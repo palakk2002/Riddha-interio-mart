@@ -1,0 +1,9 @@
+{
+  "ignore": [
+    "db_dump.json",
+    "debug_products.json",
+    "uploads/*",
+    "temp_uploads/*",
+    "*.json"
+  ]
+}

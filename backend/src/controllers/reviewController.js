@@ -60,21 +60,22 @@ exports.createReview = async (req, res) => {
       }
     }
 
-    // Check for verified purchase (Strict Delivered-order-only requirement)
-    const orders = await Order.find({ user: userId, status: 'Delivered' });
-    let isVerified = false;
-    for (const order of orders) {
-      const foundItem = order.orderItems.find(item => item.product.toString() === productId);
-      if (foundItem) {
-        isVerified = true;
-        break;
-      }
-    }
+    // Check for verified purchase (Strict Delivered-order-only requirement within last 180 days)
+    const minDeliveryDate = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000);
+    const purchased = await Order.findOne({
+      user: userId,
+      status: 'Delivered',
+      'orderItems.product': productId,
+      $or: [
+        { deliveredAt: { $gte: minDeliveryDate } },
+        { deliveredAt: null, updatedAt: { $gte: minDeliveryDate } }
+      ]
+    }).select('_id');
 
-    if (!isVerified) {
+    if (!purchased) {
       return res.status(403).json({
         success: false,
-        message: 'Only customers with verified, delivered purchases of this product can submit a review.'
+        message: 'Only customers with verified, delivered purchases of this product within the last 180 days can submit a review.'
       });
     }
 
@@ -260,11 +261,20 @@ exports.respondToReview = async (req, res, next) => {
     const review = await Review.findById(req.params.id).populate('product');
     if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
 
+    // Null product guard to prevent server crashes if the product was deleted
+    if (!review.product) {
+      return res.status(404).json({
+        success: false,
+        message: 'The product associated with this review no longer exists.'
+      });
+    }
+
     // Authorization: seller of the product or admin
     if (req.user.role === 'seller' && review.product.seller.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: 'Not authorized to respond to reviews on this product.' });
     }
 
+    // Overwrite / edit the response if already submitted, or create a new one
     review.sellerResponse = {
       text,
       respondedAt: Date.now()
@@ -278,6 +288,37 @@ exports.respondToReview = async (req, res, next) => {
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Get all reviews for seller's products (Seller/Admin only)
+// @route   GET /api/reviews/seller
+// @access  Private (Seller/Admin)
+exports.getSellerReviews = async (req, res) => {
+  try {
+    const Product = require('../models/Product');
+    const sellerProducts = await Product.find({ seller: req.user.id }).select('_id');
+    const productIds = sellerProducts.map(p => p._id);
+
+    const query = { product: { $in: productIds } };
+    const populateOptions = [
+      { path: 'user', select: 'fullName avatar' },
+      { path: 'product', select: 'name images price' }
+    ];
+
+    const result = await paginate(Review, query, req, populateOptions);
+
+    res.status(200).json({
+      success: true,
+      count: result.data.length,
+      totalResults: result.totalResults,
+      totalPages: result.totalPages,
+      page: result.page,
+      limit: result.limit,
+      data: result.data
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 

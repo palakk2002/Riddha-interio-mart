@@ -1,9 +1,11 @@
 {
-  "timestamp": "2026-05-22T05:35:54.685Z",
-  "query": {},
+  "timestamp": "2026-05-22T09:25:36.639Z",
+  "query": {
+    "isApproved": "pending",
+    "isActive": "all"
+  },
   "builtFilter": {
-    "isApproved": true,
-    "isActive": true
+    "isApproved": false
   },
   "resultCount": 4,
   "results": [

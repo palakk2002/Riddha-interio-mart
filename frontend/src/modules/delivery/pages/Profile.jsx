@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import { 
   LuUser, 
@@ -26,9 +27,13 @@ import { toast } from 'react-hot-toast';
 
 const Profile = () => {
   const { logout, user: currentUser, setUser } = useUser();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showDocDrawer, setShowDocDrawer] = useState(false);
+  const [uploadingDoc, setUploadingDoc] = useState(null);
+  
   const [profile, setProfile] = useState({
     name: "",
     phone: "",
@@ -36,9 +41,25 @@ const Profile = () => {
     vehicleType: "Bike",
     vehicleNumber: "",
     avatar: "",
-    isOnline: false,
-    approvalStatus: "Pending"
+    approvalStatus: "Pending",
+    documents: {
+      rc: "",
+      dl: "",
+      aadhar: "",
+      bankDetails: "",
+      insurance: "",
+      pollution: ""
+    }
   });
+
+  const documentTypes = [
+    { key: 'aadhar', label: 'Aadhar Card', icon: LuUser },
+    { key: 'dl', label: 'Driving License (DL)', icon: LuFileText },
+    { key: 'rc', label: 'Registration Certificate (RC)', icon: LuFileText },
+    { key: 'insurance', label: 'Vehicle Insurance', icon: LuShieldCheck },
+    { key: 'pollution', label: 'Pollution Certificate (PUC)', icon: LuActivity },
+    { key: 'bankDetails', label: 'Bank Details', icon: LuFileText }
+  ];
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -52,8 +73,15 @@ const Profile = () => {
           vehicleType: data.data.vehicleType || "Bike",
           vehicleNumber: data.data.vehicleNumber || "",
           avatar: data.data.avatar || "",
-          isOnline: data.data.status === 'Available',
-          approvalStatus: data.data.approvalStatus
+          approvalStatus: data.data.approvalStatus || "Pending",
+          documents: data.data.documents || {
+            rc: "",
+            dl: "",
+            aadhar: "",
+            bankDetails: "",
+            insurance: "",
+            pollution: ""
+          }
         });
       }
     } catch (err) {
@@ -67,21 +95,37 @@ const Profile = () => {
     fetchProfile();
   }, [fetchProfile]);
 
-  const toggleOnline = async () => {
-    const nextStatus = profile.isOnline ? 'Offline' : 'Available';
-    const loadingToast = toast.loading(`Switching Signal: ${nextStatus}`);
-    try {
-      setProfile(prev => ({ ...prev, isOnline: !prev.isOnline }));
-      await api.put('/delivery/status', { status: nextStatus });
-      toast.success(`Signal Synchronized: ${nextStatus}`, { id: loadingToast });
-    } catch (err) {
-       setProfile(prev => ({ ...prev, isOnline: prev.isOnline }));
-       toast.error('Signal Sync Failure', { id: loadingToast });
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/delivery/dashboard');
     }
+  };
+
+  const validateForm = () => {
+    if (!profile.name.trim()) {
+      toast.error('Full Name is required');
+      return false;
+    }
+    if (!profile.email.trim() || !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(profile.email)) {
+      toast.error('Please enter a valid email address');
+      return false;
+    }
+    if (!profile.phone.trim() || !/^\d{10}$/.test(profile.phone)) {
+      toast.error('Please enter a valid 10-digit phone number');
+      return false;
+    }
+    if (profile.vehicleNumber && !/^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/i.test(profile.vehicleNumber.trim())) {
+      toast.error('Please enter a valid vehicle number (e.g. MH12AB1234)');
+      return false;
+    }
+    return true;
   };
 
   const handleSave = async (e) => {
     if (e) e.preventDefault();
+    if (!validateForm()) return;
     setIsSaving(true);
     const loadingToast = toast.loading('Synchronizing Profile Matrix...');
     try {
@@ -95,7 +139,7 @@ const Profile = () => {
       });
       if (data.success && data.data) {
         setIsEditing(false);
-        setUser({ ...currentUser, name: data.data.fullName, avatar: data.data.avatar });
+        setUser({ ...currentUser, fullName: data.data.fullName, avatar: data.data.avatar });
         toast.success('Matrix Synchronized', { id: loadingToast });
       }
     } catch (err) {
@@ -120,6 +164,37 @@ const Profile = () => {
     }
   };
 
+  const handleDocUpload = async (e, docType) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingDoc(docType);
+    const loadingToast = toast.loading(`Uploading ${docType.toUpperCase()} asset...`);
+    try {
+      const url = await uploadImage(file);
+      const updatedDocs = {
+        ...profile.documents,
+        [docType]: url
+      };
+      
+      const { data } = await api.put('/auth/delivery/profile', {
+        documents: updatedDocs
+      });
+
+      if (data.success && data.data) {
+        setProfile(prev => ({
+          ...prev,
+          documents: data.data.documents || updatedDocs
+        }));
+        toast.success(`${docType.toUpperCase()} uploaded successfully`, { id: loadingToast });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(`Sync Failure for ${docType.toUpperCase()}`, { id: loadingToast });
+    } finally {
+      setUploadingDoc(null);
+    }
+  };
+
   if (loading) {
     return (
       <PageWrapper>
@@ -132,10 +207,10 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] font-sans pb-24">
+    <div className="min-h-screen bg-[#F5F7FA] font-sans pb-24 relative overflow-hidden">
       {/* Top Header */}
       <div className="bg-white text-slate-900 px-4 py-5 flex items-center shadow-sm border-b border-slate-100 mb-6 sticky top-0 z-20">
-        <button onClick={() => window.history.back()} className="p-1 text-slate-500 hover:text-slate-900 transition-colors">
+        <button onClick={handleBack} className="p-1 text-slate-500 hover:text-slate-900 transition-colors">
           <LuChevronRight className="rotate-180" size={24} />
         </button>
         <h1 className="text-base font-bold flex-1 text-center mr-6">Partner Profile</h1>
@@ -224,13 +299,13 @@ const Profile = () => {
                 <div>
                   <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Profile setting</h2>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-3 hover:border-[#2A458A]/30 transition-colors cursor-pointer group">
+                    <div onClick={() => setIsEditing(true)} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-3 hover:border-[#2A458A]/30 transition-colors cursor-pointer group">
                       <div className="w-9 h-9 rounded-full bg-[#F5F7FA] text-[#2A458A] flex items-center justify-center group-hover:bg-[#2A458A] group-hover:text-white transition-colors">
                         <LuUser size={16} />
                       </div>
                       <span className="font-semibold text-slate-700 text-sm">Profile</span>
                     </div>
-                    <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-3 hover:border-[#2A458A]/30 transition-colors cursor-pointer group">
+                    <div onClick={() => setShowDocDrawer(true)} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-3 hover:border-[#2A458A]/30 transition-colors cursor-pointer group">
                       <div className="w-9 h-9 rounded-full bg-[#F5F7FA] text-[#2A458A] flex items-center justify-center group-hover:bg-[#2A458A] group-hover:text-white transition-colors">
                         <LuTruck size={16} />
                       </div>
@@ -272,13 +347,13 @@ const Profile = () => {
                 <div>
                   <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Training modules</h2>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-3 hover:border-[#2A458A]/30 transition-colors cursor-pointer group">
+                    <div onClick={() => toast.success('All payouts are processed weekly. You can view your active logs under the Earnings screen.', { icon: '💰' })} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-3 hover:border-[#2A458A]/30 transition-colors cursor-pointer group">
                       <div className="w-9 h-9 rounded-full bg-[#F5F7FA] text-[#2A458A] flex items-center justify-center group-hover:bg-[#2A458A] group-hover:text-white transition-colors">
                         <LuActivity size={16} />
                       </div>
                       <span className="font-semibold text-slate-700 text-sm">Payout Calls</span>
                     </div>
-                    <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-3 hover:border-[#2A458A]/30 transition-colors cursor-pointer group">
+                    <div onClick={() => toast.success('Verification Status: Active. You have full clearance for regional logistics operations.', { icon: '🛡️' })} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-3 hover:border-[#2A458A]/30 transition-colors cursor-pointer group">
                       <div className="w-9 h-9 rounded-full bg-[#F5F7FA] text-[#2A458A] flex items-center justify-center group-hover:bg-[#2A458A] group-hover:text-white transition-colors">
                         <LuFileText size={16} />
                       </div>
@@ -300,11 +375,127 @@ const Profile = () => {
             Sign Out
           </button>
         </div>
-
       </div>
+
+      {/* Slide-over Document Drawer */}
+      <AnimatePresence>
+        {showDocDrawer && (
+          <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDocDrawer(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            
+            {/* Drawer Body */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col z-50 border-l border-slate-100"
+            >
+              {/* Header */}
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">Documents & Verification</h3>
+                  <p className="text-xs text-slate-500 mt-1">Upload and manage active verification assets</p>
+                </div>
+                <button
+                  onClick={() => setShowDocDrawer(false)}
+                  className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <LuX size={20} />
+                </button>
+              </div>
+
+              {/* Status Banner */}
+              <div className="px-6 py-4 bg-slate-50 border-b border-slate-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-500">Global Verification Status</span>
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-black tracking-wider ${
+                    profile.approvalStatus === 'Approved' 
+                      ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                      : profile.approvalStatus === 'Pending'
+                      ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                      : 'bg-rose-50 text-rose-600 border border-rose-100'
+                  }`}>
+                    {profile.approvalStatus}
+                  </span>
+                </div>
+              </div>
+
+              {/* Scrollable Docs List */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+                {documentTypes.map((doc) => {
+                  const Icon = doc.icon;
+                  const fileUrl = profile.documents?.[doc.key];
+                  const isUploading = uploadingDoc === doc.key;
+
+                  return (
+                    <div key={doc.key} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-white border border-slate-200/60 flex items-center justify-center text-[#2A458A]">
+                            <Icon size={16} />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-bold text-slate-800">{doc.label}</h4>
+                            <p className="text-[10px] text-slate-400 mt-0.5">
+                              {fileUrl ? 'Asset Submitted & Logged' : 'Verification asset required'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* File Action/Upload Badge */}
+                        {fileUrl ? (
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] font-bold text-[#2A458A] hover:underline flex items-center gap-0.5 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200/60 shadow-sm"
+                            >
+                              <span>View File</span>
+                              <LuExternalLink size={10} />
+                            </a>
+                            <label className="text-[10px] font-bold text-slate-600 cursor-pointer hover:bg-slate-200 bg-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-200/60 shadow-sm">
+                              <span>Update</span>
+                              <input
+                                type="file"
+                                className="hidden"
+                                onChange={(e) => handleDocUpload(e, doc.key)}
+                                accept="image/*,application/pdf"
+                                disabled={isUploading}
+                              />
+                            </label>
+                          </div>
+                        ) : (
+                          <label className={`text-[10px] font-bold text-white cursor-pointer hover:bg-[#1f346b] bg-[#2A458A] px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            {isUploading ? 'Uploading...' : 'Upload Asset'}
+                            <input
+                              type="file"
+                              className="hidden"
+                              onChange={(e) => handleDocUpload(e, doc.key)}
+                              accept="image/*,application/pdf"
+                              disabled={isUploading}
+                            />
+                          </label>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
 export default Profile;
-

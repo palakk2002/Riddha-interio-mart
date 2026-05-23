@@ -191,6 +191,23 @@ class InventoryService {
       try {
         session.startTransaction();
         await this.releaseReservation(reservation._id, session);
+
+        // Auto-cancel any associated unpaid pending order
+        const Order = require('../models/Order');
+        const order = await Order.findOne({
+          user: reservation.user,
+          'orderItems.product': reservation.product,
+          status: 'Pending',
+          isPaid: false
+        }).session(session);
+
+        if (order) {
+          order.status = 'Cancelled';
+          order.paymentStatus = 'failed';
+          await order.save({ session });
+          console.log(`[Inventory Daemon] Auto-cancelled abandoned Order #${order._id} due to expired stock hold.`);
+        }
+
         await session.commitTransaction();
       } catch (err) {
         console.error(`[Inventory Daemon] Failed to release expired reservation ${reservation._id}:`, err.message);

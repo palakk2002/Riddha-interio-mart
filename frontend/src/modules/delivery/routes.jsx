@@ -15,6 +15,8 @@ const Notifications = React.lazy(() => import('./pages/Notifications'));
 const LoginPage = React.lazy(() => import('../user/pages/LoginPage'));
 const SignupPage = React.lazy(() => import('../user/pages/SignupPage'));
 const DeliveryLanding = React.lazy(() => import('./pages/DeliveryLanding'));
+const RouteManagement = React.lazy(() => import('./pages/RouteManagement'));
+const DispatchCenter = React.lazy(() => import('./pages/DispatchCenter'));
 
 const DeliveryRoutes = () => {
   return (
@@ -26,6 +28,8 @@ const DeliveryRoutes = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/delivery-history" element={<DeliveryHistory />} />
+        <Route path="/route-management" element={<RouteManagement />} />
+        <Route path="/dispatch-center" element={<DispatchCenter />} />
         <Route path="/earnings" element={<Earnings />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/wallet" element={<Wallet />} />

@@ -75,6 +75,46 @@ exports.getDeliveryWallet = async (req, res, next) => {
 };
 
 /**
+ * @desc    Request delivery partner cash deposit verification (UPI / Direct Cash)
+ * @route   POST /api/wallets/delivery/deposit-request
+ * @access  Private (Delivery)
+ */
+exports.requestDeliveryCodDeposit = async (req, res, next) => {
+  try {
+    const { amount, transactionReference, notes } = req.body;
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, error: 'Please provide a valid deposit amount.' });
+    }
+
+    const wallet = await DeliveryWallet.findOne({ deliveryPartner: req.user.id });
+    if (!wallet || wallet.codCollectionLiability < amount) {
+      return res.status(400).json({ 
+        success: false, 
+        error: `Deposit amount exceeds your current COD cash liability of ₹${wallet ? wallet.codCollectionLiability : 0}.` 
+      });
+    }
+
+    const fullNotes = `Reference: ${transactionReference || 'N/A'}. User Notes: ${notes || ''}`;
+
+    const settlement = await DeliverySettlement.create({
+      deliveryPartner: req.user.id,
+      type: 'cod_deposit',
+      amount: Number(amount),
+      status: 'pending',
+      notes: fullNotes
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Deposit verification request submitted successfully. Pending Admin approval.',
+      data: settlement
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
  * @desc    Request a seller withdrawable earnings payout
  * @route   POST /api/wallets/seller/payout
  * @access  Private (Seller)
@@ -84,6 +124,10 @@ exports.requestSellerWithdrawal = async (req, res, next) => {
     const { amount, bankDetails } = req.body;
     if (!amount || amount <= 0) {
       return res.status(400).json({ success: false, error: 'Please provide a valid withdrawal amount.' });
+    }
+
+    if (amount < 500) {
+      return res.status(400).json({ success: false, error: 'Minimum withdrawal amount is ₹500.' });
     }
 
     const payout = await walletService.requestSellerPayout(req.user.id, Number(amount), bankDetails);
@@ -128,18 +172,68 @@ exports.approvePayout = async (req, res, next) => {
 };
 
 /**
+ * @desc    Reject seller payout request and refund escrow balance (Admin-only)
+ * @route   POST /api/wallets/admin/payouts/:id/reject
+ * @access  Private (Admin)
+ */
+exports.rejectPayout = async (req, res, next) => {
+  try {
+    const { notes } = req.body;
+    const payout = await walletService.rejectSellerPayout(req.params.id, notes || 'Payout request rejected by Administrator');
+
+    res.status(200).json({
+      success: true,
+      message: 'Seller payout successfully rejected and balance refunded.',
+      data: payout
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+};
+
+/**
  * @desc    Log delivery boy cash settlement deposit to Admin
  * @route   POST /api/wallets/admin/delivery/cod-deposit
  * @access  Private (Admin)
  */
 exports.depositCodLiability = async (req, res, next) => {
   try {
-    const { deliveryPartnerId, amount, notes } = req.body;
-    if (!deliveryPartnerId || !amount || amount <= 0) {
-      return res.status(400).json({ success: false, error: 'Please provide deliveryPartnerId and a valid deposit amount.' });
+    const { deliveryPartnerId, amount, notes, settlementId } = req.body;
+    
+    let deposit;
+    if (settlementId) {
+      const settlement = await DeliverySettlement.findById(settlementId);
+      if (!settlement || settlement.status !== 'pending') {
+        return res.status(400).json({ success: false, error: 'Settlement request not found or already processed.' });
+      }
+      
+      // Update status to completed
+      settlement.status = 'completed';
+      if (notes) settlement.notes += ` | Admin Approval Notes: ${notes}`;
+      await settlement.save();
+      
+      // Update wallet balance atomically
+      const wallet = await DeliveryWallet.findOne({ deliveryPartner: settlement.deliveryPartner });
+      if (!wallet || wallet.codCollectionLiability < settlement.amount) {
+        throw new Error('Deposit amount exceeds current COD cash liability.');
+      }
+      
+      wallet.codCollectionLiability = Number((wallet.codCollectionLiability - settlement.amount).toFixed(2));
+      wallet.transactions.push({
+        amount: -settlement.amount,
+        type: 'cod_settlement_to_admin',
+        description: `Cash deposit settlement to Admin. Settlement ID: ${settlement._id}`,
+        referenceId: settlement._id,
+        balanceAfter: wallet.earningsBalance
+      });
+      await wallet.save();
+      deposit = settlement;
+    } else {
+      if (!deliveryPartnerId || !amount || amount <= 0) {
+        return res.status(400).json({ success: false, error: 'Please provide deliveryPartnerId and a valid deposit amount.' });
+      }
+      deposit = await walletService.recordCodDeposit(deliveryPartnerId, Number(amount), notes || 'Cash deposited directly to Admin cashier');
     }
-
-    const deposit = await walletService.recordCodDeposit(deliveryPartnerId, Number(amount), notes || 'Cash deposited directly to Admin cashier');
 
     res.status(200).json({
       success: true,
@@ -148,6 +242,37 @@ exports.depositCodLiability = async (req, res, next) => {
     });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
+  }
+};
+
+/**
+ * @desc    Reject a delivery boy's pending cash deposit request (Admin-only)
+ * @route   POST /api/wallets/admin/delivery/cod-reject
+ * @access  Private (Admin)
+ */
+exports.rejectDeliverySettlement = async (req, res, next) => {
+  try {
+    const { settlementId, notes } = req.body;
+    if (!settlementId) {
+      return res.status(400).json({ success: false, error: 'Please provide a valid settlementId.' });
+    }
+
+    const settlement = await DeliverySettlement.findById(settlementId);
+    if (!settlement || settlement.status !== 'pending') {
+      return res.status(400).json({ success: false, error: 'Settlement request not found or already processed.' });
+    }
+
+    settlement.status = 'rejected';
+    settlement.notes += ` | Rejected by Admin. Reason: ${notes || 'Verification failed.'}`;
+    await settlement.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Delivery partner COD collection deposit request rejected.',
+      data: settlement
+    });
+  } catch (err) {
+    next(err);
   }
 };
 
