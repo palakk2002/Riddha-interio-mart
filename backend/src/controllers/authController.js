@@ -102,11 +102,14 @@ exports.refreshToken = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
+      token: newAccessToken,
+      refreshToken: newRefreshToken,
       user: {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
         role: storedToken.userRole,
+        token: newAccessToken, // Nested token for frontend compatibility
         avatar: user.avatar || "",
         phone: user.phone || "",
         shopName: user.shopName || "",

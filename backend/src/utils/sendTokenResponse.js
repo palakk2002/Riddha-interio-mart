@@ -30,14 +30,17 @@ const sendTokenResponse = async (user, statusCode, res) => {
     // Set access_token and refresh_token in httpOnly cookies
     tokenService.setAuthCookies(res, accessToken, refreshToken);
 
-    // Send response without exposing the token in the body
+    // Send response exposing tokens in the body for development and fallback local storage support
     res.status(statusCode).json({
       success: true,
+      token: accessToken,
+      refreshToken: refreshToken,
       user: {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
         role: role,
+        token: accessToken, // Nested token for frontend compatibility
         // Include common fields
         avatar: user.avatar || "",
         phone: user.phone || "",

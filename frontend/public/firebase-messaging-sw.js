@@ -9,12 +9,12 @@ importScripts('https://www.gstatic.com/firebasejs/10.12.1/firebase-messaging-com
 // They are non-secret Firebase configuration keys (your Firebase project's public config).
 // Replace these with your actual Firebase project config values.
 const firebaseConfig = {
-  apiKey: self.__FCM_API_KEY__ || 'YOUR_FIREBASE_API_KEY',
-  authDomain: self.__FCM_AUTH_DOMAIN__ || 'YOUR_PROJECT.firebaseapp.com',
-  projectId: self.__FCM_PROJECT_ID__ || 'YOUR_PROJECT_ID',
-  storageBucket: self.__FCM_STORAGE_BUCKET__ || 'YOUR_PROJECT.appspot.com',
-  messagingSenderId: self.__FCM_MESSAGING_SENDER_ID__ || 'YOUR_SENDER_ID',
-  appId: self.__FCM_APP_ID__ || 'YOUR_APP_ID',
+  apiKey: 'AIzaSyD_IxUqAwe9E6pKIODO03WVvZBocAkE3ms',
+  authDomain: 'riddha-interior-mart.firebaseapp.com',
+  projectId: 'riddha-interior-mart',
+  storageBucket: 'riddha-interior-mart.firebasestorage.app',
+  messagingSenderId: '821741062067',
+  appId: '1:821741062067:web:53b8d8b91214042fc26dc6',
 };
 
 firebase.initializeApp(firebaseConfig);

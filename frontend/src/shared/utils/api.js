@@ -119,11 +119,22 @@ api.interceptors.response.use(
         try {
           console.log('[API Interceptor] Access token expired. Attempting silent token refresh...');
           // Silent Token Refresh using raw axios call to prevent circular interception
-          await axios.post(
+          const refreshRes = await axios.post(
             `${api.defaults.baseURL}/auth/refresh`,
             {},
             { withCredentials: true }
           );
+          
+          if (refreshRes.data && refreshRes.data.success) {
+            const { token, user } = refreshRes.data;
+            const currentAuth = safeJsonParse(localStorage.getItem(AUTH_STORAGE_KEY)) || {};
+            const updatedAuth = {
+              ...currentAuth,
+              ...user,
+              token: token || currentAuth.token
+            };
+            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedAuth));
+          }
           
           console.log('[API Interceptor] Token refresh successful. Retrying original request...');
           return api(config);
