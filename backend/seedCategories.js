@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('./src/utils/seederGuard')('seedCategories.js');
 const dotenv = require('dotenv');
 const dns = require('dns');
 const Category = require('./src/models/Category');

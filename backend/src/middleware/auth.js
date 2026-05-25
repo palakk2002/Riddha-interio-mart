@@ -6,9 +6,10 @@ const Delivery = require('../models/Delivery');
 
 // Protect routes
 exports.protect = async (req, res, next) => {
-  let token;
+  let token = req.cookies?.access_token || req.signedCookies?.access_token;
 
   if (
+    !token &&
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
@@ -23,7 +24,16 @@ exports.protect = async (req, res, next) => {
 
   try {
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET || 'your_jwt_secret_key_here');
+
+    // 1. Blacklist check
+    const crypto = require('crypto');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const cacheService = require('../services/cacheService');
+    const isBlacklisted = cacheService.get(`blacklist:token:${tokenHash}`);
+    if (isBlacklisted) {
+      return res.status(401).json({ success: false, error: 'Session has been invalidated. Please log in again.' });
+    }
 
     // Find user in the correct collection based on role in token
     let Model;
@@ -34,7 +44,17 @@ exports.protect = async (req, res, next) => {
       default: Model = User;
     }
 
-    req.user = await Model.findById(decoded.id);
+    // 2. Profile Cache Check with Hydration
+    const cacheKey = `user:profile:${decoded.role}:${decoded.id}`;
+    let cachedUser = cacheService.get(cacheKey);
+    if (cachedUser) {
+      req.user = Model.hydrate(cachedUser);
+    } else {
+      req.user = await Model.findById(decoded.id);
+      if (req.user) {
+        cacheService.set(cacheKey, req.user.toObject(), 120); // 2 minutes profile cache
+      }
+    }
     
     if (!req.user) {
       return res.status(401).json({ success: false, error: `Account with role ${decoded.role} not found.` });
@@ -100,8 +120,8 @@ exports.authorize = (...roles) => {
 };
 // Optional protect: tries to find user but proceeds if not found
 exports.tryProtect = async (req, res, next) => {
-  let token;
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  let token = req.cookies?.access_token || req.signedCookies?.access_token;
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
   }
 
@@ -110,7 +130,17 @@ exports.tryProtect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET || 'your_jwt_secret_key_here');
+    
+    // 1. Blacklist check
+    const crypto = require('crypto');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const cacheService = require('../services/cacheService');
+    const isBlacklisted = cacheService.get(`blacklist:token:${tokenHash}`);
+    if (isBlacklisted) {
+      return next();
+    }
+
     let Model;
     switch (decoded.role) {
       case 'admin': Model = Admin; break;
@@ -118,7 +148,18 @@ exports.tryProtect = async (req, res, next) => {
       case 'delivery': Model = Delivery; break;
       default: Model = User;
     }
-    req.user = await Model.findById(decoded.id);
+
+    // 2. Profile Cache Check with Hydration
+    const cacheKey = `user:profile:${decoded.role}:${decoded.id}`;
+    let cachedUser = cacheService.get(cacheKey);
+    if (cachedUser) {
+      req.user = Model.hydrate(cachedUser);
+    } else {
+      req.user = await Model.findById(decoded.id);
+      if (req.user) {
+        cacheService.set(cacheKey, req.user.toObject(), 120); // 2 minutes profile cache
+      }
+    }
     
     // Safety: ensure role is available
     if (req.user && !req.user.role) {

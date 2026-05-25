@@ -40,5 +40,6 @@ const ReferralSchema = new mongoose.Schema({
 // Indexing for referral leaderboards and fast queries
 ReferralSchema.index({ referrer: 1 });
 ReferralSchema.index({ rewardStatus: 1 });
+ReferralSchema.index({ referredUser: 1 }, { unique: true });
 
 module.exports = mongoose.model('Referral', ReferralSchema);

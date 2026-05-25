@@ -49,5 +49,6 @@ const NotificationSchema = new mongoose.Schema({
 // Indexes for fast querying of user's notifications and unread counts
 NotificationSchema.index({ recipient: 1, createdAt: -1 });
 NotificationSchema.index({ recipient: 1, read: 1 });
+NotificationSchema.index({ createdAt: 1 }, { expireAfterSeconds: 30 * 24 * 60 * 60 });
 
 module.exports = mongoose.model('Notification', NotificationSchema);

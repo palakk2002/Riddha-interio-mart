@@ -3,8 +3,19 @@ const Category = require('../models/Category');
 // @desc    Get all categories
 exports.getCategories = async (req, res, next) => {
   try {
-    const categories = await Category.find();
-    res.status(200).json({ success: true, count: categories.length, data: categories });
+    const cacheService = require('../services/cacheService');
+    const cacheKey = 'categories:all';
+    
+    let categories = cacheService.get(cacheKey);
+    let cached = true;
+
+    if (!categories) {
+      cached = false;
+      categories = await Category.find().lean();
+      cacheService.set(cacheKey, categories, 600); // 10 minutes cache
+    }
+
+    res.status(200).json({ success: true, cached, count: categories.length, data: categories });
   } catch (err) {
     next(err);
   }
@@ -39,6 +50,10 @@ exports.getCategory = async (req, res, next) => {
 exports.createCategory = async (req, res, next) => {
   try {
     const category = await Category.create(req.body);
+
+    const cacheService = require('../services/cacheService');
+    cacheService.del('categories:all');
+
     res.status(201).json({ success: true, data: category });
   } catch (err) {
     next(err);
@@ -92,6 +107,9 @@ exports.updateCategory = async (req, res, next) => {
     await session.commitTransaction();
     session.endSession();
 
+    const cacheService = require('../services/cacheService');
+    cacheService.del('categories:all');
+
     res.status(200).json({ success: true, data: category });
   } catch (err) {
     await session.abortTransaction();
@@ -128,6 +146,10 @@ exports.deleteCategory = async (req, res, next) => {
     }
 
     await Category.findByIdAndDelete(req.params.id);
+
+    const cacheService = require('../services/cacheService');
+    cacheService.del('categories:all');
+
     res.status(200).json({ success: true, data: {} });
   } catch (err) {
     next(err);

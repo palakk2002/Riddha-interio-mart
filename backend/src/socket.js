@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const { Server } = require('socket.io');
 const Notification = require('./models/Notification');
 const User = require('./models/User');
+const { sendPushNotificationForUser } = require('./services/firebaseAdmin');
 
 let io;
 
@@ -24,8 +25,21 @@ function initSocket(httpServer) {
         typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
           ? authHeader.slice('Bearer '.length)
           : null;
+
+      // Helper to parse cookies from handshake headers
+      const parseCookies = (cookieString) => {
+        if (!cookieString) return {};
+        return cookieString.split(';').reduce((acc, pair) => {
+          const [key, value] = pair.split('=').map(c => c.trim());
+          if (key && value) acc[key] = decodeURIComponent(value);
+          return acc;
+        }, {});
+      };
+
+      const cookies = parseCookies(socket.handshake.headers?.cookie);
       
       let token =
+        cookies.access_token ||
         socket.handshake.auth?.token ||
         bearerToken ||
         socket.handshake.query?.token;
@@ -40,8 +54,8 @@ function initSocket(httpServer) {
         return next(new Error('AUTH_TOKEN_REQUIRED'));
       }
 
-      const secret = process.env.JWT_SECRET || 'your_jwt_secret_key_here';
-      console.log(`[Socket Auth] Attempting verification. Token length: ${token.length}, Secret exists: ${!!process.env.JWT_SECRET}`);
+      const secret = process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET || 'your_jwt_secret_key_here';
+      console.log(`[Socket Auth] Attempting verification. Token length: ${token.length}, Secret exists: ${!!process.env.ACCESS_TOKEN_SECRET}`);
 
       try {
         const decoded = jwt.verify(token, secret);
@@ -88,6 +102,24 @@ function getIO() {
 }
 
 // -----------------------------------------------------------------------------
+// Presence Detection
+// -----------------------------------------------------------------------------
+
+/**
+ * Check if a user/role is currently connected via Socket.IO.
+ * Uses the in-memory adapter room map — zero DB cost.
+ * @param {string} role  - 'user' | 'seller' | 'admin' | 'delivery'
+ * @param {string|ObjectId} id
+ * @returns {boolean}
+ */
+function isUserOnline(role, id) {
+  if (!io) return false;
+  const room = `${role}:${id}`;
+  const roomSockets = io.sockets.adapter.rooms.get(room);
+  return !!(roomSockets && roomSockets.size > 0);
+}
+
+// -----------------------------------------------------------------------------
 // Database Persistence Helpers
 // -----------------------------------------------------------------------------
 
@@ -111,7 +143,7 @@ async function persistNotification({ recipient, recipientModel, title, message, 
 async function persistForAdmins({ title, message, type, metadata }) {
   try {
     const Admin = require('./models/Admin');
-    const admins = await Admin.find({});
+    const admins = await Admin.find({}).lean();
     const notifications = admins.map(admin => ({
       recipient: admin._id,
       recipientModel: 'Admin',
@@ -122,12 +154,37 @@ async function persistForAdmins({ title, message, type, metadata }) {
     }));
     if (notifications.length > 0) {
       const saved = await Notification.insertMany(notifications);
-      return saved[0]; // Return the first one as a sample for the realtime payload
+      return { admins, sample: saved[0] }; // Return admins list for per-admin FCM check
     }
   } catch (err) {
     console.error('Failed to persist admin notifications:', err);
   }
-  return null;
+  return { admins: [], sample: null };
+}
+
+// -----------------------------------------------------------------------------
+// FCM Push Helper (fires only for offline recipients)
+// -----------------------------------------------------------------------------
+
+/**
+ * Dispatch FCM push for a single recipient if they are offline.
+ */
+async function maybePushToUser(role, id, recipientModel, { title, body, data }) {
+  if (isUserOnline(role, id)) return; // Online → Socket.IO handles it, skip FCM
+  await sendPushNotificationForUser(id, recipientModel, { title, body, data });
+}
+
+/**
+ * Dispatch FCM push to each offline admin.
+ * @param {Array} admins - Admin documents
+ * @param {{ title, body, data }} pushPayload
+ */
+async function maybePushToOfflineAdmins(admins, pushPayload) {
+  for (const admin of admins) {
+    if (!isUserOnline('admin', admin._id.toString())) {
+      await sendPushNotificationForUser(admin._id, 'Admin', pushPayload);
+    }
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -146,6 +203,13 @@ async function notifySellerNewOrder(sellerId, payload) {
   });
   io.to(`seller:${sellerId}`).emit('order:new', payload);
   if (notif) io.to(`seller:${sellerId}`).emit('notification:new', notif);
+
+  // FCM: push only if seller is offline
+  await maybePushToUser('seller', sellerId, 'Seller', {
+    title: 'New Order',
+    body: payload.message || 'You have received a new order.',
+    data: { type: 'order_update', orderId: String(payload.orderId || '') }
+  });
 }
 
 async function notifyAdminNewOrder(adminId, payload) {
@@ -161,22 +225,35 @@ async function notifyAdminNewOrder(adminId, payload) {
     });
     io.to(`admin:${adminId}`).emit('order:new', payload);
     if (notif) io.to(`admin:${adminId}`).emit('notification:new', notif);
+
+    // FCM: push only if this admin is offline
+    await maybePushToUser('admin', adminId, 'Admin', {
+      title: 'New Order',
+      body: payload.message || 'A new order was placed.',
+      data: { type: 'order_update', orderId: String(payload.orderId || '') }
+    });
   } else {
-    const notif = await persistForAdmins({
+    const { admins, sample: notif } = await persistForAdmins({
       title: 'New Order',
       message: payload.message || 'A new order was placed.',
       type: 'order_update',
       metadata: payload
     });
     io.to('role:admin').emit('order:new', payload);
-    // When broadcasting to role:admin, we can emit a slightly modified generic notification obj
     if (notif) io.to('role:admin').emit('notification:new', notif);
+
+    // FCM: push to each offline admin individually
+    await maybePushToOfflineAdmins(admins, {
+      title: 'New Order',
+      body: payload.message || 'A new order was placed.',
+      data: { type: 'order_update', orderId: String(payload.orderId || '') }
+    });
   }
 }
 
 async function notifyAdminNewProduct(payload) {
   if (!io) return;
-  const notif = await persistForAdmins({
+  const { admins, sample: notif } = await persistForAdmins({
     title: 'New Product Approval',
     message: payload.message || 'A seller has requested product approval.',
     type: 'admin_alert',
@@ -184,6 +261,12 @@ async function notifyAdminNewProduct(payload) {
   });
   io.to('role:admin').emit('product:new_request', payload);
   if (notif) io.to('role:admin').emit('notification:new', notif);
+
+  await maybePushToOfflineAdmins(admins, {
+    title: 'New Product Approval',
+    body: payload.message || 'A seller has requested product approval.',
+    data: { type: 'admin_alert', productId: String(payload.productId || '') }
+  });
 }
 
 async function notifySellerProductApproval(sellerId, payload) {
@@ -198,6 +281,12 @@ async function notifySellerProductApproval(sellerId, payload) {
   });
   io.to(`seller:${sellerId}`).emit('product:approval_update', payload);
   if (notif) io.to(`seller:${sellerId}`).emit('notification:new', notif);
+
+  await maybePushToUser('seller', sellerId, 'Seller', {
+    title: 'Product Status Update',
+    body: payload.message || 'Your product status has been updated.',
+    data: { type: 'seller_approval', productId: String(payload.productId || '') }
+  });
 }
 
 async function notifyDeliveryAssignment(deliveryBoyId, payload) {
@@ -212,6 +301,12 @@ async function notifyDeliveryAssignment(deliveryBoyId, payload) {
   });
   io.to(`delivery:${deliveryBoyId}`).emit('delivery:assigned', payload);
   if (notif) io.to(`delivery:${deliveryBoyId}`).emit('notification:new', notif);
+
+  await maybePushToUser('delivery', deliveryBoyId, 'Delivery', {
+    title: 'New Delivery Assignment',
+    body: payload.message || 'You have been assigned a new delivery.',
+    data: { type: 'delivery_update', orderId: String(payload.orderId || '') }
+  });
 }
 
 async function notifySellerDeliveryResponse(sellerId, payload) {
@@ -226,6 +321,12 @@ async function notifySellerDeliveryResponse(sellerId, payload) {
   });
   io.to(`seller:${sellerId}`).emit('delivery:response', payload);
   if (notif) io.to(`seller:${sellerId}`).emit('notification:new', notif);
+
+  await maybePushToUser('seller', sellerId, 'Seller', {
+    title: 'Delivery Status Update',
+    body: payload.message || 'A delivery status has been updated.',
+    data: { type: 'delivery_update', orderId: String(payload.orderId || '') }
+  });
 }
 
 async function notifyAdminDeliveryResponse(adminId, payload) {
@@ -241,8 +342,14 @@ async function notifyAdminDeliveryResponse(adminId, payload) {
     });
     io.to(`admin:${adminId}`).emit('delivery:response', payload);
     if (notif) io.to(`admin:${adminId}`).emit('notification:new', notif);
+
+    await maybePushToUser('admin', adminId, 'Admin', {
+      title: 'Delivery Status Update',
+      body: payload.message || 'A delivery status has been updated.',
+      data: { type: 'delivery_update', orderId: String(payload.orderId || '') }
+    });
   } else {
-    const notif = await persistForAdmins({
+    const { admins, sample: notif } = await persistForAdmins({
       title: 'Delivery Status Update',
       message: payload.message || 'A delivery status has been updated.',
       type: 'delivery_update',
@@ -250,12 +357,18 @@ async function notifyAdminDeliveryResponse(adminId, payload) {
     });
     io.to('role:admin').emit('delivery:response', payload);
     if (notif) io.to('role:admin').emit('notification:new', notif);
+
+    await maybePushToOfflineAdmins(admins, {
+      title: 'Delivery Status Update',
+      body: payload.message || 'A delivery status has been updated.',
+      data: { type: 'delivery_update', orderId: String(payload.orderId || '') }
+    });
   }
 }
 
 async function notifyAdminNewDelivery(payload) {
   if (!io) return;
-  const notif = await persistForAdmins({
+  const { admins, sample: notif } = await persistForAdmins({
     title: 'New Delivery Partner',
     message: payload.message || 'A new delivery partner has registered.',
     type: 'admin_alert',
@@ -263,6 +376,12 @@ async function notifyAdminNewDelivery(payload) {
   });
   io.to('role:admin').emit('delivery:new_registration', payload);
   if (notif) io.to('role:admin').emit('notification:new', notif);
+
+  await maybePushToOfflineAdmins(admins, {
+    title: 'New Delivery Partner',
+    body: payload.message || 'A new delivery partner has registered.',
+    data: { type: 'admin_alert' }
+  });
 }
 
 async function notifyDeliveryApproval(deliveryBoyId, payload) {
@@ -277,6 +396,12 @@ async function notifyDeliveryApproval(deliveryBoyId, payload) {
   });
   io.to(`delivery:${deliveryBoyId}`).emit('delivery:approval_update', payload);
   if (notif) io.to(`delivery:${deliveryBoyId}`).emit('notification:new', notif);
+
+  await maybePushToUser('delivery', deliveryBoyId, 'Delivery', {
+    title: 'Account Approved',
+    body: payload.message || 'Your delivery account has been approved.',
+    data: { type: 'admin_alert' }
+  });
 }
 
 async function notifyUserOrderStatus(userId, payload) {
@@ -291,6 +416,12 @@ async function notifyUserOrderStatus(userId, payload) {
   });
   io.to(`user:${userId}`).emit('order:status_update', payload);
   if (notif) io.to(`user:${userId}`).emit('notification:new', notif);
+
+  await maybePushToUser('user', userId, 'User', {
+    title: 'Order Status Update',
+    body: payload.message || 'Your order status has changed.',
+    data: { type: 'order_update', orderId: String(payload.orderId || '') }
+  });
 }
 
 async function notifyLowStock(sellerId, payload) {
@@ -308,10 +439,16 @@ async function notifyLowStock(sellerId, payload) {
     });
     io.to(`seller:${sellerId}`).emit('product:low_stock', payload);
     if (notif) io.to(`seller:${sellerId}`).emit('notification:new', notif);
+
+    await maybePushToUser('seller', sellerId, 'Seller', {
+      title: 'Low Stock Alert',
+      body: payload.message || 'A product is running low on stock.',
+      data: { type: 'stock_alert', productId: String(payload.productId || '') }
+    });
   }
   
   // Also notify admins
-  const adminNotif = await persistForAdmins({
+  const { admins, sample: adminNotif } = await persistForAdmins({
     title: 'Low Stock Alert',
     message: payload.message || 'A product is running low on stock.',
     type: 'stock_alert',
@@ -319,11 +456,18 @@ async function notifyLowStock(sellerId, payload) {
   });
   io.to('role:admin').emit('product:low_stock', payload);
   if (adminNotif) io.to('role:admin').emit('notification:new', adminNotif);
+
+  await maybePushToOfflineAdmins(admins, {
+    title: 'Low Stock Alert',
+    body: payload.message || 'A product is running low on stock.',
+    data: { type: 'stock_alert', productId: String(payload.productId || '') }
+  });
 }
 
 module.exports = {
   initSocket,
   getIO,
+  isUserOnline,
   notifySellerNewOrder,
   notifyAdminNewOrder,
   notifyAdminNewProduct,

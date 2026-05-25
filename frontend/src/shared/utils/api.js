@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -77,10 +78,7 @@ api.interceptors.request.use(
   (config) => {
     const user = getStoredAuth();
     if (user?.token) {
-      // console.log('Attaching Token for:', user.role);
       config.headers.Authorization = `Bearer ${user.token}`;
-    } else if (!isPublicRequest(config)) {
-      console.warn('No token found in localStorage for request:', config.url);
     }
     return config;
   },
@@ -111,20 +109,40 @@ api.interceptors.response.use(
       }
     }
 
-    // 2. Authentication 401 redirect logic
-    if (error?.response?.status === 401 && typeof window !== 'undefined') {
-      const path = window.location.pathname || '';
-      const loginPath = resolveLoginPath(path);
-
-      // Important: Only clear token and redirect if it was a PRIVATE request
-      // If it was a public request (like categories) that failed with 401,
-      // we might just have a stale token. We should clear it but stay on the page.
-      const wasPublic = isPublicRequest(config || {});
-
-      localStorage.removeItem(AUTH_STORAGE_KEY);
-
-      if (!wasPublic && path !== loginPath) {
-        window.location.assign(loginPath);
+    // 2. Authentication 401 redirect and refresh logic
+    if (error?.response?.status === 401 && config && !config._retry && typeof window !== 'undefined') {
+      const wasPublic = isPublicRequest(config);
+      
+      if (!wasPublic) {
+        config._retry = true;
+        
+        try {
+          console.log('[API Interceptor] Access token expired. Attempting silent token refresh...');
+          // Silent Token Refresh using raw axios call to prevent circular interception
+          await axios.post(
+            `${api.defaults.baseURL}/auth/refresh`,
+            {},
+            { withCredentials: true }
+          );
+          
+          console.log('[API Interceptor] Token refresh successful. Retrying original request...');
+          return api(config);
+        } catch (refreshErr) {
+          console.error('[API Interceptor] Token refresh failed or session expired. Logging out.');
+          
+          localStorage.removeItem(AUTH_STORAGE_KEY);
+          
+          const path = window.location.pathname || '';
+          const loginPath = resolveLoginPath(path);
+          
+          if (path !== loginPath) {
+            window.location.assign(loginPath);
+          }
+          return Promise.reject(refreshErr);
+        }
+      } else {
+        // Clear stale local profile if public request returns 401
+        localStorage.removeItem(AUTH_STORAGE_KEY);
       }
     }
     return Promise.reject(error);

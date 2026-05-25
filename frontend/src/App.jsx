@@ -6,11 +6,11 @@ import OfflineDetector from './shared/components/OfflineDetector';
 import Navbar from './modules/user/components/Navbar';
 import Footer from './modules/user/components/Footer';
 import BottomNavbar from './modules/user/components/BottomNavbar';
-import UserRoutes from './modules/user/routes';
-import AdminRoutes from './modules/admin/routes';
-import SellerRoutes from './modules/seller/routes';
-import DeliveryRoutes from './modules/delivery/routes';
-import ComingSoonRoutes from './modules/comingsoon/routes';
+const UserRoutes = React.lazy(() => import('./modules/user/routes'));
+const AdminRoutes = React.lazy(() => import('./modules/admin/routes'));
+const SellerRoutes = React.lazy(() => import('./modules/seller/routes'));
+const DeliveryRoutes = React.lazy(() => import('./modules/delivery/routes'));
+const ComingSoonRoutes = React.lazy(() => import('./modules/comingsoon/routes'));
 import { Toaster } from 'react-hot-toast';
 import PincodeModal from './modules/user/components/PincodeModal';
 import DeliveryBar from './modules/user/components/DeliveryBar';
@@ -56,9 +56,9 @@ function App() {
 
       {/* Global Notifications */}
       {user?.role === 'admin' ? (
-        <AdminNotifications token={user.token} />
+        <AdminNotifications token={user.token || 'cookie'} />
       ) : (
-        user?.token && <UserNotifications token={user.token} />
+        user && <UserNotifications token={user.token || 'cookie'} />
       )}
 
       {!isDashboardLayout && (

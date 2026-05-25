@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('./src/utils/seederGuard')('seed_seller_products.js');
 const dotenv = require('dotenv');
 dotenv.config();
 

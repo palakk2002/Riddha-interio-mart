@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('./src/utils/seederGuard')('seed_favourites.js');
 const cloudinary = require('cloudinary').v2;
 const dotenv = require('dotenv');
 const fs = require('fs');

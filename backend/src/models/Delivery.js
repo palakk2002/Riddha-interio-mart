@@ -105,4 +105,20 @@ DeliverySchema.methods.matchPassword = async function(enteredPassword) {
 
 DeliverySchema.index({ createdAt: -1 });
 
+DeliverySchema.post('save', function(doc) {
+  try {
+    const cacheService = require('../services/cacheService');
+    cacheService.del(`user:profile:delivery:${doc._id}`);
+  } catch (e) {}
+});
+
+DeliverySchema.post('findOneAndUpdate', function(doc) {
+  try {
+    if (doc) {
+      const cacheService = require('../services/cacheService');
+      cacheService.del(`user:profile:delivery:${doc._id}`);
+    }
+  } catch (e) {}
+});
+
 module.exports = mongoose.model('Delivery', DeliverySchema);

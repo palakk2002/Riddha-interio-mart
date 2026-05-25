@@ -68,44 +68,4 @@ exports.deleteBulkOrder = async (req, res) => {
   }
 };
 
-// Seed dummy data
-exports.seedBulkOrders = async (req, res) => {
-  try {
-    const dummy = [
-      {
-        name: "Corporate Interiors Pvt Ltd",
-        phone: "9876543210",
-        email: "info@corpinteriors.com",
-        items: [
-          { name: "Executive Leather Chair", quantity: 50, category: "Office Furniture" },
-          { name: "Conference Table", quantity: 5, category: "Office Furniture" }
-        ],
-        message: "Looking for a full office setup for our new branch."
-      },
-      {
-        name: "Grand Residency Hotel",
-        phone: "8887776665",
-        email: "procure@grandresidency.com",
-        items: [
-          { name: "Premium Velvet Sofa", quantity: 20, category: "Living Room" },
-          { name: "King Size Bed Frame", quantity: 15, category: "Bedroom" }
-        ],
-        message: "Urgently need these for our lobby renovation."
-      }
-    ];
-    await BulkOrder.insertMany(dummy);
-    res.status(201).json({ success: true, message: "Dummy data seeded" });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-};
 
-// Clear all bulk orders
-exports.clearBulkOrders = async (req, res) => {
-  try {
-    await BulkOrder.deleteMany({});
-    res.status(200).json({ success: true, message: "All bulk orders cleared" });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-};

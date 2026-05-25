@@ -325,23 +325,21 @@ exports.updateAdminPassword = async (req, res, next) => {
 
 // @desc    Get dashboard statistics
 // @route   GET /api/auth/admin/dashboard-stats
-// @access  Private/Admin
-let dashboardStatsCache = null;
-let dashboardStatsCacheExpiry = 0;
-
-// @desc    Get dashboard statistics
-// @route   GET /api/auth/admin/dashboard-stats
-// @access  Private/Admin
 exports.getDashboardStats = async (req, res, next) => {
   try {
-    const now = Date.now();
+    const cacheService = require('../services/cacheService');
+    const cacheKey = 'analytics:admin:dashboard';
+
     // Serve from cache if fresh and not explicitly bypassed
-    if (dashboardStatsCache && now < dashboardStatsCacheExpiry && req.query.refresh !== 'true') {
-      return res.status(200).json({
-        success: true,
-        cached: true,
-        data: dashboardStatsCache
-      });
+    if (req.query.refresh !== 'true') {
+      const cachedData = cacheService.get(cacheKey);
+      if (cachedData) {
+        return res.status(200).json({
+          success: true,
+          cached: true,
+          data: cachedData
+        });
+      }
     }
 
     const Catalog = require('../models/Catalog');
@@ -359,10 +357,8 @@ exports.getDashboardStats = async (req, res, next) => {
       sellersCount,
       usersCount,
       deliveryCount,
-      revenueData,
+      orderMetricsFacet,
       recentOrders,
-      orderStatusCounts,
-      paymentMethodCounts,
       userTypeCounts,
       pendingApprovalsCount,
       totalStockSum
@@ -374,19 +370,26 @@ exports.getDashboardStats = async (req, res, next) => {
       User.countDocuments({ role: 'user' }),
       Delivery.countDocuments({ approvalStatus: 'Approved' }),
       Order.aggregate([
-        { $match: { status: { $ne: 'Cancelled' } } },
-        { $group: { _id: null, total: { $sum: '$totalPrice' } } }
+        {
+          $facet: {
+            totalRevenue: [
+              { $match: { status: { $ne: 'Cancelled' } } },
+              { $group: { _id: null, total: { $sum: '$totalPrice' } } }
+            ],
+            statusCounts: [
+              { $group: { _id: "$status", count: { $sum: 1 } } }
+            ],
+            paymentCounts: [
+              { $group: { _id: "$paymentMethod", count: { $sum: 1 } } }
+            ]
+          }
+        }
       ]),
       Order.find()
         .populate('user', 'fullName')
         .sort('-createdAt')
-        .limit(8),
-      Order.aggregate([
-        { $group: { _id: "$status", count: { $sum: 1 } } }
-      ]),
-      Order.aggregate([
-        { $group: { _id: "$paymentMethod", count: { $sum: 1 } } }
-      ]),
+        .limit(8)
+        .lean(),
       User.aggregate([
         { $match: { role: 'user' } },
         { $group: { _id: "$userType", count: { $sum: 1 } } }
@@ -396,6 +399,10 @@ exports.getDashboardStats = async (req, res, next) => {
         { $group: { _id: null, total: { $sum: '$countInStock' } } }
       ])
     ]);
+
+    const revenueData = orderMetricsFacet[0]?.totalRevenue || [];
+    const orderStatusCounts = orderMetricsFacet[0]?.statusCounts || [];
+    const paymentMethodCounts = orderMetricsFacet[0]?.paymentCounts || [];
 
     // Calculate revenue for last 7 days for graph
     const sevenDaysAgo = new Date();
@@ -519,9 +526,8 @@ exports.getDashboardStats = async (req, res, next) => {
       }))
     };
 
-    // Store in-memory cache for 60 seconds
-    dashboardStatsCache = payload;
-    dashboardStatsCacheExpiry = now + 60 * 1000;
+    // Store in-memory cache for 300 seconds (5 minutes)
+    cacheService.set(cacheKey, payload, 300);
 
     res.status(200).json({
       success: true,
@@ -1062,18 +1068,40 @@ exports.getCashCollections = async (req, res, next) => {
 // @access  Private/Admin
 exports.confirmCashDeposit = async (req, res, next) => {
   try {
+    const crypto = require('crypto');
     const Order = require('../models/Order');
+    const walletService = require('../services/walletService');
+
+    // 1. Fetch all undeposited COD orders for the specific delivery boy
+    const undepositedOrders = await Order.find({
+      deliveryBoy: req.params.deliveryBoyId,
+      paymentMethod: 'COD',
+      deliveryStatus: 'Delivered',
+      isCashDeposited: false
+    });
+
+    if (undepositedOrders.length === 0) {
+      return res.status(200).json({ success: true, message: 'No pending cash deposits to confirm' });
+    }
+
+    // 2. Sum the totalPrice of all undeposited orders
+    const totalAmount = Number(undepositedOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0).toFixed(2));
+
+    // 3. Create a deterministic idempotency key based on sorted order IDs
+    const orderIds = undepositedOrders.map(order => order._id.toString()).sort();
+    const hash = crypto.createHash('md5').update(orderIds.join(',')).digest('hex');
+    const idempotencyKey = `cod_settle_${req.params.deliveryBoyId}_${hash}`;
+
+    // 4. Atomically settle liability in the DeliveryWallet
+    await walletService.settleDeliveryCodLiability(req.params.deliveryBoyId, totalAmount, idempotencyKey);
+
+    // 5. Mark all these specific orders as deposited
     await Order.updateMany(
-      { 
-        deliveryBoy: req.params.deliveryBoyId, 
-        paymentMethod: 'COD', 
-        deliveryStatus: 'Delivered',
-        isCashDeposited: false 
-      },
+      { _id: { $in: orderIds } },
       { $set: { isCashDeposited: true } }
     );
 
-    res.status(200).json({ success: true, message: 'Cash deposit confirmed' });
+    res.status(200).json({ success: true, message: `Cash deposit of ₹${totalAmount} confirmed successfully` });
   } catch (err) {
     next(err);
   }

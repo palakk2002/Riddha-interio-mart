@@ -142,6 +142,10 @@ const ProductSchema = new mongoose.Schema({
 ProductSchema.index({ seller: 1, countInStock: 1 });
 ProductSchema.index({ seller: 1, createdAt: -1 });
 ProductSchema.index({ name: 'text', description: 'text', category: 'text' });
+ProductSchema.index({ category: 1, isApproved: 1, isActive: 1 });
+ProductSchema.index({ subcategory: 1, isApproved: 1, isActive: 1 });
+ProductSchema.index({ brand: 1, isApproved: 1, isActive: 1 });
+ProductSchema.index({ price: 1, isApproved: 1, isActive: 1 });
 
 ProductSchema.post('save', function() {
   try {

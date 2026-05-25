@@ -23,10 +23,11 @@ export function connectSocket({ token } = {}) {
     'http://localhost:5000';
 
   const url = normalizeSocketUrl(base);
+  const hasToken = token && token !== 'cookie';
 
   if (socketInstance) {
     // Keep auth token fresh for reconnects
-    if (token) socketInstance.auth = { token };
+    if (hasToken) socketInstance.auth = { token };
     if (!socketInstance.connected) socketInstance.connect();
     return socketInstance;
   }
@@ -35,8 +36,9 @@ export function connectSocket({ token } = {}) {
     transports: ['polling', 'websocket'],
     autoConnect: true,
     reconnection: true,
-    auth: token ? { token } : undefined,
-    query: token ? { token } : undefined
+    withCredentials: true, // Support propagation of secure cookies over WS handshake
+    auth: hasToken ? { token } : undefined,
+    query: hasToken ? { token } : undefined
   });
 
   return socketInstance;

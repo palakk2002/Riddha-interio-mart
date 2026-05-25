@@ -1,5 +1,6 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
+require('./src/utils/seederGuard')('seed_defaults.js');
+require('dotenv').config();
 const Admin = require('./src/models/Admin');
 const User = require('./src/models/User');
 

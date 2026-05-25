@@ -108,4 +108,20 @@ SellerSchema.methods.matchPassword = async function(enteredPassword) {
 
 SellerSchema.index({ isVerified: 1, createdAt: -1 });
 
+SellerSchema.post('save', function(doc) {
+  try {
+    const cacheService = require('../services/cacheService');
+    cacheService.del(`user:profile:seller:${doc._id}`);
+  } catch (e) {}
+});
+
+SellerSchema.post('findOneAndUpdate', function(doc) {
+  try {
+    if (doc) {
+      const cacheService = require('../services/cacheService');
+      cacheService.del(`user:profile:seller:${doc._id}`);
+    }
+  } catch (e) {}
+});
+
 module.exports = mongoose.model('Seller', SellerSchema);

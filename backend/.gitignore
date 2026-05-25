@@ -6,3 +6,6 @@ dist
 build
 .DS_Store
 *.log
+
+# Firebase service account credentials (contains private key – never commit)
+src/config/*adminsdk*.json

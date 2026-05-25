@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('./src/utils/seederGuard')('seed_brands.js');
 const dotenv = require('dotenv');
 const Brand = require('./src/models/Brand');
 const connectDB = require('./src/config/db');

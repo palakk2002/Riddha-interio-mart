@@ -186,21 +186,21 @@ export const CartProvider = ({ children }) => {
 
   const cartTotal = pricingBreakdown.totalPrice;
 
+  const contextValue = React.useMemo(() => ({
+    cart,
+    loading,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    getItemQuantity,
+    clearCart,
+    cartTotal,
+    pricingBreakdown,
+    cartCount: cart.length,
+  }), [cart, loading, cartTotal, pricingBreakdown]);
+
   return (
-    <CartContext.Provider
-      value={{
-        cart,
-        loading,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        getItemQuantity,
-        clearCart,
-        cartTotal,
-        pricingBreakdown,
-        cartCount: cart.length,
-      }}
-    >
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );

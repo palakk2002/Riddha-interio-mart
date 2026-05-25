@@ -7,7 +7,6 @@ import {
 } from "react-icons/lu";
 import { FiDownload, FiDollarSign } from "react-icons/fi";
 import api from "../../../shared/utils/api";
-import * as XLSX from 'xlsx';
 import { toast } from "react-hot-toast";
 
 const SellerTransactionsPage = () => {
@@ -41,11 +40,12 @@ const SellerTransactionsPage = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     if (transactions.length === 0) {
       toast.error('No transactions available to export.');
       return;
     }
+    const XLSX = await import('xlsx');
     const dataToExport = transactions.map(t => ({
       'Transaction ID': t.id ? `#TXN-00${t.id}` : '#TXN-N/A',
       'Seller Name': t.sellerName,

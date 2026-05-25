@@ -216,7 +216,7 @@ const DispatchCenter = () => {
     fetchStatusAndOffers();
 
     // Listen for WebSocket dispatches
-    const socket = connectSocket({ token: user?.token });
+    const socket = connectSocket({ token: user?.token || 'cookie' });
     if (socket) {
       socket.on('dispatch:offer', (payload) => {
         // Construct event payload structure locally

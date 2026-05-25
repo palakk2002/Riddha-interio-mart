@@ -323,7 +323,7 @@ exports.respondToReview = async (req, res, next) => {
 exports.getSellerReviews = async (req, res) => {
   try {
     const Product = require('../models/Product');
-    const sellerProducts = await Product.find({ seller: req.user.id }).select('_id');
+    const sellerProducts = await Product.find({ seller: req.user.id }).select('_id').lean();
     const productIds = sellerProducts.map(p => p._id);
 
     const query = { product: { $in: productIds } };

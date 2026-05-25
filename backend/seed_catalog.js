@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('./src/utils/seederGuard')('seed_catalog.js');
 const dotenv = require('dotenv');
 const cloudinary = require('cloudinary').v2;
 const Catalog = require('./src/models/Catalog');

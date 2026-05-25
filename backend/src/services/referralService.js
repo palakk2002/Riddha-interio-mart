@@ -74,31 +74,22 @@ class ReferralService {
    */
   async processSignupReward(referredUserId) {
     const referral = await Referral.findOne({ referredUser: referredUserId, rewardStatus: 'pending' });
-    
-    // Ensure the referred user has a wallet
-    let referredWallet = await Wallet.findOne({ user: referredUserId });
-    if (!referredWallet) {
-      referredWallet = await Wallet.create({ user: referredUserId, balance: 0 });
-    }
+    if (!referral) return;
 
-    if (referral) {
-      // Add signup bonus transaction to referred user's wallet
-      const signupBonus = referral.referredUserReward;
-      const expirationDate = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days validity
+    const walletService = require('./walletService');
+    const signupBonus = referral.referredUserReward;
+    const expirationDate = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days validity
+    const signupIdempotencyKey = `signup_reward_${referredUserId}`;
 
-      referredWallet.transactions.push({
-        amount: signupBonus,
-        type: 'signup_bonus',
-        description: 'Signup bonus using referral code',
-        status: 'active',
-        expiresAt: expirationDate,
-        referenceId: referral._id
-      });
-
-      // Recalculate balance
-      referredWallet.balance = this._calculateActiveBalance(referredWallet.transactions);
-      await referredWallet.save();
-    }
+    await walletService.creditUserWallet(
+      referredUserId,
+      signupBonus,
+      'signup_bonus',
+      'Signup bonus using referral code',
+      referral._id,
+      signupIdempotencyKey,
+      expirationDate
+    );
   }
 
   /**
@@ -108,28 +99,22 @@ class ReferralService {
     const referral = await Referral.findOne({ referredUser: referredUserId, rewardStatus: 'pending' });
     if (!referral) return;
 
-    // Credit reward to referrer
+    const walletService = require('./walletService');
     const referrerId = referral.referrer;
-    let referrerWallet = await Wallet.findOne({ user: referrerId });
-    if (!referrerWallet) {
-      referrerWallet = await Wallet.create({ user: referrerId, balance: 0 });
-    }
-
     const referralBonus = referral.referrerReward;
     const expirationDate = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days validity
+    const firstOrderIdempotencyKey = `first_order_reward_${referredUserId}_${orderId}`;
 
-    referrerWallet.transactions.push({
-      amount: referralBonus,
-      type: 'referral_bonus',
-      description: 'Reward for inviting a friend who placed an order',
-      status: 'active',
-      expiresAt: expirationDate,
-      referenceId: orderId
-    });
-
-    // Recalculate and update referrer balance
-    referrerWallet.balance = this._calculateActiveBalance(referrerWallet.transactions);
-    await referrerWallet.save();
+    // Credit reward to referrer atomically
+    await walletService.creditUserWallet(
+      referrerId,
+      referralBonus,
+      'referral_bonus',
+      'Reward for inviting a friend who placed an order',
+      orderId,
+      firstOrderIdempotencyKey,
+      expirationDate
+    );
 
     // Increment referrer referralCount
     await User.findByIdAndUpdate(referrerId, { $inc: { referralCount: 1 } });

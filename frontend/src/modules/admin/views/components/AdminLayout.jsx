@@ -48,9 +48,9 @@ const AdminLayout = () => {
 
   // Socket setup
   useEffect(() => {
-    if (!user?.token || user?.role !== 'admin') return;
+    if (!user || user?.role !== 'admin') return;
 
-    const socket = connectSocket({ token: user.token });
+    const socket = connectSocket({ token: user.token || 'cookie' });
 
     const onOrderNew = async (payload) => {
       const shortId = String(payload?.orderId || '').slice(-8).toUpperCase();

@@ -185,10 +185,20 @@ exports.updateReturnStatus = async (req, res, next) => {
         await inventoryService.returnStock(returnReq.product, order.orderItems[itemIndex].quantity);
       }
 
-      // 3. Process Wallet Refund Deduction & Tax Rollback Log
+      // 3. Process Wallet Refund Deduction, Customer Wallet Credit & Tax Rollback Log
       try {
         const walletService = require('../services/walletService');
         await walletService.recordRefundDeduction(order, returnReq.refundAmount);
+
+        const refundIdempotencyKey = `refund_credit_${returnReq._id}`;
+        await walletService.creditUserWallet(
+          returnReq.user,
+          returnReq.refundAmount,
+          'refund_credit',
+          `Refund for returned items in Order ${order._id}`,
+          returnReq._id,
+          refundIdempotencyKey
+        );
 
         if (itemIndex !== -1) {
           const taxService = require('../services/taxService');
@@ -198,7 +208,7 @@ exports.updateReturnStatus = async (req, res, next) => {
           }]);
         }
       } catch (refundErr) {
-        console.error('Failed to log wallet refund deduction:', refundErr.message);
+        console.error('Failed to log wallet refund operations:', refundErr.message);
       }
     }
 

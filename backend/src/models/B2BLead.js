@@ -11,4 +11,6 @@ const B2BLeadSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+B2BLeadSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('B2BLead', B2BLeadSchema);

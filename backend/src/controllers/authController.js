@@ -1,0 +1,206 @@
+const RefreshToken = require('../models/RefreshToken');
+const Admin = require('../models/Admin');
+const Seller = require('../models/Seller');
+const Delivery = require('../models/Delivery');
+const User = require('../models/User');
+const tokenService = require('../utils/tokenService');
+
+/**
+ * @desc    Refresh Access & Refresh Tokens (Single-Use Rotation)
+ * @route   POST /api/auth/refresh
+ * @access  Public (Requires Cookie)
+ */
+exports.refreshToken = async (req, res, next) => {
+  try {
+    const token = req.cookies?.refresh_token;
+    if (!token) {
+      return res.status(401).json({ success: false, error: 'Session expired. Please log in again.' });
+    }
+
+    const tokenHash = tokenService.hashToken(token);
+    const storedToken = await RefreshToken.findOne({ tokenHash });
+
+    if (!storedToken) {
+      return res.status(401).json({ success: false, error: 'Invalid session. Please log in again.' });
+    }
+
+    // 1. REUSE DETECTION (Token Family Invalidation)
+    if (storedToken.isRevoked) {
+      console.warn(`[SECURITY WARNING] Revoked refresh token reuse attempted! UserId: ${storedToken.userId}. Revoking all tokens!`);
+      
+      // Revoke all tokens in this user's family as a proactive defense
+      await RefreshToken.deleteMany({ userId: storedToken.userId });
+      
+      // Clear cookies
+      tokenService.clearAuthCookies(res);
+      return res.status(401).json({ success: false, error: 'Compromised session detected. All active sessions revoked.' });
+    }
+
+    // 2. VERIFY JWT SIGNATURE & EXPIRY
+    const decoded = tokenService.verifyRefreshToken(token);
+    if (!decoded || String(decoded.id) !== String(storedToken.userId)) {
+      await RefreshToken.deleteOne({ _id: storedToken._id });
+      tokenService.clearAuthCookies(res);
+      return res.status(401).json({ success: false, error: 'Session signature invalid or expired.' });
+    }
+
+    // 3. FETCH CORRESPONDING ACCOUNT & VERIFY STATUS
+    let Model;
+    switch (storedToken.userRole) {
+      case 'admin': Model = Admin; break;
+      case 'seller': Model = Seller; break;
+      case 'delivery': Model = Delivery; break;
+      default: Model = User;
+    }
+
+    const user = await Model.findById(storedToken.userId);
+    if (!user) {
+      await RefreshToken.deleteOne({ _id: storedToken._id });
+      tokenService.clearAuthCookies(res);
+      return res.status(401).json({ success: false, error: 'Account no longer exists.' });
+    }
+
+    // Suspend check for sellers
+    if (storedToken.userRole === 'seller' && ['suspended', 'rejected', 'pending'].includes(user.status)) {
+      await RefreshToken.deleteMany({ userId: user._id });
+      tokenService.clearAuthCookies(res);
+      return res.status(403).json({ success: false, error: `Seller status is currently: ${user.status}` });
+    }
+
+    // Suspend check for delivery partners
+    if (storedToken.userRole === 'delivery') {
+      const appStatus = user.approvalStatus || 'Approved';
+      if (['Suspended', 'Rejected', 'Pending'].includes(appStatus)) {
+        await RefreshToken.deleteMany({ userId: user._id });
+        tokenService.clearAuthCookies(res);
+        return res.status(403).json({ success: false, error: `Delivery partner status is currently: ${appStatus}` });
+      }
+    }
+
+    // 4. GENERATE NEW ROTATED TOKEN PAIR
+    const newAccessToken = tokenService.generateAccessToken(user._id, storedToken.userRole);
+    const newRefreshToken = tokenService.generateRefreshToken(user._id, storedToken.userRole);
+    const newHash = tokenService.hashToken(newRefreshToken);
+
+    // 5. UPDATE OLD TOKEN (Mark as rotated) & RECORD NEW ACTIVE ONE
+    storedToken.isRevoked = true;
+    storedToken.replacedBy = newHash;
+    await storedToken.save();
+
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days matching token
+    await RefreshToken.create({
+      tokenHash: newHash,
+      userId: user._id,
+      userRole: storedToken.userRole,
+      expiresAt,
+      userAgent: req.headers['user-agent'] || '',
+      ipAddress: req.ip || req.connection?.remoteAddress || ''
+    });
+
+    // 6. DISPATCH NEW COOKIES & RETURN USER DATA
+    tokenService.setAuthCookies(res, newAccessToken, newRefreshToken);
+
+    res.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: storedToken.userRole,
+        avatar: user.avatar || "",
+        phone: user.phone || "",
+        shopName: user.shopName || "",
+        shopAddress: user.shopAddress || "",
+        vehicleType: user.vehicleType || "",
+        vehicleNumber: user.vehicleNumber || "",
+        isVerified: user.isVerified || false,
+        approvalStatus: user.approvalStatus || "",
+        type: user.type || "standard",
+        permissions: user.permissions || {}
+      }
+    });
+  } catch (err) {
+    console.error('Session Refresh Error:', err.message);
+    res.status(500).json({ success: false, error: 'Internal token refresh failure' });
+  }
+};
+
+/**
+ * @desc    Global Log Out
+ * @route   POST /api/auth/logout
+ * @access  Public (Requires Cookie)
+ */
+exports.logout = async (req, res, next) => {
+  try {
+    const token = req.cookies?.refresh_token;
+    if (token) {
+      const tokenHash = tokenService.hashToken(token);
+      await RefreshToken.deleteOne({ tokenHash });
+    }
+
+    // Blacklist stateless access token
+    const accessToken = req.cookies?.access_token || req.signedCookies?.access_token || (req.headers.authorization && req.headers.authorization.startsWith('Bearer') ? req.headers.authorization.split(' ')[1] : null);
+    if (accessToken) {
+      try {
+        const jwt = require('jsonwebtoken');
+        const crypto = require('crypto');
+        const cacheService = require('../services/cacheService');
+
+        const decoded = jwt.decode(accessToken);
+        if (decoded && decoded.exp) {
+          const remainingTTL = decoded.exp - Math.floor(Date.now() / 1000);
+          if (remainingTTL > 0) {
+            const tokenHash = crypto.createHash('sha256').update(accessToken).digest('hex');
+            cacheService.set(`blacklist:token:${tokenHash}`, true, remainingTTL);
+            
+            // Delete user's cached profile
+            cacheService.del(`user:profile:${decoded.role}:${decoded.id}`);
+            console.log(`[CACHE BLACKLIST] Access token blacklisted for user ${decoded.id} for ${remainingTTL} seconds.`);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to blacklist access token on logout:', err.message);
+      }
+    }
+
+    // Clear cookies on client browser
+    tokenService.clearAuthCookies(res);
+
+    res.status(200).json({ success: true, message: 'Logged out successfully' });
+  } catch (err) {
+    console.error('Log Out Error:', err.message);
+    res.status(500).json({ success: false, error: 'Log out failure' });
+  }
+};
+
+/**
+ * @desc    Get current authenticated session profile (Unified)
+ * @route   GET /api/auth/me
+ * @access  Private
+ */
+exports.getMe = async (req, res) => {
+  try {
+    res.status(200).json({
+      success: true,
+      user: {
+        id: req.user._id,
+        fullName: req.user.fullName,
+        email: req.user.email,
+        role: req.user.role,
+        avatar: req.user.avatar || "",
+        phone: req.user.phone || "",
+        shopName: req.user.shopName || "",
+        shopAddress: req.user.shopAddress || "",
+        vehicleType: req.user.vehicleType || "",
+        vehicleNumber: req.user.vehicleNumber || "",
+        isVerified: req.user.isVerified || false,
+        approvalStatus: req.user.approvalStatus || "",
+        type: req.user.type || "standard",
+        permissions: req.user.permissions || {}
+      }
+    });
+  } catch (err) {
+    console.error('Unified Profile Fetch Error:', err.message);
+    res.status(500).json({ success: false, error: 'Failed to retrieve profile' });
+  }
+};

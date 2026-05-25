@@ -25,6 +25,11 @@ const WalletTransactionSchema = new mongoose.Schema({
   referenceId: {
     type: mongoose.Schema.Types.ObjectId
   },
+  idempotencyKey: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
   createdAt: {
     type: Date,
     default: Date.now

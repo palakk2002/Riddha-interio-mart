@@ -4,9 +4,7 @@ const Brand = require('../models/Brand');
 
 class SearchService {
   constructor() {
-    // In-memory cache for search results to deliver sub-2ms response times
-    this.cache = new Map();
-    this.cacheDuration = 5 * 60 * 1000; // 5 minutes cache
+    // Search caches are now integrated centrally via CacheService
   }
 
   /**
@@ -128,31 +126,24 @@ class SearchService {
    * Invalidate search caches when new products are created or stocks modified
    */
   clearCache() {
-    this.cache.clear();
+    const cacheService = require('./cacheService');
+    cacheService.delPattern('search:*');
   }
 
   /**
    * Retrieves results from the local search cache
    */
   getCachedResult(key) {
-    const cached = this.cache.get(key);
-    if (!cached) return null;
-
-    if (Date.now() - cached.timestamp > this.cacheDuration) {
-      this.cache.delete(key);
-      return null;
-    }
-    return cached.data;
+    const cacheService = require('./cacheService');
+    return cacheService.get(`search:${key}`);
   }
 
   /**
    * Saves results inside the cache
    */
   setCacheResult(key, data) {
-    this.cache.set(key, {
-      timestamp: Date.now(),
-      data
-    });
+    const cacheService = require('./cacheService');
+    cacheService.set(`search:${key}`, data, 300); // 5 minutes = 300 seconds
   }
 }
 

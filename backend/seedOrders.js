@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('./src/utils/seederGuard')('seedOrders.js');
 const dotenv = require('dotenv');
 const dns = require('dns');
 const Order = require('./src/models/Order');

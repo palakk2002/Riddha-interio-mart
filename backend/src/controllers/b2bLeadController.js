@@ -17,7 +17,7 @@ exports.createLead = async (req, res, next) => {
 // @access  Private/Admin
 exports.getLeads = async (req, res, next) => {
   try {
-    const leads = await B2BLead.find().sort('-createdAt');
+    const leads = await B2BLead.find().sort('-createdAt').lean();
     res.status(200).json({ success: true, data: leads });
   } catch (err) {
     next(err);

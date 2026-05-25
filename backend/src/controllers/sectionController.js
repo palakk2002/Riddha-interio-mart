@@ -146,12 +146,24 @@ const validateSectionPayload = async (payload) => {
 // @access  Public
 exports.getSections = async (req, res) => {
   try {
-    const sections = await populateSection(
-      Section.find().sort({ displayOrder: 1, createdAt: -1 })
-    );
+    const cacheService = require('../services/cacheService');
+    const cacheKey = 'home:sections';
+
+    let sections = cacheService.get(cacheKey);
+    let cached = true;
+
+    if (!sections) {
+      cached = false;
+      sections = await populateSection(
+        Section.find().sort({ displayOrder: 1, createdAt: -1 })
+      ).lean();
+
+      cacheService.set(cacheKey, sections, 3600); // 1 hour cache
+    }
 
     res.status(200).json({
       success: true,
+      cached,
       count: sections.length,
       data: sections
     });
@@ -199,6 +211,9 @@ exports.createSection = async (req, res) => {
 
     const section = await Section.create(payload);
 
+    const cacheService = require('../services/cacheService');
+    cacheService.del('home:sections');
+
     res.status(201).json({
       success: true,
       data: section
@@ -234,6 +249,9 @@ exports.updateSection = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Section not found' });
     }
 
+    const cacheService = require('../services/cacheService');
+    cacheService.del('home:sections');
+
     res.status(200).json({
       success: true,
       data: section
@@ -257,6 +275,9 @@ exports.deleteSection = async (req, res) => {
     if (!section) {
       return res.status(404).json({ success: false, error: 'Section not found' });
     }
+
+    const cacheService = require('../services/cacheService');
+    cacheService.del('home:sections');
 
     res.status(200).json({
       success: true,

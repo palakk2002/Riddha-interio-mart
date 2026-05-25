@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiDownload, FiSearch, FiTrash2 } from 'react-icons/fi';
 import api from '../../../shared/utils/api';
-import * as XLSX from 'xlsx';
 import { toast } from 'react-hot-toast';
 
 const BulkOrdersPage = () => {
@@ -79,7 +78,8 @@ const BulkOrdersPage = () => {
     ), { duration: 6000 });
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
+    const XLSX = await import('xlsx');
     const dataToExport = orders.map(order => ({
       'Date': new Date(order.createdAt).toLocaleDateString(),
       'Customer Name': order.name,

@@ -42,6 +42,19 @@ const getDateRange = (timeRange, startDate, endDate) => {
 exports.getSellerAnalytics = async (req, res, next) => {
   try {
     const { timeRange, startDate, endDate } = req.query;
+    
+    const cacheService = require('../services/cacheService');
+    const cacheKey = `analytics:seller:${req.user.id}:${timeRange || 'monthly'}:${startDate || ''}:${endDate || ''}`;
+
+    const cachedData = cacheService.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json({
+        success: true,
+        cached: true,
+        data: cachedData
+      });
+    }
+
     const { start, end } = getDateRange(timeRange, startDate, endDate);
     const sellerId = new mongoose.Types.ObjectId(req.user.id);
 
@@ -135,25 +148,30 @@ exports.getSellerAnalytics = async (req, res, next) => {
     const wallet = await SellerWallet.findOne({ seller: sellerId });
     const walletBalance = wallet ? (wallet.withdrawableBalance + wallet.pendingBalance) : 0;
 
+    const payload = {
+      stats: {
+        totalRevenue,
+        periodRevenue,
+        totalOrders,
+        pendingOrders,
+        completedOrders,
+        walletBalance
+      },
+      revenueTrends: revenueTrends.map(t => ({
+        date: t._id,
+        revenue: t.revenue,
+        orders: t.orders
+      })),
+      topProducts,
+      lowStockProducts
+    };
+
+    cacheService.set(cacheKey, payload, 600); // 10 minutes cache
+
     res.status(200).json({
       success: true,
-      data: {
-        stats: {
-          totalRevenue,
-          periodRevenue,
-          totalOrders,
-          pendingOrders,
-          completedOrders,
-          walletBalance
-        },
-        revenueTrends: revenueTrends.map(t => ({
-          date: t._id,
-          revenue: t.revenue,
-          orders: t.orders
-        })),
-        topProducts,
-        lowStockProducts
-      }
+      cached: false,
+      data: payload
     });
 
   } catch (error) {

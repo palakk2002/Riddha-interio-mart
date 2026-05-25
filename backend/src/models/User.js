@@ -133,5 +133,22 @@ UserSchema.methods.getResetPasswordOtp = function() {
 };
 
 UserSchema.index({ role: 1 });
+UserSchema.index({ referredBy: 1 });
+
+UserSchema.post('save', function(doc) {
+  try {
+    const cacheService = require('../services/cacheService');
+    cacheService.del(`user:profile:${doc.role || 'user'}:${doc._id}`);
+  } catch (e) {}
+});
+
+UserSchema.post('findOneAndUpdate', function(doc) {
+  try {
+    if (doc) {
+      const cacheService = require('../services/cacheService');
+      cacheService.del(`user:profile:${doc.role || 'user'}:${doc._id}`);
+    }
+  } catch (e) {}
+});
 
 module.exports = mongoose.model('User', UserSchema);

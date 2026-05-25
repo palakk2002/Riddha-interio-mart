@@ -22,6 +22,11 @@ const DeliveryWalletTransactionSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  idempotencyKey: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
   createdAt: {
     type: Date,
     default: Date.now

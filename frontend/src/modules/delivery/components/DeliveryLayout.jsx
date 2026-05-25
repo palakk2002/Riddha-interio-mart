@@ -130,9 +130,9 @@ const DeliveryLayout = () => {
 
   // Socket setup
   React.useEffect(() => {
-    if (!user?.token || user?.role !== 'delivery') return;
+    if (!user || user?.role !== 'delivery') return;
 
-    const socket = connectSocket({ token: user.token });
+    const socket = connectSocket({ token: user.token || 'cookie' });
 
     const onAssigned = (payload) => {
       setAssignmentRequest(payload);

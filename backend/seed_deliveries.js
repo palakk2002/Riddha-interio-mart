@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('./src/utils/seederGuard')('seed_deliveries.js');
 const Delivery = require('./src/models/Delivery');
 require('dotenv').config();
 

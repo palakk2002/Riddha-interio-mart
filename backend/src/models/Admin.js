@@ -68,4 +68,20 @@ AdminSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+AdminSchema.post('save', function(doc) {
+  try {
+    const cacheService = require('../services/cacheService');
+    cacheService.del(`user:profile:admin:${doc._id}`);
+  } catch (e) {}
+});
+
+AdminSchema.post('findOneAndUpdate', function(doc) {
+  try {
+    if (doc) {
+      const cacheService = require('../services/cacheService');
+      cacheService.del(`user:profile:admin:${doc._id}`);
+    }
+  } catch (e) {}
+});
+
 module.exports = mongoose.model('Admin', AdminSchema);

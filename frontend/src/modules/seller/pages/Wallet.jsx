@@ -60,16 +60,18 @@ const Wallet = () => {
 
   // Listen for socket events to update wallet in real-time
   React.useEffect(() => {
-    const userStr = localStorage.getItem('user');
-    let token = null;
+    const userStr = localStorage.getItem('riddha_user') || localStorage.getItem('user');
+    let hasUser = false;
+    let token = 'cookie';
     if (userStr) {
       try {
         const u = JSON.parse(userStr);
-        token = u.token;
+        hasUser = true;
+        if (u.token) token = u.token;
       } catch (e) {}
     }
 
-    if (token) {
+    if (hasUser) {
       const { connectSocket } = require('../../../shared/utils/socket');
       const socket = connectSocket({ token });
       

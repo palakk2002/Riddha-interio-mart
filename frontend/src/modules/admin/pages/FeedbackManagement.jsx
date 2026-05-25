@@ -13,7 +13,6 @@ import {
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import api from '../../../shared/utils/api';
-import * as XLSX from 'xlsx';
 
 const FeedbackManagement = () => {
   const [reviews, setReviews] = useState([]);
@@ -91,11 +90,12 @@ const FeedbackManagement = () => {
     }
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     if (reviews.length === 0) {
       toast.error('No reviews available to export.');
       return;
     }
+    const XLSX = await import('xlsx');
     const dataToExport = reviews.map(r => ({
       'Review ID': r._id,
       'Product Name': r.product?.name || 'Unknown Product',

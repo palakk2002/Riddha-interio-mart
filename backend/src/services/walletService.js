@@ -1,113 +1,263 @@
 const mongoose = require('mongoose');
+const Wallet = require('../models/Wallet');
 const SellerWallet = require('../models/SellerWallet');
 const DeliveryWallet = require('../models/DeliveryWallet');
 const SellerPayout = require('../models/SellerPayout');
 const DeliverySettlement = require('../models/DeliverySettlement');
 const Seller = require('../models/Seller');
 
+/**
+ * Robust execution wrapper supporting Mongoose atomic sessions
+ * with automatic fallback for standalone single-node local Mongo instances.
+ */
+const executeInTransaction = async (operation) => {
+  const MAX_RETRIES = 5;
+  let attempt = 0;
+
+  while (attempt < MAX_RETRIES) {
+    attempt++;
+    const session = await mongoose.startSession();
+    try {
+      session.startTransaction();
+      const result = await operation(session);
+      await session.commitTransaction();
+      return result;
+    } catch (err) {
+      await session.abortTransaction();
+
+      // Check if it's a transient transaction error (e.g., WriteConflict)
+      const isTransient = err.errorLabels && err.errorLabels.includes('TransientTransactionError');
+      if (isTransient && attempt < MAX_RETRIES) {
+        console.warn(`[FINTECH WARN] Transient transaction error (WriteConflict). Retrying attempt ${attempt + 1}/${MAX_RETRIES}...`);
+        session.endSession();
+        // Wait a short backoff period before retrying
+        await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
+        continue;
+      }
+      
+      // Fallback for local MongoDB standalone instances lacking Replica Set support
+      const isNoReplicaSet = err.message.includes('replica set') || 
+                             err.codeName === 'TransactionOutcomeUnknown' || 
+                             err.code === 20;
+      if (isNoReplicaSet) {
+        console.warn('[FINTECH WARN] Standalone MongoDB detected. Executing fallback without transaction session.');
+        session.endSession();
+        return await operation(null);
+      }
+      
+      session.endSession();
+      throw err;
+    }
+  }
+};
+
 class WalletService {
+  /**
+   * Credit customer user wallet with idempotency protection
+   */
+  async creditUserWallet(userId, amount, type, description, referenceId, idempotencyKey, expiresAt = null) {
+    return executeInTransaction(async (session) => {
+      let wallet = await Wallet.findOne({ user: userId }).session(session);
+      if (!wallet) {
+        // Upsert wallet atomically
+        const created = await Wallet.create([{ user: userId, balance: 0, transactions: [] }], { session });
+        wallet = created[0];
+      }
+
+      // 1. Idempotency Check: Prevent duplicate credits
+      const exists = wallet.transactions.some(tx => tx.idempotencyKey === idempotencyKey);
+      if (exists) {
+        console.log(`[FINTECH] Duplicate transaction blocked. Key: ${idempotencyKey}`);
+        return wallet;
+      }
+
+      // 2. Push transaction log
+      wallet.transactions.push({
+        amount: Number(amount),
+        type,
+        description,
+        status: 'active',
+        referenceId,
+        idempotencyKey,
+        expiresAt
+      });
+
+      // 3. Recalculate balance securely (active & unexpired only)
+      wallet.balance = this._calculateActiveBalance(wallet.transactions);
+
+      await wallet.save({ session });
+      return wallet;
+    });
+  }
+
+  /**
+   * Debit customer user wallet with idempotency protection and balance guards
+   */
+  async debitUserWallet(userId, amount, type, description, referenceId, idempotencyKey) {
+    return executeInTransaction(async (session) => {
+      let wallet = await Wallet.findOne({ user: userId }).session(session);
+      if (!wallet) {
+        throw new Error('Customer wallet not found.');
+      }
+
+      // 1. Idempotency Check
+      const exists = wallet.transactions.some(tx => tx.idempotencyKey === idempotencyKey);
+      if (exists) {
+        console.log(`[FINTECH] Duplicate transaction blocked. Key: ${idempotencyKey}`);
+        return wallet;
+      }
+
+      // 2. Balance Guard
+      if (wallet.balance < amount) {
+        throw new Error('Insufficient wallet balance.');
+      }
+
+      // 3. Push negative amount debit log
+      wallet.transactions.push({
+        amount: -Number(amount),
+        type,
+        description,
+        status: 'active',
+        referenceId,
+        idempotencyKey
+      });
+
+      // 4. Recalculate balance
+      wallet.balance = this._calculateActiveBalance(wallet.transactions);
+
+      await wallet.save({ session });
+      return wallet;
+    });
+  }
+
   /**
    * Record a sale as pending when an order is placed
    */
-  async recordPendingSale(order) {
+  async recordPendingSale(order, customIdempotencyKey = null) {
     if (order.sellerType === 'Admin') return; // Skip admin sales commission
 
-    let wallet = await SellerWallet.findOne({ seller: order.seller });
-    if (!wallet) {
-      wallet = await SellerWallet.create({ seller: order.seller });
-    }
+    const idempotencyKey = customIdempotencyKey || `pending_sale_${order._id}`;
 
-    const subtotal = order.totalPrice;
-    // Calculate commission (10% flat rate)
-    const commission = subtotal * 0.10;
-    const netEarnings = subtotal - commission;
+    return executeInTransaction(async (session) => {
+      let wallet = await SellerWallet.findOne({ seller: order.seller }).session(session);
+      if (!wallet) {
+        const created = await SellerWallet.create([{ seller: order.seller }], { session });
+        wallet = created[0];
+      }
 
-    // Record pending transaction
-    wallet.transactions.push({
-      amount: netEarnings,
-      type: 'sale_credit',
-      status: 'pending',
-      description: `Pending earnings for Order ${order._id} (inclusive of 10% commission fee)`,
-      referenceId: order._id,
-      balanceAfter: wallet.withdrawableBalance // Balance doesn't increase yet
+      // 1. Idempotency Check
+      const exists = wallet.transactions.some(t => t.idempotencyKey === idempotencyKey);
+      if (exists) return wallet;
+
+      const subtotal = order.totalPrice;
+      const commission = subtotal * 0.10;
+      const netEarnings = subtotal - commission;
+
+      // 2. Append transaction log
+      wallet.transactions.push({
+        amount: netEarnings,
+        type: 'sale_credit',
+        status: 'pending',
+        description: `Pending earnings for Order ${order._id} (inclusive of 10% commission fee)`,
+        referenceId: order._id,
+        balanceAfter: wallet.withdrawableBalance,
+        idempotencyKey
+      });
+
+      wallet.pendingBalance = Number((wallet.pendingBalance + netEarnings).toFixed(2));
+      await wallet.save({ session });
+      return wallet;
     });
-
-    wallet.pendingBalance += netEarnings;
-    await wallet.save();
   }
 
   /**
    * Promotes pending sale earnings to withdrawable once the order becomes Delivered
    */
-  async clearPendingSale(orderId) {
-    // Find all wallets containing this pending order transaction
-    const wallets = await SellerWallet.find({ 'transactions.referenceId': orderId });
-    
-    for (const wallet of wallets) {
-      const tx = wallet.transactions.find(t => t.referenceId.toString() === orderId.toString() && t.status === 'pending');
-      if (tx) {
-        const newWithdrawable = wallet.withdrawableBalance + tx.amount;
-        
-        await SellerWallet.updateOne(
-          { 
-            _id: wallet._id, 
-            "transactions._id": tx._id 
-          },
-          {
-            $set: { 
-              "transactions.$.status": "cleared",
-              "transactions.$.balanceAfter": newWithdrawable
+  async clearPendingSale(orderId, customIdempotencyKey = null) {
+    const idempotencyKey = customIdempotencyKey || `clear_sale_${orderId}`;
+
+    return executeInTransaction(async (session) => {
+      // Find all wallets containing this pending order transaction
+      const wallets = await SellerWallet.find({ 
+        'transactions.referenceId': orderId,
+        'transactions.status': 'pending' 
+      }).session(session);
+      
+      for (const wallet of wallets) {
+        const tx = wallet.transactions.find(t => t.referenceId.toString() === orderId.toString() && t.status === 'pending');
+        if (tx) {
+          // Idempotency: verify this specific clearance has not fired already
+          const alreadyCleared = wallet.transactions.some(t => t.idempotencyKey === idempotencyKey);
+          if (alreadyCleared) continue;
+
+          const newWithdrawable = Number((wallet.withdrawableBalance + tx.amount).toFixed(2));
+          
+          await SellerWallet.updateOne(
+            { 
+              _id: wallet._id, 
+              "transactions._id": tx._id 
             },
-            $inc: {
-              pendingBalance: -tx.amount,
-              withdrawableBalance: tx.amount,
-              totalEarnings: tx.amount
-            }
-          }
-        );
+            {
+              $set: { 
+                "transactions.$.status": "cleared",
+                "transactions.$.balanceAfter": newWithdrawable,
+                "transactions.$.idempotencyKey": idempotencyKey
+              },
+              $inc: {
+                pendingBalance: -tx.amount,
+                withdrawableBalance: tx.amount,
+                totalEarnings: tx.amount
+              }
+            },
+            { session }
+          );
+        }
       }
-    }
+    });
   }
 
   /**
    * Records a refund deduction on returned orders
    */
-  async recordRefundDeduction(order, refundAmount) {
-    // Deduct proportionally (including 10% commission recovery)
-    const commissionRecovery = Number((refundAmount * 0.10).toFixed(2));
-    const netDeduction = Number((refundAmount - commissionRecovery).toFixed(2));
+  async recordRefundDeduction(order, refundAmount, customIdempotencyKey = null) {
+    const idempotencyKey = customIdempotencyKey || `refund_deduct_${order._id}_${refundAmount}`;
 
-    // Update atomically and get the new balance (upsert if no wallet exists yet)
-    const wallet = await SellerWallet.findOneAndUpdate(
-      { seller: order.seller },
-      { $inc: { withdrawableBalance: -netDeduction } },
-      { returnDocument: 'after', upsert: true }
-    );
-
-    const newBalance = Number(wallet.withdrawableBalance.toFixed(2));
-
-    // Atomically push the transaction log
-    await SellerWallet.updateOne(
-      { seller: order.seller },
-      {
-        $push: {
-          transactions: {
-            amount: -netDeduction,
-            type: 'refund_debit',
-            status: 'cleared',
-            description: `Deduction for returned items in Order ${order._id}`,
-            referenceId: order._id,
-            balanceAfter: newBalance
-          }
-        }
+    return executeInTransaction(async (session) => {
+      let wallet = await SellerWallet.findOne({ seller: order.seller }).session(session);
+      if (!wallet) {
+        const created = await SellerWallet.create([{ seller: order.seller }], { session });
+        wallet = created[0];
       }
-    );
+
+      // Idempotency check
+      const exists = wallet.transactions.some(t => t.idempotencyKey === idempotencyKey);
+      if (exists) return wallet;
+
+      const commissionRecovery = Number((refundAmount * 0.10).toFixed(2));
+      const netDeduction = Number((refundAmount - commissionRecovery).toFixed(2));
+
+      wallet.withdrawableBalance = Number((wallet.withdrawableBalance - netDeduction).toFixed(2));
+      const newBalance = Number(wallet.withdrawableBalance.toFixed(2));
+
+      wallet.transactions.push({
+        amount: -netDeduction,
+        type: 'refund_debit',
+        status: 'cleared',
+        description: `Deduction for returned items in Order ${order._id}`,
+        referenceId: order._id,
+        balanceAfter: newBalance,
+        idempotencyKey
+      });
+
+      await wallet.save({ session });
+      return wallet;
+    });
   }
 
   /**
    * Initiates a withdrawal payout request for sellers
    */
-  async requestSellerPayout(sellerId, amount, customBankDetails = null) {
+  async requestSellerPayout(sellerId, amount, customBankDetails = null, customIdempotencyKey = null) {
     if (amount < 500) {
       throw new Error('Minimum withdrawal amount is ₹500.');
     }
@@ -116,29 +266,26 @@ class WalletService {
     if (!seller) throw new Error('Seller profile not found.');
 
     const hasProfileBankDetails = seller.bankDetails && seller.bankDetails.accountNumber && seller.bankDetails.accountNumber.trim() !== '';
-    const hasCustomBankDetails = customBankDetails && customBankDetails.accountNumber && customBankDetails.accountNumber.trim() !== '';
+    const bankDetails = (customBankDetails && customBankDetails.accountNumber) ? customBankDetails : seller.bankDetails;
 
-    if (!hasCustomBankDetails && !hasProfileBankDetails) {
-      throw new Error('Please configure your bank details in your profile or provide valid bank details with the withdrawal request.');
+    if (!bankDetails || !bankDetails.accountNumber) {
+      throw new Error('Please configure your bank details in your profile or provide valid details.');
     }
 
-    const bankDetails = hasCustomBankDetails ? customBankDetails : seller.bankDetails;
+    return executeInTransaction(async (session) => {
+      // 1. Debit wallet withdrawable balance atomically to prevent double-spending race conditions
+      const wallet = await SellerWallet.findOneAndUpdate(
+        { seller: sellerId, withdrawableBalance: { $gte: amount } },
+        { $inc: { withdrawableBalance: -amount } },
+        { session, new: true }
+      );
 
-    // 1. Debit wallet withdrawable balance atomically to prevent double-spending race conditions
-    const wallet = await SellerWallet.findOneAndUpdate(
-      { seller: sellerId, withdrawableBalance: { $gte: amount } },
-      { $inc: { withdrawableBalance: -amount } },
-      { returnDocument: 'after' }
-    );
+      if (!wallet) {
+        throw new Error('Insufficient withdrawable balance.');
+      }
 
-    if (!wallet) {
-      throw new Error('Insufficient withdrawable balance.');
-    }
-
-    // 2. Create the SellerPayout document
-    let payoutRequest;
-    try {
-      payoutRequest = await SellerPayout.create({
+      // 2. Create the SellerPayout document
+      const payoutRequest = await SellerPayout.create([{
         seller: sellerId,
         amount,
         status: 'requested',
@@ -148,170 +295,265 @@ class WalletService {
           ifscCode: bankDetails.ifscCode,
           bankName: bankDetails.bankName
         }
+      }], { session });
+
+      const payout = payoutRequest[0];
+      const idempotencyKey = customIdempotencyKey || `payout_request_${payout._id}`;
+
+      // 3. Ledger pushing with idempotency
+      const newBalance = Number(wallet.withdrawableBalance.toFixed(2));
+      wallet.transactions.push({
+        amount: -amount,
+        type: 'payout_debit',
+        status: 'pending',
+        description: `Payout request created. Request ID: ${payout._id}`,
+        referenceId: payout._id,
+        balanceAfter: newBalance,
+        idempotencyKey
       });
-    } catch (createErr) {
-      // Rollback the atomic balance decrement if the database fails to create the payout
-      await SellerWallet.updateOne(
-        { seller: sellerId },
-        { $inc: { withdrawableBalance: amount } }
-      );
-      throw createErr;
-    }
 
-    // 3. Atomically record the transaction in the wallet ledger
-    const newBalance = Number(wallet.withdrawableBalance.toFixed(2));
-    await SellerWallet.updateOne(
-      { seller: sellerId },
-      {
-        $push: {
-          transactions: {
-            amount: -amount,
-            type: 'payout_debit',
-            status: 'pending',
-            description: `Payout request created. Request ID: ${payoutRequest._id}`,
-            referenceId: payoutRequest._id,
-            balanceAfter: newBalance
-          }
-        }
-      }
-    );
-
-    return payoutRequest;
+      await wallet.save({ session });
+      return payout;
+    });
   }
 
   /**
    * Process and approve seller payout
    */
-  async approveSellerPayout(payoutId, transactionReference) {
-    const payout = await SellerPayout.findById(payoutId);
-    if (!payout || payout.status !== 'requested') {
-      throw new Error('Payout request not found or already processed.');
-    }
+  async approveSellerPayout(payoutId, transactionReference, customIdempotencyKey = null) {
+    const idempotencyKey = customIdempotencyKey || `payout_approve_${payoutId}`;
 
-    payout.status = 'completed';
-    payout.transactionReference = transactionReference;
-    await payout.save();
-
-    // Clear transaction status inside wallet ledger
-    const wallet = await SellerWallet.findOne({ seller: payout.seller });
-    if (wallet) {
-      const tx = wallet.transactions.find(t => t.referenceId.toString() === payoutId.toString());
-      if (tx) {
-        tx.status = 'cleared';
-        await wallet.save();
+    return executeInTransaction(async (session) => {
+      const payout = await SellerPayout.findOne({ _id: payoutId, status: 'requested' }).session(session);
+      if (!payout) {
+        throw new Error('Payout request not found or already processed.');
       }
-    }
-    return payout;
+
+      payout.status = 'completed';
+      payout.transactionReference = transactionReference;
+      await payout.save({ session });
+
+      const wallet = await SellerWallet.findOne({ seller: payout.seller }).session(session);
+      if (wallet) {
+        const tx = wallet.transactions.find(t => t.referenceId.toString() === payoutId.toString());
+        if (tx) {
+          // Verify idempotency
+          if (tx.idempotencyKey !== idempotencyKey) {
+            tx.status = 'cleared';
+            tx.idempotencyKey = idempotencyKey;
+            await wallet.save({ session });
+          }
+        }
+      }
+      return payout;
+    });
   }
 
   /**
    * Reject a seller payout request and refund the funds atomically
    */
-  async rejectSellerPayout(payoutId, adminNotes = '') {
-    // 1. Transition payout status atomically to 'rejected' to prevent race conditions during admin approvals/rejections
-    const payout = await SellerPayout.findOneAndUpdate(
-      { _id: payoutId, status: { $in: ['requested', 'processing'] } },
-      { $set: { status: 'rejected', adminNotes } },
-      { returnDocument: 'after' }
-    );
+  async rejectSellerPayout(payoutId, adminNotes = '', customIdempotencyKey = null) {
+    const idempotencyKey = customIdempotencyKey || `payout_reject_${payoutId}`;
 
-    if (!payout) {
-      throw new Error('Payout request not found, or it has already been processed.');
-    }
-
-    // 2. Refund the funds to the seller's withdrawable balance atomically
-    const wallet = await SellerWallet.findOneAndUpdate(
-      { seller: payout.seller },
-      { $inc: { withdrawableBalance: payout.amount } },
-      { returnDocument: 'after' }
-    );
-
-    if (wallet) {
-      // 3. Atomically update the transaction status inside the ledger to 'cancelled'
-      const newBalance = Number(wallet.withdrawableBalance.toFixed(2));
-      
-      await SellerWallet.updateOne(
-        { 
-          seller: payout.seller, 
-          "transactions.referenceId": payoutId 
-        },
-        {
-          $set: { 
-            "transactions.$.status": "cancelled",
-            "transactions.$.balanceAfter": newBalance,
-            "transactions.$.description": `Payout request rejected & refunded. Notes: ${adminNotes}`
-          }
-        }
+    return executeInTransaction(async (session) => {
+      // 1. Invalidate Payout atomically
+      const payout = await SellerPayout.findOneAndUpdate(
+        { _id: payoutId, status: { $in: ['requested', 'processing'] } },
+        { $set: { status: 'rejected', adminNotes } },
+        { session, new: true }
       );
-    }
 
-    return payout;
+      if (!payout) {
+        throw new Error('Payout request not found, or already processed.');
+      }
+
+      // 2. Refund balance
+      const wallet = await SellerWallet.findOneAndUpdate(
+        { seller: payout.seller },
+        { $inc: { withdrawableBalance: payout.amount } },
+        { session, new: true }
+      );
+
+      if (wallet) {
+        const newBalance = Number(wallet.withdrawableBalance.toFixed(2));
+        
+        await SellerWallet.updateOne(
+          { 
+            seller: payout.seller, 
+            "transactions.referenceId": payoutId 
+          },
+          {
+            $set: { 
+              "transactions.$.status": "cancelled",
+              "transactions.$.balanceAfter": newBalance,
+              "transactions.$.description": `Payout request rejected & refunded. Notes: ${adminNotes}`,
+              "transactions.$.idempotencyKey": idempotencyKey
+            }
+          },
+          { session }
+        );
+      }
+
+      return payout;
+    });
   }
 
   /**
    * Record delivery partner earnings & COD liability on order delivery completion
    */
-  async recordDeliveryEarning(deliveryPartnerId, orderId, isCod, totalPrice) {
-    let wallet = await DeliveryWallet.findOne({ deliveryPartner: deliveryPartnerId });
-    if (!wallet) {
-      wallet = await DeliveryWallet.create({ deliveryPartner: deliveryPartnerId });
-    }
+  async recordDeliveryEarning(deliveryPartnerId, orderId, isCod, totalPrice, customIdempotencyKey = null) {
+    const idempotencyKey = customIdempotencyKey || `delivery_earn_${deliveryPartnerId}_${orderId}`;
 
-    const deliveryFee = 50; // standard delivery pay of ₹50
+    return executeInTransaction(async (session) => {
+      let wallet = await DeliveryWallet.findOne({ deliveryPartner: deliveryPartnerId }).session(session);
+      if (!wallet) {
+        const created = await DeliveryWallet.create([{ deliveryPartner: deliveryPartnerId }], { session });
+        wallet = created[0];
+      }
 
-    // Credit delivery fee
-    wallet.earningsBalance += deliveryFee;
-    wallet.transactions.push({
-      amount: deliveryFee,
-      type: 'delivery_fee_credit',
-      description: `Delivery fee earning for Order ${orderId}`,
-      referenceId: orderId,
-      balanceAfter: wallet.earningsBalance
-    });
+      // Idempotency check
+      const exists = wallet.transactions.some(t => t.idempotencyKey === idempotencyKey);
+      if (exists) return wallet;
 
-    // Credit COD liability if cash was collected
-    if (isCod) {
-      wallet.codCollectionLiability += totalPrice;
+      const deliveryFee = 50; // standard delivery pay of ₹50
+
+      // Credit delivery fee
+      wallet.earningsBalance = Number((wallet.earningsBalance + deliveryFee).toFixed(2));
       wallet.transactions.push({
-        amount: totalPrice,
-        type: 'cod_cash_collected',
-        description: `COD Cash collected from customer for Order ${orderId}`,
+        amount: deliveryFee,
+        type: 'delivery_fee_credit',
+        description: `Delivery fee earning for Order ${orderId}`,
         referenceId: orderId,
-        balanceAfter: wallet.earningsBalance // earnings balance remains unaffected by COD liability
+        balanceAfter: wallet.earningsBalance,
+        idempotencyKey
       });
-    }
 
-    await wallet.save();
+      // Credit COD liability if cash was collected
+      if (isCod) {
+        const codIdempotencyKey = `cod_collect_${deliveryPartnerId}_${orderId}`;
+        const codExists = wallet.transactions.some(t => t.idempotencyKey === codIdempotencyKey);
+        if (!codExists) {
+          wallet.codCollectionLiability = Number((wallet.codCollectionLiability + totalPrice).toFixed(2));
+          wallet.transactions.push({
+            amount: totalPrice,
+            type: 'cod_cash_collected',
+            description: `COD Cash collected from customer for Order ${orderId}`,
+            referenceId: orderId,
+            balanceAfter: wallet.earningsBalance,
+            idempotencyKey: codIdempotencyKey
+          });
+        }
+      }
+
+      await wallet.save({ session });
+      return wallet;
+    });
   }
 
   /**
    * Logs a delivery boy cash deposit settlement to Admin
    */
-  async recordCodDeposit(deliveryPartnerId, amount, notes) {
-    const wallet = await DeliveryWallet.findOne({ deliveryPartner: deliveryPartnerId });
-    if (!wallet || wallet.codCollectionLiability < amount) {
-      throw new Error('Deposit amount exceeds current COD cash liability.');
+  async recordCodDeposit(deliveryPartnerId, amount, notes, customIdempotencyKey = null) {
+    const idempotencyKey = customIdempotencyKey || `cod_deposit_${deliveryPartnerId}_${Date.now()}`;
+
+    return executeInTransaction(async (session) => {
+      const wallet = await DeliveryWallet.findOne({ deliveryPartner: deliveryPartnerId }).session(session);
+      if (!wallet || wallet.codCollectionLiability < amount) {
+        throw new Error('Deposit amount exceeds current COD cash liability.');
+      }
+
+      // Idempotency Check
+      const exists = wallet.transactions.some(t => t.idempotencyKey === idempotencyKey);
+      if (exists) return wallet;
+
+      const settlementRequest = await DeliverySettlement.create([{
+        deliveryPartner: deliveryPartnerId,
+        type: 'cod_deposit',
+        amount,
+        status: 'completed',
+        notes
+      }], { session });
+
+      const settlement = settlementRequest[0];
+
+      wallet.codCollectionLiability = Number((wallet.codCollectionLiability - amount).toFixed(2));
+      wallet.transactions.push({
+        amount: -amount,
+        type: 'cod_settlement_to_admin',
+        description: `Cash deposit settlement to Admin. Settlement ID: ${settlement._id}`,
+        referenceId: settlement._id,
+        balanceAfter: wallet.earningsBalance,
+        idempotencyKey
+      });
+
+      await wallet.save({ session });
+      return settlement;
+    });
+  }
+
+  /**
+   * Atomically settles delivery boy COD cash liability in the DeliveryWallet
+   */
+  async settleDeliveryCodLiability(deliveryBoyId, amount, idempotencyKey) {
+    return executeInTransaction(async (session) => {
+      const wallet = await DeliveryWallet.findOne({ deliveryPartner: deliveryBoyId }).session(session);
+      if (!wallet) {
+        throw new Error('Delivery wallet not found.');
+      }
+
+      // Idempotency Check
+      const exists = wallet.transactions.some(tx => tx.idempotencyKey === idempotencyKey);
+      if (exists) {
+        console.log(`[FINTECH] COD settlement already recorded. Key: ${idempotencyKey}`);
+        return wallet;
+      }
+
+      // Create settlement document
+      const settlementRequest = await DeliverySettlement.create([{
+        deliveryPartner: deliveryBoyId,
+        type: 'cod_deposit',
+        amount,
+        status: 'completed',
+        notes: 'COD Cash deposit reconciled by Admin'
+      }], { session });
+
+      const settlement = settlementRequest[0];
+
+      // Offset COD collection liability
+      wallet.codCollectionLiability = Number((Math.max(0, wallet.codCollectionLiability - amount)).toFixed(2));
+      wallet.transactions.push({
+        amount: -amount,
+        type: 'cod_settlement_to_admin',
+        description: `COD Cash deposit settlement confirmed by Admin. Settlement ID: ${settlement._id}`,
+        referenceId: settlement._id,
+        balanceAfter: wallet.earningsBalance,
+        idempotencyKey
+      });
+
+      await wallet.save({ session });
+      return wallet;
+    });
+  }
+
+  /**
+   * Helper to compute active balance considering only active and unexpired transactions
+   */
+  _calculateActiveBalance(transactions) {
+    let balance = 0;
+    const now = new Date();
+
+    for (const tx of transactions) {
+      // Check expiration for positive balances
+      if (tx.amount > 0 && tx.status === 'active' && tx.expiresAt && tx.expiresAt < now) {
+        tx.status = 'expired';
+      }
+
+      if (tx.status === 'active') {
+        balance += tx.amount;
+      }
     }
 
-    const settlement = await DeliverySettlement.create({
-      deliveryPartner: deliveryPartnerId,
-      type: 'cod_deposit',
-      amount,
-      status: 'completed',
-      notes
-    });
-
-    wallet.codCollectionLiability = Number((wallet.codCollectionLiability - amount).toFixed(2));
-    wallet.transactions.push({
-      amount: -amount,
-      type: 'cod_settlement_to_admin',
-      description: `Cash deposit settlement to Admin. Settlement ID: ${settlement._id}`,
-      referenceId: settlement._id,
-      balanceAfter: wallet.earningsBalance
-    });
-
-    await wallet.save();
-    return settlement;
+    return Number(balance.toFixed(2));
   }
 }
 

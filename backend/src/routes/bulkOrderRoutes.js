@@ -3,8 +3,6 @@ const router = express.Router();
 const { 
   createBulkOrder, 
   getAllBulkOrders, 
-  seedBulkOrders, 
-  clearBulkOrders,
   updateBulkOrderStatus,
   deleteBulkOrder
 } = require('../controllers/bulkOrderController');
@@ -17,9 +15,5 @@ router.post('/', createBulkOrder);
 router.get('/', protect, authorize('admin'), checkPermission('orders'), getAllBulkOrders);
 router.put('/:id', protect, authorize('admin'), checkPermission('orders'), updateBulkOrderStatus);
 router.delete('/:id', protect, authorize('admin'), checkPermission('orders'), deleteBulkOrder);
-
-// Dev/Admin Routes for testing
-router.post('/seed', protect, authorize('admin'), checkPermission('orders'), seedBulkOrders);
-router.delete('/clear', protect, authorize('admin'), checkPermission('orders'), clearBulkOrders);
 
 module.exports = router;

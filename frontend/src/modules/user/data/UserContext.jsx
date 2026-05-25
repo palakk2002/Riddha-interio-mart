@@ -21,6 +21,25 @@ export const UserProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!user);
   const [address, setAddress] = useState(null);
 
+  // Sync session on mount (unified session validation)
+  useEffect(() => {
+    const syncSession = async () => {
+      const savedUser = localStorage.getItem('riddha_user');
+      if (savedUser) {
+        try {
+          const res = await api.get('/auth/me');
+          if (res.data.success && res.data.user) {
+            setUser(res.data.user);
+          }
+        } catch (err) {
+          console.error('[UserContext] Session sync failed. Clearing profile.');
+          setUser(null);
+        }
+      }
+    };
+    syncSession();
+  }, []);
+
   // Sync user state with localStorage
   useEffect(() => {
     if (user) {
@@ -68,26 +87,32 @@ export const UserProvider = ({ children }) => {
     setUser(userData);
   };
 
-  const logout = () => {
-    localStorage.removeItem('riddha_user');
-    setUser(null);
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (err) {
+      console.error('[UserContext] Failed to call API logout:', err.message);
+    } finally {
+      localStorage.removeItem('riddha_user');
+      setUser(null);
+    }
   };
 
+  const contextValue = React.useMemo(() => ({
+    user,
+    loading,
+    setLoading,
+    isLoggedIn,
+    address,
+    login,
+    logout,
+    saveAddress,
+    fetchAddresses,
+    setUser
+  }), [user, loading, isLoggedIn, address]);
+
   return (
-    <UserContext.Provider
-      value={{
-        user,
-        loading,
-        setLoading,
-        isLoggedIn,
-        address,
-        login,
-        logout,
-        saveAddress,
-        fetchAddresses,
-        setUser
-      }}
-    >
+    <UserContext.Provider value={contextValue}>
       {children}
     </UserContext.Provider>
   );

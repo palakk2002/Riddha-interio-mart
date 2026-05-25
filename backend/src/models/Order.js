@@ -201,5 +201,8 @@ OrderSchema.index({ 'orderItems.product': 1 }); // Useful for top products aggre
 OrderSchema.index({ deliveryBoy: 1, deliveryStatus: 1, createdAt: -1 });
 OrderSchema.index({ seller: 1, user: 1 });
 OrderSchema.index({ 'shippingAddress.fullName': 1 });
+OrderSchema.index({ user: 1, createdAt: -1 });
+OrderSchema.index({ status: 1, createdAt: -1 });
+OrderSchema.index({ paymentStatus: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Order', OrderSchema);

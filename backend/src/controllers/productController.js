@@ -18,8 +18,9 @@ exports.getProducts = async (req, res, next) => {
     }
 
     // 1. Generate unique cache key based on query parameters
-    const cacheKey = JSON.stringify(req.query);
-    const cachedData = searchService.getCachedResult(cacheKey);
+    const cacheService = require('../services/cacheService');
+    const cacheKey = `products:list:${JSON.stringify(req.query)}`;
+    const cachedData = cacheService.get(cacheKey);
     if (cachedData) {
       return res.status(200).json({
         success: true,
@@ -149,7 +150,7 @@ exports.getProducts = async (req, res, next) => {
     };
 
     // Store in-memory cache
-    searchService.setCacheResult(cacheKey, outputPayload);
+    cacheService.set(cacheKey, outputPayload, 300); // 5 minutes cache
 
     // Write to local debug file
     try {
@@ -260,6 +261,9 @@ exports.createProduct = async (req, res, next) => {
         sellerName: req.user. shopName || req.user.fullName
       });
     }
+    const cacheService = require('../services/cacheService');
+    cacheService.delPattern('products:list:*');
+    cacheService.delPattern('search:*');
     
     res.status(201).json({ success: true, data: product });
   } catch (error) {
@@ -335,6 +339,11 @@ exports.updateApprovalStatus = async (req, res, next) => {
       console.error('Failed to log admin action:', logErr.message);
     }
 
+    const cacheService = require('../services/cacheService');
+    cacheService.delPattern('products:list:*');
+    cacheService.delPattern('search:*');
+    cacheService.del(`products:single:${id}`);
+
     res.status(200).json({ success: true, data: product });
   } catch (error) {
     next(error);
@@ -344,12 +353,24 @@ exports.updateApprovalStatus = async (req, res, next) => {
 // @desc    Get single product details
 exports.getProduct = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id)
-      .populate('seller', 'fullName shopName isVerified')
-      .populate('brand', 'name logo');
+    const cacheService = require('../services/cacheService');
+    const cacheKey = `products:single:${req.params.id}`;
     
+    let product = cacheService.get(cacheKey);
+    let cached = true;
+
     if (!product) {
-      return res.status(404).json({ success: false, error: 'Product not found' });
+      cached = false;
+      product = await Product.findById(req.params.id)
+        .populate('seller', 'fullName shopName isVerified')
+        .populate('brand', 'name logo')
+        .lean();
+      
+      if (!product) {
+        return res.status(404).json({ success: false, error: 'Product not found' });
+      }
+
+      cacheService.set(cacheKey, product, 300); // 5 minutes cache
     }
 
     // Logic: Admin can see everything, others only see verified/approved products
@@ -367,7 +388,7 @@ exports.getProduct = async (req, res, next) => {
       return res.status(401).json({ success: false, error: 'This product is currently under review.' });
     }
 
-    res.status(200).json({ success: true, data: product });
+    res.status(200).json({ success: true, cached, data: product });
   } catch (error) {
     next(error);
   }
@@ -414,6 +435,11 @@ exports.deleteProduct = async (req, res, next) => {
         console.error('Failed to log admin action:', logErr.message);
       }
     }
+
+    const cacheService = require('../services/cacheService');
+    cacheService.delPattern('products:list:*');
+    cacheService.delPattern('search:*');
+    cacheService.del(`products:single:${req.params.id}`);
 
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
@@ -468,6 +494,11 @@ exports.updateProduct = async (req, res, next) => {
       new: true,
       runValidators: true
     });
+
+    const cacheService = require('../services/cacheService');
+    cacheService.delPattern('products:list:*');
+    cacheService.delPattern('search:*');
+    cacheService.del(`products:single:${req.params.id}`);
 
     res.status(200).json({ success: true, data: product });
   } catch (error) {
@@ -525,6 +556,10 @@ exports.createBulkProducts = async (req, res, next) => {
 
     const createdProducts = await Product.insertMany(productsToCreate);
 
+    const cacheService = require('../services/cacheService');
+    cacheService.delPattern('products:list:*');
+    cacheService.delPattern('search:*');
+
     res.status(201).json({
       success: true,
       count: createdProducts.length,
@@ -566,6 +601,15 @@ exports.updateBulkStock = async (req, res, next) => {
       product.countInStock = newStock;
       await product.save();
       results.push({ productId, success: true, countInStock: newStock });
+    }
+
+    const cacheService = require('../services/cacheService');
+    cacheService.delPattern('products:list:*');
+    cacheService.delPattern('search:*');
+    if (updates && Array.isArray(updates)) {
+      for (const update of updates) {
+        cacheService.del(`products:single:${update.productId}`);
+      }
     }
 
     res.status(200).json({ success: true, data: results });
