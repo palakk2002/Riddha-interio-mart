@@ -1,12 +1,61 @@
 {
-  "timestamp": "2026-05-23T13:12:47.984Z",
-  "query": {
-    "isApproved": "pending",
-    "isActive": "all"
-  },
+  "timestamp": "2026-05-25T11:05:36.332Z",
+  "query": {},
   "builtFilter": {
-    "isApproved": false
+    "isApproved": true,
+    "isActive": true
   },
-  "resultCount": 0,
-  "results": []
+  "resultCount": 10,
+  "results": [
+    {
+      "_id": "6a115739107b7b663108dd7d",
+      "name": "Test ModularKitchen Product 2",
+      "category": "ModularKitchen"
+    },
+    {
+      "_id": "6a115739107b7b663108dd7c",
+      "name": "Test ModularKitchen Product 1",
+      "category": "ModularKitchen"
+    },
+    {
+      "_id": "6a115739107b7b663108dd7b",
+      "name": "Test Hardware Product 2",
+      "category": "Hardware"
+    },
+    {
+      "_id": "6a115739107b7b663108dd7a",
+      "name": "Test Hardware Product 1",
+      "category": "Hardware"
+    },
+    {
+      "_id": "6a115739107b7b663108dd79",
+      "name": "Test Bathroom Product 2",
+      "category": "Bathroom"
+    },
+    {
+      "_id": "6a115739107b7b663108dd78",
+      "name": "Test Bathroom Product 1",
+      "category": "Bathroom"
+    },
+    {
+      "_id": "6a115739107b7b663108dd77",
+      "name": "Test Office Product 2",
+      "category": "Office"
+    },
+    {
+      "_id": "6a115739107b7b663108dd76",
+      "name": "Test Office Product 1",
+      "category": "Office"
+    },
+    {
+      "_id": "6a115739107b7b663108dd75",
+      "name": "Test OutDoor Product 2",
+      "category": "OutDoor"
+    },
+    {
+      "_id": "6a115739107b7b663108dd74",
+      "name": "Test OutDoor Product 1",
+      "category": "OutDoor"
+    }
+  ]
 }

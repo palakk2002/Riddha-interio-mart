@@ -79,5 +79,10 @@
     "_id": "6a115739107b7b663108dd7d",
     "name": "Test ModularKitchen Product 2",
     "category": "ModularKitchen"
+  },
+  {
+    "_id": "6a13f5725ccf49b0baf34346",
+    "name": "Fintech Test Table",
+    "category": "Test Category"
   }
 ]
