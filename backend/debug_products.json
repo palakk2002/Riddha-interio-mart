@@ -1,12 +1,18 @@
 {
-  "timestamp": "2026-05-26T07:57:20.103Z",
+  "timestamp": "2026-05-26T08:45:08.424Z",
   "query": {
-    "isApproved": "pending",
-    "isActive": "all"
+    "limit": "1"
   },
   "builtFilter": {
-    "isApproved": false
+    "isApproved": true,
+    "isActive": true
   },
-  "resultCount": 0,
-  "results": []
+  "resultCount": 1,
+  "results": [
+    {
+      "_id": "6a13f5725ccf49b0baf34346",
+      "name": "Fintech Test Table",
+      "category": "Test Category"
+    }
+  ]
 }

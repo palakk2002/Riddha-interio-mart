@@ -5,6 +5,25 @@ import api from './api';
  * @param {File|Blob} file The file to upload
  * @returns {Promise<string>} The Cloudinary URL
  */
+const base64ToBlob = (base64Data) => {
+  const parts = base64Data.split(';base64,');
+  const contentType = parts[0].split(':')[1];
+  const raw = window.atob(parts[1]);
+  const rawLength = raw.length;
+  const uInt8Array = new Uint8Array(rawLength);
+  
+  for (let i = 0; i < rawLength; ++i) {
+    uInt8Array[i] = raw.charCodeAt(i);
+  }
+  
+  return new Blob([uInt8Array], { type: contentType });
+};
+
+/**
+ * Uploads a file to Cloudinary via the backend proxy
+ * @param {File|Blob|string} file The file to upload (supports raw files or base64 data URLs)
+ * @returns {Promise<string>} The Cloudinary URL
+ */
 export const uploadImage = async (file) => {
   if (!file) return null;
   
@@ -14,7 +33,15 @@ export const uploadImage = async (file) => {
   }
 
   const formData = new FormData();
-  formData.append('image', file);
+  
+  // Handle base64 image strings from previews
+  if (typeof file === 'string' && file.startsWith('data:image')) {
+    const blob = base64ToBlob(file);
+    const ext = blob.type.split('/')[1] || 'png';
+    formData.append('image', blob, `upload_${Date.now()}.${ext}`);
+  } else {
+    formData.append('image', file);
+  }
   
   const { data } = await api.post('/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }

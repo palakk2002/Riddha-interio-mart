@@ -327,23 +327,34 @@ const BrandModal = ({ brand, isOpen, onClose, onSave, saving }) => {
                   <FiPlus /> Add Banner
                 </button>
               </div>
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {formData.banners.map((url, idx) => (
-                  <div key={idx} className="bg-white p-4 rounded-3xl border border-soft-oatmeal/40 flex items-center gap-4 group">
+                  <div key={idx} className="relative group">
                     <div 
                       onClick={() => { setActiveBannerUploadIndex(idx); bannerFileInputRef.current.click(); }}
-                      className="w-24 h-14 rounded-xl bg-soft-oatmeal/10 border border-soft-oatmeal/20 flex-shrink-0 overflow-hidden relative cursor-pointer hover:opacity-80 transition-opacity"
-                      title="Click to Upload Banner Image"
+                      className="w-full aspect-[21/9] md:aspect-[3/1] rounded-3xl bg-white border-2 border-dashed border-soft-oatmeal/60 flex flex-col items-center justify-center cursor-pointer hover:bg-soft-oatmeal/10 transition-all overflow-hidden relative shadow-inner group"
                     >
-                      {url ? <img src={url} className="w-full h-full object-cover" /> : <FiImage className="absolute inset-0 m-auto text-warm-sand/20" />}
+                      {url ? (
+                        <>
+                          <img src={url} alt="Banner Preview" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-deep-espresso/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                            <span className="text-white text-[8px] font-black uppercase tracking-widest">Change Banner Image</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center">
+                          <FiImage size={32} className="mx-auto mb-2 opacity-20" />
+                          <span className="text-[8px] font-bold uppercase text-warm-sand/40">Click to upload banner image</span>
+                        </div>
+                      )}
                     </div>
-                    <input
-                      type="text" value={url} onChange={(e) => handleArrayChange('banners', idx, e.target.value)}
-                      placeholder="Enter banner image URL or click thumbnail to upload..."
-                      className="flex-1 bg-transparent border-none text-xs focus:ring-0 font-medium placeholder:text-warm-sand/30"
-                    />
-                    <button onClick={() => removeArrayItem('banners', idx)} className="p-2 text-warm-sand/40 hover:text-red-500 transition-colors">
-                      <FiTrash2 size={16} />
+                    
+                    {/* Delete Floating Button */}
+                    <button 
+                      onClick={() => removeArrayItem('banners', idx)} 
+                      className="absolute top-4 right-4 p-2 bg-white hover:bg-red-50 text-warm-sand/60 hover:text-red-500 rounded-xl shadow-md border border-soft-oatmeal/20 transition-all z-10 opacity-0 group-hover:opacity-100"
+                    >
+                      <FiTrash2 size={14} />
                     </button>
                   </div>
                 ))}
