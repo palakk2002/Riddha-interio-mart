@@ -199,7 +199,7 @@ const Navbar = () => {
               </div>
             </div>
 
-            {!isCartPage && (
+            {!isCartPage && currentPath !== '/search' && (
               <div className="flex-1 px-2">
                 <SearchBar variant="premium" />
               </div>
@@ -288,7 +288,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          {!isCartPage && (
+          {!isCartPage && currentPath !== '/search' && (
             <div className="md:hidden pb-3 px-2">
               <SearchBar variant="premium" />
             </div>
