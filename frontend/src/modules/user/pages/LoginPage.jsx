@@ -410,8 +410,8 @@ const LoginPage = () => {
       </div>
 
       {/* Right Section - Login Form */}
-      <div className="hidden lg:flex flex-[0.92] flex-col justify-center bg-transparent relative px-10 xl:px-16">
-        <div className="w-full max-w-none">
+      <div className="flex w-full lg:flex-[0.92] flex-col justify-center bg-transparent relative px-6 sm:px-12 lg:px-16 py-12 min-h-screen lg:min-h-0 overflow-y-auto">
+        <div className="w-full max-w-[460px] mx-auto lg:mx-0 lg:max-w-none">
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8 flex justify-center">
             <img src={logo} alt="Riddha Logo" className="w-48 md:w-56 h-auto object-contain" />
