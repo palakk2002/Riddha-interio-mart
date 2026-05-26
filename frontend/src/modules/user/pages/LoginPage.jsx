@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useUser } from '../data/UserContext';
 import { FiArrowLeft, FiUser, FiLock, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
-import { FaGoogle, FaFacebookF, FaXTwitter } from 'react-icons/fa6';
+
 import Button from '../../../shared/components/Button';
 import LOGIN_BG from '../../../assets/login_bg_fretshop.png';
 import api from '../../../shared/utils/api';
@@ -34,13 +34,13 @@ const LoginPage = () => {
   
   // Unified signature brand colors
   const theme = {
-    primaryBtn: isDelivery ? 'bg-[#2A458A] hover:opacity-90' : 'bg-[var(--color-primary)] hover:opacity-90',
-    accentText: isDelivery ? 'text-[#2A458A]' : 'text-[var(--color-primary)]',
-    focusBorder: isDelivery ? 'focus:border-[#2A458A] focus:ring-[#2A458A]/5' : 'focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/5',
-    iconFocus: isDelivery ? 'group-focus-within:text-[#2A458A]' : 'group-focus-within:text-[var(--color-primary)]',
-    checkboxBg: isDelivery ? 'bg-[#2A458A] border-[#2A458A]' : 'bg-[var(--color-primary)] border-[var(--color-primary)]',
-    ambientGlow: isDelivery ? 'bg-[#2A458A]/10' : 'bg-[var(--color-primary)]/10',
-    lineGlow: isDelivery ? 'from-[#2A458A]' : 'from-[var(--color-primary)]'
+    primaryBtn: isDelivery ? 'bg-[#2A458A] hover:opacity-90' : 'bg-[#189D91] hover:opacity-90',
+    accentText: isDelivery ? 'text-[#2A458A]' : 'text-[#189D91]',
+    focusBorder: isDelivery ? 'focus:border-[#2A458A] focus:ring-[#2A458A]/5' : 'focus:border-[#189D91] focus:ring-[#189D91]/5',
+    iconFocus: isDelivery ? 'group-focus-within:text-[#2A458A]' : 'group-focus-within:text-[#189D91]',
+    checkboxBg: isDelivery ? 'bg-[#2A458A] border-[#2A458A]' : 'bg-[#189D91] border-[#189D91]',
+    ambientGlow: isDelivery ? 'bg-[#2A458A]/10' : 'bg-[#189D91]/10',
+    lineGlow: isDelivery ? 'from-[#2A458A]' : 'from-[#189D91]'
   };
 
   const getSignupPath = () => {
@@ -233,21 +233,16 @@ const LoginPage = () => {
                     {loading ? 'Authenticating...' : 'Sign In Now'}
                   </Button>
 
-                  {role !== 'admin' && (
-                    <div className="pt-3">
-                      <div className="relative flex items-center justify-center mb-4">
-                        <div className="absolute inset-0 flex items-center">
-                          <div className="w-full border-t border-slate-100"></div>
-                        </div>
-                        <span className="relative px-3 bg-transparent text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">Or Continue With</span>
-                      </div>
-                      <div className="flex justify-center gap-3">
-                        {[FaGoogle, FaFacebookF, FaXTwitter].map((Icon, idx) => (
-                          <button key={idx} type="button" className="w-10 h-10 rounded-xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-600 hover:border-slate-200 transition-all hover:scale-105 active:scale-95 shadow-sm">
-                            <Icon size={14} />
-                          </button>
-                        ))}
-                      </div>
+
+
+                  {getSignupPath() && (
+                    <div className="pt-2">
+                      <Link
+                        to={getSignupPath()}
+                        className="w-full inline-flex items-center justify-center gap-2 rounded-2xl border border-[#189D91]/20 bg-[#189D91]/8 px-5 py-3.5 text-[11px] font-black uppercase tracking-[0.22em] text-[#189D91] hover:bg-[#189D91]/12 hover:border-[#189D91]/30 transition-all shadow-sm"
+                      >
+                        Create Account
+                      </Link>
                     </div>
                   )}
                 </form>
@@ -358,23 +353,6 @@ const LoginPage = () => {
 
           {/* Social login and footer at bottom */}
           <div className="w-full mt-auto">
-            {/* Or continue with divider */}
-            <div className="relative flex items-center justify-center mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-100"></div>
-              </div>
-              <span className="relative px-3 bg-white text-[10px] font-bold text-slate-350 uppercase tracking-widest">Or continue with...</span>
-            </div>
-
-            {/* Circle social login buttons */}
-            <div className="flex justify-center gap-5 mb-8">
-              <button type="button" className="w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all hover:scale-105 active:scale-95 shadow-sm">
-                <FaGoogle size={18} className="text-rose-500" />
-              </button>
-              <button type="button" className="w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-[#1877F2] transition-all hover:scale-105 active:scale-95 shadow-sm">
-                <FaFacebookF size={18} className="text-[#1877F2]" />
-              </button>
-            </div>
 
             {/* Footer Copyright */}
             <p className="text-center text-[9px] font-bold text-slate-400 uppercase tracking-wider">
@@ -546,24 +524,7 @@ const LoginPage = () => {
               {loading ? 'Authenticating...' : 'Sign In Now'}
             </Button>
 
-            {/* Social Logins */}
-            {role !== 'admin' && (
-              <div className="pt-3">
-                <div className="relative flex items-center justify-center mb-4">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-100"></div>
-                  </div>
-                  <span className="relative px-3 bg-transparent text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">Or Continue With</span>
-                </div>
-                <div className="flex justify-center gap-3">
-                  {[FaGoogle, FaFacebookF, FaXTwitter].map((Icon, idx) => (
-                    <button key={idx} type="button" className="w-10 h-10 rounded-xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-600 hover:border-slate-200 transition-all hover:scale-105 active:scale-95 shadow-sm">
-                      <Icon size={14} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+
 
             {getSignupPath() && (
               <div className="pt-2">

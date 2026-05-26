@@ -48,12 +48,12 @@ const SidebarLink = ({ to, icon: Icon, label, onClick }) => (
   <Link
     to={to}
     onClick={onClick}
-    className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#189D91]/5 hover:text-[#189D91] transition-all group"
+    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-[#189D91]/5 hover:text-[#189D91] transition-all group"
   >
-    <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-[#189D91]/10 transition-colors">
-      <Icon size={18} />
+    <div className="p-1.5 rounded-md bg-gray-50 border border-gray-100 group-hover:bg-[#189D91]/10 group-hover:border-[#189D91]/20 transition-all">
+      <Icon size={16} />
     </div>
-    <span className="text-sm font-bold tracking-tight">{label}</span>
+    <span className="text-[13px] font-semibold tracking-tight">{label}</span>
   </Link>
 );
 
@@ -141,11 +141,11 @@ const Navbar = () => {
           {/* Main Desktop Header Row */}
           <div className="hidden md:flex items-center justify-between py-2.5 gap-4 lg:gap-6">
             <div className="flex items-center gap-6 lg:gap-8 shrink-0">
-              <Link to="/" className="flex items-center">
+              <Link to="/" className="flex items-center lg:-my-4 relative z-10">
                 <img
                   src={TransparentLogo}
                   alt="Riddha Interio"
-                  className="h-10 lg:h-12 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                  className="h-10 lg:h-20 w-auto object-contain hover:scale-105 transition-transform duration-300 origin-left"
                 />
               </Link>
 
@@ -428,47 +428,40 @@ const Navbar = () => {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="md:hidden fixed top-0 left-0 bottom-0 h-screen w-[80%] max-w-[300px] bg-white z-[100] shadow-2xl flex flex-col overflow-hidden"
+              className="md:hidden fixed top-0 left-0 bottom-0 h-screen w-[85%] max-w-[320px] bg-white z-[100] shadow-[10px_0_40px_-15px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden"
             >
-              <div className="flex items-center justify-between px-6 py-6 border-b border-gray-100 bg-white">
-                <Link to="/" onClick={closeMobile} className="flex items-center group">
-                  <img
-                    src={TransparentLogo}
-                    alt="Riddha Interio"
-                    className="h-10 w-auto object-contain bg-white rounded-md px-1 shadow-sm"
-                  />
-                </Link>
-                <button onClick={closeMobile} className="p-2.5 text-deep-espresso/40 hover:text-deep-espresso rounded-full"><FiX className="h-5 w-5" /></button>
-              </div>
-              <div className="flex-1 overflow-y-auto no-scrollbar">
-                {/* User Profile Header (Mobile Sidebar) */}
-                <div className="px-6 py-6 bg-gray-50/50 border-b border-gray-100 mb-2">
+              <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col">
+                {/* User Profile Header & Close Button */}
+                <div className="px-5 py-6 bg-gradient-to-b from-gray-50/80 to-white border-b border-gray-100 relative shrink-0">
+                  <button onClick={closeMobile} className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-800 bg-white shadow-sm border border-gray-100 rounded-full transition-all">
+                    <FiX className="h-4 w-4" />
+                  </button>
                   {user ? (
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-full bg-[#189D91]/10 flex items-center justify-center text-[#189D91] border-2 border-white shadow-sm overflow-hidden font-bold">
+                    <div className="flex items-center gap-3.5 mt-2">
+                      <div className="h-11 w-11 rounded-full bg-[#189D91]/10 flex items-center justify-center text-[#189D91] border border-white shadow-sm overflow-hidden font-bold">
                         {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : user.fullName?.charAt(0) || 'U'}
                       </div>
-                      <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-[#189D91]">Welcome back</p>
-                        <h4 className="text-base font-black text-gray-900 leading-tight">{user.fullName || 'User'}</h4>
+                      <div className="pr-8">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#189D91] mb-1">Welcome back</p>
+                        <h4 className="text-[15px] font-bold text-gray-900 leading-none truncate">{user.fullName || 'User'}</h4>
                       </div>
                     </div>
                   ) : (
-                    <Link to="/login" onClick={closeMobile} className="flex items-center gap-4 group">
-                      <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 border-2 border-white shadow-sm">
-                        <FiUser size={20} />
+                    <Link to="/login" onClick={closeMobile} className="flex items-center gap-3.5 mt-2 group pr-8">
+                      <div className="h-11 w-11 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 border border-white shadow-sm">
+                        <FiUser size={18} />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Join the family</p>
-                        <h4 className="text-base font-black text-[#189D91] group-hover:underline">Login / Signup</h4>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-1">Join the family</p>
+                        <h4 className="text-[15px] font-bold text-[#189D91] group-hover:underline leading-none">Login / Signup</h4>
                       </div>
                     </Link>
                   )}
                 </div>
 
-                <div className="px-4 py-2 space-y-1">
+                <div className="px-3 py-3 space-y-1 shrink-0">
                   {/* Primary Nav */}
-                  <div className="pb-4 mb-4 border-b border-gray-50">
+                  <div className="pb-3 mb-3 border-b border-gray-50">
                     <SidebarLink to="/" icon={FiHome} label="Home" onClick={closeMobile} />
                     <SidebarLink to="/products" icon={FiGrid} label="Shop Products" onClick={closeMobile} />
                     <SidebarLink to="/referral-rewards" icon={LuWallet} label="Riddha Wallet" onClick={closeMobile} />
@@ -478,15 +471,15 @@ const Navbar = () => {
                   </div>
 
                   {/* Information & Support */}
-                  <div className="pb-4 mb-4 border-b border-gray-50">
-                    <p className="px-4 mb-2 text-[10px] font-black uppercase tracking-widest text-gray-400/60">Support & Info</p>
+                  <div className="pb-3 mb-3 border-b border-gray-50">
+                    <p className="px-3 mb-2 text-[9px] font-bold uppercase tracking-[0.15em] text-gray-400">Support & Info</p>
                     <SidebarLink to="/about" icon={FiInfo} label="About Us" onClick={closeMobile} />
                     <SidebarLink to="/contact" icon={FiPhone} label="Contact Us" onClick={closeMobile} />
                   </div>
 
                   {/* Legal */}
-                  <div className="pb-4">
-                    <p className="px-4 mb-2 text-[10px] font-black uppercase tracking-widest text-gray-400/60">Policies</p>
+                  <div className="pb-2">
+                    <p className="px-3 mb-2 text-[9px] font-bold uppercase tracking-[0.15em] text-gray-400">Policies</p>
                     <SidebarLink to="/policies/returns" icon={FiRefreshCw} label="Returns & Refunds" onClick={closeMobile} />
                     <SidebarLink to="/policies/cancellation" icon={FiXCircle} label="Cancellation" onClick={closeMobile} />
                     <SidebarLink to="/terms" icon={FiShield} label="Terms & Conditions" onClick={closeMobile} />
@@ -495,16 +488,16 @@ const Navbar = () => {
               </div>
 
               {/* Logout Footer */}
-              <div className="p-6 border-t border-gray-100 bg-gray-50/30">
+              <div className="p-4 border-t border-gray-100 bg-gray-50/50 mt-auto shrink-0">
                 {user ? (
                   <button
                     onClick={() => { logout(); navigate('/'); closeMobile(); }}
-                    className="w-full py-3 px-4 rounded-xl border-2 border-red-50 text-red-600 font-black text-sm flex items-center justify-center gap-3 hover:bg-red-50 transition-colors"
+                    className="w-full py-2.5 px-4 rounded-lg bg-white border border-red-100 text-red-600 font-bold text-[13px] flex items-center justify-center gap-2 hover:bg-red-50 hover:border-red-200 shadow-sm transition-all"
                   >
-                    <FiLogOut size={18} /> Logout Account
+                    <FiLogOut size={16} /> Logout Account
                   </button>
                 ) : (
-                  <p className="text-[10px] uppercase tracking-[0.25em] font-black text-gray-300 text-center italic">© {new Date().getFullYear()} Riddha Interio Mart.</p>
+                  <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-gray-400 text-center">© {new Date().getFullYear()} Riddha Interio</p>
                 )}
               </div>
             </motion.div>
