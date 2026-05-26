@@ -6,82 +6,8 @@
   },
   "builtFilter": {
     "isApproved": true,
-    "isActive": true,
-    "$or": [
-      {
-        "name": {
-          "$all": [
-            {}
-          ]
-        }
-      },
-      {
-        "description": {
-          "$all": [
-            {}
-          ]
-        }
-      }
-    ]
+    "isActive": true
   },
-<<<<<<< HEAD
-  "resultCount": 6,
-=======
-  "resultCount": 10,
->>>>>>> ea1c61e70d712b7a99a63a67a7d42bd8f0cc80f7
-  "results": [
-    {
-      "_id": "6a115739107b7b663108dd7d",
-      "name": "Test ModularKitchen Product 2",
-      "category": "ModularKitchen"
-    },
-    {
-      "_id": "6a115739107b7b663108dd7c",
-      "name": "Test ModularKitchen Product 1",
-      "category": "ModularKitchen"
-    },
-    {
-      "_id": "6a115739107b7b663108dd7b",
-      "name": "Test Hardware Product 2",
-      "category": "Hardware"
-    },
-    {
-      "_id": "6a115739107b7b663108dd7a",
-      "name": "Test Hardware Product 1",
-      "category": "Hardware"
-    },
-    {
-      "_id": "6a115739107b7b663108dd79",
-      "name": "Test Bathroom Product 2",
-      "category": "Bathroom"
-    },
-    {
-      "_id": "6a115739107b7b663108dd78",
-      "name": "Test Bathroom Product 1",
-      "category": "Bathroom"
-<<<<<<< HEAD
-=======
-    },
-    {
-      "_id": "6a115739107b7b663108dd77",
-      "name": "Test Office Product 2",
-      "category": "Office"
-    },
-    {
-      "_id": "6a115739107b7b663108dd76",
-      "name": "Test Office Product 1",
-      "category": "Office"
-    },
-    {
-      "_id": "6a115739107b7b663108dd75",
-      "name": "Test OutDoor Product 2",
-      "category": "OutDoor"
-    },
-    {
-      "_id": "6a115739107b7b663108dd74",
-      "name": "Test OutDoor Product 1",
-      "category": "OutDoor"
->>>>>>> ea1c61e70d712b7a99a63a67a7d42bd8f0cc80f7
-    }
-  ]
+  "resultCount": 0,
+  "results": []
 }
