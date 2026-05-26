@@ -299,7 +299,14 @@ const SearchEntryPage = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-black text-[#189D91]">₹{product.discountPrice || product.price}</span>
+                        <span className="text-sm font-black text-[#189D91]">
+                          ₹{(() => {
+                            const pPrice = Number(product.price) || 0;
+                            const pDiscount = Number(product.discountPrice) || 0;
+                            const display = (pDiscount > 0 && pDiscount < pPrice) ? pDiscount : pPrice;
+                            return display.toLocaleString();
+                          })()}
+                        </span>
                         <FiChevronRight className="text-gray-300 group-hover:text-[#189D91] transition-colors" />
                       </div>
                     </button>

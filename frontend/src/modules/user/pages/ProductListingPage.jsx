@@ -51,8 +51,14 @@ const ProductListingPage = () => {
       );
     }
 
-    if (sortBy === 'price-low') result.sort((a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
-    if (sortBy === 'price-high') result.sort((a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
+    const getEffectivePrice = (p) => {
+      const pPrice = Number(p.price) || 0;
+      const pDiscount = Number(p.discountPrice) || 0;
+      return (pDiscount > 0 && pDiscount < pPrice) ? pDiscount : pPrice;
+    };
+
+    if (sortBy === 'price-low') result.sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
+    if (sortBy === 'price-high') result.sort((a, b) => getEffectivePrice(b) - getEffectivePrice(a));
 
     return result;
   }, [activeCategory, sortBy, products]);

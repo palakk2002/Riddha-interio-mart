@@ -45,14 +45,11 @@ const SectionGrid = ({ products, loading, containerVariants }) => {
       ) : (
         products.map((product) => {
           const productId = product._id || product.id;
-          const displayPrice = product?.discountPrice != null && product.discountPrice !== ''
-            ? product.discountPrice
-            : product?.price;
-          const originalPrice =
-            product?.discountPrice != null && product.discountPrice !== ''
-              ? product?.price
-              : null;
-          const hasDiscount = originalPrice != null && Number(originalPrice) > Number(displayPrice);
+          const rawPrice = Number(product?.price) || 0;
+          const rawDiscount = Number(product?.discountPrice) || 0;
+          const hasDiscount = rawDiscount > 0 && rawDiscount < rawPrice;
+          const displayPrice = hasDiscount ? rawDiscount : rawPrice;
+          const originalPrice = hasDiscount ? rawPrice : null;
 
           return (
             <Motion.div

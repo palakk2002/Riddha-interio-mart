@@ -64,6 +64,11 @@ exports.getProducts = async (req, res, next) => {
     if (!isAdmin) {
       filter.isApproved = true;
       filter.isActive = true;
+      
+      // Filter out products from unverified sellers
+      const unverifiedSellers = await Seller.find({ isVerified: { $ne: true } }).select('_id');
+      const unverifiedSellerIds = unverifiedSellers.map(s => s._id);
+      filter.seller = { $nin: unverifiedSellerIds };
     } else {
       if (req.query.isActive !== undefined && req.query.isActive !== 'all') {
         filter.isActive = req.query.isActive === 'true' || req.query.isActive === true;
