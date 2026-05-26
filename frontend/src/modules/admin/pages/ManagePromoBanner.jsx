@@ -59,10 +59,7 @@ const ManagePromoBanner = () => {
     fetchBanners();
   }, []);
 
-  // Flush state leaks when changing tabs
-  useEffect(() => {
-    resetForm();
-  }, [activeTab]);
+
 
   const totalBanners = banners.length;
 
@@ -200,7 +197,12 @@ const ManagePromoBanner = () => {
 
         <div className="inline-flex p-1.5 rounded-2xl border border-soft-oatmeal bg-white shadow-sm w-full md:w-auto">
           <button
-            onClick={() => setActiveTab('create')}
+            onClick={() => {
+              if (editingId) {
+                resetForm();
+              }
+              setActiveTab('create');
+            }}
             className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
               activeTab === 'create'
                 ? 'bg-deep-espresso text-white shadow-sm'
@@ -211,7 +213,10 @@ const ManagePromoBanner = () => {
             Create Promo Banner
           </button>
           <button
-            onClick={() => setActiveTab('all')}
+            onClick={() => {
+              resetForm();
+              setActiveTab('all');
+            }}
             className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
               activeTab === 'all'
                 ? 'bg-deep-espresso text-white shadow-sm'

@@ -27,7 +27,8 @@ const Profile = () => {
   };
 
   const copyReferralCode = () => {
-    navigator.clipboard.writeText('RIDDHA-2026');
+    const code = user?.referralCode || 'RIDDHA-2026';
+    navigator.clipboard.writeText(code);
     setCopied(true);
     toast.success('Referral code copied!');
     setTimeout(() => setCopied(false), 2000);
@@ -149,7 +150,9 @@ const Profile = () => {
                 <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
                   <FiGift className="text-[#189D91]" />
                 </div>
-                <p className="text-[10px] font-bold text-[#189D91] uppercase tracking-wider">2 Friends Referred Successfully</p>
+                <p className="text-[10px] font-bold text-[#189D91] uppercase tracking-wider">
+                  {user.referralCount || 0} {user.referralCount === 1 ? 'Friend' : 'Friends'} Referred Successfully
+                </p>
               </div>
             </div>
             
@@ -157,7 +160,7 @@ const Profile = () => {
               <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-3 text-center">MY REFERRAL CODE</p>
               <div className="flex items-center gap-3">
                 <div className="px-6 py-3 bg-gray-50 rounded-xl border-2 border-dashed border-[#189D91]/20 font-bold text-slate-800 tracking-widest text-lg">
-                  RIDDHA-2026
+                  {user.referralCode || 'PENDING'}
                 </div>
                 <button 
                   onClick={copyReferralCode}

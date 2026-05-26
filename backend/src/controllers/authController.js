@@ -199,7 +199,9 @@ exports.getMe = async (req, res) => {
         isVerified: req.user.isVerified || false,
         approvalStatus: req.user.approvalStatus || "",
         type: req.user.type || "standard",
-        permissions: req.user.permissions || {}
+        permissions: req.user.permissions || {},
+        referralCode: req.user.referralCode || "",
+        referralCount: req.user.referralCount || 0
       }
     });
   } catch (err) {

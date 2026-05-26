@@ -362,12 +362,14 @@ exports.addOrderItems = async (req, res) => {
       }
     }
 
-    // Process Referral First Order reward for referrer
-    try {
-      const referralService = require('../services/referralService');
-      await referralService.processFirstOrderReward(req.user.id, createdOrders[0]._id);
-    } catch (refOrderRewardErr) {
-      console.error('Referral order reward processing failed:', refOrderRewardErr.message);
+    // Process Referral First Order reward for referrer (COD only)
+    if (paymentMethod === 'COD') {
+      try {
+        const referralService = require('../services/referralService');
+        await referralService.processFirstOrderReward(req.user.id, createdOrders[0]._id);
+      } catch (refOrderRewardErr) {
+        console.error('Referral order reward processing failed:', refOrderRewardErr.message);
+      }
     }
 
     let razorpayOrder = null;
@@ -974,6 +976,14 @@ exports.verifyPayment = async (req, res) => {
         await walletService.recordPendingSale(order);
       } catch (walletErr) {
         console.error('Failed to log pending earnings in verifyPayment:', walletErr.message);
+      }
+
+      // Process Referral First Order reward for referrer (Online Payment)
+      try {
+        const referralService = require('../services/referralService');
+        await referralService.processFirstOrderReward(order.user, order._id);
+      } catch (refOrderRewardErr) {
+        console.error('Referral order reward processing failed in verifyPayment:', refOrderRewardErr.message);
       }
 
       const { processInvoiceAsync } = require('../utils/invoiceService');

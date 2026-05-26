@@ -33,5 +33,12 @@
     "_id": "6a13f5725ccf49b0baf34346",
     "name": "Fintech Test Table",
     "category": "Test Category"
+  },
+  {
+    "_id": "6a157979815311dd3743db2e",
+    "name": "test name",
+    "category": "Test Category",
+    "subcategory": "",
+    "subsubcategory": ""
   }
 ]
