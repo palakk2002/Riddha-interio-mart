@@ -35,7 +35,7 @@ const OrderDetailPage = React.lazy(() => import('./pages/OrderDetailPage'));
 const ProductListPage = React.lazy(() => import('./pages/ProductListPage'));
 const AddInventoryPage = React.lazy(() => import('./pages/AddInventoryPage'));
 const EditInventoryPage = React.lazy(() => import('./pages/EditInventoryPage'));
-const ManageDeliveries = React.lazy(() => import('./pages/ManageDeliveries'));
+const FleetConsole = React.lazy(() => import('./pages/FleetConsole'));
 const AssignDeliveryPage = React.lazy(() => import('./pages/DeliveryAssignment'));
 const AddProductFlowPage = React.lazy(() => import('./pages/AddProductFlowPage'));
 const StockManagement = React.lazy(() => import('./pages/StockManagement'));
@@ -48,7 +48,6 @@ const UserPaymentsPage = React.lazy(() => import('./pages/UserPaymentsPage'));
 const CashCollectionPage = React.lazy(() => import('./pages/CashCollectionPage'));
 const SellerTransactionsPage = React.lazy(() => import('./pages/SellerTransactionsPage'));
 const ManageSellerListPage = React.lazy(() => import('./pages/ManageSellerListPage'));
-const ManageDeliveryBoyPage = React.lazy(() => import('./pages/ManageDeliveryBoyPage'));
 const FeedbackManagement = React.lazy(() => import('./pages/FeedbackManagement'));
 const SellerRecommendationManagement = React.lazy(() => import('./pages/SellerRecommendationManagement'));
 import { RBACProvider } from './data/RBACContext';
@@ -106,8 +105,8 @@ const AdminRoutes = () => {
 
           {/* Delivery */}
           <Route element={<ProtectedRoute permission="delivery" />}>
-            <Route path="/delivery" element={<ManageDeliveryBoyPage />} />
-            <Route path="/delivery/pending" element={<ManageDeliveries />} />
+            <Route path="/delivery" element={<FleetConsole />} />
+            <Route path="/delivery/pending" element={<FleetConsole />} />
             <Route path="/delivery/assign" element={<AssignDeliveryPage />} />
           </Route>
 

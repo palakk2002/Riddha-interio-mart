@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PageWrapper from '../components/PageWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 import { 
-  LuMapPin, LuSearch, LuTruck, LuPackage, LuCircleCheck, LuNavigation, LuX, LuExternalLink 
+  LuMapPin, LuSearch, LuTruck, LuPackage, LuCircleCheck, LuNavigation, LuX, LuExternalLink,
+  LuRefreshCw, LuWifi, LuWifiOff, LuClock
 } from 'react-icons/lu';
 import api from '../../../shared/utils/api';
+
+const POLL_INTERVAL = 15000; // 15 seconds
 
 const OrderTracking = () => {
   const [orders, setOrders] = useState([]);
@@ -12,23 +16,42 @@ const OrderTracking = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showMap, setShowMap] = useState(false);
+  const [lastSync, setLastSync] = useState(null);
+  const [isPolling, setIsPolling] = useState(false);
+  const pollRef = useRef(null);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await api.get('/orders');
-        // Filter active orders or orders with an assigned delivery boy
-        setOrders(res.data.data.filter(o => 
-          ['Shipped', 'Out for Delivery', 'Processing'].includes(o.status) || 
-          (o.deliveryBoy && o.deliveryStatus !== 'None' && o.status !== 'Delivered')
-        ));
-      } catch (err) {
-        console.error('Failed to fetch orders for tracking:', err);
-      } finally {
-        setLoading(false);
+  const fetchOrders = async (silent = false) => {
+    try {
+      if (!silent) setLoading(true);
+      else setIsPolling(true);
+
+      const res = await api.get('/orders');
+      const activeOrders = res.data.data.filter(o => 
+        ['Shipped', 'Out for Delivery', 'Processing'].includes(o.status) || 
+        (o.deliveryBoy && o.deliveryStatus !== 'None' && o.status !== 'Delivered')
+      );
+      setOrders(activeOrders);
+      setLastSync(new Date());
+
+      // If a modal is open, also refresh the selected order live data
+      if (selectedOrder) {
+        const refreshed = activeOrders.find(o => o._id === selectedOrder._id);
+        if (refreshed) setSelectedOrder(refreshed);
       }
-    };
+    } catch (err) {
+      console.error('Failed to fetch orders for tracking:', err);
+      if (!silent) toast.error('Failed to load tracking data');
+    } finally {
+      setLoading(false);
+      setIsPolling(false);
+    }
+  };
+
+  // Initial fetch + 15-second polling
+  useEffect(() => {
     fetchOrders();
+    pollRef.current = setInterval(() => fetchOrders(true), POLL_INTERVAL);
+    return () => clearInterval(pollRef.current);
   }, []);
 
   const filteredOrders = orders.filter(o => 
@@ -42,11 +65,42 @@ const OrderTracking = () => {
     setShowMap(true);
   };
 
-  const getMapUrl = (order) => {
-    if (!order) return '';
+  /**
+   * Priority 1: Use the courier's real GPS coordinates if available and recent (< 30 min old)
+   * Priority 2: Fall back to the delivery address text search
+   */
+  const getMapConfig = (order) => {
+    if (!order) return { url: '', isLive: false };
+
+    const loc = order.deliveryBoy?.currentLocation;
+    const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
+
+    if (
+      loc &&
+      typeof loc.latitude === 'number' &&
+      typeof loc.longitude === 'number' &&
+      loc.updatedAt &&
+      new Date(loc.updatedAt) > thirtyMinsAgo
+    ) {
+      // Real-time GPS embed — shows the courier's actual live position
+      const url = `https://maps.google.com/maps?q=${loc.latitude},${loc.longitude}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+      return { url, isLive: true, lat: loc.latitude, lng: loc.longitude, updatedAt: loc.updatedAt };
+    }
+
+    // Fallback: show delivery destination on map
     const address = `${order.shippingAddress?.fullAddress || ''} ${order.shippingAddress?.city || ''} ${order.shippingAddress?.pincode || ''}`;
-    return `https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+    const url = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+    return { url, isLive: false };
   };
+
+  const formatLastSync = (date) => {
+    if (!date) return 'Never';
+    const diff = Math.round((Date.now() - date.getTime()) / 1000);
+    if (diff < 60) return `${diff}s ago`;
+    return `${Math.floor(diff / 60)}m ago`;
+  };
+
+  const mapConfig = selectedOrder ? getMapConfig(selectedOrder) : { url: '', isLive: false };
 
   return (
     <PageWrapper>
@@ -57,18 +111,34 @@ const OrderTracking = () => {
             <h1 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
               <LuNavigation className="text-[var(--color-primary)]" size={20} /> Live Order Tracking
             </h1>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active shipment telemetry ledger</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+              Active shipment telemetry · Auto-refreshes every 15s
+            </p>
           </div>
           
-          <div className="relative w-full sm:w-72">
-            <LuSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
-            <input 
-              type="text" 
-              placeholder="Search Order ID or Customer..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-1.5 focus:bg-white focus:outline-none focus:border-[var(--color-primary)] transition-all text-xs font-semibold text-slate-800 placeholder-slate-400"
-            />
+          <div className="flex items-center gap-3">
+            {/* Live Sync Indicator */}
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+              {isPolling ? (
+                <LuRefreshCw size={13} className="text-[var(--color-primary)] animate-spin" />
+              ) : (
+                <LuWifi size={13} className="text-emerald-500" />
+              )}
+              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                Synced {formatLastSync(lastSync)}
+              </span>
+            </div>
+
+            <div className="relative w-full sm:w-64">
+              <LuSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+              <input 
+                type="text" 
+                placeholder="Search Order ID or Customer..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-1.5 focus:bg-white focus:outline-none focus:border-[var(--color-primary)] transition-all text-xs font-semibold text-slate-800 placeholder-slate-400"
+              />
+            </div>
           </div>
         </div>
 
@@ -86,66 +156,85 @@ const OrderTracking = () => {
              <p className="text-xs text-slate-400 max-w-sm mx-auto font-medium">All active order cycles are currently settled.</p>
           </div>
         ) : (
-          /* Sleek Compact Grid */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredOrders.map((order) => (
-              <div 
-                key={order._id} 
-                className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-sm hover:border-[var(--color-primary)] hover:shadow-md transition-all duration-300 group flex flex-col justify-between"
-              >
-                <div>
-                  {/* Card Header */}
-                  <div className="flex justify-between items-start mb-3 pb-3 border-b border-slate-50">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 bg-teal-50 text-[var(--color-primary)] rounded-lg flex items-center justify-center">
-                        <LuTruck size={16} />
+            {filteredOrders.map((order) => {
+              const hasLiveGps = (() => {
+                const loc = order.deliveryBoy?.currentLocation;
+                const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
+                return loc && typeof loc.latitude === 'number' && loc.updatedAt && new Date(loc.updatedAt) > thirtyMinsAgo;
+              })();
+
+              return (
+                <div 
+                  key={order._id} 
+                  className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-sm hover:border-[var(--color-primary)] hover:shadow-md transition-all duration-300 group flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Card Header */}
+                    <div className="flex justify-between items-start mb-3 pb-3 border-b border-slate-50">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 bg-teal-50 text-[var(--color-primary)] rounded-lg flex items-center justify-center">
+                          <LuTruck size={16} />
+                        </div>
+                        <div>
+                          <p className="text-[8px] font-bold uppercase tracking-wider text-slate-400 leading-none">Order ID</p>
+                          <h3 className="text-xs font-bold text-slate-800 mt-1">#{order.orderId || order._id.slice(-8).toUpperCase()}</h3>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[8px] font-bold uppercase tracking-wider text-slate-400 leading-none">Order ID</p>
-                        <h3 className="text-xs font-bold text-slate-800 mt-1">#{order.orderId || order._id.slice(-8).toUpperCase()}</h3>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
+                        order.status === 'Shipped' ? 'bg-emerald-50 text-emerald-600 border-emerald-100/50' : 'bg-amber-50 text-amber-600 border-amber-100/50'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </div>
+
+                    {/* Details Grid */}
+                    <div className="grid grid-cols-2 gap-3 mb-4 text-[11px] leading-tight">
+                      <div className="space-y-0.5">
+                        <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Receiver</p>
+                        <p className="font-semibold text-slate-700 truncate">{order.user?.fullName || 'Guest User'}</p>
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Dispatcher</p>
+                        <p className="font-semibold text-slate-700 truncate">{order.deliveryBoy?.fullName || 'Awaiting Partner'}</p>
                       </div>
                     </div>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
-                      order.status === 'Shipped' ? 'bg-emerald-50 text-emerald-600 border-emerald-100/50' : 'bg-amber-50 text-amber-600 border-amber-100/50'
+
+                    {/* Address */}
+                    <div className="bg-slate-50/50 p-2.5 rounded-lg border border-slate-100 mb-4 flex items-start gap-2">
+                      <LuMapPin size={13} className="text-slate-400 shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Delivery Address</p>
+                        <p className="text-[10px] text-slate-500 font-semibold truncate mt-0.5">
+                          {order.shippingAddress?.fullAddress}, {order.shippingAddress?.city}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* GPS Status + Track Button */}
+                  <div className="space-y-2">
+                    {/* GPS Quality Indicator */}
+                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider ${
+                      hasLiveGps 
+                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+                        : 'bg-slate-50 text-slate-400 border border-slate-100'
                     }`}>
-                      {order.status}
-                    </span>
-                  </div>
+                      <span className={`w-1.5 h-1.5 rounded-full ${hasLiveGps ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+                      {hasLiveGps ? 'Live GPS Available' : 'GPS Unavailable · Address Only'}
+                    </div>
 
-                  {/* Compact Details Grid */}
-                  <div className="grid grid-cols-2 gap-3 mb-4 text-[11px] leading-tight">
-                    <div className="space-y-0.5">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Receiver</p>
-                      <p className="font-semibold text-slate-700 truncate">{order.user?.fullName || 'Guest User'}</p>
-                    </div>
-                    <div className="space-y-0.5">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Dispatcher Partner</p>
-                      <p className="font-semibold text-slate-700 truncate">{order.deliveryBoy?.fullName || 'Awaiting Partner'}</p>
-                    </div>
-                  </div>
-
-                  {/* Destination Details */}
-                  <div className="bg-slate-50/50 p-2.5 rounded-lg border border-slate-100 mb-4 flex items-start gap-2">
-                    <LuMapPin size={13} className="text-slate-400 shrink-0 mt-0.5" />
-                    <div className="min-w-0">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Delivery Address</p>
-                      <p className="text-[10px] text-slate-500 font-semibold truncate mt-0.5">
-                        {order.shippingAddress?.fullAddress}, {order.shippingAddress?.city}
-                      </p>
-                    </div>
+                    <button 
+                      onClick={() => handleOpenMap(order)}
+                      className="w-full py-2 bg-[var(--color-primary)] hover:opacity-90 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98]"
+                    >
+                      <LuMapPin size={13} />
+                      {hasLiveGps ? 'View Live Location' : 'View Destination Map'}
+                    </button>
                   </div>
                 </div>
-
-                {/* Compact Action Trigger */}
-                <button 
-                  onClick={() => handleOpenMap(order)}
-                  className="w-full py-2 bg-[var(--color-primary)] hover:opacity-90 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98]"
-                >
-                  <LuMapPin size={13} />
-                  GPS Live Location
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -171,15 +260,25 @@ const OrderTracking = () => {
               {/* Modal Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 shrink-0 bg-white">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-[var(--color-primary)] text-white rounded-lg flex items-center justify-center shadow-sm shadow-[var(--color-primary)]/10">
+                  <div className="w-9 h-9 bg-[var(--color-primary)] text-white rounded-lg flex items-center justify-center shadow-sm">
                     <LuNavigation size={18} />
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-slate-800 leading-none">
-                      Tracking Shipment <span className="text-[var(--color-primary)]">#{selectedOrder.orderId || selectedOrder._id.slice(-8).toUpperCase()}</span>
+                      Tracking <span className="text-[var(--color-primary)]">#{selectedOrder.orderId || selectedOrder._id.slice(-8).toUpperCase()}</span>
                     </h3>
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live Telemetry
+                      {mapConfig.isLive ? (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Live Courier GPS · Updates every 15s
+                        </>
+                      ) : (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                          Destination Map · Courier GPS not broadcasting
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -191,7 +290,7 @@ const OrderTracking = () => {
                 </button>
               </div>
 
-              {/* Map View Frame */}
+              {/* Map View */}
               <div className="flex-1 bg-slate-50 relative">
                 <iframe
                   title="Live Tracking Map"
@@ -201,7 +300,7 @@ const OrderTracking = () => {
                   scrolling="no"
                   marginHeight="0"
                   marginWidth="0"
-                  src={getMapUrl(selectedOrder)}
+                  src={mapConfig.url}
                   className="filter grayscale-[0.05]"
                 />
                 
@@ -217,13 +316,19 @@ const OrderTracking = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-slate-900 p-3 rounded-lg shadow-lg flex items-center gap-3 text-white sm:min-w-[240px] shrink-0">
-                    <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center shrink-0">
-                      <LuTruck size={16} />
+                  <div className={`p-3 rounded-lg shadow-lg flex items-center gap-3 sm:min-w-[240px] shrink-0 ${mapConfig.isLive ? 'bg-slate-900 text-white' : 'bg-amber-50 border border-amber-100'}`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${mapConfig.isLive ? 'bg-white/10' : 'bg-amber-100'}`}>
+                      <LuTruck size={16} className={mapConfig.isLive ? 'text-white' : 'text-amber-600'} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[8px] font-bold uppercase tracking-wider text-slate-300">Carrier Partner</p>
-                      <p className="text-[11px] font-bold truncate">{selectedOrder.deliveryBoy?.fullName || 'Express Dispatch'}</p>
+                      <p className={`text-[8px] font-bold uppercase tracking-wider ${mapConfig.isLive ? 'text-slate-300' : 'text-amber-600'}`}>
+                        {mapConfig.isLive ? 'Courier Position' : 'No Live GPS'}
+                      </p>
+                      <p className={`text-[11px] font-bold truncate ${mapConfig.isLive ? 'text-white' : 'text-amber-700'}`}>
+                        {mapConfig.isLive 
+                          ? `${selectedOrder.deliveryBoy?.fullName || 'En Route'}`
+                          : 'Partner not broadcasting'}
+                      </p>
                     </div>
                   </div>
                 </div>

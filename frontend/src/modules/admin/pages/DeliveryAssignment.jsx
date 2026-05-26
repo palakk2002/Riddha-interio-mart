@@ -15,12 +15,7 @@ import {
   LuCircleAlert
 } from 'react-icons/lu';
 import api from '../../../shared/utils/api';
-// import { toast } from 'react-hot-toast'; 
-
-const toast = {
-  success: (msg) => window.alert('Success: ' + msg),
-  error: (msg) => window.alert('Error: ' + msg)
-};
+import { toast } from 'react-hot-toast';
 
 const AssignDeliveryPage = () => {
   const [orders, setOrders] = useState([]);
@@ -88,10 +83,22 @@ const AssignDeliveryPage = () => {
     }
   };
 
+  const orderPincode = selectedOrder?.shippingAddress?.pincode?.trim();
+
   const filteredOrders = orders.filter(o => 
     o.shippingAddress.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     o._id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Sort partners: pincode-matching partners appear first
+  const sortedPartners = [...partners].sort((a, b) => {
+    if (!orderPincode) return 0;
+    const aMatch = (a.servicePincodes || []).includes(orderPincode);
+    const bMatch = (b.servicePincodes || []).includes(orderPincode);
+    if (aMatch && !bMatch) return -1;
+    if (!aMatch && bMatch) return 1;
+    return 0;
+  });
 
   return (
     <div className="p-4 md:p-8 space-y-8 bg-[#FDFBF9] min-h-screen">
@@ -218,37 +225,55 @@ const AssignDeliveryPage = () => {
                  </div>
 
                  <div className="space-y-4">
-                    {partners.length === 0 ? (
-                       <div className="text-center py-10 italic text-dusty-cocoa text-sm">
-                          No partners are currently available or online.
-                       </div>
-                    ) : (
-                      partners.map((partner) => (
-                        <button
-                          key={partner._id}
-                          disabled={assigning}
-                          onClick={() => handleAssign(partner._id)}
-                          className="w-full group flex items-center justify-between p-4 rounded-2xl border border-soft-oatmeal hover:border-warm-sand hover:bg-warm-sand/5 transition-all duration-300 text-left disabled:opacity-50"
-                        >
-                          <div className="flex items-center gap-4">
-                             <div className="w-10 h-10 bg-soft-oatmeal/20 rounded-xl flex items-center justify-center text-warm-sand group-hover:bg-warm-sand group-hover:text-white transition-all">
-                                <LuUser size={20} />
-                             </div>
-                             <div>
-                                <h5 className="text-sm font-bold text-deep-espresso">{partner.fullName}</h5>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                   <div className={`w-1.5 h-1.5 rounded-full ${partner.status === 'Available' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                                   <span className="text-[9px] font-black uppercase text-dusty-cocoa">{partner.vehicleType} Specialist</span>
+                     {sortedPartners.length === 0 ? (
+                        <div className="text-center py-10 italic text-dusty-cocoa text-sm">
+                           No partners are currently available or online.
+                        </div>
+                     ) : (
+                       sortedPartners.map((partner) => {
+                         const matchesPincode = orderPincode && (partner.servicePincodes || []).includes(orderPincode);
+                         return (
+                           <button
+                             key={partner._id}
+                             disabled={assigning}
+                             onClick={() => handleAssign(partner._id)}
+                             className={`w-full group flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 text-left disabled:opacity-50 ${
+                               matchesPincode
+                                 ? 'border-emerald-200 bg-emerald-50/50 hover:border-emerald-400'
+                                 : 'border-soft-oatmeal hover:border-warm-sand hover:bg-warm-sand/5'
+                             }`}
+                           >
+                             <div className="flex items-center gap-4">
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                                  matchesPincode
+                                    ? 'bg-emerald-100 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white'
+                                    : 'bg-soft-oatmeal/20 text-warm-sand group-hover:bg-warm-sand group-hover:text-white'
+                                }`}>
+                                   <LuUser size={20} />
+                                </div>
+                                <div>
+                                   <div className="flex items-center gap-2">
+                                     <h5 className="text-sm font-bold text-deep-espresso">{partner.fullName}</h5>
+                                     {matchesPincode && (
+                                       <span className="text-[8px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-full border border-emerald-200">
+                                         🎯 Pincode Match
+                                       </span>
+                                     )}
+                                   </div>
+                                   <div className="flex items-center gap-2 mt-0.5">
+                                      <div className={`w-1.5 h-1.5 rounded-full ${partner.status === 'Available' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                                      <span className="text-[9px] font-black uppercase text-dusty-cocoa">{partner.vehicleType} Specialist</span>
+                                   </div>
                                 </div>
                              </div>
-                          </div>
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                             <span className="text-[9px] font-black uppercase text-warm-sand">Select Partner</span>
-                             <LuChevronRight size={14} className="text-warm-sand" />
-                          </div>
-                        </button>
-                      ))
-                    )}
+                             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span className="text-[9px] font-black uppercase text-warm-sand">Select Partner</span>
+                                <LuChevronRight size={14} className="text-warm-sand" />
+                             </div>
+                           </button>
+                         );
+                       })
+                     )}
                  </div>
 
                  <div className="pt-4 text-center">

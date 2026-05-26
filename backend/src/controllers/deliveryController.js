@@ -1,4 +1,5 @@
 const Delivery = require('../models/Delivery');
+const Order = require('../models/Order');
 const sendTokenResponse = require('../utils/sendTokenResponse');
 const checkEmailExists = require('../utils/checkEmailExists');
 const { notifyAdminNewDelivery, notifyDeliveryApproval } = require('../socket');
@@ -334,3 +335,29 @@ exports.updateDeliveryLocation = async (req, res, next) => {
   }
 };
 
+// @desc    Permanently delete a delivery partner (admin only)
+// @route   DELETE /api/delivery/:id
+// @access  Private/Admin
+exports.deleteDeliveryPartner = async (req, res, next) => {
+  try {
+    const partner = await Delivery.findById(req.params.id);
+    if (!partner) {
+      return res.status(404).json({ success: false, error: 'Delivery partner not found' });
+    }
+
+    // Anonymize their order history — remove direct reference but keep order records intact
+    await Order.updateMany(
+      { deliveryBoy: req.params.id },
+      { $unset: { deliveryBoy: '' } }
+    );
+
+    await Delivery.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: `Delivery partner "${partner.fullName}" has been permanently removed.`
+    });
+  } catch (err) {
+    next(err);
+  }
+};

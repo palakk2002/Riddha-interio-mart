@@ -9,7 +9,8 @@ const {
   getAllDeliveryPartners,
   updateDeliveryApprovalStatus,
   getPendingDeliveryBoys,
-  updateDeliveryLocation
+  updateDeliveryLocation,
+  deleteDeliveryPartner
 } = require('../controllers/deliveryController');
 const { getDeliveryAnalytics } = require('../controllers/deliveryAnalyticsController');
 const { protect, authorize } = require('../middleware/auth');
@@ -42,5 +43,6 @@ router.get('/analytics', protect, getDeliveryAnalytics);
 router.get('/pending', protect, authorize('admin'), getPendingDeliveryBoys);
 router.get('/', protect, authorize('admin'), getAllDeliveryPartners);
 router.put('/:id/approve', protect, authorize('admin'), updateDeliveryApprovalStatus);
+router.delete('/:id', protect, authorize('admin'), deleteDeliveryPartner);
 
 module.exports = router;
