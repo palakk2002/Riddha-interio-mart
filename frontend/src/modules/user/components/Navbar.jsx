@@ -28,7 +28,7 @@ import { useCart } from "../data/CartContext";
 import { useUser } from "../data/UserContext";
 import SearchBar from "./SearchBar";
 import api from '../../../shared/utils/api';
-import { getDeliveryEstimate } from '../../../shared/utils/delivery';
+import { getDeliveryEstimate, getCityFromPincode } from '../../../shared/utils/delivery';
 import BulkOrderModal from "./BulkOrderModal";
 import NotificationDropdown from "../../../shared/components/NotificationDropdown";
 import Logo from "../../../assets/WhatsApp Image 2026-05-06 at 3.50.08 PM.jpeg";
@@ -76,6 +76,30 @@ const Navbar = () => {
   const [pincode, setPincode] = useState('700016');
   const [showMoreCategories, setShowMoreCategories] = useState(false);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+
+  const activeCity = getCityFromPincode(pincode);
+  const deliveryEstimate = getDeliveryEstimate(pincode);
+
+  const [isPincodeModalOpen, setIsPincodeModalOpen] = useState(false);
+  const [tempPincode, setTempPincode] = useState('');
+  const [pincodeError, setPincodeError] = useState('');
+
+  const handleOpenPincodeModal = () => {
+    setTempPincode(pincode);
+    setPincodeError('');
+    setIsPincodeModalOpen(true);
+  };
+
+  const handlePincodeSubmit = (e) => {
+    e.preventDefault();
+    if (tempPincode.length !== 6) {
+      setPincodeError('Please enter a 6-digit pincode.');
+      return;
+    }
+    localStorage.setItem('userPincode', tempPincode);
+    setPincode(tempPincode);
+    setIsPincodeModalOpen(false);
+  };
 
   useEffect(() => {
     const savedPincode = localStorage.getItem('userPincode');
@@ -154,8 +178,11 @@ const Navbar = () => {
                 <FiMapPin className="text-[#004D40] w-5 h-5 shrink-0" />
                 <div className="flex flex-col">
                   <span className="text-[10px] font-medium text-gray-400 leading-none">Delivering to</span>
-                  <button className="flex items-center gap-1 text-[11.5px] font-bold text-gray-800 mt-0.5 group">
-                    Kolkata - <span>{pincode}</span> <FiChevronDown className="text-gray-400 group-hover:text-gray-600 transition-colors" size={12} />
+                  <button 
+                    onClick={handleOpenPincodeModal}
+                    className="flex items-center gap-1 text-[11.5px] font-bold text-gray-800 mt-0.5 group"
+                  >
+                    {activeCity} - <span>{pincode}</span> <FiChevronDown className="text-gray-400 group-hover:text-gray-600 transition-colors" size={12} />
                   </button>
                 </div>
               </div>
@@ -166,7 +193,7 @@ const Navbar = () => {
                 <div className="flex flex-col">
                   <span className="text-[10px] font-medium text-gray-400 leading-none">Delivery in</span>
                   <span className="text-[11.5px] font-extrabold text-[#EA580C] mt-0.5">
-                    4 hours
+                    {deliveryEstimate.time}
                   </span>
                 </div>
               </div>
@@ -302,62 +329,30 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* Dynamic Subcategories next to All Categories */}
+            {/* Dynamic Parent Categories next to All Categories */}
             <div className="flex items-center gap-6 lg:gap-8 overflow-x-auto no-scrollbar scroll-smooth ml-6">
-              {(() => {
-                const subcategoriesList = [];
-                categories.forEach(cat => {
-                  if (cat.subcategories && cat.subcategories.length > 0) {
-                    cat.subcategories.forEach(sub => {
-                      subcategoriesList.push({
-                        name: sub.name,
-                        parentSlug: getCategorySlug(cat.name),
-                        slug: getCategorySlug(sub.name)
-                      });
-                    });
-                  }
-                });
+              {categories.map((cat, i) => {
+                const slug = getCategorySlug(cat.name);
+                const linkTo = `/category/${slug}`;
+                const isActive = location.pathname === linkTo;
 
-                // Fallback to parent categories if no nested subcategories are defined yet
-                const listToRender = subcategoriesList.length > 0 
-                  ? subcategoriesList 
-                  : categories.map(cat => ({
-                      name: cat.name,
-                      parentSlug: getCategorySlug(cat.name),
-                      slug: '',
-                      isParent: true
-                    }));
-
-                return listToRender.map((item, i) => {
-                  const linkTo = item.isParent 
-                    ? `/category/${item.parentSlug}`
-                    : `/category/${item.parentSlug}?sub=${encodeURIComponent(item.name)}`;
-                  
-                  // Active status check using location query params
-                  const queryParams = new URLSearchParams(location.search);
-                  const activeSub = queryParams.get('sub');
-                  const isActive = item.isParent
-                    ? location.pathname === `/category/${item.parentSlug}`
-                    : location.pathname === `/category/${item.parentSlug}` && activeSub?.toLowerCase() === item.name.toLowerCase();
-
-                  return (
-                    <div
-                      key={i}
-                      className="relative h-full flex items-center shrink-0"
+                return (
+                  <div
+                    key={i}
+                    className="relative h-full flex items-center shrink-0"
+                  >
+                    <Link
+                      to={linkTo}
+                      className={`text-[13px] font-semibold tracking-tight transition-all h-full flex items-center whitespace-nowrap px-1 py-3 ${isActive
+                        ? "text-[#004D40] border-b-2 border-[#004D40]"
+                        : "text-gray-800 hover:text-[#004D40]"
+                        }`}
                     >
-                      <Link
-                        to={linkTo}
-                        className={`text-[13px] font-semibold tracking-tight transition-all h-full flex items-center whitespace-nowrap px-1 py-3 ${isActive
-                          ? "text-[#004D40] border-b-2 border-[#004D40]"
-                          : "text-gray-800 hover:text-[#004D40]"
-                          }`}
-                      >
-                        {item.name}
-                      </Link>
-                    </div>
-                  );
-                });
-              })()}
+                      {cat.name}
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -459,6 +454,26 @@ const Navbar = () => {
                   )}
                 </div>
 
+                {/* Mobile Delivery Location Selector */}
+                <div className="px-5 py-3.5 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-2.5">
+                    <FiMapPin className="text-[#004D40] w-4 h-4" />
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Delivering to</span>
+                      <span className="text-[12px] font-bold text-gray-800 mt-0.5">{activeCity} - {pincode}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      closeMobile();
+                      handleOpenPincodeModal();
+                    }}
+                    className="text-[10px] font-bold uppercase tracking-wider text-[#004D40] hover:underline"
+                  >
+                    Change
+                  </button>
+                </div>
+
                 <div className="px-3 py-3 space-y-1 shrink-0">
                   {/* Primary Nav */}
                   <div className="pb-3 mb-3 border-b border-gray-50">
@@ -509,6 +524,78 @@ const Navbar = () => {
         isOpen={isBulkModalOpen}
         onClose={() => setIsBulkModalOpen(false)}
       />
+
+      {/* Premium Pincode Selection Modal */}
+      <AnimatePresence>
+        {isPincodeModalOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsPincodeModalOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-[4px] z-[999]"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 350 }}
+              className="fixed inset-0 m-auto w-[90%] max-w-[380px] h-fit bg-white rounded-3xl shadow-2xl z-[1000] overflow-hidden p-6 border border-gray-100 flex flex-col gap-4"
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-[#004D40]/5 flex items-center justify-center text-[#004D40]">
+                    <FiMapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-[15px] font-extrabold text-gray-900 tracking-tight leading-none">Change Location</h3>
+                    <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-400 mt-1">Select Delivery Destination</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsPincodeModalOpen(false)}
+                  className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                >
+                  <FiX className="w-5 h-5" />
+                </button>
+              </div>
+
+              <p className="text-[12px] font-medium text-gray-400 leading-relaxed">
+                Enter your 6-digit delivery pincode to estimate shipping timeframes and product availability.
+              </p>
+
+              <form onSubmit={handlePincodeSubmit} className="flex flex-col gap-4 mt-2">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-gray-400 ml-1">Pincode</label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={tempPincode}
+                    onChange={(e) => setTempPincode(e.target.value.replace(/\D/g, ''))}
+                    placeholder="e.g. 700016"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border-2 border-transparent focus:border-[#004D40]/10 focus:bg-white focus:outline-none text-[13px] font-bold text-gray-800 tracking-widest"
+                    required
+                  />
+                </div>
+
+                {pincodeError && (
+                  <span className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">
+                    {pincodeError}
+                  </span>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full py-3.5 bg-[#004D40] text-white rounded-2xl font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#003d33] transition-colors shadow-lg shadow-[#004D40]/15"
+                >
+                  Update Location
+                </button>
+              </form>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 };
