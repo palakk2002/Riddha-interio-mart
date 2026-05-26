@@ -86,10 +86,7 @@ const ManageHeroBanner = () => {
     fetchBanners();
   }, []);
 
-  // Flush state leaks when changing tabs
-  useEffect(() => {
-    resetForm();
-  }, [activeTab]);
+
 
   const handleChange = (field, value) => {
     if (field.startsWith('bgImage.')) {
@@ -238,15 +235,20 @@ const ManageHeroBanner = () => {
 
         <div className="inline-flex p-1.5 rounded-2xl border border-soft-oatmeal bg-white shadow-sm w-full md:w-auto">
           <button
-            onClick={() => setActiveTab('create')}
+            onClick={() => {
+              if (activeTab !== 'create') {
+                resetForm();
+              }
+              setActiveTab('create');
+            }}
             className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
               activeTab === 'create'
                 ? 'bg-deep-espresso text-white shadow-sm'
                 : 'text-deep-espresso hover:bg-soft-oatmeal/30'
             }`}
           >
-            <LuImagePlus size={16} />
-            Create Banner
+            {editingId ? <LuPencil size={16} /> : <LuImagePlus size={16} />}
+            {editingId ? 'Edit Banner' : 'Create Banner'}
           </button>
           <button
             onClick={() => setActiveTab('all')}

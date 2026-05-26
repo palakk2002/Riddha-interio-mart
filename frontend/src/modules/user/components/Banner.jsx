@@ -16,7 +16,7 @@ const Banner = ({ banners }) => {
 
   // Filter out any banners from API that do not have a valid image URL
   const validBanners = Array.isArray(banners)
-    ? banners.filter(b => b && (b.image || b.bg || typeof b === 'string'))
+    ? banners.filter(b => b && (b.image || b.bg || b.bgImage?.src || typeof b === 'string'))
     : [];
 
   // Use dynamic banners if available and valid, otherwise fallback to defaults
@@ -45,7 +45,7 @@ const Banner = ({ banners }) => {
 
   if (!slides.length) return null;
 
-  const currentImage = slides[currentSlide]?.image || slides[currentSlide]?.bg || (typeof slides[currentSlide] === 'string' ? slides[currentSlide] : HeroBG1);
+  const currentImage = slides[currentSlide]?.image || slides[currentSlide]?.bg || slides[currentSlide]?.bgImage?.src || (typeof slides[currentSlide] === 'string' ? slides[currentSlide] : HeroBG1);
 
   return (
     <section className="py-2 md:py-4 bg-white">
