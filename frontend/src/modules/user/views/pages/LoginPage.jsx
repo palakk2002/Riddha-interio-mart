@@ -28,6 +28,29 @@ const LoginPage = () => {
     e.preventDefault();
     setError('');
 
+    if (!identifier) {
+      setError('Please enter your email address');
+      return;
+    }
+    if (!password) {
+      setError('Please enter your password');
+      return;
+    }
+
+    if (!identifier.includes('@')) {
+      setError('Email must contain an "@" symbol (e.g. user@example.com)');
+      return;
+    }
+    if (!identifier.includes('.')) {
+      setError('Email is missing a domain (e.g. .com, .in)');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(identifier)) {
+      setError('Please enter a valid email address format');
+      return;
+    }
+
     const isAdmin = location.pathname.startsWith('/admin');
     const isSeller = location.pathname.startsWith('/seller');
     const authPath = isAdmin ? '/auth/admin/login' : isSeller ? '/auth/seller/login' : '/auth/login';
@@ -95,10 +118,7 @@ const LoginPage = () => {
         }
       }
 
-      if (!identifier || !password) {
-        setError('Please enter both email and password');
-        return;
-      }
+
 
       setError(message || 'Invalid credentials. Please try again.');
     }

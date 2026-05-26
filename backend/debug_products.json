@@ -1,17 +1,60 @@
 {
-  "timestamp": "2026-05-26T06:02:51.911Z",
+  "timestamp": "2026-05-26T06:41:00.753Z",
   "query": {
-    "category": "Carrara Marble",
-    "subcategory": "Polished"
+    "search": "te",
+    "limit": "6"
   },
   "builtFilter": {
-    "category": "Carrara Marble",
-    "subcategory": {
-      "$regex": {}
-    },
     "isApproved": true,
-    "isActive": true
+    "isActive": true,
+    "$or": [
+      {
+        "name": {
+          "$all": [
+            {}
+          ]
+        }
+      },
+      {
+        "description": {
+          "$all": [
+            {}
+          ]
+        }
+      }
+    ]
   },
-  "resultCount": 0,
-  "results": []
+  "resultCount": 6,
+  "results": [
+    {
+      "_id": "6a115739107b7b663108dd7d",
+      "name": "Test ModularKitchen Product 2",
+      "category": "ModularKitchen"
+    },
+    {
+      "_id": "6a115739107b7b663108dd7c",
+      "name": "Test ModularKitchen Product 1",
+      "category": "ModularKitchen"
+    },
+    {
+      "_id": "6a115739107b7b663108dd7b",
+      "name": "Test Hardware Product 2",
+      "category": "Hardware"
+    },
+    {
+      "_id": "6a115739107b7b663108dd7a",
+      "name": "Test Hardware Product 1",
+      "category": "Hardware"
+    },
+    {
+      "_id": "6a115739107b7b663108dd79",
+      "name": "Test Bathroom Product 2",
+      "category": "Bathroom"
+    },
+    {
+      "_id": "6a115739107b7b663108dd78",
+      "name": "Test Bathroom Product 1",
+      "category": "Bathroom"
+    }
+  ]
 }

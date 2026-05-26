@@ -30,13 +30,65 @@ const SignupPage = () => {
     e.preventDefault();
     setError('');
 
-    if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError('Please fill in all fields');
+    if (!formData.fullName.trim()) {
+      setError('Please enter your full name');
+      return;
+    }
+    if (!formData.email.trim()) {
+      setError('Please enter your email address');
+      return;
+    }
+    if (!formData.password) {
+      setError('Please enter a password');
+      return;
+    }
+    if (!formData.confirmPassword) {
+      setError('Please confirm your password');
+      return;
+    }
+
+    if (formData.fullName.trim().length < 3) {
+      setError('Full name must be at least 3 characters long');
+      return;
+    }
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (!nameRegex.test(formData.fullName.trim())) {
+      setError('Full name can only contain letters and spaces');
+      return;
+    }
+
+    if (!formData.email.includes('@')) {
+      setError('Email must contain an "@" symbol (e.g. user@example.com)');
+      return;
+    }
+    if (!formData.email.includes('.')) {
+      setError('Email is missing a domain (e.g. .com, .in)');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address format');
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+
+    const hasLetter = /[a-zA-Z]/.test(formData.password);
+    if (!hasLetter) {
+      setError('Password must contain at least one letter');
+      return;
+    }
+    const hasNumber = /[0-9]/.test(formData.password);
+    if (!hasNumber) {
+      setError('Password must contain at least one number');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError('The passwords you entered do not match');
       return;
     }
 
@@ -255,16 +307,17 @@ const SignupPage = () => {
                   </div>
 
                   {/* Confirm Password */}
-                  <div className="md:block hidden space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-1 ml-1">Confirm Password</label>
+                  <div className="space-y-1">
+                    <label className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white/60 mb-1 ml-1">Confirm Password</label>
                     <div className="relative group">
+                      <FiLock className="md:hidden absolute left-6 top-1/2 -translate-y-1/2 text-warm-sand group-focus-within:text-deep-espresso h-5 w-5" />
                       <input 
                         type="password"
                         name="confirmPassword"
                         placeholder="••••••••" 
                         value={formData.confirmPassword}
                         onChange={handleChange}
-                        className="w-full pl-6 pr-6 py-3.5 rounded-xl bg-white/10 border-2 border-transparent border-white/10 focus:border-white/40 focus:bg-white/20 focus:outline-none text-sm font-semibold transition-all text-white"
+                        className="w-full md:pl-6 pl-16 pr-6 py-3.5 rounded-full md:rounded-xl bg-soft-oatmeal/10 md:bg-white/10 border-2 border-transparent md:border-white/10 focus:border-warm-sand/50 md:focus:border-white/40 focus:bg-white md:focus:bg-white/20 focus:outline-none text-sm font-semibold transition-all md:text-white"
                       />
                     </div>
                   </div>

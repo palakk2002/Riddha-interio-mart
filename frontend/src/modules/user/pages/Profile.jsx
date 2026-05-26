@@ -103,10 +103,10 @@ const Profile = () => {
                     {React.cloneElement(item.icon, { size: 20 })}
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-sm md:text-base font-bold text-slate-800 group-hover:text-[#189D91] transition-colors tracking-tight capitalize">
+                    <h3 className="text-sm md:text-base font-medium text-slate-800 group-hover:text-[#189D91] transition-colors tracking-tight capitalize">
                       {item.title.toLowerCase()}
                     </h3>
-                    <p className="text-gray-400 text-[9px] md:text-[10px] font-semibold tracking-wider leading-relaxed capitalize">
+                    <p className="text-gray-400 text-[9px] md:text-[10px] font-normal tracking-wider leading-relaxed capitalize">
                       {item.subtitle.toLowerCase()}
                     </p>
                   </div>
@@ -126,10 +126,10 @@ const Profile = () => {
                     {React.cloneElement(item.icon, { size: 20 })}
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-sm md:text-base font-bold text-slate-800 group-hover:text-[#189D91] transition-colors tracking-tight capitalize">
+                    <h3 className="text-sm md:text-base font-medium text-slate-800 group-hover:text-[#189D91] transition-colors tracking-tight capitalize">
                       {item.title.toLowerCase()}
                     </h3>
-                    <p className="text-gray-400 text-[9px] md:text-[10px] font-semibold tracking-wider leading-relaxed capitalize">
+                    <p className="text-gray-400 text-[9px] md:text-[10px] font-normal tracking-wider leading-relaxed capitalize">
                       {item.subtitle.toLowerCase()}
                     </p>
                   </div>
