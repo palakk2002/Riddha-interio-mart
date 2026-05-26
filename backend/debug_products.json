@@ -1,14 +1,7 @@
 {
-  "timestamp": "2026-05-26T06:02:51.911Z",
-  "query": {
-    "category": "Carrara Marble",
-    "subcategory": "Polished"
-  },
+  "timestamp": "2026-05-26T06:41:41.565Z",
+  "query": {},
   "builtFilter": {
-    "category": "Carrara Marble",
-    "subcategory": {
-      "$regex": {}
-    },
     "isApproved": true,
     "isActive": true
   },
