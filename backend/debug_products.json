@@ -1,12 +1,11 @@
 {
-  "timestamp": "2026-05-26T06:41:00.753Z",
+  "timestamp": "2026-05-26T07:57:20.103Z",
   "query": {
-    "search": "te",
-    "limit": "6"
+    "isApproved": "pending",
+    "isActive": "all"
   },
   "builtFilter": {
-    "isApproved": true,
-    "isActive": true
+    "isApproved": false
   },
   "resultCount": 0,
   "results": []
