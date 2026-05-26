@@ -224,7 +224,7 @@ const DynamicSections = () => {
             >
               <div className="space-y-4 md:space-y-6">
                 {categories.length > 0 && (
-                  <div className="flex flex-wrap justify-start gap-1.5 md:gap-3 py-1">
+                  <div className="flex overflow-x-auto no-scrollbar justify-start gap-2 md:gap-3 py-1 pb-3 -mx-4 px-4 sm:mx-0 sm:px-0">
                     {categories.map((category) => {
                       const catId = getId(category);
                       const isActive = activeFilter === catId;
@@ -237,7 +237,7 @@ const DynamicSections = () => {
                               [sectionId]: isActive ? null : catId,
                             }));
                           }}
-                          className={`rounded-full px-4.5 py-2 text-[10px] md:text-xs font-black transition-all duration-200 shadow-sm border ${
+                          className={`shrink-0 rounded-full px-5 py-2 text-[10px] md:text-xs font-black transition-all duration-200 shadow-sm border ${
                             isActive
                               ? 'bg-[#189D91] border-[#189D91] text-white hover:bg-[#14847a]'
                               : 'bg-white border-gray-200 text-slate-500 hover:border-gray-300 hover:text-gray-800'

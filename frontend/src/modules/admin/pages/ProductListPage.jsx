@@ -148,20 +148,20 @@ const ProductListPage = ({ status }) => {
                             className="w-14 h-14 rounded-2xl object-cover shadow-sm group-hover:scale-105 transition-transform border border-soft-oatmeal" 
                           />
                           <div className="space-y-0.5">
-                            <p className="font-bold text-deep-espresso text-base">{product.name}</p>
+                            <p className="font-medium text-deep-espresso text-sm">{product.name}</p>
                             <div className="flex items-center gap-2">
-                              <span className="text-[9px] font-black bg-brand-purple/5 text-brand-purple px-1.5 py-0.5 rounded border border-brand-purple/10 uppercase tracking-widest">Seller</span>
-                              <p className="text-xs font-bold text-brand-teal">{product.seller?.shopName || product.seller?.fullName || 'Internal'}</p>
+                              <span className="text-[9px] font-medium bg-brand-purple/5 text-brand-purple px-1.5 py-0.5 rounded border border-brand-purple/10 uppercase tracking-widest">Seller</span>
+                              <p className="text-xs font-medium text-brand-teal">{product.seller?.shopName || product.seller?.fullName || 'Internal'}</p>
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="space-y-1.5">
-                          <span className="block text-[10px] font-black text-deep-espresso/60 bg-soft-oatmeal/30 px-2 py-1 rounded border border-soft-oatmeal w-fit">
+                          <span className="block text-[10px] font-medium text-deep-espresso/60 bg-soft-oatmeal/30 px-2 py-1 rounded border border-soft-oatmeal w-fit">
                             {product.sku || 'NO-SKU'}
                           </span>
-                          <p className="text-[11px] font-bold text-warm-sand flex items-center gap-1">
+                          <p className="text-[11px] font-medium text-warm-sand flex items-center gap-1">
                             <LuTag size={12} className="opacity-50" />
                             {product.brand?.name || 'No Brand'}
                           </p>
@@ -169,16 +169,16 @@ const ProductListPage = ({ status }) => {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className="space-y-1.5">
-                          <span className="inline-block text-[10px] font-bold text-red-800 uppercase tracking-widest bg-brand-purple/5 px-2.5 py-1 rounded-full border border-red-800/10">
+                          <span className="inline-block text-[10px] font-medium text-red-800 uppercase tracking-widest bg-brand-purple/5 px-2.5 py-1 rounded-full border border-red-800/10">
                             {product.category}
                           </span>
-                          <p className="text-[10px] font-black text-brand-teal/60 uppercase tracking-widest">
+                          <p className="text-[10px] font-medium text-brand-teal/60 uppercase tracking-widest">
                             {product.unitValue} {product.unit} • {product.countInStock} {product.countInStock > 0 ? 'Left' : 'OUT'}
                           </p>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border shadow-sm ${
+                        <span className={`text-[9px] font-medium uppercase tracking-widest px-2.5 py-1 rounded-full border shadow-sm ${
                           product.approvalStatus === 'approved' 
                           ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
                           : product.approvalStatus === 'rejected'
@@ -189,17 +189,17 @@ const ProductListPage = ({ status }) => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                         <p className="text-[10px] font-black text-warm-sand uppercase tracking-widest mb-0.5">Seller Asks</p>
-                         <p className="font-black text-deep-espresso/60">₹{(product.sellerPrice || product.price)?.toLocaleString()}</p>
+                         <p className="text-[10px] font-medium text-warm-sand uppercase tracking-widest mb-0.5">Seller Asks</p>
+                         <p className="font-medium text-deep-espresso/60">₹{(product.sellerPrice || product.price)?.toLocaleString()}</p>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="text-lg font-display font-bold text-emerald-600">
+                        <span className="text-sm font-medium text-emerald-600">
                           {product.adminCommission || 0}%
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="text-[10px] font-black text-[#240046] uppercase tracking-widest mb-0.5">User Price</p>
-                        <p className="font-black text-[#240046] text-xl">₹{product.price?.toLocaleString()}</p>
+                        <p className="text-[10px] font-medium text-[#240046] uppercase tracking-widest mb-0.5">User Price</p>
+                        <p className="font-medium text-[#240046] text-sm">₹{product.price?.toLocaleString()}</p>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">

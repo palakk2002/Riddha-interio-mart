@@ -26,7 +26,7 @@ const TopBrands = ({ title }) => {
 
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-12 py-8 md:py-14">
-      <div className="relative overflow-hidden rounded-[28px] md:rounded-[36px] border border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.96)_0%,rgba(245,249,249,0.95)_52%,rgba(238,247,246,0.98)_100%)] shadow-[0_20px_60px_rgba(16,24,40,0.08)]">
+      <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.96)_0%,rgba(245,249,249,0.95)_52%,rgba(238,247,246,0.98)_100%)] shadow-[0_20px_60px_rgba(16,24,40,0.08)]">
         <div className="absolute -top-20 right-0 h-56 w-56 rounded-full bg-[#189D91]/8 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-[#EC008C]/6 blur-3xl pointer-events-none" />
 
@@ -58,7 +58,7 @@ const TopBrands = ({ title }) => {
               <Link
                 key={brand._id}
                 to={`/brand/${brand.slug || brand.name.toLowerCase().replace(/\s+/g, '-')}`}
-                className="group/brand relative overflow-hidden rounded-[22px] md:rounded-[26px] border border-slate-200/70 bg-white/90 p-0 flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(24,157,145,0.12)] hover:border-[#189D91]/20"
+                className="group/brand relative overflow-hidden rounded-xl border border-slate-200/70 bg-white/90 p-0 flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(24,157,145,0.12)] hover:border-[#189D91]/20"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(24,157,145,0.06),transparent_55%)] opacity-0 group-hover/brand:opacity-100 transition-opacity" />
 
