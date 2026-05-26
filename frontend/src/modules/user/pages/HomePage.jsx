@@ -31,16 +31,20 @@ const SectionGrid = ({ products, loading, containerVariants }) => {
   };
 
   return (
-    <Motion.div
-      variants={containerVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
-      className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-4"
-    >
+    <div className="relative">
+      {/* Fade edge on right */}
+      <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent z-10" />
+      <Motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="flex flex-row gap-3 md:gap-4 overflow-x-auto pb-2 scrollbar-hide"
+        style={{ scrollSnapType: 'x mandatory' }}
+      >
       {loading ? (
         [1, 2, 3, 4, 5, 6].map(i => (
-          <div key={i} className="aspect-[3/4] bg-gray-100 rounded-xl animate-pulse" />
+          <div key={i} className="flex-none w-36 md:w-48 aspect-[3/4] bg-gray-100 rounded-xl animate-pulse" />
         ))
       ) : (
         products.map((product) => {
@@ -58,6 +62,8 @@ const SectionGrid = ({ products, loading, containerVariants }) => {
                 hidden: { opacity: 0, y: 15 },
                 visible: { opacity: 1, y: 0 }
               }}
+              className="flex-none w-36 md:w-48"
+              style={{ scrollSnapAlign: 'start' }}
             >
               <Link
                 to={`/products/${productId}`}
@@ -103,6 +109,7 @@ const SectionGrid = ({ products, loading, containerVariants }) => {
         })
       )}
     </Motion.div>
+    </div>
   );
 };
 
