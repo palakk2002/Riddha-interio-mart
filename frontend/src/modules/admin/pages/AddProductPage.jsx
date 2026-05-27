@@ -34,7 +34,8 @@ const AddProductPage = () => {
     unitValue: '1',
     images: [],
     videoUrl: '',
-    targetCustomer: 'both'
+    targetCustomer: 'both',
+    gstRate: ''
   });
 
   // SKU availability tracking state for master catalog
@@ -160,7 +161,8 @@ const AddProductPage = () => {
         price: Number(formData.price),
         countInStock: Number(formData.stock),
         images: uploadedUrls,
-        videoUrl: finalVideoUrl
+        videoUrl: finalVideoUrl,
+        gstRate: formData.gstRate !== '' ? Number(formData.gstRate) : undefined
       };
 
       await api.post('/catalog', payload);
@@ -447,20 +449,40 @@ const AddProductPage = () => {
                        </div>
                      )}
                     
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
-                          <FiUser size={12} /> Target Audience
-                       </label>
-                       <select 
-                         required
-                         value={formData.targetCustomer}
-                         onChange={(e) => setFormData({...formData, targetCustomer: e.target.value})}
-                         className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all cursor-pointer font-medium"
-                       >
-                          <option value="individual">Individual Customers</option>
-                          <option value="enterpriser">Enterprisers Only</option>
-                          <option value="both">Both (Public)</option>
-                       </select>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                         <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
+                            <FiUser size={12} /> Target Audience
+                         </label>
+                         <select 
+                           required
+                           value={formData.targetCustomer}
+                           onChange={(e) => setFormData({...formData, targetCustomer: e.target.value})}
+                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all cursor-pointer font-medium"
+                         >
+                            <option value="individual">Individual Customers</option>
+                            <option value="enterpriser">Enterprisers Only</option>
+                            <option value="both">Both (Public)</option>
+                         </select>
+                      </div>
+
+                      <div className="space-y-2">
+                         <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest flex items-center gap-2">
+                            <FiTag size={12} /> GST Rate Override
+                         </label>
+                         <select 
+                           value={formData.gstRate}
+                           onChange={(e) => setFormData({...formData, gstRate: e.target.value})}
+                           className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand transition-all cursor-pointer font-medium"
+                         >
+                            <option value="">Inherit Category Default</option>
+                            <option value="0">0% (GST Exempt)</option>
+                            <option value="5">5% GST</option>
+                            <option value="12">12% GST</option>
+                            <option value="18">18% GST</option>
+                            <option value="28">28% GST</option>
+                         </select>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
