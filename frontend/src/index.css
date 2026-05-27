@@ -24,6 +24,15 @@
   --radius-2xl: 16px;
 }
 
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE/Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;             /* Chrome/Safari */
+}
+
 .user-theme {
   --color-warm-sand: #189D91;
   --color-header-red: #189D91;

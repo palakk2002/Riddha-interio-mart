@@ -1,12 +1,58 @@
 {
-  "timestamp": "2026-05-27T06:46:42.405Z",
-  "query": {
-    "isApproved": "pending",
-    "isActive": "all"
-  },
+<<<<<<< HEAD
+<<<<<<< HEAD
+  "timestamp": "2026-05-26T12:22:15.832Z",
+=======
+  "timestamp": "2026-05-27T05:21:20.377Z",
+>>>>>>> 766e8be4f412beef35c991af3b08d2e825399e39
+=======
+  "timestamp": "2026-05-27T05:31:00.654Z",
+>>>>>>> c182086d4d78e4279b3a6131e31310f237bd9bde
+  "query": {},
   "builtFilter": {
-    "isApproved": false
+    "isApproved": true,
+    "isActive": true,
+    "seller": {
+      "$nin": [
+        "6a13f55aa0df05ee424a7c4b",
+        "6a10057431fa10db6ebdaaff",
+        "6a0ffa1a0a9ba187d1855673",
+        "6a0d647e24ccaade805a2ca0"
+      ]
+    }
   },
-  "resultCount": 0,
-  "results": []
+  "resultCount": 5,
+  "results": [
+    {
+      "_id": "6a157979815311dd3743db2e",
+      "name": "test name",
+      "category": "Test Category",
+      "subcategory": "",
+      "subsubcategory": ""
+    },
+    {
+      "_id": "6a115739107b7b663108dd7c",
+      "name": "Test ModularKitchen Product 1",
+      "category": "ModularKitchen"
+    },
+    {
+      "_id": "6a0e9e4f8cf557a669106462",
+      "name": "Swan Neck Golden Faucet",
+      "category": "Bath",
+      "subcategory": "",
+      "subsubcategory": ""
+    },
+    {
+      "_id": "6a0e9b1c8cf557a669106024",
+      "name": "Carrara Marble Slab",
+      "category": "Flooring",
+      "subcategory": "Carrara Marble"
+    },
+    {
+      "_id": "6a0e9b1c8cf557a669106022",
+      "name": "Traditional Terracotta Tile",
+      "category": "Flooring",
+      "subcategory": "Terracotta Tiles"
+    }
+  ]
 }
