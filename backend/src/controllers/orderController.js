@@ -134,13 +134,20 @@ exports.addOrderItems = async (req, res) => {
 
       let couponDiscount = 0;
       if (coupon && coupon.seller.toString() === sellerId) {
-        // Load coupon inside session for transaction safety
-        const couponInSession = await Coupon.findById(coupon._id).session(session);
+        // Load, validate, and atomically increment the coupon usedCount within the transaction
+        const couponInSession = await Coupon.findOneAndUpdate(
+          {
+            _id: coupon._id,
+            usedCount: { $lt: coupon.usageLimit },
+            isActive: true,
+            expiryDate: { $gte: new Date() }
+          },
+          { $inc: { usedCount: 1 } },
+          { new: true, session }
+        );
+
         if (!couponInSession) {
-          throw new Error('Coupon code is invalid or expired.');
-        }
-        if (couponInSession.usedCount >= couponInSession.usageLimit) {
-          throw new Error('This coupon has reached its redemption limit.');
+          throw new Error('This coupon code is invalid, expired, or has reached its redemption limit.');
         }
 
         const groupSellingTotal = groupPricing.subtotal - groupPricing.discountAmount;
@@ -177,10 +184,6 @@ exports.addOrderItems = async (req, res) => {
         group.items.forEach(item => {
           item.price = Number((item.price * ratio).toFixed(2));
         });
-
-        // Atomic update of usedCount inside the transaction
-        couponInSession.usedCount += 1;
-        await couponInSession.save({ session });
       }
       
       const isCod = paymentMethod === 'COD';
@@ -242,11 +245,19 @@ exports.addOrderItems = async (req, res) => {
       createdOrders.push(savedOrder);
 
       // Commit reservations (Atomic and Concurrency-Safe inside session)
+      const InventoryReservation = require('../models/InventoryReservation');
       for (const item of group.items) {
         const matchedRes = reservationsList.find(res => res.product.toString() === item.product.toString());
         if (!matchedRes) {
           throw new Error(`Active stock hold reservation not found for ${item.name}`);
         }
+
+        // Link the reservation hold directly to this newly created order!
+        await InventoryReservation.updateOne(
+          { _id: matchedRes._id },
+          { $set: { order: savedOrder._id } },
+          { session }
+        );
 
         if (isCod) {
           await inventoryService.commitReservation(matchedRes._id, session);
@@ -398,10 +409,43 @@ exports.addOrderItems = async (req, res) => {
     });
 
   } catch (error) {
-    // Abort transaction and roll back all mutations safely
-    await session.abortTransaction();
+    // Abort Mongoose transaction if it was active
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
     session.endSession();
-    console.error('Order creation transaction aborted:', error.message);
+    console.error('Order creation transaction aborted, executing saga rollback:', error.message);
+
+    // Saga Manual Rollback: Revert any mutations if transaction support was missing (local standalone fallback)
+    try {
+      const inventoryService = require('../services/inventoryService');
+      const Coupon = require('../models/Coupon');
+      
+      for (const res of reservationsList) {
+        if (res && res._id) {
+          await inventoryService.releaseReservation(res._id).catch(e => 
+            console.error(`[SAGA ROLLBACK ERROR] Failed to release reservation ${res._id}:`, e.message)
+          );
+        }
+      }
+
+      for (const savedOrder of createdOrders) {
+        if (savedOrder && savedOrder._id) {
+          await Order.deleteOne({ _id: savedOrder._id }).catch(e =>
+            console.error(`[SAGA ROLLBACK ERROR] Failed to delete order ${savedOrder._id}:`, e.message)
+          );
+        }
+      }
+
+      if (coupon && coupon.seller) {
+        await Coupon.updateOne({ _id: coupon._id }, { $inc: { usedCount: -1 } }).catch(e =>
+          console.error(`[SAGA ROLLBACK ERROR] Failed to restore coupon ${coupon._id}:`, e.message)
+        );
+      }
+      console.log('[SAGA SUCCESS] Manual rollback completed successfully.');
+    } catch (rollbackErr) {
+      console.error('[SAGA CRITICAL] Saga manual rollback encountered failures:', rollbackErr.message);
+    }
 
     const isNotFound = error.message.includes('Product not found');
     res.status(isNotFound ? 404 : 400).json({
@@ -891,52 +935,62 @@ exports.calculateOrderPricing = async (req, res, next) => {
 // @route   POST /api/orders/verify-payment
 // @access  Private
 exports.verifyPayment = async (req, res) => {
+  const mongoose = require('mongoose');
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
     const { verifyRazorpayPayment } = require('../utils/paymentGateway');
     
     const isValid = verifyRazorpayPayment(razorpay_order_id, razorpay_payment_id, razorpay_signature);
     if (!isValid) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ success: false, message: 'Invalid payment signature' });
     }
 
-    const orders = await Order.find({ 'paymentResult.id': razorpay_order_id });
+    // 1. Fetch unpaid orders matching the razorpay_order_id under the session (distributed lock)
+    const orders = await Order.find({ 'paymentResult.id': razorpay_order_id, isPaid: false }).session(session);
+    if (orders.length === 0) {
+      // Either orders do not exist or they were already marked as paid by a webhook or concurrent request
+      await session.commitTransaction();
+      session.endSession();
+      return res.status(200).json({ success: true, message: 'Payment already verified and processed (idempotent)' });
+    }
+
+    const InventoryReservation = require('../models/InventoryReservation');
+    const inventoryService = require('../services/inventoryService');
+    const walletService = require('../services/walletService');
+    const referralService = require('../services/referralService');
     
+    const lowStockAlerts = [];
+
     for (const order of orders) {
       // Commit the active stock hold reservations for this order
-      const InventoryReservation = require('../models/InventoryReservation');
-      const inventoryService = require('../services/inventoryService');
-      const lowStockAlerts = [];
+      const reservations = await InventoryReservation.find({
+        order: order._id,
+        status: 'reserved'
+      }).session(session);
 
-      for (const item of order.orderItems) {
-        const reservation = await InventoryReservation.findOne({
-          user: order.user,
-          product: item.product,
-          status: 'reserved'
-        });
-        if (reservation) {
-          await inventoryService.commitReservation(reservation._id);
+      for (const reservation of reservations) {
+        await inventoryService.commitReservation(reservation._id, session);
 
-          // Fetch updated product for low stock alerts check
-          const updatedProduct = await Product.findById(item.product);
-          if (updatedProduct && updatedProduct.countInStock <= 5) {
-            lowStockAlerts.push({
-              seller: updatedProduct.seller,
-              data: {
-                productId: updatedProduct._id,
-                name: updatedProduct.name,
-                remainingStock: updatedProduct.countInStock
-              }
-            });
-          }
+        // Fetch updated product for low stock alerts check
+        const updatedProduct = await Product.findById(reservation.product).session(session);
+        if (updatedProduct && updatedProduct.countInStock <= 5) {
+          lowStockAlerts.push({
+            seller: updatedProduct.seller,
+            data: {
+              productId: updatedProduct._id,
+              name: updatedProduct.name,
+              remainingStock: updatedProduct.countInStock
+            }
+          });
         }
       }
 
-      // Fire low stock alerts if any
-      for (const alert of lowStockAlerts) {
-        notifyLowStock(alert.seller, alert.data);
-      }
-
+      // Update order payment status atomically
       order.isPaid = true;
       order.paidAt = Date.now();
       order.paymentStatus = 'paid';
@@ -947,9 +1001,25 @@ exports.verifyPayment = async (req, res) => {
         update_time: new Date().toISOString(),
         email_address: req.user.email
       };
-      await order.save();
+      await order.save({ session });
 
-      // --- Post-Payment Side Effects ---
+      // Escrow pending sales credit to Seller Wallet
+      await walletService.recordPendingSale(order, null, session);
+
+      // Process Referral First Order reward for referrer
+      await referralService.processFirstOrderReward(order.user, order._id, session);
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // --- Post-Commit Side Effects (Executed asynchronously after successful transaction commit) ---
+    // Fire low stock alerts if any
+    for (const alert of lowStockAlerts) {
+      notifyLowStock(alert.seller, alert.data);
+    }
+
+    for (const order of orders) {
       try {
         const payload = {
           orderId: String(order._id),
@@ -971,21 +1041,6 @@ exports.verifyPayment = async (req, res) => {
         console.error('Socket notify failed in verifyPayment:', e.message);
       }
 
-      try {
-        const walletService = require('../services/walletService');
-        await walletService.recordPendingSale(order);
-      } catch (walletErr) {
-        console.error('Failed to log pending earnings in verifyPayment:', walletErr.message);
-      }
-
-      // Process Referral First Order reward for referrer (Online Payment)
-      try {
-        const referralService = require('../services/referralService');
-        await referralService.processFirstOrderReward(order.user, order._id);
-      } catch (refOrderRewardErr) {
-        console.error('Referral order reward processing failed in verifyPayment:', refOrderRewardErr.message);
-      }
-
       const { processInvoiceAsync } = require('../utils/invoiceService');
       processInvoiceAsync(order._id, req.user.id);
 
@@ -1000,10 +1055,172 @@ exports.verifyPayment = async (req, res) => {
         console.error('Failed to queue email in verifyPayment:', emailErr.message);
       }
     }
-    
+
     res.status(200).json({ success: true, message: 'Payment verified successfully' });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('[FINTECH ERROR] verifyPayment transaction failed, rolled back:', error.message);
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Razorpay Webhook Callback Reconciler
+// @route   POST /api/orders/webhook/razorpay
+// @access  Public
+exports.handleRazorpayWebhook = async (req, res) => {
+  const crypto = require('crypto');
+  const mongoose = require('mongoose');
+  const { validateWebhookSignature } = require('../utils/paymentGateway');
+
+  const signature = req.headers['x-razorpay-signature'];
+  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || 'your_webhook_secret_here';
+
+  // 1. Verify Webhook Signature using raw body buffer
+  if (!req.rawBody) {
+    return res.status(400).json({ success: false, message: 'Raw body is missing for verification' });
+  }
+
+  const isValid = validateWebhookSignature(req.rawBody, signature, webhookSecret);
+  if (!isValid) {
+    console.error('[WEBHOOK ERROR] Razorpay signature mismatch!');
+    return res.status(400).json({ success: false, message: 'Invalid webhook signature' });
+  }
+
+  const event = req.body;
+  console.log(`[WEBHOOK] Received event: ${event.event}`);
+
+  // We are only interested in successful payment events
+  if (event.event !== 'payment.captured' && event.event !== 'order.paid') {
+    return res.status(200).json({ success: true, message: 'Unhandled event type ignored' });
+  }
+
+  const payload = event.payload;
+  const razorpay_order_id = payload.payment?.entity?.order_id || payload.order?.entity?.id;
+  const razorpay_payment_id = payload.payment?.entity?.id;
+  const email_address = payload.payment?.entity?.email;
+
+  if (!razorpay_order_id) {
+    return res.status(400).json({ success: false, message: 'Razorpay order ID not found in payload' });
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // 2. Fetch unpaid orders matching the razorpay_order_id under the session (distributed lock)
+    const orders = await Order.find({ 'paymentResult.id': razorpay_order_id, isPaid: false }).session(session);
+    if (orders.length === 0) {
+      // Already marked as paid by verifyPayment or a previous webhook trigger
+      await session.commitTransaction();
+      session.endSession();
+      console.log(`[WEBHOOK] Orders matching ${razorpay_order_id} are already paid. Idempotent success.`);
+      return res.status(200).json({ success: true, message: 'Already processed (idempotent)' });
+    }
+
+    const InventoryReservation = require('../models/InventoryReservation');
+    const inventoryService = require('../services/inventoryService');
+    const walletService = require('../services/walletService');
+    const referralService = require('../services/referralService');
+    
+    const lowStockAlerts = [];
+
+    for (const order of orders) {
+      // Commit the active stock hold reservations for this order
+      const reservations = await InventoryReservation.find({
+        order: order._id,
+        status: 'reserved'
+      }).session(session);
+
+      for (const reservation of reservations) {
+        await inventoryService.commitReservation(reservation._id, session);
+
+        // Fetch updated product for low stock alerts check
+        const updatedProduct = await Product.findById(reservation.product).session(session);
+        if (updatedProduct && updatedProduct.countInStock <= 5) {
+          lowStockAlerts.push({
+            seller: updatedProduct.seller,
+            data: {
+              productId: updatedProduct._id,
+              name: updatedProduct.name,
+              remainingStock: updatedProduct.countInStock
+            }
+          });
+        }
+      }
+
+      // Reconcile order payment status atomically
+      order.isPaid = true;
+      order.paidAt = Date.now();
+      order.paymentStatus = 'paid';
+      order.status = 'Processing';
+      order.paymentResult = {
+        id: razorpay_payment_id,
+        status: 'captured',
+        update_time: new Date().toISOString(),
+        email_address: email_address || 'webhook@razorpay.com'
+      };
+      await order.save({ session });
+
+      // Escrow pending sales credit to Seller Wallet
+      await walletService.recordPendingSale(order, null, session);
+
+      // Process Referral First Order reward for referrer
+      await referralService.processFirstOrderReward(order.user, order._id, session);
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // --- Post-Commit Side Effects (Executed asynchronously after successful transaction commit) ---
+    // Fire low stock alerts if any
+    for (const alert of lowStockAlerts) {
+      notifyLowStock(alert.seller, alert.data);
+    }
+
+    for (const order of orders) {
+      try {
+        const socketPayload = {
+          orderId: String(order._id),
+          totalPrice: order.totalPrice,
+          itemsCount: order.orderItems.reduce((sum, i) => sum + i.quantity, 0),
+          status: order.status,
+          createdAt: order.createdAt,
+          customerName: 'Customer', // Webhooks lack active req.user context
+          shippingCity: order.shippingAddress?.city
+        };
+
+        if (order.sellerType === 'Admin') {
+          notifyAdminNewOrder(null, socketPayload);
+        } else {
+          notifySellerNewOrder(order.seller, socketPayload);
+          notifyAdminNewOrder(null, socketPayload);
+        }
+      } catch (e) {
+        console.error('Socket notify failed in Webhook:', e.message);
+      }
+
+      const { processInvoiceAsync } = require('../utils/invoiceService');
+      processInvoiceAsync(order._id, order.user);
+
+      try {
+        const User = require('../models/User');
+        const customer = await User.findById(order.user);
+        if (customer && customer.email) {
+          const emailService = require('../services/emailService');
+          await emailService.queueEmail(customer.email, `Order Reconciled Confirmation - #${order._id.toString().slice(-8).toUpperCase()}`, 'order_confirmation', { order });
+        }
+      } catch (emailErr) {
+        console.error('Failed to queue email in Webhook:', emailErr.message);
+      }
+    }
+
+    return res.status(200).json({ success: true, message: 'Webhook payment reconciled successfully' });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('[WEBHOOK ERROR] Reconcile transaction failed, rolled back:', error.message);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -1135,5 +1352,103 @@ exports.resendDeliveryOtp = async (req, res) => {
   }
 };
 
+// @desc    Validate coupon code for customer checkout review
+// @route   POST /api/orders/validate-coupon
+// @access  Private
+exports.validateCoupon = async (req, res, next) => {
+  const { couponCode, orderItems } = req.body;
+  if (!couponCode) {
+    return res.status(400).json({ success: false, message: 'Coupon code is required.' });
+  }
+  if (!orderItems || orderItems.length === 0) {
+    return res.status(400).json({ success: false, message: 'Cart items are required to validate coupon.' });
+  }
+
+  try {
+    const coupon = await Coupon.findOne({
+      code: couponCode.toUpperCase().trim(),
+      isActive: true,
+      expiryDate: { $gte: new Date() }
+    });
+
+    if (!coupon) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired coupon code.' });
+    }
+
+    if (coupon.usedCount >= coupon.usageLimit) {
+      return res.status(400).json({ success: false, message: 'This coupon has reached its redemption limit.' });
+    }
+
+    // Secure backend calculation of all items
+    const checkoutPricing = await pricingService.calculateCartPricing(orderItems);
+
+    // Group items by Seller
+    const groupedItems = {};
+    for (const item of checkoutPricing.enrichedItems) {
+      const sId = item.seller.toString();
+      const sType = item.sellerType || 'Seller';
+      
+      if (!groupedItems[sId]) {
+        groupedItems[sId] = {
+          seller: sId,
+          sellerType: sType,
+          items: []
+        };
+      }
+      groupedItems[sId].items.push(item);
+    }
+
+    const couponSellerId = coupon.seller.toString();
+    if (!groupedItems[couponSellerId]) {
+      return res.status(400).json({ success: false, message: 'This coupon is not applicable to any products in your cart.' });
+    }
+
+    // Calculate exact pricing details for this seller order group
+    const group = groupedItems[couponSellerId];
+    const groupPricing = await pricingService.calculateCartPricing(
+      group.items.map(i => ({ product: i.product, quantity: i.quantity }))
+    );
+
+    const groupSellingTotal = groupPricing.subtotal - groupPricing.discountAmount;
+    if (groupSellingTotal < coupon.minPurchaseAmount) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Minimum purchase amount of ₹${coupon.minPurchaseAmount} is required for this coupon.` 
+      });
+    }
+
+    let discountAmount = 0;
+    if (coupon.discountType === 'percentage') {
+      discountAmount = (groupSellingTotal * coupon.discountValue) / 100;
+      if (coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount) {
+        discountAmount = coupon.maxDiscountAmount;
+      }
+    } else {
+      discountAmount = coupon.discountValue;
+    }
+
+    // Make sure discount is not more than group total
+    if (discountAmount > groupSellingTotal) {
+      discountAmount = groupSellingTotal;
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Coupon is valid!',
+      data: {
+        code: coupon.code,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        discountAmount: Number(discountAmount.toFixed(2)),
+        seller: coupon.seller
+      }
+    });
+  } catch (error) {
+    console.error('Coupon validation error:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 exports.getCodEligibility = getCodEligibility;
+
 

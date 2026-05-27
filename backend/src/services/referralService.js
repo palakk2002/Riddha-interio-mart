@@ -95,9 +95,17 @@ class ReferralService {
   /**
    * Triggers referral bonus when referred user completes their first order
    */
-  async processFirstOrderReward(referredUserId, orderId) {
-    const referral = await Referral.findOne({ referredUser: referredUserId, rewardStatus: 'pending' });
-    if (!referral) return;
+  async processFirstOrderReward(referredUserId, orderId, sessionOverride = null) {
+    const query = Referral.findOneAndUpdate(
+      { referredUser: referredUserId, rewardStatus: 'pending' },
+      { $set: { rewardStatus: 'rewarded' } },
+      { new: false } // return old document to check if it WAS pending
+    );
+    if (sessionOverride) {
+      query.session(sessionOverride);
+    }
+    const referral = await query;
+    if (!referral) return; // If already claimed or not found, exit!
 
     const walletService = require('./walletService');
     const referrerId = referral.referrer;
@@ -113,15 +121,16 @@ class ReferralService {
       'Reward for inviting a friend who placed an order',
       orderId,
       firstOrderIdempotencyKey,
-      expirationDate
+      expirationDate,
+      sessionOverride
     );
 
     // Increment referrer referralCount
-    await User.findByIdAndUpdate(referrerId, { $inc: { referralCount: 1 } });
-
-    // Update referral status
-    referral.rewardStatus = 'rewarded';
-    await referral.save();
+    const userUpdateQuery = User.findByIdAndUpdate(referrerId, { $inc: { referralCount: 1 } });
+    if (sessionOverride) {
+      userUpdateQuery.session(sessionOverride);
+    }
+    await userUpdateQuery;
 
     // Notify referrer
     try {

@@ -28,9 +28,19 @@ const InventoryReservationSchema = new mongoose.Schema({
     enum: ['reserved', 'completed', 'released'],
     default: 'reserved',
     index: true
+  },
+  order: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Order',
+    index: true
   }
 }, {
   timestamps: true
 });
+
+// Compound indexes for high-speed stock hold queries
+InventoryReservationSchema.index({ status: 1, expiresAt: 1 });
+InventoryReservationSchema.index({ order: 1, status: 1 });
+InventoryReservationSchema.index({ product: 1, user: 1, status: 1 });
 
 module.exports = mongoose.model('InventoryReservation', InventoryReservationSchema);

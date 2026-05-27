@@ -12,7 +12,9 @@ const {
   calculateOrderPricing,
   verifyPayment,
   verifyDeliveryOtp,
-  resendDeliveryOtp
+  resendDeliveryOtp,
+  handleRazorpayWebhook,
+  validateCoupon
 } = require('../controllers/orderController');
 const { protect, authorize } = require('../middleware/auth');
 const { check } = require('express-validator');
@@ -20,11 +22,14 @@ const { validate } = require('../middleware/validationMiddleware');
 
 // Public routes
 router.route('/calculate-pricing').post(calculateOrderPricing);
+router.route('/webhook/razorpay').post(handleRazorpayWebhook);
 
 router.use(protect);
 
 router.route('/cod-eligibility').post(checkCodEligibility);
 router.route('/verify-payment').post(verifyPayment);
+router.route('/validate-coupon').post(validateCoupon);
+
 
 router.route('/')
   .get(getOrders)

@@ -4,6 +4,10 @@ const SystemSettingsSchema = new mongoose.Schema({
   deliveryCommissionRate: {
     type: Number,
     default: 50.00
+  },
+  salesCommissionRate: {
+    type: Number,
+    default: 10.00
   }
 });
 

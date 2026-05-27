@@ -22,10 +22,8 @@ const CartPage = () => {
   const handleAction = () => {
     if (!isLoggedIn) {
       navigate('/login');
-    } else if (!address) {
-      navigate('/address');
     } else {
-      navigate('/payment');
+      navigate('/checkout');
     }
   };
 
@@ -60,19 +58,15 @@ const CartPage = () => {
         <div className="flex items-center gap-10 mb-10">
           <div className="flex items-center gap-3 bg-[#189D91]/10 px-5 py-2 rounded-full border border-[#189D91]/20">
             <span className="w-6 h-6 rounded-full bg-[#189D91] text-white flex items-center justify-center text-xs font-bold">1</span>
-            <span className="text-sm font-bold text-[#189D91]">Shipping Address</span>
+            <span className="text-sm font-bold text-[#189D91]">Checkout Summary</span>
           </div>
           <div className="flex items-center gap-3 opacity-60">
             <span className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-bold">2</span>
-            <span className="text-sm font-semibold text-gray-600">Delivery Method</span>
+            <span className="text-sm font-semibold text-gray-600">Payment Selection</span>
           </div>
           <div className="flex items-center gap-3 opacity-60">
             <span className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-bold">3</span>
-            <span className="text-sm font-semibold text-gray-600">Payment Method</span>
-          </div>
-          <div className="flex items-center gap-3 opacity-60">
-            <span className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-bold">4</span>
-            <span className="text-sm font-semibold text-gray-600">Review Order</span>
+            <span className="text-sm font-semibold text-gray-600">Order Placed</span>
           </div>
         </div>
 
@@ -103,8 +97,8 @@ const CartPage = () => {
                     <div className="flex-1 flex flex-col justify-between pr-6">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-bold text-gray-900 text-lg">{item.name}</h3>
-                          <p className="text-sm font-semibold text-gray-500 mt-1">₹{item.price?.toLocaleString('en-IN')}</p>
+                           <h3 className="font-bold text-gray-900 text-lg">{item.name}</h3>
+                           <p className="text-sm font-semibold text-gray-500 mt-1">₹{item.price?.toLocaleString('en-IN')}</p>
                         </div>
                         <button
                           onClick={() => removeFromCart(item._id || item.id)}
@@ -192,12 +186,13 @@ const CartPage = () => {
                 onClick={handleAction}
                 className="w-full mt-8 bg-[#189D91] hover:bg-[#14847a] text-white py-4 rounded-xl font-bold text-[15px] shadow-md shadow-[#189D91]/15 hover:shadow-lg transition-all"
               >
-                Continue to Delivery Method
+                Proceed to Checkout
               </button>
             </div>
           </div>
         </div>
       </div>
+
 
       {/* ======================= MOBILE VIEW ======================= */}
       <div className="md:hidden pb-40">

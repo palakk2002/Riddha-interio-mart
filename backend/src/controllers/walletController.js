@@ -16,30 +16,44 @@ exports.getSellerWallet = async (req, res, next) => {
       wallet = await SellerWallet.create({ seller: req.user.id });
     }
 
-    // Populate order details for sale/refund transactions
-    const populatedTransactions = await Promise.all(wallet.transactions.map(async (tx) => {
+    // 1. Gather all unique reference IDs for sale/refund transactions to eliminate N+1 query pattern
+    const referenceIds = wallet.transactions
+      .filter(tx => ['sale_credit', 'refund_debit'].includes(tx.type) && tx.referenceId)
+      .map(tx => tx.referenceId);
+
+    // 2. Batch fetch order details in a single query
+    const ordersMap = {};
+    if (referenceIds.length > 0) {
+      try {
+        const Order = require('../models/Order');
+        const orders = await Order.find({ _id: { $in: referenceIds } })
+          .select('user orderItems')
+          .populate('user', 'fullName email')
+          .lean();
+        
+        orders.forEach(order => {
+          ordersMap[order._id.toString()] = order;
+        });
+      } catch (err) {
+        console.error('Failed to batch populate orders for seller wallet transactions:', err.message);
+      }
+    }
+
+    // 3. Map populated data back to transactions in-memory
+    const populatedTransactions = wallet.transactions.map((tx) => {
       let txObj = tx.toObject();
       if (['sale_credit', 'refund_debit'].includes(tx.type) && tx.referenceId) {
-        try {
-          const Order = require('../models/Order');
-          const order = await Order.findById(tx.referenceId)
-            .select('user orderItems')
-            .populate('user', 'fullName email')
-            .lean();
-          
-          if (order) {
-            txObj.orderData = {
-              customerName: order.user ? order.user.fullName : 'Unknown User',
-              productName: order.orderItems && order.orderItems.length > 0 ? order.orderItems[0].name : 'Unknown Product',
-              itemsCount: order.orderItems ? order.orderItems.length : 0
-            };
-          }
-        } catch (e) {
-          console.error('Failed to populate order data for transaction:', e.message);
+        const order = ordersMap[tx.referenceId.toString()];
+        if (order) {
+          txObj.orderData = {
+            customerName: order.user ? order.user.fullName : 'Unknown User',
+            productName: order.orderItems && order.orderItems.length > 0 ? order.orderItems[0].name : 'Unknown Product',
+            itemsCount: order.orderItems ? order.orderItems.length : 0
+          };
         }
       }
       return txObj;
-    }));
+    });
 
     const responseData = wallet.toObject();
     responseData.transactions = populatedTransactions;
@@ -484,19 +498,25 @@ exports.getAdminFinancialAnalytics = async (req, res, next) => {
       });
     }
 
-    // 5. Populate seller leaderboard
-    const populatedSellers = [];
-    for (const record of topSellersAgg) {
-      if (record && record._id) {
-        const sellerObj = await Seller.findById(record._id);
-        populatedSellers.push({
+    // 5. Populate seller leaderboard — batch fetch to eliminate N+1
+    const topSellerIds = topSellersAgg.filter(r => r && r._id).map(r => r._id);
+    const topSellerDocs = await Seller.find({ _id: { $in: topSellerIds } })
+      .select('shopName fullName')
+      .lean();
+    const sellerDocsMap = {};
+    topSellerDocs.forEach(s => { sellerDocsMap[s._id.toString()] = s; });
+
+    const populatedSellers = topSellersAgg
+      .filter(r => r && r._id)
+      .map(record => {
+        const sellerObj = sellerDocsMap[record._id.toString()];
+        return {
           name: sellerObj?.shopName || sellerObj?.fullName || 'Marketplace Seller',
           sales: `₹${record.sales.toLocaleString()}`,
           orders: record.ordersCount,
-          growth: '+12%' // Assuming static growth for now until historical data is computed
-        });
-      }
-    }
+          growth: '+12%'
+        };
+      });
 
     res.status(200).json({
       success: true,

@@ -22,19 +22,26 @@ exports.protect = async (req, res, next) => {
     return res.status(401).json({ success: false, error: 'No token provided. Access denied.' });
   }
 
+  const secret = process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET;
+  if (!secret) {
+    console.error('[SECURITY CRITICAL] JWT secret is not configured in the environment variables!');
+    return res.status(500).json({ success: false, error: 'Server authentication configuration error.' });
+  }
+
   try {
     // Verify token
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET || 'your_jwt_secret_key_here');
+    const decoded = jwt.verify(token, secret);
 
-    // 1. Blacklist check
+    // 1. Blacklist check using MongoDB TTL collection
     const crypto = require('crypto');
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const cacheService = require('../services/cacheService');
-    const isBlacklisted = cacheService.get(`blacklist:token:${tokenHash}`);
+    const BlacklistedToken = require('../models/BlacklistedToken');
+    const isBlacklisted = await BlacklistedToken.findOne({ tokenHash });
     if (isBlacklisted) {
       return res.status(401).json({ success: false, error: 'Session has been invalidated. Please log in again.' });
     }
 
+    const cacheService = require('../services/cacheService');
     // Find user in the correct collection based on role in token
     let Model;
     switch (decoded.role) {
@@ -129,17 +136,24 @@ exports.tryProtect = async (req, res, next) => {
     return next();
   }
 
+  const secret = process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET;
+  if (!secret) {
+    return next();
+  }
+
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET || 'your_jwt_secret_key_here');
+    const decoded = jwt.verify(token, secret);
     
     // 1. Blacklist check
     const crypto = require('crypto');
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const cacheService = require('../services/cacheService');
-    const isBlacklisted = cacheService.get(`blacklist:token:${tokenHash}`);
+    const BlacklistedToken = require('../models/BlacklistedToken');
+    const isBlacklisted = await BlacklistedToken.findOne({ tokenHash });
     if (isBlacklisted) {
       return next();
     }
+
+    const cacheService = require('../services/cacheService');
 
     let Model;
     switch (decoded.role) {

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { FiCheck, FiArrowRight, FiShoppingBag, FiMapPin } from 'react-icons/fi';
+import { FiCheck, FiArrowRight, FiShoppingBag, FiMapPin, FiAlertCircle } from 'react-icons/fi';
 import Button from '../../../shared/components/Button';
 
 const OrderSuccessPage = () => {
   const navigate = useNavigate();
   const [orderIds, setOrderIds] = useState([]);
+  const [noOrder, setNoOrder] = useState(false);
 
   useEffect(() => {
     try {
@@ -14,14 +15,44 @@ const OrderSuccessPage = () => {
       if (savedIds) {
         setOrderIds(JSON.parse(savedIds));
       } else {
-        // Fallback for old single order logic
         const oldId = localStorage.getItem('last_order_id');
-        if (oldId) setOrderIds([oldId]);
+        if (oldId) {
+          setOrderIds([oldId]);
+        } else {
+          setNoOrder(true);
+        }
       }
     } catch (e) {
-      setOrderIds(['RD-PAYMENT-SUCCESS']);
+      setNoOrder(true);
     }
   }, []);
+
+  const handleExit = (targetPath) => {
+    // Clear order transaction keys from storage on successful completion
+    localStorage.removeItem('last_order_ids');
+    localStorage.removeItem('last_order_id');
+    navigate(targetPath);
+  };
+
+  if (noOrder) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mb-6 text-amber-500 border border-amber-100">
+          <FiAlertCircle size={32} />
+        </div>
+        <h2 className="text-xl font-bold text-gray-800 mb-2">No Active Order Success Found</h2>
+        <p className="text-gray-400 mb-8 text-xs font-semibold uppercase tracking-wider max-w-sm leading-relaxed">
+          It looks like you accessed this page directly without placing an active checkout transaction.
+        </p>
+        <button 
+          onClick={() => navigate('/products')} 
+          className="px-10 py-4 bg-[#189D91] hover:bg-black text-white font-black rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-md shadow-[#189D91]/15 active:scale-[0.98]"
+        >
+          START SHOPPING
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
@@ -82,7 +113,7 @@ const OrderSuccessPage = () => {
            </div>
         </div>
 
-        {/* Placeholder Map UI Inside Card */}
+        {/* Live Map Concierge Tracking Simulation */}
         <div className="relative h-40 bg-emerald-50/50 rounded-2xl border border-[#189D91]/10 overflow-hidden mt-4">
           <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#189D91 1px, transparent 1px)', backgroundSize: '12px 12px' }} />
           
@@ -117,13 +148,13 @@ const OrderSuccessPage = () => {
         className="mt-12 w-full max-w-md space-y-4"
       >
         <Button 
-          onClick={() => navigate('/')}
+          onClick={() => handleExit('/')}
           className="w-full h-16 rounded-2xl bg-[#189D91] text-white font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-[#189D91]/20 flex items-center justify-center gap-3"
         >
           CONTINUE SHOPPING <FiArrowRight className="text-lg" />
         </Button>
         <button 
-          onClick={() => navigate('/orders')}
+          onClick={() => handleExit('/orders')}
           className="w-full py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:text-[#189D91] transition-colors"
         >
           View My Orders

@@ -5,6 +5,7 @@ const DeliveryWallet = require('../models/DeliveryWallet');
 const SellerPayout = require('../models/SellerPayout');
 const DeliverySettlement = require('../models/DeliverySettlement');
 const Seller = require('../models/Seller');
+const SystemSettings = require('../models/SystemSettings');
 
 /**
  * Robust execution wrapper supporting Mongoose atomic sessions
@@ -55,8 +56,8 @@ class WalletService {
   /**
    * Credit customer user wallet with idempotency protection
    */
-  async creditUserWallet(userId, amount, type, description, referenceId, idempotencyKey, expiresAt = null) {
-    return executeInTransaction(async (session) => {
+  async creditUserWallet(userId, amount, type, description, referenceId, idempotencyKey, expiresAt = null, sessionOverride = null) {
+    const operation = async (session) => {
       let wallet = await Wallet.findOne({ user: userId }).session(session);
       if (!wallet) {
         // Upsert wallet atomically
@@ -85,16 +86,24 @@ class WalletService {
       // 3. Recalculate balance securely (active & unexpired only)
       wallet.balance = this._calculateActiveBalance(wallet.transactions);
 
+      // Force Mongoose to mark transactions array as modified to persist subdocument mutations correctly
+      wallet.markModified('transactions');
+
       await wallet.save({ session });
       return wallet;
-    });
+    };
+
+    if (sessionOverride) {
+      return await operation(sessionOverride);
+    }
+    return executeInTransaction(operation);
   }
 
   /**
    * Debit customer user wallet with idempotency protection and balance guards
    */
-  async debitUserWallet(userId, amount, type, description, referenceId, idempotencyKey) {
-    return executeInTransaction(async (session) => {
+  async debitUserWallet(userId, amount, type, description, referenceId, idempotencyKey, sessionOverride = null) {
+    const operation = async (session) => {
       let wallet = await Wallet.findOne({ user: userId }).session(session);
       if (!wallet) {
         throw new Error('Customer wallet not found.');
@@ -125,20 +134,28 @@ class WalletService {
       // 4. Recalculate balance
       wallet.balance = this._calculateActiveBalance(wallet.transactions);
 
+      // Force Mongoose to mark transactions array as modified to persist subdocument mutations correctly
+      wallet.markModified('transactions');
+
       await wallet.save({ session });
       return wallet;
-    });
+    };
+
+    if (sessionOverride) {
+      return await operation(sessionOverride);
+    }
+    return executeInTransaction(operation);
   }
 
   /**
    * Record a sale as pending when an order is placed
    */
-  async recordPendingSale(order, customIdempotencyKey = null) {
+  async recordPendingSale(order, customIdempotencyKey = null, sessionOverride = null) {
     if (order.sellerType === 'Admin') return; // Skip admin sales commission
 
     const idempotencyKey = customIdempotencyKey || `pending_sale_${order._id}`;
 
-    return executeInTransaction(async (session) => {
+    const operation = async (session) => {
       let wallet = await SellerWallet.findOne({ seller: order.seller }).session(session);
       if (!wallet) {
         const created = await SellerWallet.create([{ seller: order.seller }], { session });
@@ -149,16 +166,20 @@ class WalletService {
       const exists = wallet.transactions.some(t => t.idempotencyKey === idempotencyKey);
       if (exists) return wallet;
 
+      // Dynamically load commission rate from SystemSettings
+      let settings = await SystemSettings.findOne().session(session);
+      const commissionRate = (settings && settings.salesCommissionRate !== undefined) ? settings.salesCommissionRate / 100 : 0.10;
+
       const subtotal = order.totalPrice;
-      const commission = subtotal * 0.10;
-      const netEarnings = subtotal - commission;
+      const commission = Number((subtotal * commissionRate).toFixed(2));
+      const netEarnings = Number((subtotal - commission).toFixed(2));
 
       // 2. Append transaction log
       wallet.transactions.push({
         amount: netEarnings,
         type: 'sale_credit',
         status: 'pending',
-        description: `Pending earnings for Order ${order._id} (inclusive of 10% commission fee)`,
+        description: `Pending earnings for Order ${order._id} (inclusive of ${(commissionRate * 100).toFixed(0)}% commission fee)`,
         referenceId: order._id,
         balanceAfter: wallet.withdrawableBalance,
         idempotencyKey
@@ -167,7 +188,12 @@ class WalletService {
       wallet.pendingBalance = Number((wallet.pendingBalance + netEarnings).toFixed(2));
       await wallet.save({ session });
       return wallet;
-    });
+    };
+
+    if (sessionOverride) {
+      return await operation(sessionOverride);
+    }
+    return executeInTransaction(operation);
   }
 
   /**
@@ -219,10 +245,10 @@ class WalletService {
   /**
    * Records a refund deduction on returned orders
    */
-  async recordRefundDeduction(order, refundAmount, customIdempotencyKey = null) {
+  async recordRefundDeduction(order, refundAmount, customIdempotencyKey = null, sessionOverride = null) {
     const idempotencyKey = customIdempotencyKey || `refund_deduct_${order._id}_${refundAmount}`;
 
-    return executeInTransaction(async (session) => {
+    const operation = async (session) => {
       let wallet = await SellerWallet.findOne({ seller: order.seller }).session(session);
       if (!wallet) {
         const created = await SellerWallet.create([{ seller: order.seller }], { session });
@@ -233,7 +259,11 @@ class WalletService {
       const exists = wallet.transactions.some(t => t.idempotencyKey === idempotencyKey);
       if (exists) return wallet;
 
-      const commissionRecovery = Number((refundAmount * 0.10).toFixed(2));
+      // Dynamically load commission rate from SystemSettings
+      let settings = await SystemSettings.findOne().session(session);
+      const commissionRate = (settings && settings.salesCommissionRate !== undefined) ? settings.salesCommissionRate / 100 : 0.10;
+
+      const commissionRecovery = Number((refundAmount * commissionRate).toFixed(2));
       const netDeduction = Number((refundAmount - commissionRecovery).toFixed(2));
 
       wallet.withdrawableBalance = Number((wallet.withdrawableBalance - netDeduction).toFixed(2));
@@ -243,7 +273,7 @@ class WalletService {
         amount: -netDeduction,
         type: 'refund_debit',
         status: 'cleared',
-        description: `Deduction for returned items in Order ${order._id}`,
+        description: `Deduction for returned items in Order ${order._id} (inclusive of ${(commissionRate * 100).toFixed(0)}% commission recovery)`,
         referenceId: order._id,
         balanceAfter: newBalance,
         idempotencyKey
@@ -251,7 +281,12 @@ class WalletService {
 
       await wallet.save({ session });
       return wallet;
-    });
+    };
+
+    if (sessionOverride) {
+      return await operation(sessionOverride);
+    }
+    return executeInTransaction(operation);
   }
 
   /**
@@ -401,10 +436,10 @@ class WalletService {
   /**
    * Record delivery partner earnings & COD liability on order delivery completion
    */
-  async recordDeliveryEarning(deliveryPartnerId, orderId, isCod, totalPrice, customIdempotencyKey = null) {
+  async recordDeliveryEarning(deliveryPartnerId, orderId, isCod, totalPrice, customIdempotencyKey = null, sessionOverride = null) {
     const idempotencyKey = customIdempotencyKey || `delivery_earn_${deliveryPartnerId}_${orderId}`;
 
-    return executeInTransaction(async (session) => {
+    const operation = async (session) => {
       let wallet = await DeliveryWallet.findOne({ deliveryPartner: deliveryPartnerId }).session(session);
       if (!wallet) {
         const created = await DeliveryWallet.create([{ deliveryPartner: deliveryPartnerId }], { session });
@@ -415,7 +450,9 @@ class WalletService {
       const exists = wallet.transactions.some(t => t.idempotencyKey === idempotencyKey);
       if (exists) return wallet;
 
-      const deliveryFee = 50; // standard delivery pay of ₹50
+      // Dynamically load delivery fee from SystemSettings
+      let settings = await SystemSettings.findOne().session(session);
+      const deliveryFee = (settings && settings.deliveryCommissionRate !== undefined) ? settings.deliveryCommissionRate : 50;
 
       // Credit delivery fee
       wallet.earningsBalance = Number((wallet.earningsBalance + deliveryFee).toFixed(2));
@@ -447,7 +484,12 @@ class WalletService {
 
       await wallet.save({ session });
       return wallet;
-    });
+    };
+
+    if (sessionOverride) {
+      return await operation(sessionOverride);
+    }
+    return executeInTransaction(operation);
   }
 
   /**

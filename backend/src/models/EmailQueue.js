@@ -45,4 +45,7 @@ const EmailQueueSchema = new mongoose.Schema({
 
 EmailQueueSchema.index({ status: 1, nextAttemptAt: 1 });
 
+// TTL index to automatically purge sent/failed email elements after 30 days
+EmailQueueSchema.index({ createdAt: 1 }, { expireAfterSeconds: 30 * 24 * 60 * 60 });
+
 module.exports = mongoose.model('EmailQueue', EmailQueueSchema);

@@ -48,11 +48,21 @@ const { initSocket } = require('./socket');
 
 const uploadRoutes = require('./routes/uploadRoutes');
 
+const mongoSanitize = require('express-mongo-sanitize');
+
 const app = express();
 
 // Body parser
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({
+  limit: '50mb',
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Protect against NoSQL injection
+app.use(mongoSanitize());
 
 // Enable Cookies
 app.use(cookieParser(process.env.COOKIE_SECRET));

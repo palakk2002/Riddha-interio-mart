@@ -24,4 +24,7 @@ const SearchQuerySchema = new mongoose.Schema({
 // Compound unique index for tracking query frequencies per user or overall
 SearchQuerySchema.index({ query: 1, user: 1 }, { unique: true });
 
+// Compound index for high-speed recent queries sorting
+SearchQuerySchema.index({ user: 1, updatedAt: -1 });
+
 module.exports = mongoose.model('SearchQuery', SearchQuerySchema);

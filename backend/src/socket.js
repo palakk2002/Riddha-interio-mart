@@ -54,8 +54,12 @@ function initSocket(httpServer) {
         return next(new Error('AUTH_TOKEN_REQUIRED'));
       }
 
-      const secret = process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET || 'your_jwt_secret_key_here';
-      console.log(`[Socket Auth] Attempting verification. Token length: ${token.length}, Secret exists: ${!!process.env.ACCESS_TOKEN_SECRET}`);
+      const secret = process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET;
+      if (!secret) {
+        console.error('[Socket Auth ERROR] ACCESS_TOKEN_SECRET or JWT_SECRET environment variables are missing!');
+        return next(new Error('AUTH_CONFIG_ERROR'));
+      }
+      console.log(`[Socket Auth] Attempting verification. Token length: ${token.length}, Secret exists: true`);
 
       try {
         const decoded = jwt.verify(token, secret);

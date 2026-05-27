@@ -176,6 +176,9 @@ class InventoryService {
   /**
    * Background scan process to release all expired stock reservations.
    */
+  /**
+   * Background scan process to release all expired stock reservations.
+   */
   async releaseExpiredReservations() {
     const expiredReservations = await InventoryReservation.find({
       status: 'reserved',
@@ -190,27 +193,94 @@ class InventoryService {
       const session = await mongoose.startSession();
       try {
         session.startTransaction();
-        await this.releaseReservation(reservation._id, session);
 
-        // Auto-cancel any associated unpaid pending order
         const Order = require('../models/Order');
-        const order = await Order.findOne({
-          user: reservation.user,
-          'orderItems.product': reservation.product,
-          status: 'Pending',
-          isPaid: false
-        }).session(session);
+        let order = null;
+        if (reservation.order) {
+          order = await Order.findOne({
+            _id: reservation.order,
+            status: 'Pending',
+            isPaid: false
+          }).session(session);
+        } else {
+          order = await Order.findOne({
+            user: reservation.user,
+            'orderItems.product': reservation.product,
+            status: 'Pending',
+            isPaid: false
+          }).session(session);
+        }
 
         if (order) {
           order.status = 'Cancelled';
           order.paymentStatus = 'failed';
           await order.save({ session });
-          console.log(`[Inventory Daemon] Auto-cancelled abandoned Order #${order._id} due to expired stock hold.`);
+
+          const associatedReservations = await InventoryReservation.find({
+            order: order._id,
+            status: 'reserved'
+          }).session(session);
+
+          for (const assocRes of associatedReservations) {
+            await this.releaseReservation(assocRes._id, session);
+          }
+          console.log(`[Inventory Daemon] Reconciled and auto-cancelled abandoned Order #${order._id} releasing all associated stock holds.`);
+        } else {
+          await this.releaseReservation(reservation._id, session);
         }
 
         await session.commitTransaction();
       } catch (err) {
-        console.error(`[Inventory Daemon] Failed to release expired reservation ${reservation._id}:`, err.message);
+        await session.abortTransaction();
+
+        // Handle standalone MongoDB fallback
+        const isNoReplicaSet = err.message.includes('replica set') || 
+                               err.codeName === 'TransactionOutcomeUnknown' || 
+                               err.code === 20;
+        if (isNoReplicaSet) {
+          console.warn('[Inventory Daemon WARNING] Standalone MongoDB detected. Sweeping expired hold without transaction.');
+          try {
+            // Standalone sweep fallback logic (runs without session)
+            const Order = require('../models/Order');
+            let order = null;
+            if (reservation.order) {
+              order = await Order.findOne({
+                _id: reservation.order,
+                status: 'Pending',
+                isPaid: false
+              });
+            } else {
+              order = await Order.findOne({
+                user: reservation.user,
+                'orderItems.product': reservation.product,
+                status: 'Pending',
+                isPaid: false
+              });
+            }
+
+            if (order) {
+              order.status = 'Cancelled';
+              order.paymentStatus = 'failed';
+              await order.save();
+
+              const associatedReservations = await InventoryReservation.find({
+                order: order._id,
+                status: 'reserved'
+              });
+
+              for (const assocRes of associatedReservations) {
+                await this.releaseReservation(assocRes._id);
+              }
+              console.log(`[Inventory Daemon] Reconciled and auto-cancelled abandoned Order #${order._id} releasing all associated stock holds (Standalone fallback).`);
+            } else {
+              await this.releaseReservation(reservation._id);
+            }
+          } catch (fallbackErr) {
+            console.error('[Inventory Daemon ERROR] Standalone sweep fallback failed:', fallbackErr.message);
+          }
+        } else {
+          console.error(`[Inventory Daemon ERROR] Failed to release expired reservation ${reservation._id}:`, err.message);
+        }
       } finally {
         session.endSession();
       }

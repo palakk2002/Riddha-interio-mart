@@ -29,6 +29,8 @@ const FCMTokenSchema = new mongoose.Schema({
 
 // Compound indexes for high-speed queries
 FCMTokenSchema.index({ user: 1, userModel: 1 });
-FCMTokenSchema.index({ lastUsedAt: 1 });
+
+// TTL index to automatically purge device tokens that have been inactive for 60 days
+FCMTokenSchema.index({ lastUsedAt: 1 }, { expireAfterSeconds: 60 * 24 * 60 * 60 });
 
 module.exports = mongoose.model('FCMToken', FCMTokenSchema);

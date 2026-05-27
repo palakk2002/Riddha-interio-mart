@@ -141,12 +141,12 @@ exports.logout = async (req, res, next) => {
       await RefreshToken.deleteOne({ tokenHash });
     }
 
-    // Blacklist stateless access token
     const accessToken = req.cookies?.access_token || req.signedCookies?.access_token || (req.headers.authorization && req.headers.authorization.startsWith('Bearer') ? req.headers.authorization.split(' ')[1] : null);
     if (accessToken) {
       try {
         const jwt = require('jsonwebtoken');
         const crypto = require('crypto');
+        const BlacklistedToken = require('../models/BlacklistedToken');
         const cacheService = require('../services/cacheService');
 
         const decoded = jwt.decode(accessToken);
@@ -154,11 +154,20 @@ exports.logout = async (req, res, next) => {
           const remainingTTL = decoded.exp - Math.floor(Date.now() / 1000);
           if (remainingTTL > 0) {
             const tokenHash = crypto.createHash('sha256').update(accessToken).digest('hex');
-            cacheService.set(`blacklist:token:${tokenHash}`, true, remainingTTL);
+            
+            // Store blacklisted token hash inside MongoDB with a TTL date matching its expiry
+            await BlacklistedToken.create({
+              tokenHash,
+              expiresAt: new Date(decoded.exp * 1000)
+            }).catch(err => {
+              if (err.code !== 11000) { // Ignore duplicate key errors if already blacklisted
+                throw err;
+              }
+            });
             
             // Delete user's cached profile
             cacheService.del(`user:profile:${decoded.role}:${decoded.id}`);
-            console.log(`[CACHE BLACKLIST] Access token blacklisted for user ${decoded.id} for ${remainingTTL} seconds.`);
+            console.log(`[DATABASE BLACKLIST] Access token hash blacklisted for user ${decoded.id} until ${new Date(decoded.exp * 1000).toISOString()}`);
           }
         }
       } catch (err) {

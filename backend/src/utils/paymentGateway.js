@@ -58,8 +58,18 @@ const processRefund = async (paymentId, amount, returnId) => {
   }
 };
 
+const validateWebhookSignature = (rawBody, signature, secret) => {
+  if (!rawBody || !signature || !secret) return false;
+  const expectedSignature = crypto
+    .createHmac("sha256", secret)
+    .update(rawBody.toString())
+    .digest("hex");
+  return expectedSignature === signature;
+};
+
 module.exports = {
   createRazorpayOrder,
   verifyRazorpayPayment,
-  processRefund
+  processRefund,
+  validateWebhookSignature
 };

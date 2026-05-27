@@ -22,7 +22,6 @@ exports.registerAdmin = async (req, res, next) => {
 exports.loginAdmin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if (email === 'test@test.com') return res.status(200).json({ success: true, message: 'Backend Reached' });
     const admin = await Admin.findOne({ email }).select('+password');
     if (!admin || !(await admin.matchPassword(password))) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
@@ -404,43 +403,80 @@ exports.getDashboardStats = async (req, res, next) => {
     const orderStatusCounts = orderMetricsFacet[0]?.statusCounts || [];
     const paymentMethodCounts = orderMetricsFacet[0]?.paymentCounts || [];
 
-    // Calculate revenue for last 7 days for graph
+    // Consolidated aggregation pipeline: fetch 14 days of telemetry in a single optimized query
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    
-    const dailyStats = await Order.aggregate([
-      { $match: { createdAt: { $gte: sevenDaysAgo }, status: { $ne: 'Cancelled' } } },
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+    fourteenDaysAgo.setHours(0, 0, 0, 0);
+
+    const dailyStats14Days = await Order.aggregate([
+      { $match: { createdAt: { $gte: fourteenDaysAgo }, status: { $ne: 'Cancelled' } } },
       {
         $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
           revenue: { $sum: "$totalPrice" },
           orders: { $sum: 1 }
         }
-      },
-      { $sort: { "_id": 1 } }
+      }
     ]);
 
-    // Fill in missing days with zero revenue
-    const chartData = [];
+    // Construct a map for O(1) in-memory lookups
+    const dailyMap = {};
+    dailyStats14Days.forEach(s => {
+      dailyMap[s._id] = s;
+    });
+
+    // Compute current 7-day stats and graph daily data in-memory
+    const currDates = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
-      const dayData = dailyStats.find(s => s._id === dateStr);
-      chartData.push({
-        date: d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
-        revenue: dayData ? dayData.revenue : 0,
-        orders: dayData ? dayData.orders : 0
-      });
+      currDates.push(d.toISOString().split('T')[0]);
     }
 
-    // Dynamic Week-over-Week Trends
-    const fourteenDaysAgo = new Date();
-    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+    let currRevSum = 0;
+    let currOrdersSum = 0;
+    const chartData = [];
+    currDates.forEach(dateStr => {
+      const dayData = dailyMap[dateStr];
+      const rev = dayData ? dayData.revenue : 0;
+      const ords = dayData ? dayData.orders : 0;
+      currRevSum += rev;
+      currOrdersSum += ords;
+      
+      const d = new Date(dateStr);
+      chartData.push({
+        date: d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
+        revenue: rev,
+        orders: ords
+      });
+    });
 
+    const currOrderStats = [{ totalRevenue: currRevSum, totalOrders: currOrdersSum }];
+
+    // Compute previous 7-day stats (days 8-14 ago) in-memory
+    const prevDates = [];
+    for (let i = 13; i >= 7; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      prevDates.push(d.toISOString().split('T')[0]);
+    }
+
+    let prevRevSum = 0;
+    let prevOrdersSum = 0;
+    prevDates.forEach(dateStr => {
+      const dayData = dailyMap[dateStr];
+      prevRevSum += dayData ? dayData.revenue : 0;
+      prevOrdersSum += dayData ? dayData.orders : 0;
+    });
+
+    const prevOrderStats = [{ totalRevenue: prevRevSum, totalOrders: prevOrdersSum }];
+
+    // Fetch the remaining counts in parallel
     const [
-      prevOrderStats,
-      currOrderStats,
       prevSellersCount,
       currSellersCount,
       prevUsersCount,
@@ -448,14 +484,6 @@ exports.getDashboardStats = async (req, res, next) => {
       prevDeliveryCount,
       currDeliveryCount
     ] = await Promise.all([
-      Order.aggregate([
-        { $match: { createdAt: { $gte: fourteenDaysAgo, $lt: sevenDaysAgo }, status: { $ne: 'Cancelled' } } },
-        { $group: { _id: null, totalRevenue: { $sum: "$totalPrice" }, totalOrders: { $sum: 1 } } }
-      ]),
-      Order.aggregate([
-        { $match: { createdAt: { $gte: sevenDaysAgo }, status: { $ne: 'Cancelled' } } },
-        { $group: { _id: null, totalRevenue: { $sum: "$totalPrice" }, totalOrders: { $sum: 1 } } }
-      ]),
       Seller.countDocuments({ isVerified: true, createdAt: { $gte: fourteenDaysAgo, $lt: sevenDaysAgo } }),
       Seller.countDocuments({ isVerified: true, createdAt: { $gte: sevenDaysAgo } }),
       User.countDocuments({ role: 'user', createdAt: { $gte: fourteenDaysAgo, $lt: sevenDaysAgo } }),

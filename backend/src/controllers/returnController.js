@@ -166,16 +166,23 @@ exports.updateReturnStatus = async (req, res, next) => {
     if (status === 'Approved' || status === 'Completed') {
       // 1. Process Refund
       if (returnReq.refundStatus === 'Pending') {
-        try {
-          const refundRes = await processRefund(
-            order.paymentResult?.id || null, 
-            returnReq.refundAmount, 
-            returnReq._id
-          );
+        if (order.paymentMethod === 'COD' || order.paymentMethod === 'Wallet' || !order.paymentResult?.id) {
+          // COD or Wallet payments do not go through Razorpay.
+          // Refund is processed by crediting their Wallet directly (logged below).
           returnReq.refundStatus = 'Processed';
-        } catch (error) {
-          console.error('Refund processing error:', error);
-          returnReq.refundStatus = 'Failed';
+          console.log(`[FINTECH] COD/Wallet order return - skipping Razorpay API, marked refund processed directly.`);
+        } else {
+          try {
+            const refundRes = await processRefund(
+              order.paymentResult.id, 
+              returnReq.refundAmount, 
+              returnReq._id
+            );
+            returnReq.refundStatus = 'Processed';
+          } catch (error) {
+            console.error('Refund processing error:', error);
+            returnReq.refundStatus = 'Failed';
+          }
         }
       }
 
