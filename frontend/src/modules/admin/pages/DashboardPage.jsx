@@ -46,18 +46,16 @@ const Sparkline = ({ data = [30, 45, 35, 50, 40, 60, 55], color = "#189D91" }) =
   const chartData = data.map((val, idx) => ({ id: idx, value: val }));
   return (
     <div className="h-8 w-20 shrink-0">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData}>
-          <Area 
-            type="monotone" 
-            dataKey="value" 
-            stroke={color} 
-            fill={`${color}15`} 
-            strokeWidth={1.5} 
-            dot={false} 
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+      <AreaChart width={80} height={32} data={chartData}>
+        <Area
+          type="monotone"
+          dataKey="value"
+          stroke={color}
+          fill={`${color}15`}
+          strokeWidth={1.5}
+          dot={false}
+        />
+      </AreaChart>
     </div>
   );
 };
@@ -69,6 +67,19 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.matchMedia('(min-width: 1024px)').matches;
+  });
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+    const handleChange = (event) => setIsDesktop(event.matches);
+
+    setIsDesktop(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -237,8 +248,10 @@ const DashboardPage = () => {
 
   return (
     <PageWrapper>
+      {isDesktop ? (
+      <>
       {/* 🖥️ WEB VIEW ONLY (Large screens) */}
-      <div className="hidden lg:block max-w-7xl mx-auto space-y-8 pb-16">
+      <div className="max-w-7xl mx-auto space-y-8 pb-16">
         
         {/* Premium Admin Hero Section */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-6 md:p-8 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden">
@@ -739,7 +752,10 @@ const DashboardPage = () => {
       </div>
 
       {/* 📱 MOBILE VIEW ONLY (Touch & Swipe Optimized) */}
-      <div className="block lg:hidden max-w-md mx-auto space-y-5 pb-20">
+      </>
+      ) : (
+      <>
+      <div className="max-w-md mx-auto space-y-5 pb-20">
         
         {/* Compact Mobile Greeting Header */}
         <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center justify-between">
@@ -1082,6 +1098,8 @@ const DashboardPage = () => {
         </div>
 
       </div>
+      </>
+      )}
     </PageWrapper>
   );
 };

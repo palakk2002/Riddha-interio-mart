@@ -1,9 +1,6 @@
 {
-  "timestamp": "2026-05-27T11:41:28.824Z",
-  "query": {
-    "isActive": "all",
-    "isApproved": "all"
-  },
+  "timestamp": "2026-05-27T12:04:59.013Z",
+  "query": {},
   "builtFilter": {},
   "resultCount": 7,
   "results": [

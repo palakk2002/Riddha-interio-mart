@@ -95,8 +95,23 @@ app.use(helmet());
 // Apply rate limiting to all routes
 app.use('/api', limiter);
 
-// Apply stricter rate limiting to auth routes
-app.use('/api/auth', authLimiter);
+// Apply stricter rate limiting only to credential/OTP entry points.
+// Authenticated admin/seller/user reads under /api/auth/* should not share the
+// tiny login-attempt quota.
+app.use([
+  '/api/auth/admin/login',
+  '/api/auth/admin/register',
+  '/api/auth/user/login',
+  '/api/auth/user/register',
+  '/api/auth/user/verify-email',
+  '/api/auth/user/forgotpassword',
+  '/api/auth/user/resetpassword',
+  '/api/auth/seller/login',
+  '/api/auth/seller/register',
+  '/api/auth/seller/verify-otp',
+  '/api/auth/delivery/login',
+  '/api/auth/delivery/register'
+], authLimiter);
 
 // Dev logging middleware
 if (process.env.NODE_ENV === 'development') {
