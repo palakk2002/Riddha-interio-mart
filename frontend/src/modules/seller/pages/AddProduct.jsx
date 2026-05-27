@@ -72,7 +72,8 @@ const AddProduct = () => {
     unitValue: '1',
     countInStock: '',
     images: [], // Array of base64
-    videoUrl: ''
+    videoUrl: '',
+    gstRate: ''
   });
 
   useEffect(() => {
@@ -242,6 +243,7 @@ const AddProduct = () => {
         countInStock: Number(formData.countInStock),
         images: uploadedUrls,
         videoUrl: finalVideoUrl,
+        gstRate: formData.gstRate !== '' ? Number(formData.gstRate) : undefined,
         source: selection 
       });
       if (res.data.success) {
@@ -628,6 +630,20 @@ const AddProduct = () => {
                         value={formData.discountPrice} onChange={(e) => setFormData({...formData, discountPrice: e.target.value})}
                         className="w-full px-6 py-4 rounded-2xl bg-slate-50 border-none font-bold text-emerald-600 placeholder:text-emerald-200 focus:ring-2 focus:ring-emerald-500/10 transition-all"
                       />
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">GST Rate Override</label>
+                      <select 
+                        value={formData.gstRate} onChange={(e) => setFormData({...formData, gstRate: e.target.value})}
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border-none font-bold text-xs text-slate-600 focus:ring-2 focus:ring-emerald-500/10 transition-all cursor-pointer"
+                      >
+                         <option value="">Inherit Category Default</option>
+                         <option value="0">0% (GST Exempt)</option>
+                         <option value="5">5% GST</option>
+                         <option value="12">12% GST</option>
+                         <option value="18">18% GST</option>
+                         <option value="28">28% GST</option>
+                      </select>
                    </div>
                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">

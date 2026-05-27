@@ -28,6 +28,7 @@ const AddCategoryPage = () => {
     name: '',
     image: '',
     description: '',
+    defaultGstRate: 18,
   });
 
   const [categoryIcon, setCategoryIcon] = useState('');
@@ -130,7 +131,8 @@ const AddCategoryPage = () => {
         description: category.description,
         image: mainImageUrl,
         icon: finalIcon,
-        subcategories: updatedSubcategories.filter(s => s !== null)
+        subcategories: updatedSubcategories.filter(s => s !== null),
+        defaultGstRate: Number(category.defaultGstRate) || 18
       };
 
       const response = await api.post('/categories', categoryData);
@@ -206,6 +208,21 @@ const AddCategoryPage = () => {
                     onChange={(e) => setCategory({...category, description: e.target.value})}
                     placeholder="Describe the aesthetic..."
                     className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl md:rounded-2xl px-5 py-4 md:px-6 md:py-5 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all font-medium resize-none" 
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-warm-sand uppercase tracking-widest pl-1">Default GST Rate (%)</label>
+                  <input 
+                    required
+                    type="number" 
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={category.defaultGstRate}
+                    onChange={(e) => setCategory({...category, defaultGstRate: e.target.value})}
+                    placeholder="e.g. 18"
+                    className="w-full bg-soft-oatmeal/10 border border-soft-oatmeal rounded-xl md:rounded-2xl px-5 py-4 md:px-6 md:py-5 text-sm focus:outline-none focus:ring-2 focus:ring-warm-sand/20 focus:bg-white transition-all font-medium" 
                   />
                 </div>
               </div>
