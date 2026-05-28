@@ -16,19 +16,10 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('/node_modules/react/') || id.includes('/node_modules/react-dom/') || id.includes('/node_modules/react-router-dom/')) {
-              return 'vendor-react';
-            }
-            if (id.includes('recharts')) {
-              return 'vendor-recharts';
-            }
-            if (id.includes('xlsx')) {
-              return 'vendor-xlsx';
-            }
-            if (id.includes('lucide-react') || id.includes('react-icons')) {
-              return 'vendor-icons';
-            }
-            return 'vendor-libs';
+            if (id.includes('recharts')) return 'vendor-recharts';
+            if (id.includes('xlsx')) return 'vendor-xlsx';
+            if (id.includes('lucide-react') || id.includes('react-icons')) return 'vendor-icons';
+            // Let Vite handle React and other libraries automatically to prevent context errors
           }
         }
       }
