@@ -111,9 +111,17 @@ const Navbar = () => {
     const fetchCategories = async () => {
       try {
         const response = await api.get('/categories');
-        setCategories(response.data.data);
+        const payload = response.data;
+        const nextCategories = Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload)
+            ? payload
+            : [];
+
+        setCategories(nextCategories);
       } catch (err) {
         console.error('Failed to fetch navbar categories:', err);
+        setCategories([]);
       }
     };
     fetchCategories();
