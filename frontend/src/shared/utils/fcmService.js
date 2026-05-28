@@ -17,6 +17,7 @@
 
 let messagingInstance = null;
 let currentToken = null;
+let deniedPermissionLogged = false;
 
 /**
  * Initialize Firebase messaging lazily and return the messaging instance.
@@ -84,9 +85,20 @@ async function requestPermissionAndGetToken() {
   if (!messaging) return null;
 
   try {
+    if (Notification.permission === 'denied') {
+      if (!deniedPermissionLogged) {
+        console.log('[FCM] Notification permission is blocked in this browser. Push notifications disabled.');
+        deniedPermissionLogged = true;
+      }
+      return null;
+    }
+
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
-      console.log('[FCM] Notification permission denied by user.');
+      if (!deniedPermissionLogged) {
+        console.log('[FCM] Notification permission denied by user.');
+        deniedPermissionLogged = true;
+      }
       return null;
     }
 

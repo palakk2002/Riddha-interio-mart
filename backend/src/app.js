@@ -63,22 +63,13 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Protect against NoSQL injection
 app.use((req, res, next) => {
-<<<<<<< HEAD
   // In Express 5, req.query is a getter. We need to make it writable
   // so express-mongo-sanitize can reassign it.
-  const query = req.query;
-  Object.defineProperty(req, 'query', {
-    configurable: true,
-    enumerable: true,
-    writable: true,
-    value: query
-=======
   Object.defineProperty(req, 'query', {
     value: { ...req.query },
     writable: true,
     configurable: true,
     enumerable: true,
->>>>>>> c8371fba7314fff7598422eff26f6b04649c300a
   });
   next();
 });
@@ -106,8 +97,23 @@ app.use(helmet());
 // Apply rate limiting to all routes
 app.use('/api', limiter);
 
-// Apply stricter rate limiting to auth routes
-app.use('/api/auth', authLimiter);
+// Apply stricter rate limiting only to credential/OTP entry points.
+// Authenticated admin/seller/user reads under /api/auth/* should not share the
+// tiny login-attempt quota.
+app.use([
+  '/api/auth/admin/login',
+  '/api/auth/admin/register',
+  '/api/auth/user/login',
+  '/api/auth/user/register',
+  '/api/auth/user/verify-email',
+  '/api/auth/user/forgotpassword',
+  '/api/auth/user/resetpassword',
+  '/api/auth/seller/login',
+  '/api/auth/seller/register',
+  '/api/auth/seller/verify-otp',
+  '/api/auth/delivery/login',
+  '/api/auth/delivery/register'
+], authLimiter);
 
 // Dev logging middleware
 if (process.env.NODE_ENV === 'development') {

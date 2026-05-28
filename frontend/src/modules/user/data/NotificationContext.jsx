@@ -18,6 +18,8 @@ export const NotificationProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   // Track FCM foreground unsubscribe function across renders
   const fcmUnsubscribeRef = useRef(null);
+  const authToken = user?.token;
+  const userRole = user?.role;
 
   // Fetch notifications
   const fetchNotifications = async () => {
@@ -78,12 +80,12 @@ export const NotificationProvider = ({ children }) => {
 
   // Socket connection + FCM initialization
   useEffect(() => {
-    if (user && user.token) {
+    if (authToken && userRole !== 'admin') {
       fetchNotifications();
 
       // --- Socket.IO connection (primary realtime channel) ---
       const newSocket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
-        auth: { token: user.token },
+        auth: { token: authToken },
         transports: ['polling', 'websocket']
       });
 
@@ -150,7 +152,7 @@ export const NotificationProvider = ({ children }) => {
         fcmUnsubscribeRef.current = null;
       }
     }
-  }, [user]);
+  }, [authToken, userRole]);
 
   const markAsRead = async (id) => {
     try {
