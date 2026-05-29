@@ -102,188 +102,59 @@ const LoginPage = () => {
   };
 
   if (role === 'user') {
-    if (isDesktop) {
-      return (
-        <div className="min-h-screen w-full font-sans bg-[radial-gradient(circle_at_top_left,rgba(24,157,145,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(236,0,140,0.08),transparent_28%),linear-gradient(180deg,#f8fafc_0%,#eef5f5_100%)] flex items-center justify-center md:p-8">
-          <div className="hidden md:flex w-full max-w-5xl h-[80vh] min-h-[600px] bg-white rounded-3xl shadow-2xl overflow-hidden relative border border-slate-100">
-            <div className="flex-1 relative overflow-hidden border-r border-slate-200/70">
-              <img src={LOGIN_BG} alt="Luxury Showroom" className="absolute inset-0 w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,249,252,0.92)_0%,rgba(246,249,252,0.72)_42%,rgba(246,249,252,0.2)_100%)]" />
-              <div className="relative z-10 h-full flex items-center justify-center px-10 xl:px-16">
-                <div className="max-w-xl text-left">
-                  <div className="mb-7 w-full max-w-[200px]">
-                    <img src={logo} alt="Riddha Logo" className="w-full h-auto object-contain" />
-                  </div>
-                  <div className="space-y-4">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 border border-white/90 shadow-sm">
-                      <span className="w-2 h-2 rounded-full bg-[#189D91]" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#189D91]">Premium Interior Mart</span>
-                    </div>
-                    <h1 className="text-3xl xl:text-5xl font-black leading-[1.1] tracking-tight text-slate-950">
-                      Sign in to your
-                      <span className="block mt-1 bg-clip-text text-transparent bg-gradient-to-r from-[#189D91] via-slate-700 to-[#EC008C]">
-                        Riddha account
-                      </span>
-                    </h1>
-                    <p className="max-w-md text-sm xl:text-base font-medium leading-relaxed text-slate-600">
-                      Access saved addresses, order tracking, wishlist items, and faster checkout with a cleaner desktop experience.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-[0.8] flex items-center justify-center px-10 xl:px-14 py-10 relative bg-white">
-              <button
-                onClick={() => navigate(-1)}
-                className="absolute top-6 left-6 flex items-center gap-2 group text-slate-400 hover:text-slate-600 transition-all font-bold text-xs tracking-widest uppercase z-50 bg-slate-50 p-2.5 rounded-full hover:bg-slate-100"
-              >
-                <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-              </button>
-
-              <div className="w-full max-w-[400px] bg-transparent border-0 shadow-none">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <h2 className="text-2xl font-black text-slate-950">Log In</h2>
-                    <p className="text-xs font-semibold text-slate-500 mt-1">Access your secure user panel</p>
-                  </div>
-                  {getSignupPath() && (
-                    <button
-                      type="button"
-                      onClick={() => navigate(getSignupPath())}
-                      className="inline-flex items-center justify-center rounded-2xl border border-[#189D91]/20 bg-white/70 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-[#189D91] shadow-sm hover:bg-white transition-all"
-                    >
-                      Sign Up
-                    </button>
-                  )}
-                </div>
-
-                <AnimatePresence>
-                  {error && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className="mb-5 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col items-center gap-2"
-                    >
-                      <span className="text-rose-600 text-[10px] font-bold uppercase tracking-wider text-center leading-relaxed">{error}</span>
-                      {unverifiedEmail && (
-                        <button onClick={handleResendAndVerify} className="bg-rose-600 text-white px-5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-rose-700 transition-colors">
-                          Verify Email
-                        </button>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 ml-0.5">Email Address</label>
-                      <div className="relative group">
-                        <FiUser className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-350 ${theme.iconFocus} transition-colors`} size={16} />
-                        <input
-                          type="text"
-                          placeholder="name@example.com"
-                          value={identifier}
-                          onChange={(e) => setIdentifier(e.target.value)}
-                          className={`w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-sm font-semibold text-slate-700 placeholder:text-slate-300 shadow-sm`}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between items-center px-0.5">
-                        <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Password</label>
-                        <button type="button" onClick={() => navigate('/forgot-password')} className={`text-[10px] font-black ${theme.accentText} uppercase tracking-[0.18em] hover:underline`}>
-                          Forgot?
-                        </button>
-                      </div>
-                      <div className="relative group">
-                        <FiLock className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-355 ${theme.iconFocus} transition-colors`} size={16} />
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          placeholder="••••••••"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className={`w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-2xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-sm font-semibold text-slate-700 placeholder:text-slate-300 shadow-sm`}
-                        />
-                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
-                          {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between px-0.5 pt-1">
-                    <button type="button" onClick={() => setRememberMe(!rememberMe)} className="flex items-center gap-2 group">
-                      <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${rememberMe ? theme.checkboxBg : 'border-slate-200 bg-white group-hover:border-slate-300'}`}>
-                        {rememberMe && <FiCheck className="text-white text-[10px] stroke-[4]" />}
-                      </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-slate-600 transition-colors">Remember Me</span>
-                    </button>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className={`w-full py-3.5 rounded-2xl ${theme.primaryBtn} text-white font-black text-[11px] uppercase tracking-[0.22em] transition-all active:scale-[0.98] mt-3 shadow-lg shadow-[#189D91]/15`}
-                  >
-                    {loading ? 'Authenticating...' : 'Sign In Now'}
-                  </Button>
-
-
-
-                  {getSignupPath() && (
-                    <div className="pt-2">
-                      <Link
-                        to={getSignupPath()}
-                        className="w-full inline-flex items-center justify-center gap-2 rounded-2xl border border-[#189D91]/20 bg-[#189D91]/8 px-5 py-3.5 text-[11px] font-black uppercase tracking-[0.22em] text-[#189D91] hover:bg-[#189D91]/12 hover:border-[#189D91]/30 transition-all shadow-sm"
-                      >
-                        Create Account
-                      </Link>
-                    </div>
-                  )}
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     return (
-      <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center font-sans overflow-y-auto px-4 py-8">
+      <div className="min-h-screen w-full bg-[radial-gradient(circle_at_top_left,rgba(24,157,145,0.06),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(236,0,140,0.04),transparent_28%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] flex items-center justify-center font-sans overflow-y-auto md:p-8">
         {/* Device wrapper for desktop, seamless on mobile */}
-        <div className="w-full max-w-[420px] min-h-[820px] bg-white flex flex-col justify-between py-12 px-8 rounded-3xl md:shadow-2xl overflow-hidden relative border border-slate-100">
+        <div className="w-full max-w-[420px] md:max-w-5xl min-h-screen md:min-h-[600px] md:h-[80vh] bg-white flex flex-col md:flex-row justify-between md:justify-start md:rounded-3xl md:shadow-2xl overflow-hidden relative border-none md:border-slate-100">
           
           {/* Back Button */}
           <button 
             onClick={() => navigate(-1)} 
-            className="absolute top-6 left-6 p-2 bg-slate-50 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all border border-slate-100 shadow-sm"
+            className="absolute top-6 left-6 p-2 md:p-2.5 bg-slate-50 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all border border-slate-100 shadow-sm md:bg-white/80 md:shadow-md z-50"
             aria-label="Go Back"
           >
             <FiArrowLeft size={18} />
           </button>
 
-          <div className="w-full flex flex-col items-center">
+          {/* Left Image Desktop */}
+          <div className="hidden md:block md:w-1/2 md:h-full relative bg-slate-100 overflow-hidden border-r border-slate-100">
+             <img src={LOGIN_BG} alt="Luxury Showroom" className="w-full h-full object-cover" />
+             <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,249,252,0.92)_0%,rgba(246,249,252,0.6)_100%)]" />
+             <div className="relative z-10 h-full flex flex-col justify-center px-12 xl:px-16">
+               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 border border-white/90 shadow-sm w-fit mb-4">
+                 <span className="w-2 h-2 rounded-full bg-[#189D91]" />
+                 <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#189D91]">Premium Interior Mart</span>
+               </div>
+               <h1 className="text-4xl xl:text-5xl font-black leading-[1.1] tracking-tight text-slate-950 mb-4">
+                 Sign in to your<br/>
+                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#189D91] via-slate-700 to-[#EC008C]">
+                   Riddha account
+                 </span>
+               </h1>
+               <p className="max-w-md text-sm xl:text-base font-medium leading-relaxed text-slate-600">
+                 Access saved addresses, order tracking, wishlist items, and faster checkout with a cleaner desktop experience.
+               </p>
+             </div>
+          </div>
+
+          <div className="flex-1 md:w-1/2 w-full flex flex-col justify-between py-12 px-8 md:px-12 xl:px-16 items-center md:items-start overflow-y-auto">
             {/* Logo */}
-            <div className="mt-8 mb-8 w-full max-w-[200px] flex justify-center">
+            <div className="mt-8 md:mt-0 mb-8 w-full max-w-[200px] flex justify-center md:justify-start">
               <img src={logo} alt="Interio Mega Mart" className="w-full h-auto object-contain" />
             </div>
 
             {error && (
-              <div className="w-full mb-4 p-3.5 bg-rose-50 border border-rose-100 rounded-xl text-center">
+              <div className="w-full mb-4 p-3.5 bg-rose-50 border border-rose-100 rounded-xl text-center md:text-left">
                 <span className="text-rose-600 text-[10px] font-bold uppercase tracking-wider leading-relaxed">{error}</span>
                 {unverifiedEmail && (
-                  <button onClick={handleResendAndVerify} className="block mt-2 mx-auto bg-rose-600 text-white px-4 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-rose-700">
+                  <button onClick={handleResendAndVerify} className="block mt-2 mx-auto md:mx-0 bg-rose-600 text-white px-4 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-rose-700">
                     Verify Email
                   </button>
                 )}
               </div>
             )}
 
-            <form onSubmit={handleLogin} className="w-full space-y-5">
+            <form onSubmit={handleLogin} className="w-full space-y-5 flex-1 flex flex-col justify-center">
               {/* Phone or Email Input */}
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-slate-700 ml-0.5">Phone Number</label>
@@ -293,7 +164,7 @@ const LoginPage = () => {
                     placeholder="or Email"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50/85 border border-slate-200/80 rounded-xl focus:bg-white focus:border-[#189D91] outline-none transition-all text-xs font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-semibold"
+                    className="w-full px-4 py-3 bg-slate-50/85 border border-slate-200/80 rounded-xl focus:bg-white focus:border-[#189D91] outline-none transition-all text-xs font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-semibold shadow-sm"
                   />
                 </div>
               </div>
@@ -309,7 +180,7 @@ const LoginPage = () => {
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-4 pr-12 py-3 bg-slate-50/85 border border-slate-200/80 rounded-xl focus:bg-white focus:border-[#189D91] outline-none transition-all text-xs font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-semibold"
+                    className="w-full pl-4 pr-12 py-3 bg-slate-50/85 border border-slate-200/80 rounded-xl focus:bg-white focus:border-[#189D91] outline-none transition-all text-xs font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-semibold shadow-sm"
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
                     {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
@@ -336,29 +207,26 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#8A3B8B] hover:bg-[#722b73] text-white py-3.5 rounded-full font-bold text-[14px] uppercase tracking-wider transition-all active:scale-[0.98] shadow-md shadow-[#8A3B8B]/10 mt-6"
+                className="w-full bg-[#8A3B8B] hover:bg-[#722b73] text-white py-3.5 rounded-full font-bold text-[14px] uppercase tracking-wider transition-all active:scale-[0.98] shadow-md shadow-[#8A3B8B]/20 mt-6"
               >
-                {loading ? 'Authenticating...' : 'Login'}
+                {loading ? 'Authenticating...' : 'LOGIN'}
               </button>
             </form>
 
             {/* Create Account */}
-            <div className="mt-4 text-center">
+            <div className="mt-8 text-center md:text-left w-full flex justify-center md:justify-start">
               <Link to="/signup" className="text-[12px] font-bold text-slate-400 hover:text-slate-600 tracking-wider">
                 Create Account
               </Link>
             </div>
-          </div>
-
-          {/* Social login and footer at bottom */}
-          <div className="w-full mt-auto">
 
             {/* Footer Copyright */}
-            <p className="text-center text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-              © {new Date().getFullYear()} Riddha Interio Mart.
-            </p>
+            <div className="mt-auto pt-6 w-full md:hidden">
+              <p className="text-center text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                © {new Date().getFullYear()} Riddha Interio Mart.
+              </p>
+            </div>
           </div>
-
         </div>
       </div>
     );
