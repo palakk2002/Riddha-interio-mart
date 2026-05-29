@@ -1,15 +1,21 @@
 {
-  "timestamp": "2026-05-27T12:04:59.013Z",
-  "query": {},
-  "builtFilter": {},
-  "resultCount": 1,
-  "results": [
-    {
-      "_id": "6a157979815311dd3743db2e",
-      "name": "test name",
-      "category": "Test Category",
-      "subcategory": "",
-      "subsubcategory": ""
+  "timestamp": "2026-05-29T06:09:07.956Z",
+  "query": {
+    "category": "Carrara Marble"
+  },
+  "builtFilter": {
+    "category": "Carrara Marble",
+    "isApproved": true,
+    "isActive": true,
+    "seller": {
+      "$nin": [
+        "6a13f55aa0df05ee424a7c4b",
+        "6a10057431fa10db6ebdaaff",
+        "6a0ffa1a0a9ba187d1855673",
+        "6a0d647e24ccaade805a2ca0"
+      ]
     }
-  ]
+  },
+  "resultCount": 0,
+  "results": []
 }

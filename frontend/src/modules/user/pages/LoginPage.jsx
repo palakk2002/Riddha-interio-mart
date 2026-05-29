@@ -104,14 +104,14 @@ const LoginPage = () => {
   if (role === 'user') {
     if (isDesktop) {
       return (
-        <div className="min-h-screen w-full overflow-hidden font-sans bg-[radial-gradient(circle_at_top_left,rgba(24,157,145,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(236,0,140,0.08),transparent_28%),linear-gradient(180deg,#f8fafc_0%,#eef5f5_100%)]">
-          <div className="hidden md:flex min-h-screen w-full">
+        <div className="min-h-screen w-full font-sans bg-[radial-gradient(circle_at_top_left,rgba(24,157,145,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(236,0,140,0.08),transparent_28%),linear-gradient(180deg,#f8fafc_0%,#eef5f5_100%)] flex items-center justify-center md:p-8">
+          <div className="hidden md:flex w-full max-w-5xl h-[80vh] min-h-[600px] bg-white rounded-3xl shadow-2xl overflow-hidden relative border border-slate-100">
             <div className="flex-1 relative overflow-hidden border-r border-slate-200/70">
               <img src={LOGIN_BG} alt="Luxury Showroom" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,249,252,0.92)_0%,rgba(246,249,252,0.72)_42%,rgba(246,249,252,0.2)_100%)]" />
-              <div className="relative z-10 h-full flex items-center justify-center px-12 xl:px-20">
+              <div className="relative z-10 h-full flex items-center justify-center px-10 xl:px-16">
                 <div className="max-w-xl text-left">
-                  <div className="mb-7 w-full max-w-[260px]">
+                  <div className="mb-7 w-full max-w-[200px]">
                     <img src={logo} alt="Riddha Logo" className="w-full h-auto object-contain" />
                   </div>
                   <div className="space-y-4">
@@ -119,13 +119,13 @@ const LoginPage = () => {
                       <span className="w-2 h-2 rounded-full bg-[#189D91]" />
                       <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#189D91]">Premium Interior Mart</span>
                     </div>
-                    <h1 className="text-[3.4rem] xl:text-[4.2rem] font-black leading-[0.95] tracking-tight text-slate-950">
+                    <h1 className="text-3xl xl:text-5xl font-black leading-[1.1] tracking-tight text-slate-950">
                       Sign in to your
-                      <span className="block bg-clip-text text-transparent bg-gradient-to-r from-[#189D91] via-slate-700 to-[#EC008C]">
+                      <span className="block mt-1 bg-clip-text text-transparent bg-gradient-to-r from-[#189D91] via-slate-700 to-[#EC008C]">
                         Riddha account
                       </span>
                     </h1>
-                    <p className="max-w-lg text-base xl:text-lg font-medium leading-relaxed text-slate-600">
+                    <p className="max-w-md text-sm xl:text-base font-medium leading-relaxed text-slate-600">
                       Access saved addresses, order tracking, wishlist items, and faster checkout with a cleaner desktop experience.
                     </p>
                   </div>
@@ -133,20 +133,19 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <div className="flex-1 flex items-center justify-center px-10 xl:px-16 py-12 relative">
+            <div className="flex-[0.8] flex items-center justify-center px-10 xl:px-14 py-10 relative bg-white">
               <button
                 onClick={() => navigate(-1)}
-                className="absolute top-10 right-10 flex items-center gap-2 group text-slate-500 hover:text-slate-700 transition-all font-bold text-xs tracking-widest uppercase z-50"
+                className="absolute top-6 left-6 flex items-center gap-2 group text-slate-400 hover:text-slate-600 transition-all font-bold text-xs tracking-widest uppercase z-50 bg-slate-50 p-2.5 rounded-full hover:bg-slate-100"
               >
                 <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-                Back
               </button>
 
-              <div className="w-full max-w-[540px] bg-transparent border-0 shadow-none">
-                <div className="flex items-center justify-between mb-10">
+              <div className="w-full max-w-[400px] bg-transparent border-0 shadow-none">
+                <div className="flex items-center justify-between mb-8">
                   <div>
-                    <h2 className="text-3xl font-black text-slate-950">Log In</h2>
-                    <p className="text-sm font-semibold text-slate-500 mt-1">Access your secure user panel</p>
+                    <h2 className="text-2xl font-black text-slate-950">Log In</h2>
+                    <p className="text-xs font-semibold text-slate-500 mt-1">Access your secure user panel</p>
                   </div>
                   {getSignupPath() && (
                     <button
@@ -188,7 +187,7 @@ const LoginPage = () => {
                           placeholder="name@example.com"
                           value={identifier}
                           onChange={(e) => setIdentifier(e.target.value)}
-                          className={`w-full pl-10 pr-4 py-3 bg-white/75 border border-slate-200 rounded-2xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-sm font-semibold text-slate-700 placeholder:text-slate-300 shadow-sm`}
+                          className={`w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-sm font-semibold text-slate-700 placeholder:text-slate-300 shadow-sm`}
                         />
                       </div>
                     </div>
@@ -207,7 +206,7 @@ const LoginPage = () => {
                           placeholder="••••••••"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className={`w-full pl-10 pr-10 py-3 bg-white/75 border border-slate-200 rounded-2xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-sm font-semibold text-slate-700 placeholder:text-slate-300 shadow-sm`}
+                          className={`w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-2xl focus:bg-white ${theme.focusBorder} outline-none transition-all text-sm font-semibold text-slate-700 placeholder:text-slate-300 shadow-sm`}
                         />
                         <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
                           {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
@@ -366,56 +365,57 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex font-sans overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(24,157,145,0.10),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(236,0,140,0.08),transparent_28%),linear-gradient(180deg,#f8fafc_0%,#f2f7f7_100%)]">
-      {/* Left Section - Branded, Bright & Clean (No Dark Colors!) */}
-      <div className="hidden lg:flex flex-[1.08] relative items-center justify-center overflow-hidden bg-gradient-to-br from-teal-50/50 via-slate-50 to-pink-50/30 border-r border-slate-200/80">
-        {/* Soft logo related gradients */}
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[var(--color-primary)]/5 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[var(--color-accent-pink)]/5 rounded-full blur-[100px] pointer-events-none translate-x-1/3 translate-y-1/3" />
-        
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative z-10 max-w-xl w-full px-10 xl:px-14 py-10 text-center flex flex-col items-center"
-        >
-          {/* Logo Frame */}
-          <div className="mb-7 w-full max-w-[250px]">
-             <img 
-               src={logo} 
-               alt="Riddha Logo" 
-               className="w-full h-auto object-contain" 
-             />
-          </div>
+    <div className="min-h-screen w-full flex font-sans bg-[radial-gradient(circle_at_top_left,rgba(24,157,145,0.10),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(236,0,140,0.08),transparent_28%),linear-gradient(180deg,#f8fafc_0%,#f2f7f7_100%)] items-center justify-center lg:p-8">
+      <div className="flex w-full lg:max-w-5xl lg:h-[80vh] lg:min-h-[600px] bg-white lg:rounded-3xl lg:shadow-2xl overflow-hidden relative lg:border lg:border-slate-100 flex-col lg:flex-row">
+        {/* Left Section - Branded, Bright & Clean (No Dark Colors!) */}
+        <div className="hidden lg:flex flex-[1.08] relative items-center justify-center overflow-hidden bg-gradient-to-br from-teal-50/50 via-slate-50 to-pink-50/30 border-r border-slate-200/80">
+          {/* Soft logo related gradients */}
+          <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[var(--color-primary)]/5 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[var(--color-accent-pink)]/5 rounded-full blur-[100px] pointer-events-none translate-x-1/3 translate-y-1/3" />
+          
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="relative z-10 max-w-xl w-full px-10 xl:px-14 py-10 text-center flex flex-col items-center"
+          >
+            {/* Logo Frame */}
+            <div className="mb-7 w-full max-w-[250px]">
+               <img 
+                 src={logo} 
+                 alt="Riddha Logo" 
+                 className="w-full h-auto object-contain" 
+               />
+            </div>
 
-          {/* Typography Area */}
-          <div className="space-y-3 text-center max-w-[460px]">
-             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/80 border border-white/90 rounded-full shadow-sm">
-                <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
-                <span className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider leading-none">
-                   Premium Interior Mart
-                </span>
-             </div>
+            {/* Typography Area */}
+            <div className="space-y-3 text-center max-w-[460px]">
+               <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/80 border border-white/90 rounded-full shadow-sm">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
+                  <span className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider leading-none">
+                     Premium Interior Mart
+                  </span>
+               </div>
 
-             <h2 className="text-[2.1rem] xl:text-4xl font-black text-slate-950 tracking-tight leading-[1.02]">
-                India's Premium <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-700 to-[var(--color-primary)] font-black">Interior & Design Hub</span>
-             </h2>
+               <h2 className="text-[2.1rem] xl:text-4xl font-black text-slate-950 tracking-tight leading-[1.02]">
+                  India's Premium <br/>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-700 to-[var(--color-primary)] font-black">Interior & Design Hub</span>
+               </h2>
 
-             <p className="text-slate-700 text-sm xl:text-base font-medium leading-relaxed max-w-md mx-auto">
-                Curating premium architectural collection of luxury fittings and design setups.
-             </p>
-          </div>
-        </motion.div>
-      </div>
+               <p className="text-slate-700 text-sm xl:text-base font-medium leading-relaxed max-w-md mx-auto">
+                  Curating premium architectural collection of luxury fittings and design setups.
+               </p>
+            </div>
+          </motion.div>
+        </div>
 
-      {/* Right Section - Login Form */}
-      <div className="flex w-full lg:flex-[0.92] flex-col justify-center bg-transparent relative px-6 sm:px-12 lg:px-16 py-12 min-h-screen lg:min-h-0 overflow-y-auto">
-        <div className="w-full max-w-[460px] mx-auto lg:mx-0 lg:max-w-none">
-          {/* Mobile Logo */}
-          <div className="lg:hidden mb-8 flex justify-center">
-            <img src={logo} alt="Riddha Logo" className="w-48 md:w-56 h-auto object-contain" />
-          </div>
+        {/* Right Section - Login Form */}
+        <div className="flex w-full lg:flex-[0.92] flex-col justify-center bg-transparent relative px-6 sm:px-12 lg:px-16 py-12 min-h-screen lg:min-h-0 overflow-y-auto">
+          <div className="w-full max-w-[460px] mx-auto lg:mx-0 lg:max-w-none">
+            {/* Mobile Logo */}
+            <div className="lg:hidden mb-8 flex justify-center">
+              <img src={logo} alt="Riddha Logo" className="w-48 md:w-56 h-auto object-contain" />
+            </div>
 
           {/* Header */}
           <div className="mb-6 flex items-center justify-between gap-4 max-w-[460px]">
@@ -538,6 +538,7 @@ const LoginPage = () => {
             )}
           </form>
         </div>
+      </div>
       </div>
 
       {/* Footer Info */}
